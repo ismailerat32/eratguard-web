@@ -11,6 +11,26 @@ from mailer import send_mail
 load_dotenv()
 
 app = Flask(__name__)
+
+# ===== SPAMSHIELD STABLE SESSION SECRET START =====
+import os as _ss_os
+from pathlib import Path as _ss_Path
+
+_ss_secret_file = _ss_Path("data/.spamshield_secret_key")
+try:
+    _ss_secret_file.parent.mkdir(parents=True, exist_ok=True)
+    if not _ss_secret_file.exists():
+        _ss_secret_file.write_text("spamshield-stable-render-session-secret-2026-admin-mobile", encoding="utf-8")
+    app.secret_key = (
+        _ss_os.environ.get("FLASK_SECRET_KEY")
+        or _ss_os.environ.get("SECRET_KEY")
+        or _ss_os.environ.get("SPAMSHIELD_SECRET_KEY")
+        or _ss_secret_file.read_text(encoding="utf-8").strip()
+    )
+except Exception:
+    app.secret_key = "spamshield-stable-render-session-secret-2026-admin-mobile"
+# ===== SPAMSHIELD STABLE SESSION SECRET END =====
+
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "spamshield_dev_key")
 
 LOG_FILE = "logs/log.txt"
