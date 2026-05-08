@@ -301,6 +301,19 @@ def set_language(lang):
     return redirect(request.referrer or url_for("landing"))
 
 
+
+# ===== SPAMSHIELD RENDER KEEPALIVE HEALTH START =====
+@app.route("/health")
+@app.route("/ping")
+@app.route("/status")
+def ss_health_ping():
+    return {
+        "ok": True,
+        "service": "SpamShield PRO",
+        "status": "alive"
+    }, 200
+# ===== SPAMSHIELD RENDER KEEPALIVE HEALTH END =====
+
 @app.route("/landing")
 def landing():
     return render_template("landing.html")
@@ -2943,14 +2956,40 @@ def ss_user_alias_license_final():
 @app.route("/pricing")
 @app.route("/packages")
 @app.route("/paketler")
+@app.route("/fiyatlandirma")
 def ss_user_alias_pricing_final():
-    return redirect("/u/pricing")
+    return render_template("pricing.html")
 
-@app.route("/checkout")
-@app.route("/payment")
-@app.route("/odeme")
-def ss_user_alias_checkout_final():
-    return redirect("/u/checkout")
+@app.route("/checkout", methods=["GET", "POST"])
+@app.route("/payment", methods=["GET", "POST"])
+@app.route("/odeme", methods=["GET", "POST"])
+@app.route("/satin-al", methods=["GET", "POST"])
+def ss_public_checkout_final():
+    plan = request.args.get("plan", "pro_yearly")
+
+    plan_aliases = {
+        "monthly": "pro_monthly",
+        "aylik": "pro_monthly",
+        "yearly": "pro_yearly",
+        "yillik": "pro_yearly",
+        "annual": "pro_yearly",
+        "lifetime": "lifetime",
+        "omurluk": "lifetime",
+    }
+
+    plan = plan_aliases.get(plan, plan)
+    plan_info = get_plan_info(plan)
+
+    payment_link = "/u/pay?plan=" + plan
+
+    return render_template(
+        "checkout.html",
+        plan=plan,
+        plan_label=plan_info["label"],
+        plan_period=plan_info["period"],
+        plan_price=plan_info["price"],
+        payment_link=payment_link
+    )
 # ===== SPAMSHIELD USER FINAL ROUTE ALIAS + HOME LOCK END =====
 
 # ===== SPAMSHIELD USER SETTINGS OVERRIDE FINAL START =====
@@ -2999,3 +3038,53 @@ except Exception:
 def ss_user_card_home_final_alias():
     return _ss_user_card_home_locked_response()
 # ===== SPAMSHIELD REMOVE USER RADIAL KEEP CARD HOME END =====
+
+# ===== SPAMSHIELD RESTORE ADMIN RADIAL HOME FINAL START =====
+def _ss_admin_radial_home_final():
+    if not _ss_admin_ok():
+        return redirect("/ss-admin-access")
+
+    try:
+        resp = render_template("admin_dashboard.html")
+    except Exception as e:
+        return f"""
+        <html><head><meta charset="UTF-8"><title>SpamShield ADMIN</title></head>
+        <body style="background:#020806;color:white;font-family:Arial;padding:24px;">
+          <h2>SpamShield ADMIN</h2>
+          <p>Admin radial dashboard yüklenemedi.</p>
+          <p style="opacity:.7">Detay: {e}</p>
+        </body></html>
+        """, 200
+
+    try:
+        response = make_response(resp)
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
+    except Exception:
+        return resp
+
+# Admin ana ekranı tekrar radial dashboard olsun.
+try:
+    for _rule in list(app.url_map.iter_rules()):
+        if str(_rule) in ["/admin", "/admin/", "/admin/dashboard"]:
+            app.view_functions[_rule.endpoint] = _ss_admin_radial_home_final
+except Exception:
+    pass
+
+# Catchall içinde sadece dashboard/admin ana sayfa radial olsun, diğer dilimler hızlı kalabilir.
+try:
+    if "ss_live_admin_all_slice_catchall" in app.view_functions:
+        _old_admin_catchall_final = app.view_functions["ss_live_admin_all_slice_catchall"]
+
+        def _ss_admin_catchall_radial_dashboard_final(anything):
+            slug = str(anything or "").strip().lower()
+            if slug in ("", "dashboard", "home", "main"):
+                return _ss_admin_radial_home_final()
+            return _old_admin_catchall_final(anything)
+
+        app.view_functions["ss_live_admin_all_slice_catchall"] = _ss_admin_catchall_radial_dashboard_final
+except Exception:
+    pass
+# ===== SPAMSHIELD RESTORE ADMIN RADIAL HOME FINAL END =====
