@@ -4056,3 +4056,284 @@ try:
 except Exception:
     pass
 # ===== SPAMSHIELD USER BLOCKED COMPACT FINAL END =====
+
+
+
+# ===== SPAMSHIELD USER TITANIUM CORE START =====
+from flask import request as _ss_titanium_request
+from flask import jsonify as _ss_titanium_jsonify
+from datetime import datetime as _ss_titanium_datetime
+from pathlib import Path as _ss_titanium_Path
+import json as _ss_titanium_json
+import re as _ss_titanium_re
+
+_SS_TITANIUM_DATA = _ss_titanium_Path("data")
+_SS_TITANIUM_DATA.mkdir(exist_ok=True)
+
+_SS_QUARANTINE_FILE = _SS_TITANIUM_DATA / "user_quarantine.json"
+_SS_ANALYSIS_HISTORY_FILE = _SS_TITANIUM_DATA / "user_analysis_history.json"
+_SS_TITANIUM_EVENTS_FILE = _SS_TITANIUM_DATA / "user_titanium_events.json"
+
+def _ss_titanium_now():
+    return _ss_titanium_datetime.now().isoformat(timespec="seconds")
+
+def _ss_titanium_read_json(path, default):
+    try:
+        if not path.exists():
+            return default
+        return _ss_titanium_json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return default
+
+def _ss_titanium_write_json(path, data):
+    path.parent.mkdir(exist_ok=True)
+    path.write_text(
+        _ss_titanium_json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
+
+def _ss_titanium_user_ok():
+    return bool(session.get("logged_in") and session.get("username"))
+
+def _ss_titanium_username():
+    return str(session.get("username") or "kullanıcı")
+
+def _ss_titanium_event(event_type, payload=None):
+    events = _ss_titanium_read_json(_SS_TITANIUM_EVENTS_FILE, [])
+    events.append({
+        "created_at": _ss_titanium_now(),
+        "username": _ss_titanium_username(),
+        "event_type": event_type,
+        "payload": payload or {}
+    })
+    _ss_titanium_write_json(_SS_TITANIUM_EVENTS_FILE, events[-300:])
+
+def _ss_titanium_analyze_sms(text):
+    raw = str(text or "").strip()
+    lowered = raw.lower()
+
+    signals = []
+    score = 0
+
+    risky_keywords = {
+        "ödül": 18,
+        "kazandınız": 24,
+        "kazandin": 24,
+        "kazandiniz": 24,
+        "hediye": 15,
+        "ücretsiz": 12,
+        "ucretsiz": 12,
+        "tıkla": 18,
+        "tikla": 18,
+        "link": 12,
+        "http": 24,
+        "https": 24,
+        "bit.ly": 30,
+        "acil": 16,
+        "hemen": 12,
+        "son gün": 18,
+        "son gun": 18,
+        "şifre": 22,
+        "sifre": 22,
+        "kod": 12,
+        "banka": 16,
+        "kart": 16,
+        "iban": 20,
+        "hesap": 12,
+        "onayla": 18,
+        "doğrula": 18,
+        "dogrula": 18,
+        "kargo": 10,
+        "teslimat": 10,
+        "borç": 16,
+        "borc": 16,
+        "icra": 24,
+        "ceza": 20,
+        "abonelik": 10,
+        "iptal": 8
+    }
+
+    for word, pts in risky_keywords.items():
+        if word in lowered:
+            score += pts
+            signals.append(f"Riskli ifade: {word}")
+
+    if _ss_titanium_re.search(r'https?://|www\.', lowered):
+        score += 25
+        signals.append("Bağlantı tespit edildi")
+
+    if _ss_titanium_re.search(r'\b\d{4,8}\b', lowered):
+        score += 8
+        signals.append("Kod/numara benzeri ifade tespit edildi")
+
+    if len(raw) < 12:
+        score += 4
+        signals.append("Mesaj çok kısa, bağlam sınırlı")
+
+    if len(raw) > 180:
+        score += 8
+        signals.append("Uzun mesaj, oltalama kalıbı olabilir")
+
+    if raw.count("!") >= 2:
+        score += 8
+        signals.append("Aşırı vurgu işareti tespit edildi")
+
+    score = max(0, min(score, 100))
+
+    if score >= 70:
+        status = "riskli"
+        label = "Riskli"
+        action = "quarantine"
+        summary = "Mesaj yüksek riskli görünüyor. Karantinaya alınması önerilir."
+    elif score >= 40:
+        status = "supheli"
+        label = "Şüpheli"
+        action = "review"
+        summary = "Mesaj şüpheli sinyaller taşıyor. Kullanıcı onayıyla karantinaya alınabilir."
+    else:
+        status = "guvenli"
+        label = "Güvenli"
+        action = "safe"
+        summary = "Belirgin spam/dolandırıcılık sinyali düşük görünüyor."
+
+    if not signals:
+        signals.append("Belirgin risk sinyali bulunamadı")
+
+    return {
+        "text": raw,
+        "score": score,
+        "status": status,
+        "label": label,
+        "recommended_action": action,
+        "summary": summary,
+        "signals": signals[:8],
+    }
+
+def _ss_titanium_save_analysis(result):
+    history = _ss_titanium_read_json(_SS_ANALYSIS_HISTORY_FILE, [])
+    item = {
+        "created_at": _ss_titanium_now(),
+        "username": _ss_titanium_username(),
+        "score": result.get("score"),
+        "status": result.get("status"),
+        "label": result.get("label"),
+        "summary": result.get("summary"),
+        "signals": result.get("signals", []),
+        "text": result.get("text", "")
+    }
+    history.append(item)
+    _ss_titanium_write_json(_SS_ANALYSIS_HISTORY_FILE, history[-300:])
+    return item
+
+def _ss_titanium_save_quarantine(result, source="scan"):
+    quarantine = _ss_titanium_read_json(_SS_QUARANTINE_FILE, [])
+    item = {
+        "created_at": _ss_titanium_now(),
+        "username": _ss_titanium_username(),
+        "source": source,
+        "score": result.get("score"),
+        "status": result.get("status"),
+        "label": result.get("label"),
+        "summary": result.get("summary"),
+        "signals": result.get("signals", []),
+        "text": result.get("text", "")
+    }
+    quarantine.append(item)
+    _ss_titanium_write_json(_SS_QUARANTINE_FILE, quarantine[-300:])
+    return item
+
+def ss_user_titanium_scan_final():
+    if not _ss_titanium_user_ok():
+        return _ss_titanium_jsonify({"ok": False, "error": "login_required"}), 401
+
+    if _ss_titanium_request.is_json:
+        text = (_ss_titanium_request.get_json(silent=True) or {}).get("text", "")
+    else:
+        text = _ss_titanium_request.form.get("text", "")
+
+    result = _ss_titanium_analyze_sms(text)
+
+    if not result["text"]:
+        return _ss_titanium_jsonify({
+            "ok": False,
+            "error": "empty_text",
+            "message": "Analiz için SMS metni gerekli."
+        }), 400
+
+    saved_analysis = _ss_titanium_save_analysis(result)
+
+    quarantined = None
+    if result["score"] >= 70:
+        quarantined = _ss_titanium_save_quarantine(result, source="auto_high_risk")
+
+    _ss_titanium_event("sms_scan", {
+        "score": result["score"],
+        "status": result["status"],
+        "auto_quarantine": bool(quarantined)
+    })
+
+    return _ss_titanium_jsonify({
+        "ok": True,
+        "result": result,
+        "analysis_saved": saved_analysis,
+        "auto_quarantine": bool(quarantined),
+        "quarantine_item": quarantined
+    })
+
+def ss_user_titanium_quarantine_final():
+    if not _ss_titanium_user_ok():
+        return _ss_titanium_jsonify({"ok": False, "error": "login_required"}), 401
+
+    username = _ss_titanium_username()
+    items = _ss_titanium_read_json(_SS_QUARANTINE_FILE, [])
+    items = [x for x in items if x.get("username") == username]
+    return _ss_titanium_jsonify({
+        "ok": True,
+        "count": len(items),
+        "items": list(reversed(items[-50:]))
+    })
+
+def ss_user_titanium_history_final():
+    if not _ss_titanium_user_ok():
+        return _ss_titanium_jsonify({"ok": False, "error": "login_required"}), 401
+
+    username = _ss_titanium_username()
+    items = _ss_titanium_read_json(_SS_ANALYSIS_HISTORY_FILE, [])
+    items = [x for x in items if x.get("username") == username]
+    return _ss_titanium_jsonify({
+        "ok": True,
+        "count": len(items),
+        "items": list(reversed(items[-50:]))
+    })
+
+def ss_user_titanium_summary_final():
+    if not _ss_titanium_user_ok():
+        return _ss_titanium_jsonify({"ok": False, "error": "login_required"}), 401
+
+    username = _ss_titanium_username()
+    history = [x for x in _ss_titanium_read_json(_SS_ANALYSIS_HISTORY_FILE, []) if x.get("username") == username]
+    quarantine = [x for x in _ss_titanium_read_json(_SS_QUARANTINE_FILE, []) if x.get("username") == username]
+
+    riskli = sum(1 for x in history if x.get("status") == "riskli")
+    supheli = sum(1 for x in history if x.get("status") == "supheli")
+    guvenli = sum(1 for x in history if x.get("status") == "guvenli")
+
+    return _ss_titanium_jsonify({
+        "ok": True,
+        "username": username,
+        "analysis_count": len(history),
+        "quarantine_count": len(quarantine),
+        "riskli": riskli,
+        "supheli": supheli,
+        "guvenli": guvenli,
+        "last_analysis": history[-1] if history else None
+    })
+
+try:
+    app.add_url_rule("/u/titanium/scan", endpoint="ss_user_titanium_scan_final", view_func=ss_user_titanium_scan_final, methods=["POST"])
+    app.add_url_rule("/u/titanium/quarantine", endpoint="ss_user_titanium_quarantine_final", view_func=ss_user_titanium_quarantine_final, methods=["GET"])
+    app.add_url_rule("/u/titanium/history", endpoint="ss_user_titanium_history_final", view_func=ss_user_titanium_history_final, methods=["GET"])
+    app.add_url_rule("/u/titanium/summary", endpoint="ss_user_titanium_summary_final", view_func=ss_user_titanium_summary_final, methods=["GET"])
+except Exception as e:
+    print("Titanium route register skipped:", e)
+# ===== SPAMSHIELD USER TITANIUM CORE END =====

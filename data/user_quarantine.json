@@ -1,0 +1,38 @@
+[
+  {
+    "created_at": "2026-05-09T16:43:37",
+    "username": "playtest32",
+    "source": "auto_high_risk",
+    "score": 100,
+    "status": "riskli",
+    "label": "Riskli",
+    "summary": "Mesaj yüksek riskli görünüyor. Karantinaya alınması önerilir.",
+    "signals": [
+      "Riskli ifade: ödül",
+      "Riskli ifade: kazandınız",
+      "Riskli ifade: tıkla",
+      "Riskli ifade: link",
+      "Riskli ifade: http",
+      "Riskli ifade: https",
+      "Riskli ifade: bit.ly",
+      "Riskli ifade: hemen"
+    ],
+    "text": "Tebrikler ödül kazandınız hemen linke tıkla https://bit.ly/test"
+  },
+  {
+    "created_at": "2026-05-09T16:43:37",
+    "username": "playtest32",
+    "source": "auto_high_risk",
+    "score": 72,
+    "status": "riskli",
+    "label": "Riskli",
+    "summary": "Mesaj yüksek riskli görünüyor. Karantinaya alınması önerilir.",
+    "signals": [
+      "Riskli ifade: acil",
+      "Riskli ifade: şifre",
+      "Riskli ifade: banka",
+      "Riskli ifade: doğrula"
+    ],
+    "text": "Banka hesabınızı doğrulamak için şifrenizi girin acil!"
+  }
+]
