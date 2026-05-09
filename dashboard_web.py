@@ -1183,7 +1183,7 @@ USER_MODULES = {
     "notifications": {
         "icon": "🔔",
         "title": "Bildirimler",
-        "description": "Güvenlik uyarıları, spam yakalamaları ve önemli sistem bildirimlerini takip et.",
+        "description": "Uyarılar, spam yakalamaları ve önemli sistem bildirimlerini takip et.",
         "stats": [
             {"value": "3", "label": "Bildirim"},
             {"value": "2", "label": "Yeni"},
@@ -2221,7 +2221,7 @@ def _ss_fast_admin_page(title, subtitle, cards=None):
       background:linear-gradient(180deg,#010403,#03120d 60%,#010403);
       color:var(--text);
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-      padding:22px;
+      padding:16px;
     }
     .top{
       display:flex;
@@ -2231,7 +2231,7 @@ def _ss_fast_admin_page(title, subtitle, cards=None):
       margin-bottom:22px;
     }
     .brand{
-      font-size:15px;
+      font-size:12px;
       color:var(--green);
       font-weight:800;
       letter-spacing:.3px;
@@ -2243,27 +2243,27 @@ def _ss_fast_admin_page(title, subtitle, cards=None):
       padding:9px 12px;
       border-radius:14px;
       font-weight:700;
-      font-size:13px;
+      font-size:12px;
       background:rgba(124,255,79,.06);
     }
     .hero{
       border:1px solid var(--line);
       background:rgba(6,22,15,.86);
-      border-radius:24px;
-      padding:22px;
+      border-radius:15px;
+      padding:16px;
       box-shadow:0 0 28px rgba(124,255,79,.10);
       margin-bottom:16px;
     }
     h1{
       margin:0 0 8px;
-      font-size:28px;
+      font-size:19px;
       line-height:1.08;
     }
     p{
       margin:0;
       color:var(--muted);
       line-height:1.45;
-      font-size:15px;
+      font-size:12px;
     }
     .grid{
       display:grid;
@@ -2277,7 +2277,7 @@ def _ss_fast_admin_page(title, subtitle, cards=None):
       color:var(--text);
       border:1px solid var(--line);
       background:rgba(4,18,12,.78);
-      border-radius:18px;
+      border-radius:15px;
       padding:16px;
     }
     .card b{
@@ -2289,7 +2289,7 @@ def _ss_fast_admin_page(title, subtitle, cards=None):
     .card span{
       display:block;
       color:var(--muted);
-      font-size:13px;
+      font-size:12px;
     }
     .note{
       margin-top:18px;
@@ -2648,7 +2648,7 @@ def _ss_user_home_final():
         linear-gradient(180deg,#010403,#03150d 55%,#010403);
       color:var(--text);
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-      padding:22px;
+      padding:16px;
       overflow-x:hidden;
     }
     .top{
@@ -2656,7 +2656,7 @@ def _ss_user_home_final():
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      margin-bottom:18px;
+      margin-bottom:12px;
     }
     .brand{
       display:flex;
@@ -2664,19 +2664,19 @@ def _ss_user_home_final():
       gap:12px;
     }
     .logo{
-      width:68px;
-      height:68px;
-      border-radius:24px;
+      width:54px;
+      height:54px;
+      border-radius:15px;
       display:grid;
       place-items:center;
       background:linear-gradient(145deg,rgba(32,255,136,.2),rgba(32,255,136,.04));
       border:1px solid var(--line);
       box-shadow:0 0 24px rgba(32,255,136,.16);
-      font-size:35px;
+      font-size:19px;
     }
     h1{
       margin:0;
-      font-size:36px;
+      font-size:30px;
       line-height:1;
       letter-spacing:-1px;
     }
@@ -2685,28 +2685,28 @@ def _ss_user_home_final():
       margin-top:6px;
       color:var(--muted);
       font-weight:700;
-      font-size:15px;
+      font-size:12px;
     }
     .badge{
       color:var(--green);
       border:1px solid var(--line);
       background:rgba(32,255,136,.08);
       border-radius:999px;
-      padding:12px 15px;
+      padding:9px 11px;
       font-weight:900;
-      white-space:nowrap;
+      white-space:nowrap; max-width:118px; overflow:hidden; text-overflow:ellipsis; text-align:center;
     }
     .hero{
       border:1px solid var(--line);
       background:linear-gradient(145deg,rgba(7,31,20,.94),rgba(3,14,9,.88));
-      border-radius:30px;
-      padding:26px;
+      border-radius:24px;
+      padding:20px;
       box-shadow:0 20px 50px rgba(0,0,0,.35), inset 0 0 45px rgba(32,255,136,.04);
       margin-bottom:22px;
     }
     .hero h2{
-      margin:0 0 14px;
-      font-size:38px;
+      margin:0 0 10px;
+      font-size:21px;
       line-height:1.08;
       letter-spacing:-1px;
     }
@@ -2714,7 +2714,7 @@ def _ss_user_home_final():
     .hero p{
       margin:0;
       color:var(--muted);
-      font-size:18px;
+      font-size:15px;
       line-height:1.45;
       font-weight:700;
     }
@@ -2722,48 +2722,48 @@ def _ss_user_home_final():
       display:grid;
       grid-template-columns:repeat(3,1fr);
       gap:12px;
-      margin-top:22px;
+      margin-top:16px;
     }
     .stat{
       border:1px solid rgba(32,255,136,.16);
       background:rgba(0,0,0,.18);
       border-radius:22px;
-      padding:16px 10px;
+      padding:12px 8px;
       text-align:center;
     }
     .stat b{
       color:var(--green);
       display:block;
-      font-size:28px;
+      font-size:19px;
       line-height:1;
     }
     .stat span{
       color:var(--muted);
       display:block;
-      margin-top:9px;
+      margin-top:6px;
       font-weight:800;
-      font-size:13px;
+      font-size:12px;
     }
     .section{
-      margin:24px 0 14px;
-      letter-spacing:10px;
+      margin:18px 0 10px;
+      letter-spacing:7px;
       font-weight:1000;
-      font-size:23px;
+      font-size:19px;
     }
     .bar{
-      width:126px;
-      height:8px;
+      width:96px;
+      height:6px;
       border-radius:999px;
       background:linear-gradient(90deg,var(--green),var(--green2));
-      margin-bottom:18px;
+      margin-bottom:12px;
     }
     .grid{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:16px;
+      gap:12px;
     }
     .card{
-      min-height:150px;
+      min-height:122px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
@@ -2771,49 +2771,49 @@ def _ss_user_home_final():
       color:var(--text);
       border:1px solid var(--line);
       background:linear-gradient(145deg,rgba(8,35,23,.96),rgba(2,13,8,.9));
-      border-radius:26px;
-      padding:18px;
+      border-radius:22px;
+      padding:14px;
       box-shadow:0 14px 34px rgba(0,0,0,.25);
     }
     .icon{
-      width:58px;
-      height:58px;
-      border-radius:18px;
+      width:46px;
+      height:46px;
+      border-radius:15px;
       display:grid;
       place-items:center;
       background:rgba(32,255,136,.10);
       border:1px solid rgba(32,255,136,.18);
-      font-size:31px;
+      font-size:21px;
     }
     .pill{
       align-self:flex-end;
-      margin-top:-58px;
+      margin-top:-46px;
       color:#8affb1;
       border:1px solid rgba(32,255,136,.24);
       background:rgba(32,255,136,.10);
       border-radius:999px;
-      padding:8px 12px;
-      font-size:13px;
+      padding:6px 10px;
+      font-size:12px;
       font-weight:900;
     }
     .card h3{
-      margin:18px 0 4px;
-      font-size:25px;
+      margin:13px 0 3px;
+      font-size:21px;
       line-height:1.05;
     }
     .card p{
       margin:0;
       color:var(--muted);
       font-weight:800;
-      font-size:14px;
+      font-size:12px;
       line-height:1.35;
     }
     .foot{
       text-align:center;
       color:rgba(245,255,248,.42);
       font-weight:700;
-      padding:28px 0 10px;
-      font-size:13px;
+      padding:20px 0 8px;
+      font-size:12px;
     }
   </style>
 </head>
@@ -2845,42 +2845,42 @@ def _ss_user_home_final():
   <main class="grid">
     <a class="card" href="/u/protection">
       <div class="icon">🛡️</div><div class="pill">Aktif</div>
-      <h3>Koruma</h3><p>SMS tarama ve güvenlik motoru</p>
+      <h3>Koruma</h3><p>SMS güvenlik motoru</p>
     </a>
 
     <a class="card" href="/u/reports">
       <div class="icon">📈</div><div class="pill">Hazır</div>
-      <h3>Rapor</h3><p>Günlük ve haftalık özetler</p>
+      <h3>Rapor</h3><p>Güvenlik özetleri</p>
     </a>
 
     <a class="card" href="/u/blocked">
       <div class="icon">⛔</div><div class="pill">17</div>
-      <h3>Engel</h3><p>Spam kayıtları ve blok listesi</p>
+      <h3>Engel</h3><p>Blok listesi</p>
     </a>
 
     <a class="card" href="/u/analysis">
       <div class="icon">🔍</div><div class="pill">AI</div>
-      <h3>Analiz</h3><p>Risk ve mesaj analizi</p>
+      <h3>Analiz</h3><p>AI risk analizi</p>
     </a>
 
     <a class="card" href="/u/notifications">
       <div class="icon">🔔</div><div class="pill">Açık</div>
-      <h3>Bildirim</h3><p>Güvenlik uyarıları</p>
+      <h3>Bildirim</h3><p>Uyarılar</p>
     </a>
 
     <a class="card" href="/u/license">
       <div class="icon">🔑</div><div class="pill">Pro</div>
-      <h3>Lisans</h3><p>Premium hesap durumu</p>
+      <h3>Lisans</h3><p>Hesap durumu</p>
     </a>
 
     <a class="card" href="/u/settings">
       <div class="icon">⚙️</div><div class="pill">Ayar</div>
-      <h3>Ayarlar</h3><p>Koruma ve tercih yönetimi</p>
+      <h3>Ayarlar</h3><p>Tercihler</p>
     </a>
 
     <a class="card" href="/u/community">
       <div class="icon">👥</div><div class="pill">Beta</div>
-      <h3>Topluluk</h3><p>Geri bildirim ve paylaşım</p>
+      <h3>Topluluk</h3><p>Geri bildirim</p>
     </a>
   </main>
 
