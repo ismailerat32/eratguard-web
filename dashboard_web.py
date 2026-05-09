@@ -3755,3 +3755,316 @@ try:
 except Exception:
     pass
 # ===== SPAMSHIELD USER ANALYSIS COMPACT FINAL END =====
+
+# ===== SPAMSHIELD USER BLOCKED COMPACT FINAL START =====
+from flask import render_template_string as _ss_blocked_render_template_string
+from flask import make_response as _ss_blocked_make_response
+
+def _ss_user_blocked_compact_final():
+    if not (session.get("logged_in") and session.get("username")):
+        return redirect("/login")
+
+    username = session.get("username", "kullanıcı")
+
+    html = """
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>SpamShield PRO • Engellenenler</title>
+  <style>
+    :root{
+      --bg:#020806;
+      --line:rgba(35,255,137,.22);
+      --green:#20ff88;
+      --green2:#8cff5a;
+      --text:#f5fff8;
+      --muted:rgba(245,255,248,.66);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 50% 0%,rgba(32,255,136,.14),transparent 32%),
+        radial-gradient(circle at 88% 76%,rgba(140,255,90,.10),transparent 28%),
+        linear-gradient(180deg,#010403,#03150d 58%,#010403);
+      color:var(--text);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+      padding:14px;
+      overflow-x:hidden;
+    }
+    .top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .logo{
+      width:46px;height:46px;border-radius:16px;
+      display:grid;place-items:center;
+      background:linear-gradient(145deg,rgba(32,255,136,.18),rgba(32,255,136,.04));
+      border:1px solid var(--line);
+      box-shadow:0 0 20px rgba(32,255,136,.14);
+      font-size:24px;
+      flex:0 0 auto;
+    }
+    h1{margin:0;font-size:27px;line-height:1;letter-spacing:-1px}
+    h1 span{color:var(--green2)}
+    .sub{margin-top:5px;color:var(--muted);font-weight:800;font-size:12px}
+    .badge{
+      color:var(--green);
+      border:1px solid var(--line);
+      background:rgba(32,255,136,.08);
+      border-radius:999px;
+      padding:8px 10px;
+      font-weight:950;
+      font-size:12px;
+      white-space:nowrap;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      border:1px solid var(--line);
+      background:linear-gradient(145deg,rgba(8,35,23,.94),rgba(2,13,8,.92));
+      border-radius:22px;
+      padding:16px;
+      box-shadow:0 18px 44px rgba(0,0,0,.34), inset 0 0 42px rgba(32,255,136,.04);
+      margin-bottom:18px;
+    }
+    .hero:after{
+      content:"";
+      position:absolute;
+      right:-55px;
+      top:-60px;
+      width:170px;
+      height:170px;
+      border-radius:50%;
+      background:rgba(32,255,136,.08);
+    }
+    .hero-icon{
+      width:48px;height:48px;border-radius:16px;
+      display:grid;place-items:center;
+      background:rgba(32,255,136,.10);
+      border:1px solid rgba(32,255,136,.18);
+      font-size:25px;
+      margin-bottom:13px;
+      position:relative;
+      z-index:1;
+    }
+    .hero h2{
+      margin:0 0 9px;
+      font-size:28px;
+      line-height:1.05;
+      letter-spacing:-1px;
+      position:relative;
+      z-index:1;
+    }
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.42;
+      font-weight:800;
+      position:relative;
+      z-index:1;
+    }
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:9px;
+      margin-top:15px;
+      position:relative;
+      z-index:1;
+    }
+    .stat{
+      border:1px solid rgba(32,255,136,.15);
+      background:rgba(0,0,0,.17);
+      border-radius:17px;
+      padding:10px 7px;
+      text-align:center;
+    }
+    .stat b{display:block;color:var(--green);font-size:20px;line-height:1}
+    .stat span{display:block;margin-top:6px;color:var(--muted);font-weight:900;font-size:10px}
+
+    .primary{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:50px;
+      margin-top:14px;
+      border-radius:18px;
+      color:#02120b;
+      text-decoration:none;
+      font-weight:1000;
+      font-size:16px;
+      background:linear-gradient(135deg,#20d36f,#25d0c5);
+      position:relative;
+      z-index:1;
+    }
+    .back{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:48px;
+      margin-top:10px;
+      border-radius:17px;
+      color:var(--text);
+      text-decoration:none;
+      font-weight:950;
+      font-size:15px;
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.12);
+      position:relative;
+      z-index:1;
+    }
+
+    .section{margin:17px 0 8px;letter-spacing:6px;font-weight:1000;font-size:16px}
+    .bar{
+      width:82px;height:5px;border-radius:999px;
+      background:linear-gradient(90deg,var(--green),var(--green2));
+      margin-bottom:11px;
+    }
+    .list{display:grid;gap:10px}
+    .info-card{
+      display:grid;
+      grid-template-columns:1fr auto;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:var(--text);
+      border:1px solid var(--line);
+      background:linear-gradient(145deg,rgba(8,35,23,.92),rgba(2,13,8,.9));
+      border-radius:19px;
+      padding:14px;
+      min-height:88px;
+    }
+    .info-card h3{margin:0 0 6px;font-size:20px;line-height:1.05}
+    .info-card p{margin:0;color:var(--muted);font-weight:800;font-size:12px;line-height:1.35}
+    .plus{
+      width:38px;height:38px;border-radius:999px;
+      display:grid;place-items:center;
+      color:#9affb9;
+      border:1px solid rgba(32,255,136,.22);
+      background:rgba(32,255,136,.09);
+      font-size:22px;
+      font-weight:900;
+    }
+
+    .status{
+      border:1px solid var(--line);
+      background:linear-gradient(145deg,rgba(8,35,23,.92),rgba(2,13,8,.9));
+      border-radius:21px;
+      padding:6px 14px;
+    }
+    .row{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      align-items:center;
+      gap:10px;
+      padding:13px 0;
+      border-bottom:1px solid rgba(245,255,248,.07);
+    }
+    .row:last-child{border-bottom:0}
+    .row b{font-size:15px}
+    .row span{color:#98ffb8;font-weight:950;font-size:13px}
+    .mini-plus{
+      width:30px;height:30px;border-radius:999px;
+      display:grid;place-items:center;
+      color:#9affb9;
+      border:1px solid rgba(32,255,136,.22);
+      background:rgba(32,255,136,.09);
+      font-weight:950;
+    }
+    .foot{text-align:center;color:rgba(245,255,248,.38);font-weight:800;padding:22px 0 8px;font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="brand">
+      <div class="logo">🛡️</div>
+      <div>
+        <h1>Spam<span>Shield</span></h1>
+        <div class="sub">PRO güvenlik merkezi</div>
+      </div>
+    </div>
+    <div class="badge">👑 PRO AKTİF</div>
+  </div>
+
+  <section class="hero">
+    <div class="hero-icon">⛔</div>
+    <h2>Engellenenler</h2>
+    <p>Spam olarak işaretlenen numara ve mesajları güvenli şekilde yönet.</p>
+
+    <div class="stats">
+      <div class="stat"><b>24</b><span>Engelli</span></div>
+      <div class="stat"><b>17</b><span>Liste</span></div>
+      <div class="stat"><b>5</b><span>Yeni</span></div>
+    </div>
+
+    <a class="primary" href="/u/block-list">Blok Listesini Yönet</a>
+    <a class="back" href="/radial">← Ana ekrana dön</a>
+  </section>
+
+  <div class="section">DETAYLAR</div>
+  <div class="bar"></div>
+
+  <main class="list">
+    <a class="info-card" href="/u/block-list">
+      <div>
+        <h3>Blok Listesi</h3>
+        <p>Spam gönderen numara ve servisleri tek ekrandan yönet.</p>
+      </div>
+      <div class="plus">+</div>
+    </a>
+
+    <a class="info-card" href="/u/analysis">
+      <div>
+        <h3>Riskli İçerik</h3>
+        <p>Şüpheli mesajlar analiz edilip engel listesine hazırlanır.</p>
+      </div>
+      <div class="plus">+</div>
+    </a>
+
+    <a class="info-card" href="/u/safe-list">
+      <div>
+        <h3>Güvenli Liste</h3>
+        <p>Güvendiğin kişiler yanlışlıkla engellenmesin.</p>
+      </div>
+      <div class="plus">+</div>
+    </a>
+
+    <a class="info-card" href="/u/reports">
+      <div>
+        <h3>Engel Raporları</h3>
+        <p>Engellenen mesajlar ve son hareketler özetlenir.</p>
+      </div>
+      <div class="plus">+</div>
+    </a>
+  </main>
+
+  <div class="section">DURUM</div>
+  <div class="bar"></div>
+
+  <section class="status">
+    <div class="row"><b>Blok Sistemi</b><span>Aktif</span><div class="mini-plus">+</div></div>
+    <div class="row"><b>Yeni Kayıt</b><span>5</span><div class="mini-plus">+</div></div>
+    <div class="row"><b>Spam Hassasiyeti</b><span>Yüksek</span><div class="mini-plus">+</div></div>
+    <div class="row"><b>Son Güncelleme</b><span>Az önce</span><div class="mini-plus">+</div></div>
+  </section>
+
+  <div class="foot">SpamShield PRO · {{ username }} · © 2026</div>
+</body>
+</html>
+"""
+    resp = _ss_blocked_make_response(_ss_blocked_render_template_string(html, username=username))
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
+
+try:
+    for _rule in list(app.url_map.iter_rules()):
+        if str(_rule) == "/u/blocked":
+            app.view_functions[_rule.endpoint] = _ss_user_blocked_compact_final
+except Exception:
+    pass
+# ===== SPAMSHIELD USER BLOCKED COMPACT FINAL END =====
