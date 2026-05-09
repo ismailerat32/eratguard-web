@@ -2221,17 +2221,17 @@ def _ss_fast_admin_page(title, subtitle, cards=None):
       background:linear-gradient(180deg,#010403,#03120d 60%,#010403);
       color:var(--text);
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-      padding:16px;
+      padding:12px;
     }
     .top{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
       margin-bottom:22px;
     }
     .brand{
-      font-size:12px;
+      font-size:11px;
       color:var(--green);
       font-weight:800;
       letter-spacing:.3px;
@@ -2243,33 +2243,33 @@ def _ss_fast_admin_page(title, subtitle, cards=None):
       padding:9px 12px;
       border-radius:14px;
       font-weight:700;
-      font-size:12px;
+      font-size:11px;
       background:rgba(124,255,79,.06);
     }
     .hero{
       border:1px solid var(--line);
       background:rgba(6,22,15,.86);
       border-radius:15px;
-      padding:16px;
+      padding:12px;
       box-shadow:0 0 28px rgba(124,255,79,.10);
       margin-bottom:16px;
     }
     h1{
       margin:0 0 8px;
-      font-size:19px;
+      font-size:17px;
       line-height:1.08;
     }
     p{
       margin:0;
       color:var(--muted);
       line-height:1.45;
-      font-size:12px;
+      font-size:11px;
     }
     .grid{
       display:grid;
       grid-template-columns:1fr;
-      gap:12px;
-      margin-top:16px;
+      gap:10px;
+      margin-top:13px;
     }
     .card{
       display:block;
@@ -2278,7 +2278,7 @@ def _ss_fast_admin_page(title, subtitle, cards=None):
       border:1px solid var(--line);
       background:rgba(4,18,12,.78);
       border-radius:15px;
-      padding:16px;
+      padding:12px;
     }
     .card b{
       display:block;
@@ -2289,12 +2289,12 @@ def _ss_fast_admin_page(title, subtitle, cards=None):
     .card span{
       display:block;
       color:var(--muted);
-      font-size:12px;
+      font-size:11px;
     }
     .note{
       margin-top:18px;
       color:rgba(244,255,247,.52);
-      font-size:12px;
+      font-size:11px;
       text-align:center;
     }
   </style>
@@ -2648,35 +2648,35 @@ def _ss_user_home_final():
         linear-gradient(180deg,#010403,#03150d 55%,#010403);
       color:var(--text);
       font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-      padding:16px;
+      padding:12px;
       overflow-x:hidden;
     }
     .top{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
       margin-bottom:12px;
     }
     .brand{
       display:flex;
       align-items:center;
-      gap:12px;
+      gap:10px;
     }
     .logo{
-      width:54px;
-      height:54px;
+      width:48px;
+      height:48px;
       border-radius:15px;
       display:grid;
       place-items:center;
       background:linear-gradient(145deg,rgba(32,255,136,.2),rgba(32,255,136,.04));
       border:1px solid var(--line);
       box-shadow:0 0 24px rgba(32,255,136,.16);
-      font-size:19px;
+      font-size:17px;
     }
     h1{
       margin:0;
-      font-size:30px;
+      font-size:27px;
       line-height:1;
       letter-spacing:-1px;
     }
@@ -2685,28 +2685,28 @@ def _ss_user_home_final():
       margin-top:6px;
       color:var(--muted);
       font-weight:700;
-      font-size:12px;
+      font-size:11px;
     }
     .badge{
       color:var(--green);
       border:1px solid var(--line);
       background:rgba(32,255,136,.08);
       border-radius:999px;
-      padding:9px 11px;
+      padding:8px 10px;
       font-weight:900;
       white-space:nowrap; max-width:118px; overflow:hidden; text-overflow:ellipsis; text-align:center;
     }
     .hero{
       border:1px solid var(--line);
       background:linear-gradient(145deg,rgba(7,31,20,.94),rgba(3,14,9,.88));
-      border-radius:24px;
-      padding:20px;
+      border-radius:21px;
+      padding:16px;
       box-shadow:0 20px 50px rgba(0,0,0,.35), inset 0 0 45px rgba(32,255,136,.04);
       margin-bottom:22px;
     }
     .hero h2{
       margin:0 0 10px;
-      font-size:21px;
+      font-size:19px;
       line-height:1.08;
       letter-spacing:-1px;
     }
@@ -2714,27 +2714,27 @@ def _ss_user_home_final():
     .hero p{
       margin:0;
       color:var(--muted);
-      font-size:15px;
+      font-size:14px;
       line-height:1.45;
       font-weight:700;
     }
     .stats{
       display:grid;
       grid-template-columns:repeat(3,1fr);
-      gap:12px;
-      margin-top:16px;
+      gap:10px;
+      margin-top:13px;
     }
     .stat{
       border:1px solid rgba(32,255,136,.16);
       background:rgba(0,0,0,.18);
-      border-radius:22px;
-      padding:12px 8px;
+      border-radius:19px;
+      padding:10px 7px;
       text-align:center;
     }
     .stat b{
       color:var(--green);
       display:block;
-      font-size:19px;
+      font-size:17px;
       line-height:1;
     }
     .stat span{
@@ -2742,17 +2742,17 @@ def _ss_user_home_final():
       display:block;
       margin-top:6px;
       font-weight:800;
-      font-size:12px;
+      font-size:11px;
     }
     .section{
-      margin:18px 0 10px;
-      letter-spacing:7px;
+      margin:15px 0 8px;
+      letter-spacing:6px;
       font-weight:1000;
-      font-size:19px;
+      font-size:17px;
     }
     .bar{
-      width:96px;
-      height:6px;
+      width:84px;
+      height:5px;
       border-radius:999px;
       background:linear-gradient(90deg,var(--green),var(--green2));
       margin-bottom:12px;
@@ -2760,10 +2760,10 @@ def _ss_user_home_final():
     .grid{
       display:grid;
       grid-template-columns:1fr 1fr;
-      gap:12px;
+      gap:10px;
     }
     .card{
-      min-height:122px;
+      min-height:108px;
       display:flex;
       flex-direction:column;
       justify-content:space-between;
@@ -2771,41 +2771,41 @@ def _ss_user_home_final():
       color:var(--text);
       border:1px solid var(--line);
       background:linear-gradient(145deg,rgba(8,35,23,.96),rgba(2,13,8,.9));
-      border-radius:22px;
-      padding:14px;
+      border-radius:19px;
+      padding:12px;
       box-shadow:0 14px 34px rgba(0,0,0,.25);
     }
     .icon{
-      width:46px;
-      height:46px;
+      width:40px;
+      height:40px;
       border-radius:15px;
       display:grid;
       place-items:center;
       background:rgba(32,255,136,.10);
       border:1px solid rgba(32,255,136,.18);
-      font-size:21px;
+      font-size:19px;
     }
     .pill{
       align-self:flex-end;
-      margin-top:-46px;
+      margin-top:-40px;
       color:#8affb1;
       border:1px solid rgba(32,255,136,.24);
       background:rgba(32,255,136,.10);
       border-radius:999px;
-      padding:6px 10px;
-      font-size:12px;
+      padding:5px 9px;
+      font-size:11px;
       font-weight:900;
     }
     .card h3{
-      margin:13px 0 3px;
-      font-size:21px;
+      margin:10px 0 2px;
+      font-size:19px;
       line-height:1.05;
     }
     .card p{
       margin:0;
       color:var(--muted);
       font-weight:800;
-      font-size:12px;
+      font-size:11px;
       line-height:1.35;
     }
     .foot{
@@ -2813,7 +2813,7 @@ def _ss_user_home_final():
       color:rgba(245,255,248,.42);
       font-weight:700;
       padding:20px 0 8px;
-      font-size:12px;
+      font-size:11px;
     }
   </style>
 </head>
@@ -2831,7 +2831,7 @@ def _ss_user_home_final():
 
   <section class="hero">
     <h2>Kontrol sende,<br><span>koruma aktif.</span></h2>
-    <p>AI spam analizi, lisans, raporlar ve güvenlik modülleri tek ekranda.</p>
+    <p>AI spam analizi, lisans ve güvenlik modülleri tek ekranda.</p>
     <div class="stats">
       <div class="stat"><b>8</b><span>Modül</span></div>
       <div class="stat"><b>92</b><span>Skor</span></div>
