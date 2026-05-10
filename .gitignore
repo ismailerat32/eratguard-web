@@ -140,3 +140,7 @@ USER_MODULE_LINK_AUDIT_V2_*.txt
 
 # local release reports
 SPAMSHIELD_TITANIUM_RELEASE_REPORT_*.txt
+
+# local brand audit reports
+ERATGUARD_BRAND_AUDIT_*.txt
+ERATGUARD_ACTIVE_BRAND_AUDIT_*.txt

@@ -309,7 +309,7 @@ def set_language(lang):
 def ss_health_ping():
     return {
         "ok": True,
-        "service": "SpamShield PRO",
+        "service": "EratGuard PRO",
         "status": "alive"
     }, 200
 # ===== SPAMSHIELD RENDER KEEPALIVE HEALTH END =====
@@ -425,10 +425,10 @@ def send_license(target_username):
     expires_at = user.get("expires_at", "").strip() or "2026-12-31"
     base_url = os.getenv("APP_BASE_URL", "http://127.0.0.1:8080")
 
-    subject = "SpamShield Lisans Kodunuz"
+    subject = "EratGuard Lisans Kodunuz"
     body = f"""Merhaba {target_username},
 
-SpamShield lisans kodunuz aşağıdadır:
+EratGuard lisans kodunuz aşağıdadır:
 
 {license_key}
 
@@ -439,7 +439,7 @@ Aktivasyon için:
 Aktivasyon sayfası:
 {base_url}/activate
 
-SpamShield
+EratGuard
 """
 
     try:
@@ -492,10 +492,10 @@ SpamShield
 
     base_url = os.getenv("APP_BASE_URL", "http://127.0.0.1:8080")
 
-    subject = "SpamShield Lisans Kodunuz"
+    subject = "EratGuard Lisans Kodunuz"
     body = f"""Merhaba {target_username},
 
-SpamShield lisans kodunuz aşağıdadır:
+EratGuard lisans kodunuz aşağıdadır:
 
 {license_key}
 
@@ -506,7 +506,7 @@ Aktivasyon için:
 Aktivasyon sayfası:
 {base_url}/activate
 
-SpamShield
+EratGuard
 """
 
     try:
@@ -992,7 +992,7 @@ USER_MODULES = {
             }
         ],
         "rows": [
-            {"name": "Koruma Durumu", "value": "Aktif", "detail": "SpamShield koruma motoru açık ve kullanıcı hesabı için güvenlik kontrolü aktif."},
+            {"name": "Koruma Durumu", "value": "Aktif", "detail": "EratGuard koruma motoru açık ve kullanıcı hesabı için güvenlik kontrolü aktif."},
             {"name": "AI Motoru", "value": "Hazır", "detail": "AI analiz katmanı riskli kelime, bağlantı ve dolandırıcılık sinyallerini değerlendirmeye hazır."},
             {"name": "Spam Hassasiyeti", "value": "Yüksek", "detail": "Yüksek hassasiyet modu şüpheli kampanya, sahte ödül ve oltalama içeriklerini daha sıkı kontrol eder."},
             {"name": "Son Kontrol", "value": "Az önce", "detail": "Koruma durumu son oturumda kontrol edildi ve aktif görünüyor."}
@@ -1032,7 +1032,7 @@ USER_MODULES = {
             },
             {
                 "title": "Engelleme Performansı",
-                "text": "SpamShield motorunun kaç mesajı yakaladığını gösterir.",
+                "text": "EratGuard motorunun kaç mesajı yakaladığını gösterir.",
                 "features": [
                     {"name": "Engellenen spam", "value": "24"},
                     {"name": "Şüpheli işaretlenen", "value": "9"},
@@ -1053,7 +1053,7 @@ USER_MODULES = {
         ],
         "rows": [
             {"name": "Güvenli SMS", "value": "%80", "detail": "Bu hafta alınan mesajların büyük bölümü güvenli olarak sınıflandırıldı."},
-            {"name": "Spam SMS", "value": "%20", "detail": "SpamShield bu hafta 24 mesajı spam veya riskli içerik olarak işaretledi."},
+            {"name": "Spam SMS", "value": "%20", "detail": "EratGuard bu hafta 24 mesajı spam veya riskli içerik olarak işaretledi."},
             {"name": "Rapor Periyodu", "value": "Haftalık", "detail": "Rapor ekranı haftalık özet mantığıyla çalışır. Günlük ve aylık seçenekler sonradan eklenebilir."},
             {"name": "Son Rapor", "value": "1 saat önce", "detail": "Son rapor kısa süre önce oluşturuldu ve güvenlik özeti güncellendi."}
         ],
@@ -1112,7 +1112,7 @@ USER_MODULES = {
             }
         ],
         "rows": [
-            {"name": "Son Engelleme", "value": "5 dk önce", "detail": "SpamShield son engellemeyi kısa süre önce yaptı. Riskli mesaj blok listesine işlendi."},
+            {"name": "Son Engelleme", "value": "5 dk önce", "detail": "EratGuard son engellemeyi kısa süre önce yaptı. Riskli mesaj blok listesine işlendi."},
             {"name": "Risk Seviyesi", "value": "Orta", "detail": "Son engellenen mesajlarda sahte ödül, kampanya ve şüpheli bağlantı sinyalleri görüldü."},
             {"name": "Liste Durumu", "value": "Aktif", "detail": "Blok listesi aktif. Eklenen numaralar ve riskli göndericiler koruma motoru tarafından dikkate alınır."},
             {"name": "Otomatik Engelleme", "value": "Açık", "detail": "Otomatik engelleme açıkken yüksek riskli mesajlar kullanıcıya düşmeden işaretlenir."}
@@ -1232,7 +1232,7 @@ USER_MODULES = {
             }
         ],
         "rows": [
-            {"name": "Bildirim Durumu", "value": "Açık", "detail": "Bildirimler açıkken SpamShield önemli güvenlik olaylarını kullanıcıya gösterir."},
+            {"name": "Bildirim Durumu", "value": "Açık", "detail": "Bildirimler açıkken EratGuard önemli güvenlik olaylarını kullanıcıya gösterir."},
             {"name": "Yeni Uyarı", "value": "2 adet", "detail": "Okunmamış güvenlik uyarıları ve son spam alarmı burada takip edilir."},
             {"name": "Spam Uyarısı", "value": "Aktif", "detail": "Riskli SMS yakalandığında kullanıcıya anlık uyarı gösterilir."},
             {"name": "Son Bildirim", "value": "15 dk önce", "detail": "Son bildirim kısa süre önce oluşturuldu. Bildirim geçmişi yönetim sayfasından izlenebilir."}
@@ -1319,7 +1319,7 @@ USER_MODULES = {
             {"name": "Koruma", "value": "Açık", "detail": "Koruma motoru kullanıcının tercihine göre açık veya kapalı tutulabilir."},
             {"name": "Bildirim", "value": "Açık", "detail": "Bildirimler güvenlik olayları, spam alarmı ve sistem durumu için kullanılabilir."},
             {"name": "Dil", "value": "Türkçe", "detail": "Arayüz dili kullanıcı tercihine göre yönetilebilir."},
-            {"name": "Tema", "value": "Premium Koyu", "detail": "SpamShield PRO için koyu premium tema aktif olarak kullanılır."}
+            {"name": "Tema", "value": "Premium Koyu", "detail": "EratGuard PRO için koyu premium tema aktif olarak kullanılır."}
         ],
         "primary_label": "Ayarları Aç",
         "primary_href": "/u/settings/manage"
@@ -1351,20 +1351,20 @@ USER_MODULES = {
     "legal": {
         "icon": "⚖️",
         "title": "Telif ve Yasal Bildirim",
-        "description": "SpamShield PRO kullanım koşulları, telif bildirimi ve yasal bilgilendirme alanı.",
+        "description": "EratGuard PRO kullanım koşulları, telif bildirimi ve yasal bilgilendirme alanı.",
         "stats": [
             {"value": "2026", "label": "Telif"},
             {"value": "PRO", "label": "Ürün"},
             {"value": "TR", "label": "Bölge"}
         ],
         "cards": [
-            {"title": "Telif Hakkı", "text": "SpamShield PRO arayüzü, adı, tasarımı ve yazılım yapısı izinsiz kopyalanamaz."},
+            {"title": "Telif Hakkı", "text": "EratGuard PRO arayüzü, adı, tasarımı ve yazılım yapısı izinsiz kopyalanamaz."},
             {"title": "Kullanım Sorumluluğu", "text": "Uygulama güvenlik desteği sağlar; kullanıcı kararlarını tamamen devralmaz."},
             {"title": "Veri Güvenliği", "text": "Kullanıcı verilerinin korunması için güvenli akışlar hedeflenir."},
             {"title": "Yasal Bildirim", "text": "Ticari kullanım, dağıtım ve lisanslama sahibinin iznine bağlıdır."}
         ],
         "rows": [
-            {"name": "Ürün", "value": "SpamShield PRO"},
+            {"name": "Ürün", "value": "EratGuard PRO"},
             {"name": "Telif", "value": "Tüm hakları saklıdır"},
             {"name": "Sürüm", "value": "Beta"},
             {"name": "Kapsam", "value": "SMS güvenliği"}
@@ -1399,7 +1399,7 @@ def render_user_module_page(module_key):
             for row in page["rows"]:
                 if row.get("name") == "Koruma Durumu":
                     row["value"] = "Açık" if protection_enabled else "Kapalı"
-                    row["detail"] = "Koruma açıkken SpamShield gelen mesajları aktif olarak değerlendirir. Kapalıyken sadece kayıt ve görüntüleme yapılır."
+                    row["detail"] = "Koruma açıkken EratGuard gelen mesajları aktif olarak değerlendirir. Kapalıyken sadece kayıt ve görüntüleme yapılır."
                     row["control"] = "protection_toggle"
                     row["enabled"] = protection_enabled
         except Exception:
@@ -2069,15 +2069,15 @@ def ss_live_admin_access():
         try:
             return render_template("admin_login.html", error="Admin girişi başarısız.")
         except Exception:
-            return "<h2>SpamShield Admin</h2><p>Admin girişi başarısız.</p>", 401
+            return "<h2>EratGuard Admin</h2><p>Admin girişi başarısız.</p>", 401
 
     try:
         return render_template("admin_login.html", error="")
     except Exception:
         return """
-        <html><head><meta charset="UTF-8"><title>SpamShield Admin</title></head>
+        <html><head><meta charset="UTF-8"><title>EratGuard Admin</title></head>
         <body style="background:#020806;color:white;font-family:Arial;padding:24px;">
-          <h2>SpamShield ADMIN</h2>
+          <h2>EratGuard ADMIN</h2>
           <form method="post">
             <input name="username" placeholder="admin" style="display:block;margin:10px 0;padding:12px;">
             <input name="password" type="password" placeholder="şifre" style="display:block;margin:10px 0;padding:12px;">
@@ -2116,11 +2116,11 @@ def ss_live_admin_dashboard():
     try:
         return render_template("admin_dashboard.html")
     except Exception as e:
-        return f"<h2>SpamShield ADMIN</h2><p>Dashboard yüklenemedi: {e}</p>", 500
+        return f"<h2>EratGuard ADMIN</h2><p>Dashboard yüklenemedi: {e}</p>", 500
 
 @app.route("/__spamshield_live_version")
 def ss_live_version_probe():
-    return "SpamShield live: dashboard_web admin routes active 2026-05-05", 200
+    return "EratGuard live: dashboard_web admin routes active 2026-05-05", 200
 # ===== SPAMSHIELD LIVE ADMIN APK ROUTES END =====
 
 # ===== SPAMSHIELD ADMIN ALL SLICE SAFE CATCHALL START =====
@@ -2162,9 +2162,9 @@ def ss_live_admin_all_slice_catchall(anything):
         return render_template(tpl, **ctx)
     except Exception as e:
         return f"""
-        <html><head><meta charset="UTF-8"><title>SpamShield ADMIN</title></head>
+        <html><head><meta charset="UTF-8"><title>EratGuard ADMIN</title></head>
         <body style="background:#020806;color:white;font-family:Arial;padding:24px;">
-          <h2>SpamShield ADMIN</h2>
+          <h2>EratGuard ADMIN</h2>
           <p>Bu admin bölümü hazırlanıyor: <b>{slug}</b></p>
           <p style="opacity:.7">Detay: {e}</p>
           <p><a style="color:#8cff5a" href="/admin/dashboard">Admin Dashboard'a dön</a></p>
@@ -2301,7 +2301,7 @@ def _ss_fast_admin_page(title, subtitle, cards=None):
 </head>
 <body>
   <div class="top">
-    <div class="brand">SpamShield ADMIN</div>
+    <div class="brand">EratGuard ADMIN</div>
     <a class="back" href="/admin/dashboard">Dashboard</a>
   </div>
 
@@ -2581,15 +2581,15 @@ def _ss_admin_access_cookie_override():
         try:
             return render_template("admin_login.html", error="Admin girişi başarısız.")
         except Exception:
-            return "<h2>SpamShield Admin</h2><p>Admin girişi başarısız.</p>", 401
+            return "<h2>EratGuard Admin</h2><p>Admin girişi başarısız.</p>", 401
 
     try:
         return render_template("admin_login.html", error="")
     except Exception:
         return """
-        <html><head><meta charset="UTF-8"><title>SpamShield Admin</title></head>
+        <html><head><meta charset="UTF-8"><title>EratGuard Admin</title></head>
         <body style="background:#020806;color:white;font-family:Arial;padding:24px;">
-          <h2>SpamShield ADMIN</h2>
+          <h2>EratGuard ADMIN</h2>
           <form method="post">
             <input name="username" placeholder="admin" style="display:block;margin:10px 0;padding:12px;">
             <input name="password" type="password" placeholder="şifre" style="display:block;margin:10px 0;padding:12px;">
@@ -2626,7 +2626,7 @@ def _ss_user_home_final():
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>SpamShield PRO</title>
+  <title>EratGuard PRO</title>
   <style>
     :root{
       --bg:#020806;
@@ -2884,7 +2884,7 @@ def _ss_user_home_final():
     </a>
   </main>
 
-  <div class="foot">SpamShield PRO · {{ username }} · © 2026</div>
+  <div class="foot">EratGuard PRO · {{ username }} · © 2026</div>
 </body>
 </html>
 """, username=username)
@@ -3048,9 +3048,9 @@ def _ss_admin_radial_home_final():
         resp = render_template("admin_dashboard.html")
     except Exception as e:
         return f"""
-        <html><head><meta charset="UTF-8"><title>SpamShield ADMIN</title></head>
+        <html><head><meta charset="UTF-8"><title>EratGuard ADMIN</title></head>
         <body style="background:#020806;color:white;font-family:Arial;padding:24px;">
-          <h2>SpamShield ADMIN</h2>
+          <h2>EratGuard ADMIN</h2>
           <p>Admin radial dashboard yüklenemedi.</p>
           <p style="opacity:.7">Detay: {e}</p>
         </body></html>
@@ -3105,7 +3105,7 @@ def _ss_user_protection_compact_final():
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>SpamShield PRO • Koruma</title>
+  <title>EratGuard PRO • Koruma</title>
   <style>
     :root{
       --bg:#020806;
@@ -3393,7 +3393,7 @@ def _ss_user_protection_compact_final():
     <div class="row"><b>Son Kontrol</b><span>Az önce</span><div class="mini-plus">+</div></div>
   </section>
 
-  <div class="foot">SpamShield PRO · {{ username }} · © 2026</div>
+  <div class="foot">EratGuard PRO · {{ username }} · © 2026</div>
 </body>
 </html>
 """
@@ -3427,7 +3427,7 @@ def _ss_user_analysis_compact_final():
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>SpamShield PRO • AI Analiz</title>
+  <title>EratGuard PRO • AI Analiz</title>
   <style>
     :root{
       --bg:#020806;
@@ -3730,7 +3730,7 @@ def _ss_user_analysis_compact_final():
     <div class="row"><b>Güven Skoru</b><span>0-100</span><div class="mini-plus">+</div></div>
   </section>
 
-  <div class="foot">SpamShield PRO · {{ username }} · © 2026</div>
+  <div class="foot">EratGuard PRO · {{ username }} · © 2026</div>
 </body>
 </html>
 """
@@ -3764,7 +3764,7 @@ def _ss_user_blocked_compact_final():
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>SpamShield PRO • Engellenenler</title>
+  <title>EratGuard PRO • Engellenenler</title>
   <style>
     :root{
       --bg:#020806;
@@ -4039,7 +4039,7 @@ def _ss_user_blocked_compact_final():
     <div class="row"><b>Son Güncelleme</b><span>Az önce</span><div class="mini-plus">+</div></div>
   </section>
 
-  <div class="foot">SpamShield PRO · {{ username }} · © 2026</div>
+  <div class="foot">EratGuard PRO · {{ username }} · © 2026</div>
 </body>
 </html>
 """
@@ -5064,7 +5064,7 @@ def _ss_user_reports_titanium_summary_page_final():
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>SpamShield PRO • Raporlar</title>
+  <title>EratGuard PRO • Raporlar</title>
   <style>
     :root{{
       --bg:#020806;
@@ -5271,7 +5271,7 @@ def _ss_user_reports_titanium_summary_page_final():
     {rows}
   </main>
 
-  <div class="foot">SpamShield PRO · {username} · © 2026</div>
+  <div class="foot">EratGuard PRO · {username} · © 2026</div>
 </body>
 </html>
 """
@@ -5398,7 +5398,7 @@ def _ss_user_notifications_titanium_events_page_final():
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>SpamShield PRO • Bildirimler</title>
+  <title>EratGuard PRO • Bildirimler</title>
   <style>
     :root{{
       --bg:#020806;
@@ -5562,7 +5562,7 @@ def _ss_user_notifications_titanium_events_page_final():
     {event_cards}
   </main>
 
-  <div class="foot">SpamShield PRO · {username} · © 2026</div>
+  <div class="foot">EratGuard PRO · {username} · © 2026</div>
 </body>
 </html>
 """
@@ -5721,7 +5721,7 @@ def _ss_user_settings_titanium_preferences_page_final():
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>SpamShield PRO • Ayarlar</title>
+  <title>EratGuard PRO • Ayarlar</title>
   <style>
     :root{{
       --bg:#020806;
@@ -5974,7 +5974,7 @@ def _ss_user_settings_titanium_preferences_page_final():
     <button class="save-btn" type="submit">Ayarları Kaydet</button>
   </form>
 
-  <div class="foot">SpamShield PRO · {username} · © 2026</div>
+  <div class="foot">EratGuard PRO · {username} · © 2026</div>
 </body>
 </html>
 """
@@ -6079,7 +6079,7 @@ def _ss_user_license_titanium_center_page_final():
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>SpamShield PRO • Lisans</title>
+  <title>EratGuard PRO • Lisans</title>
   <style>
     :root{{
       --bg:#020806;
@@ -6271,7 +6271,7 @@ def _ss_user_license_titanium_center_page_final():
     </article>
   </main>
 
-  <div class="foot">SpamShield PRO · {username} · © 2026</div>
+  <div class="foot">EratGuard PRO · {username} · © 2026</div>
 </body>
 </html>
 """
@@ -6363,7 +6363,7 @@ def _ss_user_community_feedback_post_final():
 
     _ss_comm_session["ss_community_feedback_status"] = {
         "ok": True,
-        "message": "Geri bildirimin alındı. SpamShield PRO gelişim havuzuna eklendi."
+        "message": "Geri bildirimin alındı. EratGuard PRO gelişim havuzuna eklendi."
     }
     return _ss_comm_redirect("/u/community")
 
@@ -6441,7 +6441,7 @@ def _ss_user_community_titanium_feedback_page_final():
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>SpamShield PRO • Topluluk</title>
+  <title>EratGuard PRO • Topluluk</title>
   <style>
     :root{{
       --bg:#020806;
@@ -6630,7 +6630,7 @@ def _ss_user_community_titanium_feedback_page_final():
   <section class="hero">
     <div class="hero-icon">🌐</div>
     <h2>Topluluk</h2>
-    <p>SpamShield PRO’yu birlikte daha güçlü hale getirmek için öneri, hata ve güvenlik geri bildirimi gönder.</p>
+    <p>EratGuard PRO’yu birlikte daha güçlü hale getirmek için öneri, hata ve güvenlik geri bildirimi gönder.</p>
 
     <div class="stats">
       <div class="stat"><b>{total_feedback}</b><span>Geri Bildirim</span></div>
@@ -6656,7 +6656,7 @@ def _ss_user_community_titanium_feedback_page_final():
     </select>
 
     <label>Mesajın</label>
-    <textarea name="message" placeholder="SpamShield PRO için önerini, hatanı veya geliştirme fikrini yaz..."></textarea>
+    <textarea name="message" placeholder="EratGuard PRO için önerini, hatanı veya geliştirme fikrini yaz..."></textarea>
 
     <button class="send-btn" type="submit">Geri Bildirim Gönder</button>
   </form>
@@ -6668,7 +6668,7 @@ def _ss_user_community_titanium_feedback_page_final():
     {feedback_cards}
   </main>
 
-  <div class="foot">SpamShield PRO · {username} · © 2026</div>
+  <div class="foot">EratGuard PRO · {username} · © 2026</div>
 </body>
 </html>
 """
@@ -6708,7 +6708,7 @@ def _ss_public_legal_page(title, subtitle, body_html):
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>{title} - SpamShield PRO</title>
+  <title>{title} - EratGuard PRO</title>
   <style>
     :root{{
       --bg:#020806;
@@ -6825,7 +6825,7 @@ def _ss_public_legal_page(title, subtitle, body_html):
       {body_html}
     </section>
 
-    <div class="foot">© 2026 SpamShield PRO · Tüm hakları saklıdır.</div>
+    <div class="foot">© 2026 EratGuard PRO · Tüm hakları saklıdır.</div>
   </div>
 </body>
 </html>
@@ -6842,10 +6842,10 @@ def _ss_public_legal_page(title, subtitle, body_html):
 def ss_public_privacy_page():
     return _ss_public_legal_page(
         "Gizlilik ve KVKK Politikası",
-        "SpamShield PRO kullanıcı verilerinin korunması, gizlilik ve kişisel veri işleme ilkeleri.",
+        "EratGuard PRO kullanıcı verilerinin korunması, gizlilik ve kişisel veri işleme ilkeleri.",
         """
         <h3>Gizlilik İlkesi</h3>
-        <p>SpamShield PRO, kullanıcı güvenliğini artırmak için tasarlanmış dijital bir güvenlik ve spam analiz hizmetidir. Kullanıcı verileri yalnızca hizmetin çalışması, lisans yönetimi, güvenlik analizi ve destek süreçleri için kullanılır.</p>
+        <p>EratGuard PRO, kullanıcı güvenliğini artırmak için tasarlanmış dijital bir güvenlik ve spam analiz hizmetidir. Kullanıcı verileri yalnızca hizmetin çalışması, lisans yönetimi, güvenlik analizi ve destek süreçleri için kullanılır.</p>
 
         <h3>İşlenen Veriler</h3>
         <ul>
@@ -6857,13 +6857,13 @@ def ss_public_privacy_page():
         </ul>
 
         <h3>Ödeme Bilgileri</h3>
-        <p>Kart bilgileri SpamShield PRO içinde saklanmaz. Ödeme işlemleri güvenli ödeme altyapısı üzerinden tamamlanır.</p>
+        <p>Kart bilgileri EratGuard PRO içinde saklanmaz. Ödeme işlemleri güvenli ödeme altyapısı üzerinden tamamlanır.</p>
 
         <h3>KVKK Bilgilendirmesi</h3>
         <p>Kişisel veriler; hizmet sunumu, kullanıcı güvenliği, lisans aktivasyonu, destek ve yasal yükümlülükler kapsamında işlenebilir. Kullanıcılar kişisel verileriyle ilgili bilgi alma, düzeltme ve silme taleplerini iletişim kanalları üzerinden iletebilir.</p>
 
         <h3>Saklama ve Güvenlik</h3>
-        <p>Veriler, hizmetin gerektirdiği süre boyunca saklanır. SpamShield PRO, yetkisiz erişime karşı makul teknik ve idari önlemler almayı hedefler.</p>
+        <p>Veriler, hizmetin gerektirdiği süre boyunca saklanır. EratGuard PRO, yetkisiz erişime karşı makul teknik ve idari önlemler almayı hedefler.</p>
 
         <div class="notice">Bu sayfa iyzico ve kullanıcı incelemesi için kamusal bilgilendirme amacıyla hazırlanmıştır.</div>
         """
@@ -6875,10 +6875,10 @@ def ss_public_privacy_page():
 def ss_public_terms_page():
     return _ss_public_legal_page(
         "Kullanım Şartları ve Mesafeli Satış Bilgilendirmesi",
-        "SpamShield PRO dijital lisans hizmetinin kullanım, satış ve aktivasyon koşulları.",
+        "EratGuard PRO dijital lisans hizmetinin kullanım, satış ve aktivasyon koşulları.",
         """
         <h3>Hizmet Tanımı</h3>
-        <p>SpamShield PRO; SMS/metin spam analizi, risk skoru, otomatik karantina, raporlama, bildirim ve lisans tabanlı kullanıcı paneli özellikleri sunan dijital bir yazılım hizmetidir.</p>
+        <p>EratGuard PRO; SMS/metin spam analizi, risk skoru, otomatik karantina, raporlama, bildirim ve lisans tabanlı kullanıcı paneli özellikleri sunan dijital bir yazılım hizmetidir.</p>
 
         <h3>Dijital Ürün ve Lisans</h3>
         <p>Satın alma işlemi sonrasında kullanıcıya dijital hizmet/lisans erişimi sağlanır. Lisans aktif edildiğinde kullanıcı premium özelliklerden yararlanabilir.</p>
@@ -6887,14 +6887,14 @@ def ss_public_terms_page():
         <ul>
           <li>Kullanıcı, hesap bilgilerini güvenli tutmakla sorumludur.</li>
           <li>Hizmet kötüye kullanım, yasa dışı faaliyet veya üçüncü kişilerin haklarını ihlal edecek şekilde kullanılamaz.</li>
-          <li>SpamShield PRO analiz sonuçları bilgilendirme amaçlıdır; nihai karar kullanıcı sorumluluğundadır.</li>
+          <li>EratGuard PRO analiz sonuçları bilgilendirme amaçlıdır; nihai karar kullanıcı sorumluluğundadır.</li>
         </ul>
 
         <h3>Ödeme ve Aktivasyon</h3>
-        <p>Ödeme işlemleri güvenli ödeme altyapısı üzerinden tamamlanır. Ödeme sonrası lisans aktivasyonu SpamShield PRO lisans merkezi üzerinden yapılır.</p>
+        <p>Ödeme işlemleri güvenli ödeme altyapısı üzerinden tamamlanır. Ödeme sonrası lisans aktivasyonu EratGuard PRO lisans merkezi üzerinden yapılır.</p>
 
         <h3>Hizmet Değişiklikleri</h3>
-        <p>SpamShield PRO, güvenlik ve performans gerekçeleriyle özelliklerde iyileştirme, güncelleme veya değişiklik yapabilir.</p>
+        <p>EratGuard PRO, güvenlik ve performans gerekçeleriyle özelliklerde iyileştirme, güncelleme veya değişiklik yapabilir.</p>
 
         <div class="notice">Mesafeli satış ve kullanım şartları yayın öncesi firma bilgileriyle son kez kontrol edilmelidir.</div>
         """
@@ -6906,10 +6906,10 @@ def ss_public_terms_page():
 def ss_public_refund_page():
     return _ss_public_legal_page(
         "İptal ve İade Politikası",
-        "SpamShield PRO dijital lisans satın alımlarında iptal, iade ve aktivasyon bilgilendirmesi.",
+        "EratGuard PRO dijital lisans satın alımlarında iptal, iade ve aktivasyon bilgilendirmesi.",
         """
         <h3>Dijital Ürün Niteliği</h3>
-        <p>SpamShield PRO dijital yazılım/lisans hizmetidir. Lisans aktif edildikten ve premium erişim kullanıma açıldıktan sonra dijital ürün niteliği gereği iade koşulları sınırlı olabilir.</p>
+        <p>EratGuard PRO dijital yazılım/lisans hizmetidir. Lisans aktif edildikten ve premium erişim kullanıma açıldıktan sonra dijital ürün niteliği gereği iade koşulları sınırlı olabilir.</p>
 
         <h3>Aktivasyon Öncesi Talepler</h3>
         <p>Ödeme yapılmış ancak lisans aktivasyonu tamamlanmamışsa kullanıcı destek kanalı üzerinden iptal veya iade talebi oluşturabilir.</p>
@@ -6921,7 +6921,7 @@ def ss_public_refund_page():
         <p>İade talepleri; ödeme durumu, lisans aktivasyonu, kullanım durumu ve ilgili mevzuat dikkate alınarak değerlendirilir.</p>
 
         <h3>Ödeme Güvenliği</h3>
-        <p>Kart bilgileri SpamShield PRO tarafından saklanmaz. Ödeme işlemleri güvenli ödeme altyapısı üzerinden gerçekleştirilir.</p>
+        <p>Kart bilgileri EratGuard PRO tarafından saklanmaz. Ödeme işlemleri güvenli ödeme altyapısı üzerinden gerçekleştirilir.</p>
 
         <div class="notice">İade politikası dijital lisans mantığına göre hazırlanmıştır; yayın öncesi firma bilgileri ve süreçler netleştirilmelidir.</div>
         """
@@ -6933,10 +6933,10 @@ def ss_public_refund_page():
 def ss_public_contact_page():
     return _ss_public_legal_page(
         "İletişim",
-        "SpamShield PRO destek, lisans, ödeme ve güvenlik bildirimleri için iletişim bilgileri.",
+        "EratGuard PRO destek, lisans, ödeme ve güvenlik bildirimleri için iletişim bilgileri.",
         """
         <h3>Destek ve İletişim</h3>
-        <p>SpamShield PRO ile ilgili lisans, ödeme, teknik destek, güvenlik bildirimi ve geri bildirim talepleri için aşağıdaki iletişim kanalları kullanılabilir.</p>
+        <p>EratGuard PRO ile ilgili lisans, ödeme, teknik destek, güvenlik bildirimi ve geri bildirim talepleri için aşağıdaki iletişim kanalları kullanılabilir.</p>
 
         <h3>E-posta</h3>
         <p>Destek e-posta adresi: <strong>spamshieldprotr@gmail.com</strong></p>
@@ -6944,7 +6944,7 @@ def ss_public_contact_page():
         <h3>Firma / Yayıncı Bilgileri</h3>
         <ul>
           <li>Yayıncı / Hizmet Sağlayıcı: İsmail Erat</li>
-          <li>Ürün / Marka: SpamShield PRO</li>
+          <li>Ürün / Marka: EratGuard PRO</li>
           <li>Hizmet türü: Dijital yazılım / lisans tabanlı güvenlik hizmeti</li>
           <li>Adres: Isparta / Türkiye</li>
           <li>Destek e-posta: spamshieldprotr@gmail.com</li>
@@ -6955,7 +6955,7 @@ def ss_public_contact_page():
         <p>Vergi ve kimlik bilgileri güvenlik nedeniyle herkese açık sitede yayınlanmaz; yalnızca resmi başvuru ve ödeme sağlayıcı panelinde paylaşılır.</p>
 
         <h3>Önemli Not</h3>
-        <p>SpamShield PRO bireysel yayıncı tarafından geliştirilen dijital yazılım/lisans hizmetidir. Resmi başvuru süreçlerinde gerekli bilgiler ilgili ödeme sağlayıcı panelinden paylaşılır.</p>
+        <p>EratGuard PRO bireysel yayıncı tarafından geliştirilen dijital yazılım/lisans hizmetidir. Resmi başvuru süreçlerinde gerekli bilgiler ilgili ödeme sağlayıcı panelinden paylaşılır.</p>
 
         <div class="notice">İletişim ve yayıncı bilgileri iyzico incelemesine uygun şekilde güncellenmiştir.</div>
         """
