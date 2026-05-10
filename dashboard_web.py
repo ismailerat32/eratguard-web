@@ -5580,3 +5580,417 @@ try:
 except Exception as e:
     print("Notifications titanium events page override skipped:", e)
 # ===== SPAMSHIELD USER NOTIFICATIONS TITANIUM EVENTS UI END =====
+
+# ===== SPAMSHIELD USER SETTINGS TITANIUM PREFERENCES UI START =====
+from flask import render_template_string as _ss_settings_render_template_string
+from flask import make_response as _ss_settings_make_response
+from flask import request as _ss_settings_request
+from flask import redirect as _ss_settings_redirect
+from flask import session as _ss_settings_session
+from pathlib import Path as _ss_settings_Path
+import json as _ss_settings_json
+import html as _ss_settings_html_escape
+
+_SS_USER_SETTINGS_FILE = _ss_settings_Path("data") / "user_settings.json"
+
+def _ss_settings_safe(v):
+    try:
+        return _ss_settings_html_escape.escape(str(v or ""))
+    except Exception:
+        return ""
+
+def _ss_settings_read_all():
+    try:
+        if not _SS_USER_SETTINGS_FILE.exists():
+            return {}
+        return _ss_settings_json.loads(_SS_USER_SETTINGS_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+def _ss_settings_write_all(data):
+    _SS_USER_SETTINGS_FILE.parent.mkdir(exist_ok=True)
+    _SS_USER_SETTINGS_FILE.write_text(
+        _ss_settings_json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
+
+def _ss_settings_default():
+    return {
+        "protection_enabled": True,
+        "ai_sensitivity": "high",
+        "auto_quarantine": True,
+        "notifications_enabled": True,
+    }
+
+def _ss_settings_get(username):
+    data = _ss_settings_read_all()
+    user_settings = data.get(username) or {}
+    merged = _ss_settings_default()
+    merged.update(user_settings)
+    return merged
+
+def _ss_settings_set(username, settings):
+    data = _ss_settings_read_all()
+    data[username] = settings
+    _ss_settings_write_all(data)
+
+def _ss_settings_label(value):
+    if value == "low":
+        return "Düşük"
+    if value == "medium":
+        return "Orta"
+    if value == "high":
+        return "Yüksek"
+    if value == "titanium":
+        return "Titanium"
+    return "Yüksek"
+
+def _ss_user_settings_manage_titanium_final():
+    if not (session.get("logged_in") and session.get("username")):
+        return redirect("/login")
+
+    if _ss_settings_request.method == "GET":
+        return _ss_settings_redirect("/u/settings")
+
+    username = str(session.get("username") or "kullanıcı")
+
+    protection_enabled = _ss_settings_request.form.get("protection_enabled") == "on"
+    auto_quarantine = _ss_settings_request.form.get("auto_quarantine") == "on"
+    notifications_enabled = _ss_settings_request.form.get("notifications_enabled") == "on"
+
+    ai_sensitivity = (_ss_settings_request.form.get("ai_sensitivity") or "high").strip()
+    if ai_sensitivity not in {"low", "medium", "high", "titanium"}:
+        ai_sensitivity = "high"
+
+    new_settings = {
+        "protection_enabled": protection_enabled,
+        "ai_sensitivity": ai_sensitivity,
+        "auto_quarantine": auto_quarantine,
+        "notifications_enabled": notifications_enabled,
+        "updated_at": _ss_titanium_now() if "_ss_titanium_now" in globals() else "",
+    }
+
+    _ss_settings_set(username, new_settings)
+
+    try:
+        _ss_titanium_event("settings_update", {
+            "protection_enabled": protection_enabled,
+            "ai_sensitivity": ai_sensitivity,
+            "auto_quarantine": auto_quarantine,
+            "notifications_enabled": notifications_enabled
+        })
+    except Exception:
+        pass
+
+    _ss_settings_session["ss_settings_saved"] = True
+    return _ss_settings_redirect("/u/settings")
+
+def _ss_user_settings_titanium_preferences_page_final():
+    if not (session.get("logged_in") and session.get("username")):
+        return redirect("/login")
+
+    username = str(session.get("username") or "kullanıcı")
+    settings = _ss_settings_get(username)
+
+    saved = bool(_ss_settings_session.pop("ss_settings_saved", False))
+
+    protection_checked = "checked" if settings.get("protection_enabled") else ""
+    quarantine_checked = "checked" if settings.get("auto_quarantine") else ""
+    notifications_checked = "checked" if settings.get("notifications_enabled") else ""
+
+    sensitivity = settings.get("ai_sensitivity", "high")
+    sensitivity_label = _ss_settings_label(sensitivity)
+
+    opt_low = "selected" if sensitivity == "low" else ""
+    opt_medium = "selected" if sensitivity == "medium" else ""
+    opt_high = "selected" if sensitivity == "high" else ""
+    opt_titanium = "selected" if sensitivity == "titanium" else ""
+
+    saved_html = ""
+    if saved:
+        saved_html = '''
+  <section class="saved">
+    <b>Ayarlar kaydedildi</b>
+    <span>Titanium tercihlerin güncellendi.</span>
+  </section>
+'''
+
+    html = f"""
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>SpamShield PRO • Ayarlar</title>
+  <style>
+    :root{{
+      --bg:#020806;
+      --line:rgba(35,255,137,.22);
+      --green:#20ff88;
+      --green2:#8cff5a;
+      --text:#f5fff8;
+      --muted:rgba(245,255,248,.66);
+    }}
+    *{{box-sizing:border-box;-webkit-tap-highlight-color:transparent}}
+    body{{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 50% 0%,rgba(32,255,136,.14),transparent 32%),
+        radial-gradient(circle at 88% 76%,rgba(140,255,90,.10),transparent 28%),
+        linear-gradient(180deg,#010403,#03150d 58%,#010403);
+      color:var(--text);
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+      padding:14px;
+      overflow-x:hidden;
+    }}
+    .top{{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}}
+    .brand{{display:flex;align-items:center;gap:10px;min-width:0}}
+    .logo{{
+      width:46px;height:46px;border-radius:16px;
+      display:grid;place-items:center;
+      background:linear-gradient(145deg,rgba(32,255,136,.18),rgba(32,255,136,.04));
+      border:1px solid var(--line);
+      box-shadow:0 0 20px rgba(32,255,136,.14);
+      font-size:24px;
+      flex:0 0 auto;
+    }}
+    h1{{margin:0;font-size:27px;line-height:1;letter-spacing:-1px}}
+    h1 span{{color:var(--green2)}}
+    .sub{{margin-top:5px;color:var(--muted);font-weight:800;font-size:12px}}
+    .badge{{
+      color:var(--green);
+      border:1px solid var(--line);
+      background:rgba(32,255,136,.08);
+      border-radius:999px;
+      padding:8px 10px;
+      font-weight:950;
+      font-size:12px;
+      white-space:nowrap;
+    }}
+    .hero{{
+      border:1px solid var(--line);
+      background:linear-gradient(145deg,rgba(8,35,23,.94),rgba(2,13,8,.92));
+      border-radius:22px;
+      padding:16px;
+      box-shadow:0 18px 44px rgba(0,0,0,.34), inset 0 0 42px rgba(32,255,136,.04);
+      margin-bottom:18px;
+    }}
+    .hero-icon{{
+      width:48px;height:48px;border-radius:16px;
+      display:grid;place-items:center;
+      background:rgba(32,255,136,.10);
+      border:1px solid rgba(32,255,136,.18);
+      font-size:25px;
+      margin-bottom:13px;
+    }}
+    .hero h2{{margin:0 0 9px;font-size:28px;line-height:1.05;letter-spacing:-1px}}
+    .hero p{{margin:0;color:var(--muted);font-size:14px;line-height:1.42;font-weight:800}}
+    .stats{{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px}}
+    .stat{{
+      border:1px solid rgba(32,255,136,.15);
+      background:rgba(0,0,0,.17);
+      border-radius:17px;
+      padding:10px 6px;
+      text-align:center;
+    }}
+    .stat b{{display:block;color:var(--green);font-size:18px;line-height:1}}
+    .stat span{{display:block;margin-top:6px;color:var(--muted);font-weight:900;font-size:9px}}
+    .back{{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:48px;
+      margin-top:14px;
+      border-radius:17px;
+      color:var(--text);
+      text-decoration:none;
+      font-weight:950;
+      font-size:15px;
+      background:rgba(255,255,255,.07);
+      border:1px solid rgba(255,255,255,.12);
+    }}
+    .section{{margin:17px 0 8px;letter-spacing:6px;font-weight:1000;font-size:16px}}
+    .bar{{width:82px;height:5px;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--green2));margin-bottom:11px}}
+    .panel{{
+      border:1px solid var(--line);
+      background:linear-gradient(145deg,rgba(8,35,23,.92),rgba(2,13,8,.9));
+      border-radius:21px;
+      padding:14px;
+      margin-bottom:14px;
+    }}
+    .setting-row{{
+      display:grid;
+      grid-template-columns:1fr auto;
+      align-items:center;
+      gap:12px;
+      padding:14px 0;
+      border-bottom:1px solid rgba(245,255,248,.07);
+    }}
+    .setting-row:last-child{{border-bottom:0}}
+    .setting-row b{{display:block;font-size:16px;margin-bottom:5px}}
+    .setting-row span{{display:block;color:var(--muted);font-size:12px;font-weight:800;line-height:1.35}}
+    .switch input{{display:none}}
+    .slider{{
+      width:54px;
+      height:32px;
+      border-radius:999px;
+      display:block;
+      position:relative;
+      background:rgba(255,255,255,.13);
+      border:1px solid rgba(255,255,255,.12);
+      transition:.2s;
+    }}
+    .slider:before{{
+      content:"";
+      position:absolute;
+      width:24px;
+      height:24px;
+      left:4px;
+      top:3px;
+      border-radius:50%;
+      background:rgba(255,255,255,.75);
+      transition:.2s;
+    }}
+    .switch input:checked + .slider{{
+      background:linear-gradient(135deg,#20d36f,#25d0c5);
+      border-color:rgba(32,255,136,.35);
+    }}
+    .switch input:checked + .slider:before{{
+      transform:translateX(21px);
+      background:#02120b;
+    }}
+    select{{
+      width:150px;
+      border-radius:15px;
+      border:1px solid rgba(35,255,137,.22);
+      background:rgba(0,0,0,.25);
+      color:#f5fff8;
+      padding:10px;
+      font-weight:900;
+      outline:none;
+    }}
+    .save-btn{{
+      width:100%;
+      min-height:50px;
+      border:0;
+      border-radius:18px;
+      color:#02120b;
+      background:linear-gradient(135deg,#20d36f,#25d0c5);
+      font-weight:1000;
+      font-size:16px;
+      margin-top:10px;
+    }}
+    .saved{{
+      border:1px solid rgba(32,255,136,.35);
+      background:rgba(32,255,136,.10);
+      border-radius:18px;
+      padding:13px 14px;
+      margin-bottom:14px;
+    }}
+    .saved b{{display:block;color:#98ffb8;font-size:15px}}
+    .saved span{{display:block;color:rgba(245,255,248,.68);font-weight:800;font-size:12px;margin-top:4px}}
+    .foot{{text-align:center;color:rgba(245,255,248,.38);font-weight:800;padding:22px 0 8px;font-size:12px}}
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="brand">
+      <div class="logo">🛡️</div>
+      <div>
+        <h1>Spam<span>Shield</span></h1>
+        <div class="sub">Titanium ayar merkezi</div>
+      </div>
+    </div>
+    <div class="badge">👑 PRO AKTİF</div>
+  </div>
+
+  <section class="hero">
+    <div class="hero-icon">⚙️</div>
+    <h2>Ayarlar</h2>
+    <p>Koruma davranışını, AI hassasiyetini, karantina ve bildirim tercihlerini yönet.</p>
+
+    <div class="stats">
+      <div class="stat"><b>{"Açık" if settings.get("protection_enabled") else "Kapalı"}</b><span>Koruma</span></div>
+      <div class="stat"><b>{_ss_settings_safe(sensitivity_label)}</b><span>AI</span></div>
+      <div class="stat"><b>{"Açık" if settings.get("auto_quarantine") else "Kapalı"}</b><span>Karantina</span></div>
+    </div>
+
+    <a class="back" href="/radial">← Ana ekrana dön</a>
+  </section>
+
+  {saved_html}
+
+  <div class="section">TERCİHLER</div>
+  <div class="bar"></div>
+
+  <form method="post" action="/u/settings/manage" class="panel">
+    <div class="setting-row">
+      <div>
+        <b>Koruma Motoru</b>
+        <span>SMS ve mesaj tarama sistemini aktif tutar.</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" name="protection_enabled" {protection_checked}>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <b>AI Hassasiyeti</b>
+        <span>Risk tespit seviyesini belirler.</span>
+      </div>
+      <select name="ai_sensitivity">
+        <option value="low" {opt_low}>Düşük</option>
+        <option value="medium" {opt_medium}>Orta</option>
+        <option value="high" {opt_high}>Yüksek</option>
+        <option value="titanium" {opt_titanium}>Titanium</option>
+      </select>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <b>Otomatik Karantina</b>
+        <span>Yüksek riskli mesajları otomatik karantinaya alır.</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" name="auto_quarantine" {quarantine_checked}>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="setting-row">
+      <div>
+        <b>Güvenlik Bildirimleri</b>
+        <span>Tarama, risk ve karantina olaylarını bildirim akışına taşır.</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" name="notifications_enabled" {notifications_checked}>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <button class="save-btn" type="submit">Ayarları Kaydet</button>
+  </form>
+
+  <div class="foot">SpamShield PRO · {username} · © 2026</div>
+</body>
+</html>
+"""
+
+    resp = _ss_settings_make_response(_ss_settings_render_template_string(html))
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    resp.headers["Pragma"] = "no-cache"
+    resp.headers["Expires"] = "0"
+    return resp
+
+try:
+    for _rule in list(app.url_map.iter_rules()):
+        if str(_rule) == "/u/settings":
+            app.view_functions[_rule.endpoint] = _ss_user_settings_titanium_preferences_page_final
+        if str(_rule) == "/u/settings/manage":
+            app.view_functions[_rule.endpoint] = _ss_user_settings_manage_titanium_final
+except Exception as e:
+    print("Settings titanium preferences page override skipped:", e)
+# ===== SPAMSHIELD USER SETTINGS TITANIUM PREFERENCES UI END =====

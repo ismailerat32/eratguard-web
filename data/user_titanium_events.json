@@ -68,5 +68,16 @@
       "status": "riskli",
       "auto_quarantine": true
     }
+  },
+  {
+    "created_at": "2026-05-10T08:37:04",
+    "username": "playtest32",
+    "event_type": "settings_update",
+    "payload": {
+      "protection_enabled": true,
+      "ai_sensitivity": "titanium",
+      "auto_quarantine": true,
+      "notifications_enabled": true
+    }
   }
 ]
