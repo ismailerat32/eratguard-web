@@ -7,6 +7,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from mailer import send_mail
+from utils.reset_utils import cleanup_expired_tokens, create_reset_token, create_reset_code
 
 load_dotenv()
 
@@ -886,6 +887,7 @@ def activate_license(target_username):
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password_live():
     t = load_locale(get_lang())
+    cleanup_expired_tokens()
 
     if request.method == "POST":
         identity = (
@@ -907,12 +909,55 @@ def forgot_password_live():
                 lang=get_lang()
             )
 
+        users = load_users()
+        username = None
+        user = None
+
+        for uname, udata in users.items():
+            email = str(udata.get("email", "") or "").strip().lower()
+            if str(uname).strip().lower() == identity.lower() or email == identity.lower():
+                username = uname
+                user = udata
+                break
+
+        reset_link = None
+        reset_code = None
+
+        if username and user:
+            raw_token = create_reset_token(username)
+            reset_link = url_for("reset_password", token=raw_token, _external=True)
+            reset_code = create_reset_code(username)
+
+            target_email = str(user.get("email", "") or "").strip()
+            if not target_email and "@" in str(username):
+                target_email = str(username)
+
+            if target_email:
+                subject = "EratGuard Şifre Sıfırlama"
+                body = (
+                    f"Merhaba {username}\n\n"
+                    f"EratGuard hesabın için şifre sıfırlama isteği oluşturuldu.\n\n"
+                    f"Sıfırlama linki:\n{reset_link}\n\n"
+                    f"6 haneli kodun: {reset_code}\n\n"
+                    f"Bu işlemi sen yapmadıysan bu mesajı yok sayabilirsin.\n"
+                )
+
+                try:
+                    ok, msg = send_mail(
+                        to_email=target_email,
+                        subject=subject,
+                        body=body
+                    )
+                    print("Password reset mail:", ok, msg, flush=True)
+                except Exception as e:
+                    print("Password reset mail error:", e, flush=True)
+
         return render_template(
             "forgot.html",
             success=True,
             message="Bu bilgi sistemde varsa sıfırlama bilgisi oluşturuldu.",
-            reset_link=None,
-            reset_code=None,
+            reset_link=reset_link,
+            reset_code=reset_code,
             error=None,
             t=t,
             lang=get_lang()
