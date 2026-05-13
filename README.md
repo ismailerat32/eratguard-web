@@ -1,4 +1,4 @@
-# 🛡 SpamShield
+# 🛡 EratGuard
 
 Modern, lisans sistemine sahip spam kontrol ve kullanıcı yönetim paneli.
 

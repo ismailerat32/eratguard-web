@@ -288,7 +288,7 @@ body{
 }
 
 
-/* === SPAMSHIELD LIVE POPUP CSS START === */
+/* === ERATGUARD LIVE POPUP CSS START === */
 .spam-live-popup{
   position:fixed;
   top:18px;
@@ -336,14 +336,14 @@ body{
   font-size:13px;
   color:rgba(255,255,255,.78);
 }
-/* === SPAMSHIELD LIVE POPUP CSS END === */
+/* === ERATGUARD LIVE POPUP CSS END === */
 
 </style>
 </head>
 
 <body>
 
-<!-- === SPAMSHIELD LIVE POPUP START === -->
+<!-- === ERATGUARD LIVE POPUP START === -->
 <div id="spamLivePopup" class="spam-live-popup">
   <div class="popup-icon">🛡️</div>
   <div>
@@ -351,7 +351,7 @@ body{
     <span id="spamPopupText">Yeni spam tehditi engellendi</span>
   </div>
 </div>
-<!-- === SPAMSHIELD LIVE POPUP END === -->
+<!-- === ERATGUARD LIVE POPUP END === -->
 
 
 <div class="phone">
@@ -492,7 +492,7 @@ function animateValue(id, end) {
   }, stepTime);
 }
 
-/* === SPAMSHIELD LIVE POPUP JS START === */
+/* === ERATGUARD LIVE POPUP JS START === */
 let __lastSpamCount = null;
 
 function softBeep(){
@@ -556,7 +556,7 @@ function watchSpamIncrease(currentSpam){
 if(new URLSearchParams(location.search).get("testPopup") === "1"){
   setTimeout(() => showSpamPopup("Test spam uyarısı başarıyla çalıştı"), 900);
 }
-/* === SPAMSHIELD LIVE POPUP JS END === */
+/* === ERATGUARD LIVE POPUP JS END === */
 
 </script>
 

@@ -176,7 +176,7 @@ def license_required():
 
     return None
 # =========================================
-# SpamShield © 2026
+# EratGuard © 2026
 # Owner: ismail erat
 # All rights reserved.
 # Unauthorized copying, resale, distribution,
@@ -204,7 +204,7 @@ from utils.reset_utils import (
 )
 
 
-# ===== SPAMSHIELD IYZICO PAYMENT CONFIG START =====
+# ===== ERATGUARD IYZICO PAYMENT CONFIG START =====
 # iyzico onayı gelince 3 iyzilink ödeme linki buraya yazılacak.
 # Linkler boş/placeholder kaldığı sürece ödeme sayfası "hazırlanıyor" ekranı gösterir.
 PAYMENT_PROVIDER = "iyzico"
@@ -226,18 +226,18 @@ PLAN_PRICES = {
     "pro_yearly": "1000 TL / Yıl",
     "lifetime": "2000 TL / Tek Sefer",
 }
-# ===== SPAMSHIELD IYZICO PAYMENT CONFIG END =====
+# ===== ERATGUARD IYZICO PAYMENT CONFIG END =====
 
 
 app = Flask(__name__)
 
-# ===== SPAMSHIELD SECURITY LEVEL 1 START =====
+# ===== ERATGUARD SECURITY LEVEL 1 START =====
 import secrets as _ss_secrets
 import time as _ss_time
 from pathlib import Path as _ss_Path
 from functools import wraps as _ss_wraps
 
-_SS_SECRET_FILE = _ss_Path("data/.spamshield_secret_key")
+_SS_SECRET_FILE = _ss_Path("data/.eratguard_secret_key")
 _SS_SECRET_FILE.parent.mkdir(exist_ok=True)
 
 def _ss_get_or_create_secret_key():
@@ -267,8 +267,8 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["PERMANENT_SESSION_LIFETIME"] = 60 * 60 * 8
 
 # Lokal HTTP test bozulmasın diye Secure cookie varsayılan kapalı.
-# Yayına HTTPS ile çıkarken env'e SPAMSHIELD_SECURE_COOKIES=1 koy.
-app.config["SESSION_COOKIE_SECURE"] = os.environ.get("SPAMSHIELD_SECURE_COOKIES", "0") == "1"
+# Yayına HTTPS ile çıkarken env'e ERATGUARD_SECURE_COOKIES=1 koy.
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("ERATGUARD_SECURE_COOKIES", "0") == "1"
 
 _SS_LOGIN_ATTEMPTS = {}
 
@@ -366,11 +366,11 @@ def ss_security_headers(response):
     response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
 
     # HTTPS yayında açılabilir; lokal HTTP testte sorun çıkarmaması için env kontrollü.
-    if os.environ.get("SPAMSHIELD_HSTS", "0") == "1":
+    if os.environ.get("ERATGUARD_HSTS", "0") == "1":
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
 
     return response
-# ===== SPAMSHIELD SECURITY LEVEL 1 END =====
+# ===== ERATGUARD SECURITY LEVEL 1 END =====
 
 
 
@@ -413,8 +413,8 @@ def _current_username_hardcore():
 
 def _make_license_code(username):
     import hashlib
-    raw = f"{username}-{_license_datetime.now().isoformat()}-SPAMSHIELD"
-    return "SPAMSHIELD-PRO-" + hashlib.sha1(raw.encode()).hexdigest()[:6].upper()
+    raw = f"{username}-{_license_datetime.now().isoformat()}-ERATGUARD"
+    return "ERATGUARD-PRO-" + hashlib.sha1(raw.encode()).hexdigest()[:6].upper()
 
 def _activate_premium_hardcore(username=None, plan="starter_monthly"):
     username = username or _current_username_hardcore()
@@ -485,7 +485,7 @@ def _get_license_state_hardcore(username=None):
             return {
                 "premium": True,
                 "status": "premium",
-                "code": session.get("license_code", "SPAMSHIELD-PRO"),
+                "code": session.get("license_code", "ERATGUARD-PRO"),
                 "plan": session.get("plan", "pro"),
                 "days_left": 365,
             }
@@ -507,7 +507,7 @@ def _get_license_state_hardcore(username=None):
             session["premium"] = True
             session["is_premium"] = True
             session["license_status"] = "premium"
-            session["license_code"] = user_obj.get("license_code", "SPAMSHIELD-PRO")
+            session["license_code"] = user_obj.get("license_code", "ERATGUARD-PRO")
             session["plan"] = user_obj.get("plan", "pro")
         except Exception:
             pass
@@ -515,7 +515,7 @@ def _get_license_state_hardcore(username=None):
         return {
             "premium": True,
             "status": "premium",
-            "code": user_obj.get("license_code", "SPAMSHIELD-PRO"),
+            "code": user_obj.get("license_code", "ERATGUARD-PRO"),
             "plan": user_obj.get("plan", "pro"),
             "days_left": 365,
         }
@@ -774,7 +774,7 @@ def load_settings():
         return settings
 
     settings = {
-        "app_name": "SpamShield Premium",
+        "app_name": "EratGuard Premium",
         "trial_days": 7,
         "license_mode": "trial_pro"
     }
@@ -1619,7 +1619,7 @@ def admin_licenses():
         target_email = str(target_user.get("email", "")).strip()
 
         if target_email:
-            subject = f"SpamShield {plan.upper()} Lisans Bilgilerin"
+            subject = f"EratGuard {plan.upper()} Lisans Bilgilerin"
             body = (
                 f"Merhaba {username},"
                 f"Lisansın oluşturuldu."
@@ -1627,7 +1627,7 @@ def admin_licenses():
                 f"Paket: {plan}"
                 f"Başlangıç: {created_at}"
                 f"Bitiş: {expires_at}"
-                f"SpamShield'i kullandığın için teşekkür ederiz."
+                f"EratGuard'i kullandığın için teşekkür ederiz."
             )
             ok, msg = send_mail(
                 to_email=target_email,
@@ -2164,7 +2164,7 @@ def reset_code():
 # ⚙️ ADMIN SETTINGS
 # =========================
 import json
-SETTINGS_FILE = "spamshield_runtime_settings.json"
+SETTINGS_FILE = "eratguard_runtime_settings.json"
 
 def load_runtime_settings():
     if not os.path.exists(SETTINGS_FILE):
@@ -2297,7 +2297,7 @@ def admin_spam_logs():
 # =========================
 # ⚙️ ADMIN SETTINGS
 # =========================
-RUNTIME_SETTINGS_FILE = "spamshield_runtime_settings.json"
+RUNTIME_SETTINGS_FILE = "eratguard_runtime_settings.json"
 
 def load_runtime_settings():
     defaults = {
@@ -2541,7 +2541,7 @@ def get_device_fingerprint():
 
 def sign_license_payload(username, license_key, expiry, device_id):
     import hashlib
-    secret = "SPAMSHIELD_PRO_CORE_V1"
+    secret = "ERATGUARD_PRO_CORE_V1"
     raw = f"{username}|{license_key}|{expiry}|{device_id}|{secret}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
@@ -3275,7 +3275,7 @@ def radial_alias_licence():
 
 
 
-# ===== SPAMSHIELD USER FINAL ROUTES =====
+# ===== ERATGUARD USER FINAL ROUTES =====
 def ss_user_page(title, icon, text):
     return f"""
     <!doctype html>
@@ -3283,7 +3283,7 @@ def ss_user_page(title, icon, text):
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>{title} - SpamShield</title>
+      <title>{title} - EratGuard</title>
       <style>
         body {{
           margin:0;
@@ -3420,7 +3420,7 @@ def ss_u_checkout():
         username = session.get("username") or session.get("user") or "admin"
         user = users.get(username) or users.get("admin") or {}
 
-        key = "SPAMSHIELD-PRO-" + secrets.token_hex(3).upper()
+        key = "ERATGUARD-PRO-" + secrets.token_hex(3).upper()
         expiry = (datetime.now() + timedelta(days=plan["days"])).strftime("%Y-%m-%d")
 
         licenses[key] = {
@@ -3455,9 +3455,9 @@ def ss_u_payment_success_legacy_disabled():
 
 
 
-# ===== SPAMSHIELD U PREFIX CATCH FIX =====
+# ===== ERATGUARD U PREFIX CATCH FIX =====
 
-# ===== SPAMSHIELD LEGAL CONTRACT ROUTES LIVE START =====
+# ===== ERATGUARD LEGAL CONTRACT ROUTES LIVE START =====
 @app.route("/u/terms", endpoint="ss_terms_page_live")
 def ss_terms_page_live():
     return render_template("terms.html")
@@ -3469,7 +3469,7 @@ def ss_privacy_page_live():
 @app.route("/u/refund", endpoint="ss_refund_page_live")
 def ss_refund_page_live():
     return render_template("refund.html")
-# ===== SPAMSHIELD LEGAL CONTRACT ROUTES LIVE END =====
+# ===== ERATGUARD LEGAL CONTRACT ROUTES LIVE END =====
 
 @app.route("/u/<path:slug>")
 def ss_u_prefix_catch(slug):
@@ -3580,8 +3580,8 @@ def _ss_user():
 
 def _ss_make_code(username):
     import hashlib
-    raw = f"{username}-{_ss_dt.now().isoformat()}-SPAMSHIELD-PRO"
-    return "SPAMSHIELD-PRO-" + hashlib.sha1(raw.encode()).hexdigest()[:6].upper()
+    raw = f"{username}-{_ss_dt.now().isoformat()}-ERATGUARD-PRO"
+    return "ERATGUARD-PRO-" + hashlib.sha1(raw.encode()).hexdigest()[:6].upper()
 
 def _ss_activate(username=None, plan="pro"):
     username = username or _ss_user()
@@ -3639,7 +3639,7 @@ def _ss_state():
 
     try:
         if session.get("premium") or session.get("is_premium") or session.get("license_status") == "premium":
-            return True, session.get("license_code") or "SPAMSHIELD-PRO"
+            return True, session.get("license_code") or "ERATGUARD-PRO"
     except Exception:
         pass
 
@@ -3655,11 +3655,11 @@ def _ss_state():
             session["premium"] = True
             session["is_premium"] = True
             session["license_status"] = "premium"
-            session["license_code"] = u.get("license_code", "SPAMSHIELD-PRO")
+            session["license_code"] = u.get("license_code", "ERATGUARD-PRO")
             session["plan"] = u.get("plan", "pro")
         except Exception:
             pass
-        return True, u.get("license_code", "SPAMSHIELD-PRO")
+        return True, u.get("license_code", "ERATGUARD-PRO")
 
     return False, None
 
@@ -3725,7 +3725,7 @@ def activate_pro_now_direct():
     )
 
     now = datetime.now()
-    code = "SPAMSHIELD-PRO-" + hashlib.sha1(
+    code = "ERATGUARD-PRO-" + hashlib.sha1(
         f"{username}-{now.isoformat()}".encode()
     ).hexdigest()[:6].upper()
 
@@ -3797,7 +3797,7 @@ def activate_pro_now_direct():
 def shield_pro_redeem_page():
     if request.method == "POST":
         code = (request.form.get("license_code") or "").strip().upper()
-        if code.startswith("SPAMSHIELD-PRO"):
+        if code.startswith("ERATGUARD-PRO"):
             try:
                 session["premium"] = True
                 session["is_premium"] = True
@@ -3881,12 +3881,12 @@ def ss_legal_notice():
     return render_template("legal_notice.html")
 
 
-# ===== SPAMSHIELD IYZICO PAYMENT ROUTE START =====
+# ===== ERATGUARD IYZICO PAYMENT ROUTE START =====
 @app.route("/u/pay")
 def ss_iyzico_pay():
     plan = request.args.get("plan", "starter_monthly").strip()
     link = PAYMENT_LINKS.get(plan, "")
-    label = PLAN_LABELS.get(plan, "SpamShield PRO")
+    label = PLAN_LABELS.get(plan, "EratGuard PRO")
     price = PLAN_PRICES.get(plan, "")
 
     payment_ready = bool(link) and not link.startswith("PASTE_")
@@ -3904,11 +3904,11 @@ def ss_iyzico_pay():
         )
 
     return redirect(link)
-# ===== SPAMSHIELD IYZICO PAYMENT ROUTE END =====
+# ===== ERATGUARD IYZICO PAYMENT ROUTE END =====
 
 
 
-# ===== SPAMSHIELD MANUAL LICENSE ACTIVATION START =====
+# ===== ERATGUARD MANUAL LICENSE ACTIVATION START =====
 def ss_payment_request_store_path():
     from pathlib import Path
     data_dir = Path("data")
@@ -3948,7 +3948,7 @@ def ss_current_username():
 def ss_manual_payment_success():
     plan = request.values.get("plan", "starter_monthly").strip()
 
-    label = PLAN_LABELS.get(plan, "SpamShield PRO")
+    label = PLAN_LABELS.get(plan, "EratGuard PRO")
     price = PLAN_PRICES.get(plan, "")
     username = ss_current_username()
 
@@ -3979,16 +3979,16 @@ def ss_manual_payment_success():
         plan_label=label,
         plan_price=price
     )
-# ===== SPAMSHIELD MANUAL LICENSE ACTIVATION END =====
+# ===== ERATGUARD MANUAL LICENSE ACTIVATION END =====
 
 
 
-# ===== SPAMSHIELD PAYMENT REQUEST POST FIX START =====
+# ===== ERATGUARD PAYMENT REQUEST POST FIX START =====
 @app.route("/u/payment-request", methods=["POST"])
 def ss_payment_request_post():
     plan = request.form.get("plan", "starter_monthly").strip()
 
-    label = PLAN_LABELS.get(plan, "SpamShield PRO")
+    label = PLAN_LABELS.get(plan, "EratGuard PRO")
     price = PLAN_PRICES.get(plan, "")
 
     username = "Giriş yapan kullanıcı"
@@ -4041,16 +4041,16 @@ def ss_payment_request_post():
         plan_label=label,
         plan_price=price
     )
-# ===== SPAMSHIELD PAYMENT REQUEST POST FIX END =====
+# ===== ERATGUARD PAYMENT REQUEST POST FIX END =====
 
 
 
-# ===== SPAMSHIELD ACTIVATE LICENSE REQUEST START =====
+# ===== ERATGUARD ACTIVATE LICENSE REQUEST START =====
 @app.route("/u/activate-license-request", methods=["POST"])
 def ss_activate_license_request():
     plan = request.form.get("plan", "starter_monthly").strip()
 
-    label = PLAN_LABELS.get(plan, "SpamShield PRO")
+    label = PLAN_LABELS.get(plan, "EratGuard PRO")
     price = PLAN_PRICES.get(plan, "")
 
     username = "Giriş yapan kullanıcı"
@@ -4105,11 +4105,11 @@ def ss_activate_license_request():
         plan_label=label,
         plan_price=price
     )
-# ===== SPAMSHIELD ACTIVATE LICENSE REQUEST END =====
+# ===== ERATGUARD ACTIVATE LICENSE REQUEST END =====
 
 
 
-# ===== SPAMSHIELD SECURITY LEVEL 2 START =====
+# ===== ERATGUARD SECURITY LEVEL 2 START =====
 _SS_PAYMENT_REQUEST_ATTEMPTS = {}
 
 def _ss_same_origin_post_ok():
@@ -4183,18 +4183,18 @@ def ss_security_level2_gatekeeper():
         if not _ss_rate_limit_bucket("activate_license_request", limit=5, window=600):
             return "Çok fazla aktivasyon talebi. Lütfen birkaç dakika sonra tekrar deneyin.", 429
 
-# ===== SPAMSHIELD SECURITY LEVEL 2 END =====
+# ===== ERATGUARD SECURITY LEVEL 2 END =====
 
 
 
-# ===== SPAMSHIELD SECURITY LEVEL 3 START =====
+# ===== ERATGUARD SECURITY LEVEL 3 START =====
 # Level 3: production lockdown, stronger admin validation, duplicate payment request guard.
 
 # Büyük kötü niyetli POST/upload denemelerini sınırlıyoruz.
 # Normal login/form/ödeme talebi için fazlasıyla yeterli.
 app.config["MAX_CONTENT_LENGTH"] = 1 * 1024 * 1024
 
-_SS_PRODUCTION_LOCKDOWN = os.environ.get("SPAMSHIELD_PRODUCTION_LOCKDOWN", "1") == "1"
+_SS_PRODUCTION_LOCKDOWN = os.environ.get("ERATGUARD_PRODUCTION_LOCKDOWN", "1") == "1"
 
 
 def _ss_load_users_for_security():
@@ -4275,7 +4275,7 @@ def ss_security_level3_gatekeeper():
 
     # Üretim modunda eski demo/test/arka-kapı gibi kullanılabilecek yolları tamamen kapat.
     # Gerekirse sadece lokal geliştirme için:
-    # export SPAMSHIELD_PRODUCTION_LOCKDOWN=0
+    # export ERATGUARD_PRODUCTION_LOCKDOWN=0
     hard_block_paths = (
         "/u/activate-pro-now",
         "/orders",
@@ -4343,11 +4343,11 @@ def ss_security_level3_headers(response):
     response.headers.pop("Server", None)
 
     return response
-# ===== SPAMSHIELD SECURITY LEVEL 3 END =====
+# ===== ERATGUARD SECURITY LEVEL 3 END =====
 
 
 
-# ===== SPAMSHIELD SECURITY LEVEL 4 START =====
+# ===== ERATGUARD SECURITY LEVEL 4 START =====
 # Level 4: API lockdown + backup/source probing protection.
 
 def _ss_is_local_request():
@@ -4437,11 +4437,11 @@ def ss_security_level4_headers(response):
         response.headers["Expires"] = "0"
 
     return response
-# ===== SPAMSHIELD SECURITY LEVEL 4 END =====
+# ===== ERATGUARD SECURITY LEVEL 4 END =====
 
 
 
-# ===== SPAMSHIELD LEGAL CONTRACT ROUTES START =====
+# ===== ERATGUARD LEGAL CONTRACT ROUTES START =====
 @app.route("/u/terms-legacy-disabled")
 def ss_terms_page_legacy_disabled():
     return render_template("terms.html")
@@ -4453,7 +4453,7 @@ def ss_privacy_page_legacy_disabled():
 @app.route("/u/refund-legacy-disabled")
 def ss_refund_page_legacy_disabled():
     return render_template("refund.html")
-# ===== SPAMSHIELD LEGAL CONTRACT ROUTES END =====
+# ===== ERATGUARD LEGAL CONTRACT ROUTES END =====
 
 
 # -----------------------
@@ -4487,7 +4487,7 @@ def approve_payment(username, license_key):
 
 
 # =========================
-# 📊 SPAMSHIELD ADMIN OVERVIEW + LOGS
+# 📊 ERATGUARD ADMIN OVERVIEW + LOGS
 # =========================
 # =========================
 # 📊 SPAM LOGS + ADMIN ROUTES
@@ -4566,7 +4566,7 @@ def simple_page_preview_fallback():
     )
 
 
-# === SPAMSHIELD LICENSE CORE V1 ===
+# === ERATGUARD LICENSE CORE V1 ===
 PRICE_MONTHLY_TRY = 199
 PRICE_YEARLY_EUR = 100
 PRICE_YEARLY_TRY = 3999
@@ -4829,25 +4829,25 @@ def user_test_payment_complete_hardcore():
     return redirect("/u/payment-success")
 
 
-# ===== SPAMSHIELD USER RADIAL PREVIEW DEV ONLY START =====
+# ===== ERATGUARD USER RADIAL PREVIEW DEV ONLY START =====
 @app.route("/dev/radial-user-preview")
 def ss_dev_radial_user_preview():
     if os.environ.get("FLASK_DEBUG", "0") != "1":
         return "Not Found", 404
     return render_template("radial_menu.html")
-# ===== SPAMSHIELD USER RADIAL PREVIEW DEV ONLY END =====
+# ===== ERATGUARD USER RADIAL PREVIEW DEV ONLY END =====
 
 
-# ===== SPAMSHIELD ADMIN RADIAL PREVIEW DEV ONLY START =====
+# ===== ERATGUARD ADMIN RADIAL PREVIEW DEV ONLY START =====
 @app.route("/dev/admin-radial-preview")
 def ss_dev_admin_radial_preview():
     if os.environ.get("FLASK_DEBUG", "0") != "1":
         return "Not Found", 404
     return render_template("admin_dashboard.html")
-# ===== SPAMSHIELD ADMIN RADIAL PREVIEW DEV ONLY END =====
+# ===== ERATGUARD ADMIN RADIAL PREVIEW DEV ONLY END =====
 
 
-# ===== SPAMSHIELD HIDDEN ADMIN LOGIN START =====
+# ===== ERATGUARD HIDDEN ADMIN LOGIN START =====
 @app.route("/ss-admin-access", methods=["GET", "POST"])
 def ss_hidden_admin_access():
     try:
@@ -4882,10 +4882,10 @@ def ss_hidden_admin_access():
         return render_template("admin_login.html", error="Yetkisiz admin erişimi reddedildi.")
 
     return render_template("admin_login.html", error="")
-# ===== SPAMSHIELD HIDDEN ADMIN LOGIN END =====
+# ===== ERATGUARD HIDDEN ADMIN LOGIN END =====
 
 
-# ===== SPAMSHIELD ADMIN SYSTEM PAGE START =====
+# ===== ERATGUARD ADMIN SYSTEM PAGE START =====
 @app.route("/admin/system")
 def ss_admin_system_page():
     if not _ss_is_admin_session():
@@ -4910,11 +4910,11 @@ def ss_admin_system_page():
         debug_state=debug_state,
         python_version=sys.version.split()[0],
     )
-# ===== SPAMSHIELD ADMIN SYSTEM PAGE END =====
+# ===== ERATGUARD ADMIN SYSTEM PAGE END =====
 
 
 
-# ===== SPAMSHIELD MOBILE APP START ROUTES START =====
+# ===== ERATGUARD MOBILE APP START ROUTES START =====
 @app.route("/app-start")
 def ss_mobile_user_app_start():
     """
@@ -4943,11 +4943,11 @@ def ss_mobile_admin_app_start():
     except Exception:
         pass
     return redirect("/ss-admin-access")
-# ===== SPAMSHIELD MOBILE APP START ROUTES END =====
+# ===== ERATGUARD MOBILE APP START ROUTES END =====
 
 
 
-# ===== SPAMSHIELD SAFE ADMIN MOBILE APP START ROUTE START =====
+# ===== ERATGUARD SAFE ADMIN MOBILE APP START ROUTE START =====
 @app.route("/ss-admin-app-start")
 def ss_safe_mobile_admin_app_start():
     """
@@ -4962,7 +4962,7 @@ def ss_safe_mobile_admin_app_start():
     except Exception:
         pass
     return redirect("/ss-admin-access")
-# ===== SPAMSHIELD SAFE ADMIN MOBILE APP START ROUTE END =====
+# ===== ERATGUARD SAFE ADMIN MOBILE APP START ROUTE END =====
 
 if __name__ == "__main__":
     load_users()
