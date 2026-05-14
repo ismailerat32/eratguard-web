@@ -150,3 +150,17 @@ ERATGUARD_SECRET_AUDIT_*.txt
 
 # EratGuard local secret key
 data/.eratguard_secret_key
+data/reset_tokens.json
+
+# EratGuard PRO runtime/user data - do not commit
+data/archive_root_json/
+data/generated_licenses.json
+data/payment_requests.json
+data/upgrade_requests.json
+data/user_analysis_history.json
+data/user_community_feedback.json
+data/user_quarantine.json
+data/user_titanium_events.json
+data/whitelist.json
+data/feedback.json
+data/payment_requests.json
