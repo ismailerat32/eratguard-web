@@ -2187,7 +2187,7 @@ def ss_live_admin_access():
 @app.route("/app-start")
 def user_app_start():
     if session.get("logged_in"):
-        return redirect("/u/home")
+        return redirect("/radial")
     return render_template("splash_user_app.html")
 
 @app.route("/ss-admin-app-start")
@@ -2926,8 +2926,8 @@ def _ss_user_home_final():
     <div class="brand">
       <div class="logo">🛡️</div>
       <div>
-        <h1>Spam<span>Shield</span></h1>
-        <div class="sub">Pro güvenlik merkezi</div>
+        <h1>Erat<span>Guard</span></h1>
+        <div class="sub">AI Spam Koruma Sistemi</div>
       </div>
     </div>
     <div class="badge">👑 PRO AKTİF</div>
@@ -2997,7 +2997,7 @@ def _ss_user_home_final():
 try:
     for _rule in list(app.url_map.iter_rules()):
         if str(_rule) == "/radial":
-            app.view_functions[_rule.endpoint] = _ss_user_home_final
+            pass  # serbest birakild
 except Exception:
     pass
 
@@ -3433,7 +3433,7 @@ def _ss_user_protection_compact_final():
     <div class="brand">
       <div class="logo">🛡️</div>
       <div>
-        <h1>Spam<span>Shield</span></h1>
+        <h1>Erat<span>Guard</span></h1>
         <div class="sub">PRO güvenlik merkezi</div>
       </div>
     </div>
@@ -3769,7 +3769,7 @@ def _ss_user_analysis_compact_final():
     <div class="brand">
       <div class="logo">🛡️</div>
       <div>
-        <h1>Spam<span>Shield</span></h1>
+        <h1>Erat<span>Guard</span></h1>
         <div class="sub">PRO güvenlik merkezi</div>
       </div>
     </div>
@@ -4078,7 +4078,7 @@ def _ss_user_blocked_compact_final():
     <div class="brand">
       <div class="logo">🛡️</div>
       <div>
-        <h1>Spam<span>Shield</span></h1>
+        <h1>Erat<span>Guard</span></h1>
         <div class="sub">PRO güvenlik merkezi</div>
       </div>
     </div>
@@ -5329,7 +5329,7 @@ def _ss_user_reports_titanium_summary_page_final():
     <div class="brand">
       <div class="logo">🛡️</div>
       <div>
-        <h1>Spam<span>Shield</span></h1>
+        <h1>Erat<span>Guard</span></h1>
         <div class="sub">Titanium rapor merkezi</div>
       </div>
     </div>
@@ -5638,7 +5638,7 @@ def _ss_user_notifications_titanium_events_page_final():
     <div class="brand">
       <div class="logo">🛡️</div>
       <div>
-        <h1>Spam<span>Shield</span></h1>
+        <h1>Erat<span>Guard</span></h1>
         <div class="sub">Titanium bildirim merkezi</div>
       </div>
     </div>
@@ -6002,7 +6002,7 @@ def _ss_user_settings_titanium_preferences_page_final():
     <div class="brand">
       <div class="logo">🛡️</div>
       <div>
-        <h1>Spam<span>Shield</span></h1>
+        <h1>Erat<span>Guard</span></h1>
         <div class="sub">Titanium ayar merkezi</div>
       </div>
     </div>
@@ -6316,7 +6316,7 @@ def _ss_user_license_titanium_center_page_final():
     <div class="brand">
       <div class="logo">🛡️</div>
       <div>
-        <h1>Spam<span>Shield</span></h1>
+        <h1>Erat<span>Guard</span></h1>
         <div class="sub">Titanium lisans merkezi</div>
       </div>
     </div>
@@ -6724,7 +6724,7 @@ def _ss_user_community_titanium_feedback_page_final():
     <div class="brand">
       <div class="logo">🛡️</div>
       <div>
-        <h1>Spam<span>Shield</span></h1>
+        <h1>Erat<span>Guard</span></h1>
         <div class="sub">Titanium topluluk merkezi</div>
       </div>
     </div>
