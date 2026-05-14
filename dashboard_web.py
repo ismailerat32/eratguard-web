@@ -2148,7 +2148,7 @@ def ss_live_admin_access():
         users = _read_users()
         user = users.get(username) or users.get(username.lower()) or {}
 
-        env_admin_pass = os.environ.get("ERATGUARD_ADMIN_PASSWORD", "") or os.environ.get("SPAMSHIELD_ADMIN_PASSWORD", "")
+        env_admin_pass = os.environ.get("ERATGUARD_ADMIN_PASSWORD", "") or os.environ.get("SPAMSHIELD_ADMIN_PASSWORD", "") or os.environ.get("ADMIN_PASSWORD", "")
 
         is_admin_name = username.lower() == "admin" or str(user.get("role", "")).lower() == "admin" or user.get("is_admin") is True
         fallback_admin_sha256 = "11b2d8d98c0a8ed79080d388420deb3b3168e5631667cad074d09ee0e26c86fb"
@@ -2651,7 +2651,7 @@ def _ss_admin_access_cookie_override():
         users = _read_users()
         user = users.get(username) or users.get(username.lower()) or {}
 
-        env_admin_pass = os.environ.get("ERATGUARD_ADMIN_PASSWORD", "") or os.environ.get("SPAMSHIELD_ADMIN_PASSWORD", "")
+        env_admin_pass = os.environ.get("ERATGUARD_ADMIN_PASSWORD", "") or os.environ.get("SPAMSHIELD_ADMIN_PASSWORD", "") or os.environ.get("ADMIN_PASSWORD", "")
         fallback_admin_sha256 = "11b2d8d98c0a8ed79080d388420deb3b3168e5631667cad074d09ee0e26c86fb"
 
         is_admin_name = (
