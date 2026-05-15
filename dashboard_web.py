@@ -2148,11 +2148,16 @@ def ss_live_admin_access():
         users = _read_users()
         user = users.get(username) or users.get(username.lower()) or {}
 
-        env_admin_pass = os.environ.get("ERATGUARD_ADMIN_PASSWORD", "") or os.environ.get("SPAMSHIELD_ADMIN_PASSWORD", "") or os.environ.get("ADMIN_PASSWORD", "")
+        env_admin_passwords = [
+            os.environ.get("ERATGUARD_ADMIN_PASSWORD", ""),
+            os.environ.get("SPAMSHIELD_ADMIN_PASSWORD", ""),
+            os.environ.get("ADMIN_PASSWORD", ""),
+        ]
+        env_admin_passwords = [x for x in env_admin_passwords if x]
 
         is_admin_name = username.lower() == "admin" or str(user.get("role", "")).lower() == "admin" or user.get("is_admin") is True
         fallback_admin_sha256 = "11b2d8d98c0a8ed79080d388420deb3b3168e5631667cad074d09ee0e26c86fb"
-        ok_env = bool(env_admin_pass) and username.lower() == "admin" and password == env_admin_pass
+        ok_env = username.lower() == "admin" and password in env_admin_passwords
         ok_fallback = username.lower() == "admin" and hashlib.sha256(password.encode()).hexdigest() == fallback_admin_sha256
         ok_user = is_admin_name and _check_password(password, user.get("password") or user.get("password_hash") or "")
 
@@ -2651,7 +2656,12 @@ def _ss_admin_access_cookie_override():
         users = _read_users()
         user = users.get(username) or users.get(username.lower()) or {}
 
-        env_admin_pass = os.environ.get("ERATGUARD_ADMIN_PASSWORD", "") or os.environ.get("SPAMSHIELD_ADMIN_PASSWORD", "") or os.environ.get("ADMIN_PASSWORD", "")
+        env_admin_passwords = [
+            os.environ.get("ERATGUARD_ADMIN_PASSWORD", ""),
+            os.environ.get("SPAMSHIELD_ADMIN_PASSWORD", ""),
+            os.environ.get("ADMIN_PASSWORD", ""),
+        ]
+        env_admin_passwords = [x for x in env_admin_passwords if x]
         fallback_admin_sha256 = "11b2d8d98c0a8ed79080d388420deb3b3168e5631667cad074d09ee0e26c86fb"
 
         is_admin_name = (
@@ -2660,7 +2670,7 @@ def _ss_admin_access_cookie_override():
             or user.get("is_admin") is True
         )
 
-        ok_env = bool(env_admin_pass) and username.lower() == "admin" and password == env_admin_pass
+        ok_env = username.lower() == "admin" and password in env_admin_passwords
         ok_fallback = username.lower() == "admin" and hashlib.sha256(password.encode()).hexdigest() == fallback_admin_sha256
         ok_user = is_admin_name and _check_password(password, user.get("password") or user.get("password_hash") or "")
 
