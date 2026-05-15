@@ -7204,3 +7204,10 @@ def eratguard_beta_security_headers(resp):
 
     return resp
 # ===== ERATGUARD BETA SECURITY HARDENING END =====
+
+# ===== ERATGUARD SESSION COOKIE HARDENING START =====
+# Ensure Flask session cookies are protected in production.
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+# ===== ERATGUARD SESSION COOKIE HARDENING END =====
