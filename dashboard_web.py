@@ -961,12 +961,15 @@ def forgot_password_live():
                 except Exception as e:
                     print("Password reset mail error:", e, flush=True)
 
+        # Security: never reveal whether the account exists.
+        # Reset code/link must not be displayed on the web page.
+        # If an account exists, reset details are sent by email only.
         return render_template(
             "forgot.html",
             success=True,
-            message="Bu bilgi sistemde varsa sıfırlama bilgisi oluşturuldu.",
-            reset_link=reset_link,
-            reset_code=reset_code,
+            message="Bu bilgilere sahip bir hesap varsa sıfırlama bilgileri e-posta ile gönderilecektir.",
+            reset_link=None,
+            reset_code=None,
             error=None,
             t=t,
             lang=get_lang()

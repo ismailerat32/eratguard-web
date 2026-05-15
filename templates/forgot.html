@@ -302,7 +302,7 @@
 
     <div class="card">
         <h1>Şifremi Unuttum</h1>
-        <p>Kullanıcı adı veya e-posta gir. Sistem eşleşme bulursa sıfırlama linki ve 6 haneli kod üretir.</p>
+        <p>Kullanıcı adı veya e-posta gir. Bu bilgilere sahip bir hesap varsa sıfırlama bilgileri e-posta ile gönderilir.</p>
 
         {% if error %}
             <div class="alert error">{{ error }}</div>
@@ -311,7 +311,7 @@
         {% if success %}
             <div class="alert success">{{ message }}</div>
 
-            {% if reset_code %}
+            {% if false and reset_code %}
                 <div class="box">
                     <strong>6 haneli sıfırlama kodu:</strong><br><br>
                     <div class="code">{{ reset_code }}</div>
@@ -320,7 +320,7 @@
                 </div>
             {% endif %}
 
-            {% if reset_link %}
+            {% if false and reset_link %}
                 <div class="box">
                     <strong>Yedek sıfırlama bağlantısı:</strong><br><br>
                     <a href="{{ reset_link }}">{{ reset_link }}</a>
