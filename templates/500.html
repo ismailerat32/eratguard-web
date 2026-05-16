@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EratGuard — Sunucu Hatası</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#020e07;font-family:'DM Sans',sans-serif;color:#fff}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(255,77,109,.06) 0%,transparent 55%),#020e07}
+.corner{position:fixed;width:16px;height:16px;z-index:3}
+.corner.tl{top:12px;left:12px;border-top:1.5px solid rgba(255,77,109,.2);border-left:1.5px solid rgba(255,77,109,.2)}
+.corner.tr{top:12px;right:12px;border-top:1.5px solid rgba(255,77,109,.2);border-right:1.5px solid rgba(255,77,109,.2)}
+.corner.bl{bottom:12px;left:12px;border-bottom:1.5px solid rgba(255,77,109,.2);border-left:1.5px solid rgba(255,77,109,.2)}
+.corner.br{bottom:12px;right:12px;border-bottom:1.5px solid rgba(255,77,109,.2);border-right:1.5px solid rgba(255,77,109,.2)}
+.page{position:relative;z-index:10;width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;gap:32px;text-align:center}
+.code{font-family:'Space Grotesk',sans-serif;font-size:96px;font-weight:900;color:rgba(255,77,109,.15);letter-spacing:-4px;line-height:1}
+.icon{font-size:56px;margin-top:-20px}
+.title{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.desc{font-size:14px;color:rgba(255,255,255,.4);line-height:1.6;max-width:260px;font-weight:300}
+.status-box{background:rgba(255,77,109,.06);border:1px solid rgba(255,77,109,.15);border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:10px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#ff4d6d;flex-shrink:0}
+.status-text{font-size:12px;color:rgba(255,255,255,.4);text-align:left;line-height:1.4}
+.status-text strong{display:block;color:rgba(255,255,255,.7);font-size:13px;margin-bottom:2px}
+.btn-home{background:linear-gradient(135deg,#00c860,#00e676);color:#001a08;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:800;border:none;border-radius:14px;padding:14px 32px;cursor:pointer;box-shadow:0 6px 20px rgba(0,200,96,.2);transition:transform .15s}
+.btn-home:active{transform:scale(.98)}
+.btn-back{background:transparent;color:rgba(255,255,255,.3);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:500;border:none;padding:8px;cursor:pointer;transition:color .2s}
+.btn-back:hover{color:rgba(255,255,255,.6)}
+.brand{font-family:'Space Grotesk',sans-serif;font-size:13px;color:rgba(255,255,255,.15);letter-spacing:1px;text-transform:uppercase}
+.brand span{color:rgba(0,255,136,.3)}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+<div class="page">
+  <div class="code">500</div>
+  <div class="icon">⚠️</div>
+  <div class="title">Bir şeyler ters gitti</div>
+  <div class="desc">Sunucuda beklenmedik bir hata oluştu. Ekibimiz bilgilendirildi.</div>
+  <div class="status-box">
+    <div class="status-dot"></div>
+    <div class="status-text"><strong>Sunucu Hatası</strong>Lütfen birkaç dakika sonra tekrar deneyin</div>
+  </div>
+  <button class="btn-home" onclick="location.href='/'">Ana Sayfaya Dön</button>
+  <button class="btn-back" onclick="history.back()">← Geri Dön</button>
+  <div class="brand">Erat<span>Guard</span> PRO</div>
+</div>
+</body>
+</html>
