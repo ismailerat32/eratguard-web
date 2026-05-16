@@ -558,6 +558,7 @@ def login():
             error = "Kullanıcı lisans süresi dolmuş." if get_lang() == "tr" else "User license has expired."
         elif check_password_hash(user["password"], password):
             session["logged_in"] = True
+            session["onboarding_done"] = True
             session["username"] = username
             session["role"] = user.get("role", "user")
             return redirect(url_for("radial"))
@@ -2192,10 +2193,17 @@ def ss_live_admin_access():
         """
 
 
+
+@app.route("/onboarding")
+def onboarding():
+    return render_template("onboarding.html")
+
 @app.route("/app-start")
 def user_app_start():
     if session.get("logged_in"):
         return redirect("/radial")
+    if not session.get("onboarding_done"):
+        return render_template("onboarding.html")
     return render_template("splash_user_app.html")
 
 @app.route("/ss-admin-app-start")

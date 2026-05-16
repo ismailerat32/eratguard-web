@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EratGuard — Hoş Geldin</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#020e07;font-family:'DM Sans',sans-serif;color:#fff}
+.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,255,100,.1) 0%,transparent 55%),#020e07}
+.corner{position:fixed;width:16px;height:16px;z-index:3}
+.corner.tl{top:12px;left:12px;border-top:1.5px solid rgba(0,255,136,.25);border-left:1.5px solid rgba(0,255,136,.25)}
+.corner.tr{top:12px;right:12px;border-top:1.5px solid rgba(0,255,136,.25);border-right:1.5px solid rgba(0,255,136,.25)}
+.corner.bl{bottom:12px;left:12px;border-bottom:1.5px solid rgba(0,255,136,.25);border-left:1.5px solid rgba(0,255,136,.25)}
+.corner.br{bottom:12px;right:12px;border-bottom:1.5px solid rgba(0,255,136,.25);border-right:1.5px solid rgba(0,255,136,.25)}
+.slides{position:fixed;inset:0;z-index:10}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:56px 28px 40px;opacity:0;transform:translateX(40px);transition:all .4s cubic-bezier(.16,1,.3,1);pointer-events:none}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all}
+.slide.exit{opacity:0;transform:translateX(-40px)}
+.illustration{position:relative;width:160px;height:160px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ill-ring{position:absolute;border-radius:50%;border:1px solid rgba(0,255,136,.15)}
+.r1{width:160px;height:160px}
+.r2{width:205px;height:205px;border-color:rgba(0,255,136,.07)}
+.ill-icon{width:108px;height:108px;border-radius:30px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(0,255,136,.2);background:linear-gradient(145deg,#001a0d,#003018);box-shadow:0 0 0 8px rgba(0,255,136,.05),0 0 35px rgba(0,255,136,.15);position:relative;z-index:2;font-size:52px;line-height:1}
+.slide-text{text-align:center;flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:16px 0}
+.slide-tag{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(0,255,136,.6);font-weight:600}
+.slide-title{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1.15;color:#fff}
+.slide-title span{color:#00ff88}
+.slide-desc{font-size:14px;color:rgba(255,255,255,.45);line-height:1.6;font-weight:300;max-width:280px;margin:0 auto}
+.features{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:6px}
+.feat-item{display:flex;align-items:center;gap:12px;background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.1);border-radius:14px;padding:12px 14px}
+.feat-icon{font-size:20px;flex-shrink:0;line-height:1}
+.feat-text{font-size:12px;color:rgba(255,255,255,.55);line-height:1.3}
+.feat-text strong{display:block;color:#fff;font-size:13px;font-weight:600;margin-bottom:2px}
+.bottom{width:100%;display:flex;flex-direction:column;gap:12px}
+.dots{display:flex;justify-content:center;gap:6px;margin-bottom:2px}
+.dot{width:6px;height:6px;border-radius:100px;background:rgba(255,255,255,.15);transition:all .3s}
+.dot.active{width:22px;background:#00ff88}
+.btn-next{width:100%;background:linear-gradient(135deg,#00c860,#00e676);color:#001a08;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;border:none;border-radius:16px;padding:16px;cursor:pointer;box-shadow:0 6px 20px rgba(0,200,96,.2);transition:transform .15s;letter-spacing:.2px}
+.btn-next:active{transform:scale(.98)}
+.btn-skip{text-align:center;font-size:13px;color:rgba(255,255,255,.22);cursor:pointer;padding:4px;transition:color .2s}
+.btn-skip:hover{color:rgba(255,255,255,.5)}
+.btn-register{width:100%;background:transparent;color:rgba(255,255,255,.55);font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;border:1.5px solid rgba(255,255,255,.1);border-radius:16px;padding:15px;cursor:pointer;transition:all .2s}
+.btn-register:active{transform:scale(.98);border-color:rgba(0,255,136,.3);color:#00ff88}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+<div class="slides">
+  <div class="slide active" id="slide-0">
+    <div class="illustration">
+      <div class="ill-ring r1"></div>
+      <div class="ill-ring r2"></div>
+      <div class="ill-icon">🛡️</div>
+    </div>
+    <div class="slide-text">
+      <div class="slide-tag">EratGuard PRO</div>
+      <div class="slide-title">Telefonunu<br><span>güvende tut.</span></div>
+      <div class="slide-desc">Spam mesajlara, phishing saldırılarına ve dolandırıcılara karşı AI destekli koruma.</div>
+    </div>
+    <div class="bottom">
+      <div class="dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <button class="btn-next" onclick="nextSlide()">Başlayalım →</button>
+      <div class="btn-skip" onclick="skipOnboarding()">Atla</div>
+    </div>
+  </div>
+  <div class="slide" id="slide-1">
+    <div class="illustration">
+      <div class="ill-ring r1"></div>
+      <div class="ill-ring r2"></div>
+      <div class="ill-icon">🤖</div>
+    </div>
+    <div class="slide-text">
+      <div class="slide-tag">Yapay Zeka</div>
+      <div class="slide-title">Her mesajı<br><span>analiz eder.</span></div>
+      <div class="slide-desc">AI motorumuz gelen her SMS'i anlık olarak tarar ve tehdit skorunu hesaplar.</div>
+      <div class="features">
+        <div class="feat-item"><div class="feat-icon">⚡</div><div class="feat-text"><strong>Anlık Tarama</strong>Mesaj gelir gelmez analiz başlar</div></div>
+        <div class="feat-item"><div class="feat-icon">🎯</div><div class="feat-text"><strong>%99 Doğruluk</strong>Gelişmiş Türkçe spam motoru</div></div>
+      </div>
+    </div>
+    <div class="bottom">
+      <div class="dots"><div class="dot"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+      <button class="btn-next" onclick="nextSlide()">Devam →</button>
+      <div class="btn-skip" onclick="skipOnboarding()">Atla</div>
+    </div>
+  </div>
+  <div class="slide" id="slide-2">
+    <div class="illustration">
+      <div class="ill-ring r1"></div>
+      <div class="ill-ring r2"></div>
+      <div class="ill-icon">⛔</div>
+    </div>
+    <div class="slide-text">
+      <div class="slide-tag">Koruma</div>
+      <div class="slide-title">Tehditleri<br><span>anında engeller.</span></div>
+      <div class="slide-desc">Spam, phishing ve dolandırıcılık girişimleri otomatik olarak engellenir ve raporlanır.</div>
+      <div class="features">
+        <div class="feat-item"><div class="feat-icon">🔒</div><div class="feat-text"><strong>Otomatik Engelleme</strong>Manuel işlem gerektirmez</div></div>
+        <div class="feat-item"><div class="feat-icon">👥</div><div class="feat-text"><strong>Topluluk Koruması</strong>Kullanıcılardan öğrenir</div></div>
+      </div>
+    </div>
+    <div class="bottom">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot active"></div><div class="dot"></div></div>
+      <button class="btn-next" onclick="nextSlide()">Devam →</button>
+      <div class="btn-skip" onclick="skipOnboarding()">Atla</div>
+    </div>
+  </div>
+  <div class="slide" id="slide-3">
+    <div class="illustration">
+      <div class="ill-ring r1"></div>
+      <div class="ill-ring r2"></div>
+      <div class="ill-icon">☑️</div>
+    </div>
+    <div class="slide-text">
+      <div class="slide-tag">Hazırsın!</div>
+      <div class="slide-title">Koruma<br><span>aktif olsun.</span></div>
+      <div class="slide-desc">Hesabına giriş yap veya yeni hesap oluştur. EratGuard hemen çalışmaya başlasın.</div>
+    </div>
+    <div class="bottom">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot active"></div></div>
+      <button class="btn-next" onclick="goToLogin()">Giriş Yap →</button>
+      <button class="btn-register" onclick="goToRegister()">Hesap Oluştur</button>
+    </div>
+  </div>
+</div>
+<script>
+var current=0,total=4;
+function nextSlide(){
+  if(current>=total-1){goToLogin();return}
+  var old=document.getElementById('slide-'+current);
+  old.classList.add('exit');old.classList.remove('active');
+  current++;
+  document.getElementById('slide-'+current).classList.add('active');
+  setTimeout(function(){old.classList.remove('exit')},400);
+}
+function skipOnboarding(){goToLogin()}
+function goToLogin(){window.location.href='/login'}
+function goToRegister(){window.location.href='/register'}
+var sx=0;
+document.addEventListener('touchstart',function(e){sx=e.touches[0].clientX},{passive:true});
+document.addEventListener('touchend',function(e){if(sx-e.changedTouches[0].clientX>50)nextSlide()},{passive:true});
+</script>
+</body>
+</html>
