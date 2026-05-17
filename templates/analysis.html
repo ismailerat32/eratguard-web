@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <title>EratGuard Analiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 body{
   margin:0;
-  font-family:Arial, sans-serif;
-  background:radial-gradient(circle at top,#0f2027,#203a43,#2c5364);
+  font-family:'Space Grotesk',Arial,sans-serif;
+  background:radial-gradient(circle at top,#020e07,#011a0d,#020e07);
   color:#fff;
   min-height:100vh;
 }
@@ -19,16 +20,16 @@ body{
   padding:26px 12px 22px;
   margin:10px 12px 15px;
   border-radius:18px;
-  background:linear-gradient(135deg,rgba(0,255,200,0.18),rgba(0,0,0,0.4));
-  box-shadow:0 0 25px rgba(0,255,200,0.25), inset 0 0 20px rgba(0,255,200,0.05);
+  background:linear-gradient(135deg,rgba(0,255,136,0.18),rgba(0,0,0,0.4));
+  box-shadow:0 0 25px rgba(0,255,136,0.25), inset 0 0 20px rgba(0,255,136,0.05);
   backdrop-filter:blur(6px);
 }
 
 .top-title{
   font-size:26px;
   font-weight:900;
-  color:#00ffd0;
-  text-shadow:0 0 18px rgba(0,255,200,0.9);
+  color:#00ff88;
+  text-shadow:0 0 18px rgba(0,255,136,0.9);
   letter-spacing:1px;
 }
 
@@ -43,10 +44,10 @@ body{
   padding:10px;
   text-align:center;
   font-size:12px;
-  color:#00ffd0;
+  color:#00ff88;
   border-radius:10px;
-  background:rgba(0,255,200,0.08);
-  box-shadow:0 0 10px rgba(0,255,200,0.3);
+  background:rgba(0,255,136,0.08);
+  box-shadow:0 0 10px rgba(0,255,136,0.3);
   letter-spacing:.5px;
 }
 
@@ -61,7 +62,7 @@ body{
   background:rgba(0,0,0,.35);
   border-radius:15px;
   padding:15px;
-  box-shadow:0 8px 25px rgba(0,0,0,.35), 0 0 18px rgba(0,255,200,.08);
+  box-shadow:0 8px 25px rgba(0,0,0,.35), 0 0 18px rgba(0,255,136,.08);
   transition:.25s;
 }
 
@@ -90,8 +91,8 @@ body{
 .bar span{
   display:block;
   height:100%;
-  background:linear-gradient(90deg,#00ffd0,#00ffa2);
-  box-shadow:0 0 10px #00ffd0;
+  background:linear-gradient(90deg,#00ff88,#00ffa2);
+  box-shadow:0 0 10px #00ff88;
   transition:.5s;
 }
 
@@ -100,7 +101,7 @@ body{
   padding:15px;
   background:rgba(0,0,0,.35);
   border-radius:15px;
-  box-shadow:0 0 25px rgba(0,255,200,.08);
+  box-shadow:0 0 25px rgba(0,255,136,.08);
 }
 
 .pie-wrap{
@@ -114,7 +115,7 @@ body{
   background:rgba(0,0,0,.35);
   border-radius:15px;
   padding:15px;
-  box-shadow:0 8px 25px rgba(0,0,0,.35), 0 0 18px rgba(0,255,200,.08);
+  box-shadow:0 8px 25px rgba(0,0,0,.35), 0 0 18px rgba(0,255,136,.08);
 }
 
 .type-list{
@@ -126,7 +127,7 @@ body{
   margin:0 15px 15px;
   padding:15px;
   border-radius:15px;
-  background:linear-gradient(135deg,rgba(0,255,200,.08),rgba(0,0,0,.4));
+  background:linear-gradient(135deg,rgba(0,255,136,.08),rgba(0,0,0,.4));
   box-shadow:0 0 15px rgba(0,255,255,.18);
   backdrop-filter:blur(6px);
 }
@@ -134,7 +135,7 @@ body{
 .bottom-panel h3{
   margin:0 0 12px;
   font-size:15px;
-  color:#00ffd0;
+  color:#00ff88;
 }
 
 .mini-stats{
@@ -152,7 +153,7 @@ body{
 }
 
 .mini-stats b{
-  color:#00ffd0;
+  color:#00ff88;
   display:block;
   margin-top:4px;
 }
@@ -163,12 +164,12 @@ body{
   width:200px;
   text-align:center;
   padding:12px;
-  background:linear-gradient(90deg,#00ffd0,#00ffa2);
+  background:linear-gradient(90deg,#00ff88,#00ffa2);
   color:#000;
   border-radius:20px;
   text-decoration:none;
   font-weight:bold;
-  box-shadow:0 0 12px rgba(0,255,200,.4);
+  box-shadow:0 0 12px rgba(0,255,136,.4);
 }
 
 @media(max-width:600px){
@@ -183,8 +184,8 @@ body{
   animation: livePulse 1.8s infinite alternate;
 }
 @keyframes livePulse{
-  from{ box-shadow:0 0 8px rgba(0,255,200,.22); }
-  to{ box-shadow:0 0 22px rgba(0,255,200,.55); }
+  from{ box-shadow:0 0 8px rgba(0,255,136,.22); }
+  to{ box-shadow:0 0 22px rgba(0,255,136,.55); }
 }
 
 </style>
@@ -307,12 +308,12 @@ async function loadAnalysis(){
           labels:data.trend_labels,
           datasets:[{
             data:data.trend_values,
-            borderColor:"#00ffd0",
-            backgroundColor:"rgba(0,255,200,0.08)",
+            borderColor:"#00ff88",
+            backgroundColor:"rgba(0,255,136,0.08)",
             fill:true,
             tension:.4,
             pointRadius:4,
-            pointBackgroundColor:"#00ffc8",
+            pointBackgroundColor:"#00ff88",
             borderWidth:3
           }]
         },
@@ -341,7 +342,7 @@ async function loadAnalysis(){
           datasets:[{
             data:data.type_values,
             backgroundColor:[
-              "rgba(0,255,200,0.85)",
+              "rgba(0,255,136,0.85)",
               "rgba(255,92,92,0.85)",
               "rgba(179,136,255,0.85)"
             ],
@@ -366,7 +367,7 @@ async function loadAnalysis(){
 
     document.getElementById("typeList").innerHTML =
       data.type_labels.map((label, i) => {
-        return "• " + label + ": <b style='color:#00ffd0'>" + data.type_values[i] + "</b>";
+        return "• " + label + ": <b style='color:#00ff88'>" + data.type_values[i] + "</b>";
       }).join("<br>");
 
   }catch(e){

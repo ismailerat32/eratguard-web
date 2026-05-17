@@ -4,17 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Şifremi Unuttum - EratGuard</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; }
         body {
             margin: 0;
             min-height: 100vh;
-            font-family: Arial, sans-serif;
+            font-family:'Space Grotesk',Arial,sans-serif;
             background:
-                radial-gradient(circle at top left, rgba(35,105,255,.18), transparent 35%),
-                radial-gradient(circle at bottom right, rgba(0,200,140,.16), transparent 35%),
-                linear-gradient(135deg, #0f172a, #111827, #0b1220);
-            color: #e5e7eb;
+                radial-gradient(ellipse 80% 50% at 50% 0%,rgba(0,255,100,.1) 0%,transparent 55%),#020e07;
+            color: #f3fff8;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -23,20 +22,20 @@
         .card {
             width: 100%;
             max-width: 560px;
-            background: rgba(17,24,39,.92);
+            background: rgba(1,15,8,.92);
             border: 1px solid rgba(255,255,255,.08);
             border-radius: 22px;
             box-shadow: 0 20px 60px rgba(0,0,0,.45);
             padding: 30px;
         }
         h1 { margin: 0 0 12px; color: #fff; }
-        p { color: #9ca3af; line-height: 1.6; }
+        p { color: rgba(255,255,255,.4); line-height: 1.6; }
         label {
             display: block;
             margin: 18px 0 8px;
             font-size: 14px;
             font-weight: 700;
-            color: #d1d5db;
+            color: rgba(255,255,255,.7);
         }
         input {
             width: 100%;
@@ -53,7 +52,7 @@
             padding: 14px 16px;
             border: 0;
             border-radius: 14px;
-            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            background: linear-gradient(135deg, #00c860, #06b6d4);
             color: #fff;
             font-weight: 700;
         }
@@ -242,13 +241,13 @@
 }
 
 .toast-info{
-  background:linear-gradient(135deg, rgba(59,130,246,.28), rgba(30,58,138,.22));
+  background:linear-gradient(135deg, rgba(0,255,136,.28), rgba(30,58,138,.22));
 }
 .toast-info .toast-icon{
-  background:rgba(59,130,246,.22);
+  background:rgba(0,255,136,.22);
 }
 .toast-info .toast-progress{
-  background:#60a5fa;
+  background:#00e676;
 }
 
 @media (max-width: 640px){
