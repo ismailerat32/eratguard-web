@@ -1015,6 +1015,7 @@ USER_MODULES = {
         "description": "SMS tarama, spam filtreleme ve gerçek zamanlı güvenlik motoru tek ekranda.",
         "stats": [
             {"value": "7/24", "label": "Aktif Koruma"},
+            {"value": _ss_get_last_scan_time(), "label": "Son Tarama"},
             {"value": "92", "label": "Güven Skoru"},
             {"value": "AI", "label": "Analiz Motoru"}
         ],
@@ -1443,6 +1444,24 @@ USER_MODULES = {
     }
 }
 
+
+
+def _ss_get_last_scan_time():
+    try:
+        import json as _j
+        logs = _j.load(open("data/spam_logs.json", encoding="utf-8"))
+        if logs:
+            last = logs[-1]
+            ts = last.get("timestamp", "")
+            if ts:
+                from datetime import datetime as _dt
+                t = _dt.fromisoformat(ts.replace("Z",""))
+                diff = (_dt.now() - t).seconds // 60
+                if diff < 1: return "Az önce"
+                if diff < 60: return f"{diff} dk önce"
+                return f"{diff//60} saat önce"
+    except: pass
+    return "Henüz yok"
 
 def render_user_module_page(module_key):
     if module_key != "legal" and not login_required():
