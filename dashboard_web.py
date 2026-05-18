@@ -1140,6 +1140,106 @@ def eg_final_reset_password_code():
 # ===== ERATGUARD FINAL PASSWORD RESET ROUTES END =====
 
 
+
+# ===== ERATGUARD ADMIN FORGOT MAIL DIAGNOSTIC START =====
+# Admin-only diagnostic. Public kullanıcıya account var/yok bilgisi sızdırmaz.
+@app.route("/admin/forgot-mail-diagnostic", methods=["GET", "POST"])
+def eg_admin_forgot_mail_diagnostic():
+    if not login_required():
+        return redirect(url_for("login"))
+    if not admin_required():
+        return redirect(url_for("index"))
+
+    def _mask_email(v):
+        v = str(v or "").strip()
+        if "@" not in v:
+            return "EMPTY"
+        left, right = v.split("@", 1)
+        return left[:2] + "***@" + right
+
+    result = None
+    identity = ""
+
+    if request.method == "POST":
+        identity = (
+            request.form.get("identity")
+            or request.form.get("username_or_email")
+            or request.form.get("email")
+            or request.form.get("username")
+            or ""
+        ).strip()
+
+        users = load_users()
+        found_username = None
+        found_user = None
+
+        for uname, udata in users.items():
+            email = str(udata.get("email", "") or "").strip().lower()
+            if str(uname).strip().lower() == identity.lower() or email == identity.lower():
+                found_username = uname
+                found_user = udata
+                break
+
+        if found_username and found_user:
+            target_email = str(found_user.get("email", "") or "").strip()
+            ok, msg = send_mail(
+                to_email=target_email,
+                subject="EratGuard Forgot Diagnostic",
+                body="Bu mesaj geldiyse EratGuard canlı SMTP sistemi bu kullanıcı e-postasına gönderebiliyor."
+            ) if target_email else (False, "Kullanıcı email alanı boş")
+
+            result = {
+                "account_found": True,
+                "matched_user": found_username,
+                "target_email_masked": _mask_email(target_email),
+                "mail_ok": ok,
+                "mail_msg": msg,
+            }
+        else:
+            result = {
+                "account_found": False,
+                "matched_user": "NONE",
+                "target_email_masked": "NONE",
+                "mail_ok": False,
+                "mail_msg": "Bu identity canlı kullanıcı datasında bulunamadı.",
+            }
+
+    html = f"""
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EratGuard Admin Forgot Diagnostic</title>
+<style>
+body{{font-family:Arial,sans-serif;background:#010805;color:#eefaf2;padding:24px}}
+.card{{max-width:680px;margin:auto;background:#06170f;border:1px solid rgba(120,255,150,.22);border-radius:22px;padding:24px}}
+input,button{{width:100%;box-sizing:border-box;padding:14px;border-radius:14px;margin-top:10px;font-size:16px}}
+input{{background:#000;color:#fff;border:1px solid #284}}
+button{{border:0;background:linear-gradient(90deg,#00d66f,#18c6e8);color:white;font-weight:800}}
+pre{{white-space:pre-wrap;background:#000;padding:16px;border-radius:14px;color:#9f9}}
+a{{color:#a9c8ff}}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Forgot Mail Diagnostic</h1>
+<p>Admin-only canlı teşhis. Kullanıcıya bilgi sızdırmaz.</p>
+<form method="post">
+<input name="identity" placeholder="Kullanıcı adı veya e-posta" value="{identity}">
+<button type="submit">Kontrol Et ve Test Maili Gönder</button>
+</form>
+<pre>{result if result else "Henüz test yapılmadı."}</pre>
+<a href="/admin">← Admin paneline dön</a>
+</div>
+</body>
+</html>
+"""
+    return html
+
+# ===== ERATGUARD ADMIN FORGOT MAIL DIAGNOSTIC END =====
+
+
 if __name__ == "__main__":
     ensure_default_user()
     ensure_default_settings()
