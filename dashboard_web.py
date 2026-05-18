@@ -1215,6 +1215,21 @@ def forgot_password_live():
         reset_link = None
         reset_code = None
 
+        def _eg_mask_email(v):
+            v = str(v or "").strip()
+            if "@" not in v:
+                return "EMPTY"
+            left, right = v.split("@", 1)
+            return (left[:2] + "***@" + right)
+
+        print(
+            "FORGOT_DEBUG:",
+            "identity_has_at=", ("@" in identity),
+            "account_found=", bool(username and user),
+            "matched_user=", (str(username)[:2] + "***" if username else "NONE"),
+            flush=True
+        )
+
         if username and user:
             raw_token = create_reset_token(username)
             reset_link = url_for("eg_final_reset_password_token", token=raw_token, _external=True)
@@ -1223,6 +1238,8 @@ def forgot_password_live():
             target_email = str(user.get("email", "") or "").strip()
             if not target_email and "@" in str(username):
                 target_email = str(username)
+
+            print("FORGOT_DEBUG_TARGET:", _eg_mask_email(target_email), flush=True)
 
             if target_email:
                 subject = "EratGuard Şifre Sıfırlama"
