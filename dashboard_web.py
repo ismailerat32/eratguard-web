@@ -2627,7 +2627,13 @@ def ss_live_admin_access():
             <input name="username" placeholder="admin" style="display:block;margin:10px 0;padding:12px;">
             <input name="password" type="password" placeholder="şifre" style="display:block;margin:10px 0;padding:12px;">
             <button style="padding:12px 18px;">Giriş</button>
-          </form>
+          
+              <div style="margin-top:14px;text-align:center;">
+                <a href="/admin/forgot-mail-diagnostic" style="color:#8cff5a;text-decoration:none;font-weight:800;">Admin şifremi unuttum</a>
+                <span style="opacity:.45;margin:0 8px;">|</span>
+                <a href="/forgot-password" style="color:#8cff5a;text-decoration:none;">Kullanıcı şifremi unuttum</a>
+              </div>
+            </form>
         </body></html>
         """
 
@@ -3077,7 +3083,13 @@ def _ss_admin_access_cookie_override():
             <input name="username" placeholder="admin" style="display:block;margin:10px 0;padding:12px;">
             <input name="password" type="password" placeholder="şifre" style="display:block;margin:10px 0;padding:12px;">
             <button style="padding:12px 18px;">Giriş</button>
-          </form>
+          
+              <div style="margin-top:14px;text-align:center;">
+                <a href="/admin/forgot-mail-diagnostic" style="color:#8cff5a;text-decoration:none;font-weight:800;">Admin şifremi unuttum</a>
+                <span style="opacity:.45;margin:0 8px;">|</span>
+                <a href="/forgot-password" style="color:#8cff5a;text-decoration:none;">Kullanıcı şifremi unuttum</a>
+              </div>
+</form>
         </body></html>
         """
 
