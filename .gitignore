@@ -99,7 +99,6 @@ static/uploads/
 # ===== SPAMSHIELD LOCAL / BUILD / ARCHIVE IGNORE END =====
 
 # ===== SPAMSHIELD EXTRA LOCAL UNTRACKED IGNORE START =====
-.env.example
 .git_remove_bad_files.txt
 
 _stage1_archive_sms/

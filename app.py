@@ -209,10 +209,18 @@ from utils.reset_utils import (
 # Linkler boş/placeholder kaldığı sürece ödeme sayfası "hazırlanıyor" ekranı gösterir.
 PAYMENT_PROVIDER = "iyzico"
 
+import os as _ss_iyzico_os
+
+try:
+    from dotenv import load_dotenv as _ss_load_dotenv
+    _ss_load_dotenv(dotenv_path=".env")
+except Exception:
+    pass
+
 PAYMENT_LINKS = {
-    "starter_monthly": "PASTE_STARTER_IYZICO_LINK_HERE",
-    "pro_yearly": "PASTE_YEARLY_IYZICO_LINK_HERE",
-    "lifetime": "PASTE_LIFETIME_IYZICO_LINK_HERE",
+    "starter_monthly": _ss_iyzico_os.getenv("IYZICO_STARTER_MONTHLY_URL", "PASTE_STARTER_IYZICO_LINK_HERE"),
+    "pro_yearly": _ss_iyzico_os.getenv("IYZICO_PRO_YEARLY_URL", "PASTE_YEARLY_IYZICO_LINK_HERE"),
+    "lifetime": _ss_iyzico_os.getenv("IYZICO_LIFETIME_URL", "PASTE_LIFETIME_IYZICO_LINK_HERE"),
 }
 
 PLAN_LABELS = {
