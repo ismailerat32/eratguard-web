@@ -2748,259 +2748,162 @@ def ss_live_admin_all_slice_catchall(anything):
 # ===== SPAMSHIELD ADMIN ALL SLICE SAFE CATCHALL END =====
 
 # ===== SPAMSHIELD FAST ADMIN SLICE PAGES START =====
-from flask import render_template_string as _ss_render_template_string
-
-def _ss_admin_logged_in_final():
-    return bool(
-        session.get("logged_in") and (
-            session.get("is_admin")
-            or session.get("role") == "admin"
-            or session.get("username") == "admin"
-        )
-    )
-
-def _ss_fast_admin_page(title, subtitle, cards=None):
-    if not _ss_admin_logged_in_final():
-        return redirect("/ss-admin-access")
-
-    cards = cards or []
-    card_html = ""
-    for label, desc, href in cards:
-        card_html += f'''
-        <a class="card" href="{href}">
-          <b>{label}</b>
-          <span>{desc}</span>
-        </a>
-        '''
-
-    return _ss_render_template_string("""
-<!doctype html>
-<html lang="tr">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>{{ title }}</title>
-  <style>
-    :root{
-      --bg:#020806;
-      --panel:#06160f;
-      --line:rgba(140,255,90,.24);
-      --green:#7cff4f;
-      --text:#f4fff7;
-      --muted:rgba(244,255,247,.68);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      min-height:100vh;
-      background:linear-gradient(180deg,#010403,#03120d 60%,#010403);
-      color:var(--text);
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-      padding:12px;
-    }
-    .top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:22px;
-    }
-    .brand{
-      font-size:11px;
-      color:var(--green);
-      font-weight:800;
-      letter-spacing:.3px;
-    }
-    .back{
-      color:var(--green);
-      text-decoration:none;
-      border:1px solid var(--line);
-      padding:9px 12px;
-      border-radius:14px;
-      font-weight:700;
-      font-size:11px;
-      background:rgba(124,255,79,.06);
-    }
-    .hero{
-      border:1px solid var(--line);
-      background:rgba(6,22,15,.86);
-      border-radius:15px;
-      padding:12px;
-      box-shadow:0 0 28px rgba(124,255,79,.10);
-      margin-bottom:16px;
-    }
-    h1{
-      margin:0 0 8px;
-      font-size:17px;
-      line-height:1.08;
-    }
-    p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.45;
-      font-size:11px;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-      margin-top:13px;
-    }
-    .card{
-      display:block;
-      text-decoration:none;
-      color:var(--text);
-      border:1px solid var(--line);
-      background:rgba(4,18,12,.78);
-      border-radius:15px;
-      padding:12px;
-    }
-    .card b{
-      display:block;
-      color:var(--green);
-      font-size:16px;
-      margin-bottom:5px;
-    }
-    .card span{
-      display:block;
-      color:var(--muted);
-      font-size:11px;
-    }
-    .note{
-      margin-top:18px;
-      color:rgba(244,255,247,.52);
-      font-size:11px;
-      text-align:center;
-    }
-  </style>
-</head>
-<body>
-  <div class="top">
-    <div class="brand">EratGuard ADMIN</div>
-    <a class="back" href="/admin/dashboard">Dashboard</a>
-  </div>
-
-  <section class="hero">
-    <h1>{{ title }}</h1>
-    <p>{{ subtitle }}</p>
-  </section>
-
-  <section class="grid">
-    {{ card_html|safe }}
-  </section>
-
-  <div class="note">Hafif admin görünümü aktif. Mobil WebView için optimize edildi.</div>
-</body>
-</html>
-""", title=title, subtitle=subtitle, card_html=card_html)
-
-def _ss_fast_admin_dashboard():
-    return _ss_fast_admin_page(
-        "Yönetim Merkezi",
-        "Admin modülleri hızlı görünümde hazır.",
-        [
-            ("Kullanıcılar", "Kullanıcı ve lisans kontrolü", "/admin/panel"),
-            ("Lisanslar", "Lisans kayıtları ve durum kontrolü", "/admin/licenses"),
-            ("Ödemeler", "Ödeme talepleri ve onay ekranı", "/admin/payment-requests"),
-            ("Raporlar", "Genel analiz ve sistem görünümü", "/admin/overview"),
-            ("Güvenlik", "Spam kayıtları ve güvenlik olayları", "/admin/spam-logs"),
-            ("Ayarlar", "Admin ayarları", "/admin/settings"),
-            ("Sistem", "Sistem durumu", "/admin/system"),
-        ]
-    )
-
-def _ss_fast_admin_panel():
-    return _ss_fast_admin_page("Kullanıcılar", "Kullanıcı ve lisans kontrol modülü.", [
-        ("Dashboard'a dön", "Ana yönetim merkezine geri dön", "/admin/dashboard"),
-        ("Lisanslar", "Lisans modülünü aç", "/admin/licenses"),
-    ])
-
-def _ss_fast_admin_licenses():
-    return _ss_fast_admin_page("Lisanslar", "Lisans kontrol ekranı hafif modda açıldı.", [
-        ("Kullanıcılar", "Kullanıcı kayıtlarını kontrol et", "/admin/panel"),
-        ("Ödemeler", "Ödeme taleplerine git", "/admin/payment-requests"),
-    ])
-
-def _ss_fast_admin_payments():
-    return _ss_fast_admin_page("Ödeme Talepleri", "Ödeme ve onay modülü hafif modda hazır.", [
-        ("Lisanslar", "Lisans durumlarına git", "/admin/licenses"),
-        ("Dashboard", "Ana merkeze dön", "/admin/dashboard"),
-    ])
-
-def _ss_fast_admin_logs():
-    return _ss_fast_admin_page("Güvenlik", "Spam logları ve güvenlik olayları hafif modda.", [
-        ("Raporlar", "Genel rapor görünümü", "/admin/overview"),
-        ("Ayarlar", "Güvenlik ayarlarına git", "/admin/settings"),
-    ])
-
-def _ss_fast_admin_overview():
-    return _ss_fast_admin_page("Raporlar", "Genel sistem ve analiz görünümü.", [
-        ("Güvenlik", "Spam loglarına git", "/admin/spam-logs"),
-        ("Sistem", "Sistem durumunu aç", "/admin/system"),
-    ])
-
-def _ss_fast_admin_whitelist():
-    return _ss_fast_admin_page("Bildirimler", "Bildirim ve beyaz liste kontrol alanı.", [
-        ("Ayarlar", "Ayarlar ekranına git", "/admin/settings"),
-        ("Dashboard", "Ana merkeze dön", "/admin/dashboard"),
-    ])
-
-def _ss_fast_admin_settings():
-    return _ss_fast_admin_page("Ayarlar", "Admin ayarları hafif görünümde.", [
-        ("Sistem", "Sistem durumunu aç", "/admin/system"),
-        ("Dashboard", "Ana merkeze dön", "/admin/dashboard"),
-    ])
-
-def _ss_fast_admin_system():
-    return _ss_fast_admin_page("Sistem", "Sistem kontrol alanı hafif modda.", [
-        ("Raporlar", "Rapor ekranına git", "/admin/overview"),
-        ("Dashboard", "Ana merkeze dön", "/admin/dashboard"),
-    ])
-
-# Var olan route endpointlerini hafif sayfalara bağla
-_override_map = {
-    "ss_live_admin_home": _ss_fast_admin_dashboard,
-    "ss_live_admin_dashboard": _ss_fast_admin_dashboard,
-    "ss_live_admin_panel_alias": _ss_fast_admin_panel,
-    "ss_live_admin_licenses_alias": _ss_fast_admin_licenses,
-    "ss_live_admin_payment_requests_alias": _ss_fast_admin_payments,
-    "ss_live_admin_spam_logs_alias": _ss_fast_admin_logs,
-    "ss_live_admin_overview_alias": _ss_fast_admin_overview,
-    "ss_live_admin_whitelist_alias": _ss_fast_admin_whitelist,
-    "ss_live_admin_settings_alias": _ss_fast_admin_settings,
-    "ss_live_admin_system_alias": _ss_fast_admin_system,
-}
-
-for _endpoint, _func in _override_map.items():
-    if _endpoint in app.view_functions:
-        app.view_functions[_endpoint] = _func
-
-# Catchall endpointini de hafif yönlendir
-if "ss_live_admin_all_slice_catchall" in app.view_functions:
-    def _ss_fast_admin_catchall(anything):
-        slug = str(anything or "").strip().lower()
-        if slug in ("dashboard", ""):
-            return _ss_fast_admin_dashboard()
-        if slug in ("panel", "users", "user"):
-            return _ss_fast_admin_panel()
-        if slug in ("licenses", "license"):
-            return _ss_fast_admin_licenses()
-        if slug in ("payment-requests", "payments", "payment"):
-            return _ss_fast_admin_payments()
-        if slug in ("spam-logs", "security"):
-            return _ss_fast_admin_logs()
-        if slug in ("overview", "reports"):
-            return _ss_fast_admin_overview()
-        if slug in ("whitelist", "notifications"):
-            return _ss_fast_admin_whitelist()
-        if slug == "settings":
-            return _ss_fast_admin_settings()
-        if slug == "system":
-            return _ss_fast_admin_system()
-        return _ss_fast_admin_dashboard()
-
-    app.view_functions["ss_live_admin_all_slice_catchall"] = _ss_fast_admin_catchall
+# DISABLED FINAL:
+# Bu blok hafif/placeholder admin ekranlarını aktif ediyordu.
+# Gerçek admin template'leri için kapatıldı.
 # ===== SPAMSHIELD FAST ADMIN SLICE PAGES END =====
+
+# ===== ERATGUARD REAL ADMIN TEMPLATE RESTORE START =====
+# Final override: FAST/Hafif admin ekranlarını gerçek admin template'lerine geri bağlar.
+try:
+    from flask import render_template as _eg_real_render_template
+    from flask import redirect as _eg_real_redirect
+    from flask import session as _eg_real_session
+
+    def _eg_real_admin_ok():
+        try:
+            cookie_ok = False
+            try:
+                cookie_ok = bool(_ss_admin_cookie_ok_final())
+            except Exception:
+                cookie_ok = False
+
+            return bool(
+                cookie_ok or (
+                    _eg_real_session.get("logged_in") and (
+                        _eg_real_session.get("is_admin")
+                        or _eg_real_session.get("role") == "admin"
+                        or _eg_real_session.get("username") == "admin"
+                    )
+                )
+            )
+        except Exception:
+            return False
+
+    def _eg_real_users_list():
+        data = globals().get("users", {})
+        try:
+            loader = globals().get("load_users")
+            if callable(loader):
+                loaded = loader()
+                if loaded:
+                    data = loaded
+        except Exception:
+            pass
+
+        out = []
+        if isinstance(data, dict):
+            for username, info in data.items():
+                item = dict(info) if isinstance(info, dict) else {"value": info}
+                item.setdefault("username", username)
+                item.setdefault("email", item.get("email", ""))
+                item.setdefault("role", item.get("role", "user"))
+                out.append(item)
+        elif isinstance(data, list):
+            out = data
+        return out
+
+    def _eg_real_render(tpl, **ctx):
+        if not _eg_real_admin_ok():
+            return _eg_real_redirect("/ss-admin-access")
+        return _eg_real_render_template(tpl, **ctx)
+
+    def _eg_real_admin_home():
+        if not _eg_real_admin_ok():
+            return _eg_real_redirect("/ss-admin-access")
+        return _eg_real_redirect("/admin/dashboard")
+
+    def _eg_real_admin_dashboard():
+        return _eg_real_render("admin_dashboard.html")
+
+    def _eg_real_admin_panel():
+        return _eg_real_render(
+            "admin_panel.html",
+            users=_eg_real_users_list(),
+            upgrade_requests=globals().get("upgrade_requests", []),
+        )
+
+    def _eg_real_admin_licenses():
+        return _eg_real_render("admin_licenses.html")
+
+    def _eg_real_admin_payments():
+        return _eg_real_render(
+            "admin_payment_requests.html",
+            requests=globals().get("payment_requests", globals().get("requests", [])),
+        )
+
+    def _eg_real_admin_spam_logs():
+        return _eg_real_render(
+            "admin_spam_logs.html",
+            spam_logs=globals().get("spam_logs", []),
+        )
+
+    def _eg_real_admin_overview():
+        return _eg_real_render(
+            "admin_overview.html",
+            stats=globals().get("stats", {}),
+            recent_logs=globals().get("recent_logs", []),
+        )
+
+    def _eg_real_admin_whitelist():
+        return _eg_real_render(
+            "whitelist.html",
+            whitelist=globals().get("whitelist", []),
+        )
+
+    def _eg_real_admin_settings():
+        return _eg_real_render(
+            "admin_settings.html",
+            settings=globals().get("settings", {}),
+        )
+
+    def _eg_real_admin_system():
+        return _eg_real_render("admin_system.html")
+
+    def _eg_real_admin_catchall(anything):
+        slug = str(anything or "").strip().lower()
+        if slug in ("", "dashboard"):
+            return _eg_real_admin_dashboard()
+        if slug in ("panel", "users", "user"):
+            return _eg_real_admin_panel()
+        if slug in ("licenses", "license", "generated-licenses"):
+            return _eg_real_admin_licenses()
+        if slug in ("payment-requests", "payments", "payment"):
+            return _eg_real_admin_payments()
+        if slug in ("spam-logs", "security"):
+            return _eg_real_admin_spam_logs()
+        if slug in ("overview", "reports"):
+            return _eg_real_admin_overview()
+        if slug in ("whitelist", "notifications"):
+            return _eg_real_admin_whitelist()
+        if slug == "settings":
+            return _eg_real_admin_settings()
+        if slug == "system":
+            return _eg_real_admin_system()
+        return _eg_real_admin_dashboard()
+
+    _real_override_map = {
+        "ss_live_admin_home": _eg_real_admin_home,
+        "ss_live_admin_dashboard": _eg_real_admin_dashboard,
+        "ss_live_admin_panel_alias": _eg_real_admin_panel,
+        "ss_live_admin_licenses_alias": _eg_real_admin_licenses,
+        "ss_live_admin_payment_requests_alias": _eg_real_admin_payments,
+        "ss_live_admin_spam_logs_alias": _eg_real_admin_spam_logs,
+        "ss_live_admin_overview_alias": _eg_real_admin_overview,
+        "ss_live_admin_whitelist_alias": _eg_real_admin_whitelist,
+        "ss_live_admin_settings_alias": _eg_real_admin_settings,
+        "ss_live_admin_system_alias": _eg_real_admin_system,
+        "ss_live_admin_all_slice_catchall": _eg_real_admin_catchall,
+    }
+
+    for _ep, _fn in _real_override_map.items():
+        if _ep in app.view_functions:
+            app.view_functions[_ep] = _fn
+
+except Exception as _eg_real_admin_restore_error:
+    print("REAL ADMIN TEMPLATE RESTORE ERROR:", _eg_real_admin_restore_error, flush=True)
+# ===== ERATGUARD REAL ADMIN TEMPLATE RESTORE END =====
+
 
 # ===== ERATGUARD FINAL SESSION SECRET LOCK START =====
 try:
