@@ -7771,3 +7771,224 @@ def eg_admin_reject_license_request(order_no):
 def eg_admin_payment_requests_redirect_final():
     return redirect("/admin/license-requests")
 # ===== ERATGUARD MANUAL LICENSE ADMIN FLOW END =====
+
+# ===== ERATGUARD ONE-TIME LICENSE VALIDATION START =====
+def _eg_norm_license_key(value):
+    return str(value or "").strip().upper()
+
+
+def _eg_mark_payment_request_license_used(license_key, username):
+    items = _eg_load_payment_requests()
+    changed = False
+    found = False
+
+    for item in items:
+        item_key = _eg_norm_license_key(item.get("license_key"))
+        item_user = str(item.get("username", "") or "").strip()
+        status = str(item.get("status", "") or "")
+
+        if item_key == license_key:
+            found = True
+
+            if item_user and item_user != username:
+                return False, "Bu lisans başka bir kullanıcı hesabına atanmış."
+
+            if "approved" not in status:
+                return False, "Bu lisans henüz admin tarafından onaylanmamış."
+
+            if item.get("used") is True and item.get("activated_by") != username:
+                return False, "Bu lisans daha önce kullanılmış."
+
+            item["used"] = True
+            item["activated_by"] = username
+            item["activated_at"] = __import__("datetime").datetime.now().isoformat(timespec="seconds")
+            changed = True
+            break
+
+    if changed:
+        _eg_save_payment_requests(items)
+
+    return found, ""
+
+
+def _eg_check_generated_license_once(license_key, username):
+    import json
+    from pathlib import Path
+    from datetime import datetime
+
+    p = Path("data/generated_licenses.json")
+    if not p.exists():
+        return False, "not_found"
+
+    try:
+        data = json.loads(p.read_text(encoding="utf-8") or "[]")
+    except Exception:
+        return False, "not_found"
+
+    if not isinstance(data, list):
+        return False, "not_found"
+
+    changed = False
+    for item in data:
+        if _eg_norm_license_key(item.get("key")) != license_key:
+            continue
+
+        if item.get("used") is True:
+            if str(item.get("activated_by", "")) == str(username):
+                return True, "already_owned"
+            return False, "Bu lisans daha önce kullanılmış."
+
+        item["used"] = True
+        item["activated_by"] = username
+        item["activated_at"] = datetime.now().isoformat(timespec="seconds")
+        changed = True
+
+        if changed:
+            p.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        return True, ""
+
+    return False, "not_found"
+
+
+def _eg_check_legacy_license_once(license_key, username):
+    import json
+    from pathlib import Path
+    from datetime import datetime
+
+    p = Path("data/licenses.json")
+    if not p.exists():
+        return False, "not_found"
+
+    try:
+        data = json.loads(p.read_text(encoding="utf-8") or "{}")
+    except Exception:
+        return False, "not_found"
+
+    if not isinstance(data, dict):
+        return False, "not_found"
+
+    item = data.get(license_key)
+    if not isinstance(item, dict):
+        return False, "not_found"
+
+    assigned_user = str(item.get("username", "") or item.get("activated_by", "") or "").strip()
+    used = bool(item.get("used")) or str(item.get("status", "")).lower() in ("used", "active")
+
+    if assigned_user and assigned_user != username:
+        return False, "Bu lisans başka bir kullanıcı hesabına atanmış."
+
+    if used and assigned_user != username:
+        return False, "Bu lisans daha önce kullanılmış."
+
+    item["used"] = True
+    item["status"] = "active"
+    item["username"] = username
+    item["activated_by"] = username
+    item["activated_at"] = datetime.now().isoformat(timespec="seconds")
+
+    data[license_key] = item
+    p.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    return True, ""
+
+
+def _eg_validate_one_time_license(license_key, username):
+    license_key = _eg_norm_license_key(license_key)
+
+    if not license_key:
+        return False, "Lütfen lisans kodu girin."
+
+    if len(license_key) < 8:
+        return False, "Lisans kodu çok kısa görünüyor."
+
+    found, msg = _eg_mark_payment_request_license_used(license_key, username)
+    if found:
+        if msg:
+            return False, msg
+        return True, ""
+
+    ok, msg = _eg_check_generated_license_once(license_key, username)
+    if ok:
+        return True, ""
+    if msg != "not_found":
+        return False, msg
+
+    ok, msg = _eg_check_legacy_license_once(license_key, username)
+    if ok:
+        return True, ""
+    if msg != "not_found":
+        return False, msg
+
+    return False, "Bu lisans kodu sistemde onaylı veya kullanılabilir durumda değil."
+
+
+def _eg_final_one_time_user_license():
+    if not login_required():
+        return redirect(url_for("login"))
+
+    username = session.get("username", "user")
+    users = load_users()
+    user = users.get(username, {}) if isinstance(users, dict) else {}
+
+    message = None
+    error = None
+
+    if request.method == "POST":
+        license_key = _eg_norm_license_key(request.form.get("license_key"))
+
+        ok, err = _eg_validate_one_time_license(license_key, username)
+
+        if not ok:
+            error = err
+        else:
+            user["license_key"] = license_key
+            user["license_type"] = "pro"
+            user["plan"] = "pro"
+            user["active"] = True
+            user["expires_at"] = user.get("expires_at") or "2099-12-31"
+            users[username] = user
+            save_users(users)
+            message = "Lisans başarıyla aktifleştirildi. Bu lisans artık bu kullanıcı hesabına kilitlendi."
+
+    license_key = user.get("license_key") or "Yok"
+    plan = user.get("license_type") or user.get("plan") or "trial"
+    expires_at = user.get("expires_at") or "Belirtilmedi"
+    active = user.get("active", True)
+
+    plan_label = "PRO" if str(plan).lower() in ["pro", "premium", "lifetime"] else "Deneme"
+    license_status_label = "AKTİF" if active else "PASİF"
+    premium_access = "Açık" if active else "Kapalı"
+
+    days_left = "∞"
+    if expires_at and expires_at not in ["Belirtilmedi", "2099-12-31", "2099-01-01"]:
+        try:
+            from datetime import datetime
+            exp = datetime.strptime(expires_at[:10], "%Y-%m-%d")
+            days_left = max(0, (exp - datetime.now()).days)
+        except Exception:
+            days_left = "∞"
+
+    return render_template(
+        "license_center.html",
+        username=username,
+        user=user,
+        license_key=license_key,
+        plan_label=plan_label,
+        license_status_label=license_status_label,
+        expires_at=expires_at,
+        premium_access=premium_access,
+        days_left=days_left,
+        message=message,
+        error=error
+    )
+
+
+# Final route override: daha önce /u/license başka fonksiyona bağlandıysa bunu tekrar güvenli tek-kullanımlık akışa bağla.
+try:
+    for _rule in list(app.url_map.iter_rules()):
+        if str(_rule) == "/u/license":
+            app.view_functions[_rule.endpoint] = _eg_final_one_time_user_license
+except Exception as _eg_license_override_error:
+    print("ONE_TIME_LICENSE_OVERRIDE_WARN:", _eg_license_override_error, flush=True)
+# ===== ERATGUARD ONE-TIME LICENSE VALIDATION END =====
