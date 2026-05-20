@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>EratGuard PRO · Lisans Aktivasyonu</title>
+  <title>EratGuard PRO · Lisans Talebi Alındı</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{
@@ -29,33 +29,14 @@
         linear-gradient(180deg,rgba(8,42,27,.94),rgba(3,20,13,.98));
       box-shadow:0 20px 48px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.06);
     }
-    .top{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      margin-bottom:20px;
-    }
+    .top{display:flex;align-items:center;gap:12px;margin-bottom:20px}
     .logo{
-      width:58px;
-      height:58px;
-      border-radius:19px;
-      display:grid;
-      place-items:center;
+      width:58px;height:58px;border-radius:19px;display:grid;place-items:center;
       background:linear-gradient(180deg,#31f99e,#0ecf72);
-      box-shadow:0 0 28px rgba(32,240,138,.20);
-      font-size:28px;
+      box-shadow:0 0 28px rgba(32,240,138,.20);font-size:28px;
     }
-    h1{
-      font-size:25px;
-      line-height:1.05;
-      letter-spacing:-.7px;
-    }
-    .sub{
-      margin-top:5px;
-      color:rgba(255,255,255,.58);
-      font-size:13px;
-      font-weight:800;
-    }
+    h1{font-size:25px;line-height:1.05;letter-spacing:-.7px}
+    .sub{margin-top:5px;color:rgba(255,255,255,.58);font-size:13px;font-weight:800}
     .hero{
       border:1px solid rgba(32,240,138,.20);
       border-radius:26px;
@@ -63,26 +44,10 @@
       background:rgba(0,0,0,.16);
       margin-bottom:14px;
     }
-    .kicker{
-      color:#31f99e;
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:1.4px;
-      margin-bottom:9px;
-    }
-    .hero h2{
-      font-size:30px;
-      line-height:1.08;
-      letter-spacing:-1px;
-      margin-bottom:10px;
-    }
+    .kicker{color:#31f99e;font-size:12px;font-weight:900;letter-spacing:1.4px;margin-bottom:9px}
+    .hero h2{font-size:30px;line-height:1.08;letter-spacing:-1px;margin-bottom:10px}
     .hero h2 span{color:#20f08a}
-    .hero p{
-      color:rgba(255,255,255,.72);
-      font-size:14px;
-      line-height:1.5;
-      font-weight:760;
-    }
+    .hero p{color:rgba(255,255,255,.72);font-size:14px;line-height:1.5;font-weight:760}
     .status{
       border:1px solid rgba(32,240,138,.20);
       background:rgba(32,240,138,.08);
@@ -94,35 +59,17 @@
       line-height:1.5;
       font-weight:800;
     }
-    .status.warn{
-      color:#ffd166;
-      background:rgba(255,209,102,.10);
-      border-color:rgba(255,209,102,.22);
-    }
-    .grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-      margin:14px 0;
-    }
+    .grid{display:grid;grid-template-columns:1fr;gap:10px;margin:14px 0}
     .box{
       border:1px solid rgba(255,255,255,.10);
       background:rgba(0,0,0,.18);
       border-radius:20px;
       padding:15px;
     }
-    .box b{
-      display:block;
-      color:rgba(255,255,255,.58);
-      font-size:12px;
-      margin-bottom:6px;
-    }
-    .box span{
-      color:#fff;
-      font-size:18px;
-      font-weight:950;
-    }
+    .box b{display:block;color:rgba(255,255,255,.58);font-size:12px;margin-bottom:6px}
+    .box span{color:#fff;font-size:18px;font-weight:950;word-break:break-word}
     .box .green{color:#31f99e}
+    .box .gold{color:#ffd166}
     .btn{
       width:100%;
       min-height:54px;
@@ -145,19 +92,8 @@
       border:1px solid rgba(255,255,255,.13);
       box-shadow:none;
     }
-    .copy{
-      text-align:center;
-      color:rgba(255,255,255,.42);
-      font-size:11px;
-      font-weight:750;
-      margin-top:16px;
-      line-height:1.45;
-    }
-    .copy a{
-      color:rgba(32,240,138,.72);
-      text-decoration:none;
-      font-weight:900;
-    }
+    .copy{text-align:center;color:rgba(255,255,255,.42);font-size:11px;font-weight:750;margin-top:16px;line-height:1.45}
+    .copy a{color:rgba(32,240,138,.72);text-decoration:none;font-weight:900}
   </style>
 </head>
 <body>
@@ -166,27 +102,25 @@
       <div class="logo">🛡️</div>
       <div>
         <h1>EratGuard PRO</h1>
-        <p class="sub">Lisans aktivasyon merkezi</p>
+        <p class="sub">Lisans talep merkezi</p>
       </div>
     </section>
 
     <section class="hero">
-      <div class="kicker">ÖDEME SONRASI AKTİVASYON</div>
-      <h2>Lisansın <span>kontrol sonrası</span> aktif edilir.</h2>
-      <p>Ödemeni iyzico üzerinden tamamladıysan, aktivasyon talebi oluştur. Ödeme kontrol edildikten sonra hesabın PRO yapılır.</p>
+      <div class="kicker">TALEP KAYDA ALINDI</div>
+      <h2>Lisans talebin <span>oluşturuldu.</span></h2>
+      <p>{{ message or "Talebiniz sipariş numarasıyla kayıt altına alındı. Ödeme bildirimi kontrol edildikten sonra lisansınız hesabınıza tanımlanır." }}</p>
     </section>
 
-    {% if saved %}
-      <div class="status">
-        ✅ Lisans aktivasyon talebin alındı. Ödeme kontrol edildikten sonra hesabın aktif edilecek.
-      </div>
-    {% else %}
-      <div class="status warn">
-        ⚠️ Bu ekran ödeme onayı değildir. Lisans aktivasyonu için iyzico panelindeki ödeme kaydı kontrol edilir.
-      </div>
-    {% endif %}
+    <div class="status">
+      ✅ Bu işlem ödeme onayı değildir. Lisans, admin kontrolü ve ödeme bildirimi doğrulaması sonrası aktif edilir.
+    </div>
 
     <section class="grid">
+      <div class="box">
+        <b>Sipariş No</b>
+        <span class="gold">{{ order_no or "Henüz oluşturulmadı" }}</span>
+      </div>
       <div class="box">
         <b>Kullanıcı</b>
         <span>{{ username }}</span>
@@ -199,19 +133,23 @@
         <b>Ücret</b>
         <span class="green">{{ plan_price }}</span>
       </div>
+      <div class="box">
+        <b>Durum</b>
+        <span>{{ status or "payment_waiting" }}</span>
+      </div>
+      {% if license_key %}
+      <div class="box">
+        <b>Lisans Kodu</b>
+        <span class="green">{{ license_key }}</span>
+      </div>
+      {% endif %}
     </section>
 
-    {% if not saved %}
-      <form method="POST" action="/u/activate-license-request">
-        <input type="hidden" name="plan" value="{{ plan }}">
-        <button class="btn" type="submit">Lisans Aktivasyon Talebi Oluştur</button>
-      </form>
-    {% endif %}
-
-    <a class="btn secondary" href="/u/license">Lisans Merkezine Dön</a>
+    <a class="btn" href="/u/license">Lisans Merkezine Dön</a>
     <a class="btn secondary" href="/radial">Güvenlik Merkezine Dön</a>
 
     <div class="copy">
+      Kart bilgileriniz EratGuard tarafından saklanmaz. Destek görüşmelerinde sipariş numaranızı paylaşabilirsiniz.<br>
       © 2026 EratGuard PRO · Tüm hakları saklıdır. · <a href="/u/legal">Telif ve Yasal Bildirim</a>
     </div>
   </main>

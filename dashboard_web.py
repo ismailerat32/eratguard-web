@@ -2479,23 +2479,88 @@ def get_plan_info(plan):
     return plans.get(plan, plans["pro_yearly"])
 
 
+def _eg_payment_requests_path():
+    from pathlib import Path
+    data_dir = Path("data")
+    data_dir.mkdir(exist_ok=True)
+    return data_dir / "payment_requests.json"
+
+
+def _eg_load_payment_requests():
+    import json
+    path = _eg_payment_requests_path()
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text(encoding="utf-8") or "[]")
+        return data if isinstance(data, list) else []
+    except Exception:
+        return []
+
+
+def _eg_save_payment_requests(items):
+    import json
+    path = _eg_payment_requests_path()
+    path.write_text(json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _eg_next_order_no():
+    from datetime import datetime
+    import random
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    return f"EG-{stamp}-{random.randint(100,999)}"
+
+
 @app.route("/u/checkout", methods=["GET", "POST"])
 def user_checkout():
     if not login_required():
         return redirect(url_for("login"))
 
-    plan = request.args.get("plan", "pro_yearly")
+    from datetime import datetime
+
+    username = session.get("username", "user")
+    plan = request.values.get("plan", "pro_yearly")
     plan_info = get_plan_info(plan)
 
     if request.method == "POST":
-        return redirect(url_for("user_payment_success", plan=plan))
+        email = (request.form.get("email") or "").strip()
+        note = (request.form.get("note") or "").strip()
+        payment_method = (request.form.get("payment_method") or "manual_transfer").strip()
+
+        requests_data = _eg_load_payment_requests()
+        order_no = _eg_next_order_no()
+
+        item = {
+            "order_no": order_no,
+            "created_at": datetime.now().isoformat(timespec="seconds"),
+            "username": username,
+            "email": email,
+            "plan": plan,
+            "plan_label": plan_info["label"],
+            "plan_period": plan_info["period"],
+            "plan_price": plan_info["price"],
+            "payment_method": payment_method,
+            "provider": "manual_license_review",
+            "status": "payment_waiting",
+            "note": note,
+            "admin_note": "",
+            "license_key": ""
+        }
+
+        requests_data.append(item)
+        _eg_save_payment_requests(requests_data)
+
+        return redirect(url_for("user_payment_success", order_no=order_no))
 
     return render_template(
         "checkout.html",
         plan=plan,
         plan_label=plan_info["label"],
         plan_period=plan_info["period"],
-        plan_price=plan_info["price"]
+        plan_price=plan_info["price"],
+        payment_provider="manual_license_review",
+        payment_ready=True,
+        message="EratGuard PRO lisans talebi oluşturun. Talebiniz için benzersiz sipariş numarası üretilecek ve ödeme onayı sonrası lisansınız hesabınıza tanımlanacaktır."
     )
 
 
@@ -2505,28 +2570,37 @@ def user_payment_success():
         return redirect(url_for("login"))
 
     username = session.get("username", "user")
-    plan = request.args.get("plan", "pro_yearly")
-    plan_info = get_plan_info(plan)
+    order_no = request.values.get("order_no", "").strip()
 
-    users = load_users()
-    user = users.get(username, {}) if isinstance(users, dict) else {}
+    request_item = None
+    for item in _eg_load_payment_requests():
+        if str(item.get("order_no", "")) == order_no and str(item.get("username", "")) == str(username):
+            request_item = item
+            break
 
-    user["active"] = True
-    user["license_key"] = user.get("license_key") or f"SPAM-PRO-{username.upper()}-2026"
-    user["license_type"] = "lifetime" if plan == "lifetime" else "pro"
-    user["plan"] = plan
-    user["expires_at"] = "2099-12-31" if plan == "lifetime" else "2027-12-31"
-
-    users[username] = user
-    save_users(users)
+    if not request_item:
+        plan = request.values.get("plan", "pro_yearly")
+        plan_info = get_plan_info(plan)
+        request_item = {
+            "order_no": "Henüz oluşturulmadı",
+            "username": username,
+            "plan": plan,
+            "plan_label": plan_info["label"],
+            "plan_price": plan_info["price"],
+            "status": "not_created"
+        }
 
     return render_template(
         "payment_success.html",
-        plan=plan,
-        plan_label=plan_info["label"],
-        plan_price=plan_info["price"],
-        license_key=user["license_key"],
-        expires_at=user["expires_at"]
+        saved=True,
+        username=username,
+        order_no=request_item.get("order_no", ""),
+        status=request_item.get("status", "payment_waiting"),
+        plan=request_item.get("plan", "pro_yearly"),
+        plan_label=request_item.get("plan_label", "EratGuard PRO"),
+        plan_price=request_item.get("plan_price", ""),
+        license_key=request_item.get("license_key", ""),
+        message="Lisans talebiniz kayda alındı. Ödeme bildiriminiz kontrol edildikten sonra lisansınız hesabınıza tanımlanacaktır. Kart bilgileriniz EratGuard tarafından saklanmaz."
     )
 
 
@@ -2536,9 +2610,6 @@ def user_pay():
         return redirect(url_for("login"))
 
     plan = request.args.get("plan", "pro_yearly")
-
-    # Şimdilik ödeme ekranına güvenli yönlendir.
-    # Sonra burası iyzico/Stripe gerçek ödeme linkiyle bağlanacak.
     return redirect(url_for("user_checkout", plan=plan))
 
 # ===== SPAMSHIELD LIVE ADMIN APK ROUTES START =====
@@ -7205,7 +7276,7 @@ except Exception as e:
     print("Community titanium feedback page override skipped:", e)
 # ===== SPAMSHIELD USER COMMUNITY TITANIUM FEEDBACK UI END =====
 
-# ===== SPAMSHIELD IYZICO PUBLIC LEGAL PAGES START =====
+# ===== ERATGUARD PUBLIC LEGAL PAGES START =====
 from flask import render_template_string as _ss_legal_public_render_template_string
 from flask import make_response as _ss_legal_public_make_response
 
@@ -7365,7 +7436,7 @@ def ss_public_privacy_page():
         </ul>
 
         <h3>Ödeme Bilgileri</h3>
-        <p>Kart bilgileri EratGuard PRO içinde saklanmaz. Ödeme işlemleri güvenli ödeme altyapısı üzerinden tamamlanır.</p>
+        <p>Kart bilgileri EratGuard PRO içinde saklanmaz. Satın alma süreci lisans talebi ve ödeme onayı üzerinden yürütülür.</p>
 
         <h3>KVKK Bilgilendirmesi</h3>
         <p>Kişisel veriler; hizmet sunumu, kullanıcı güvenliği, lisans aktivasyonu, destek ve yasal yükümlülükler kapsamında işlenebilir. Kullanıcılar kişisel verileriyle ilgili bilgi alma, düzeltme ve silme taleplerini iletişim kanalları üzerinden iletebilir.</p>
@@ -7373,7 +7444,7 @@ def ss_public_privacy_page():
         <h3>Saklama ve Güvenlik</h3>
         <p>Veriler, hizmetin gerektirdiği süre boyunca saklanır. EratGuard PRO, yetkisiz erişime karşı makul teknik ve idari önlemler almayı hedefler.</p>
 
-        <div class="notice">Bu sayfa iyzico ve kullanıcı incelemesi için kamusal bilgilendirme amacıyla hazırlanmıştır.</div>
+        <div class="notice">Bu sayfa kullanıcı bilgilendirmesi ve yayın incelemesi için kamusal bilgilendirme amacıyla hazırlanmıştır.</div>
         """
     )
 
@@ -7399,7 +7470,7 @@ def ss_public_terms_page():
         </ul>
 
         <h3>Ödeme ve Aktivasyon</h3>
-        <p>Ödeme işlemleri güvenli ödeme altyapısı üzerinden tamamlanır. Ödeme sonrası lisans aktivasyonu EratGuard PRO lisans merkezi üzerinden yapılır.</p>
+        <p>Satın alma süreci lisans talebi ve ödeme onayı üzerinden yürütülür. Ödeme onayı sonrası lisans aktivasyonu EratGuard PRO lisans merkezi üzerinden yapılır.</p>
 
         <h3>Hizmet Değişiklikleri</h3>
         <p>EratGuard PRO, güvenlik ve performans gerekçeleriyle özelliklerde iyileştirme, güncelleme veya değişiklik yapabilir.</p>
@@ -7456,7 +7527,7 @@ def ss_public_contact_page():
           <li>Hizmet türü: Dijital yazılım / lisans tabanlı güvenlik hizmeti</li>
           <li>Adres: Isparta / Türkiye</li>
           <li>Destek e-posta: spamshieldprotr@gmail.com</li>
-          <li>Ödeme altyapısı: iyzico güvenli ödeme sayfası</li>
+          <li>Ödeme altyapısı: EratGuard lisans talebi ve ödeme onayı süreci</li>
         </ul>
 
         <h3>Vergi / Kimlik Bilgisi</h3>
@@ -7465,10 +7536,10 @@ def ss_public_contact_page():
         <h3>Önemli Not</h3>
         <p>EratGuard PRO bireysel yayıncı tarafından geliştirilen dijital yazılım/lisans hizmetidir. Resmi başvuru süreçlerinde gerekli bilgiler ilgili ödeme sağlayıcı panelinden paylaşılır.</p>
 
-        <div class="notice">İletişim ve yayıncı bilgileri iyzico incelemesine uygun şekilde güncellenmiştir.</div>
+        <div class="notice">İletişim ve yayıncı bilgileri kullanıcı bilgilendirmesine uygun şekilde güncellenmiştir.</div>
         """
     )
-# ===== SPAMSHIELD IYZICO PUBLIC LEGAL PAGES END =====
+# ===== ERATGUARD PUBLIC LEGAL PAGES END =====
 
 # ===== ERATGUARD BETA PUBLIC/USER ALIAS FIX START =====
 # v1.0.0-beta probe fix:
@@ -7602,3 +7673,101 @@ app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SECURE"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 # ===== ERATGUARD SESSION COOKIE HARDENING END =====
+
+# ===== ERATGUARD MANUAL LICENSE ADMIN FLOW START =====
+def _eg_admin_payment_requests_for_template():
+    try:
+        return _eg_load_payment_requests()
+    except Exception:
+        return []
+
+
+@app.route("/admin/payment-requests-live")
+@app.route("/admin/license-requests")
+def eg_admin_license_requests_live():
+    if not session.get("admin_logged_in"):
+        return redirect("/ss-admin-access")
+
+    requests_data = _eg_admin_payment_requests_for_template()
+    requests_data = sorted(
+        requests_data,
+        key=lambda x: str(x.get("created_at", "")),
+        reverse=True
+    )
+
+    return render_template(
+        "admin_payment_requests.html",
+        requests=requests_data
+    )
+
+
+@app.route("/admin/license-request/approve/<order_no>", methods=["POST", "GET"])
+def eg_admin_approve_license_request(order_no):
+    if not session.get("admin_logged_in"):
+        return redirect("/ss-admin-access")
+
+    requests_data = _eg_load_payment_requests()
+    users = load_users()
+
+    changed = False
+    approved_license = ""
+
+    for item in requests_data:
+        if str(item.get("order_no", "")) == str(order_no):
+            username = str(item.get("username", "") or "").strip()
+            if not username:
+                continue
+
+            user = users.get(username, {}) if isinstance(users, dict) else {}
+
+            license_key = str(item.get("license_key", "") or "").strip().upper()
+            if not license_key:
+                license_key = generate_unique_license_key(users)
+
+            user["active"] = True
+            user["license_key"] = license_key
+            user["license_type"] = "lifetime" if item.get("plan") == "lifetime" else "pro"
+            user["plan"] = item.get("plan", "pro_yearly")
+            user["expires_at"] = "2099-12-31" if item.get("plan") == "lifetime" else "2027-12-31"
+
+            users[username] = user
+
+            item["status"] = "approved_license_assigned"
+            item["license_key"] = license_key
+            item["admin_note"] = "Admin onayıyla lisans kullanıcı hesabına tanımlandı."
+            changed = True
+            approved_license = license_key
+            break
+
+    if changed:
+        save_users(users)
+        _eg_save_payment_requests(requests_data)
+
+    return redirect("/admin/license-requests")
+
+
+@app.route("/admin/license-request/reject/<order_no>", methods=["POST", "GET"])
+def eg_admin_reject_license_request(order_no):
+    if not session.get("admin_logged_in"):
+        return redirect("/ss-admin-access")
+
+    requests_data = _eg_load_payment_requests()
+    changed = False
+
+    for item in requests_data:
+        if str(item.get("order_no", "")) == str(order_no):
+            item["status"] = "rejected_or_cancelled"
+            item["admin_note"] = "Talep admin tarafından iptal edildi."
+            changed = True
+            break
+
+    if changed:
+        _eg_save_payment_requests(requests_data)
+
+    return redirect("/admin/license-requests")
+
+
+@app.route("/admin/payment-requests")
+def eg_admin_payment_requests_redirect_final():
+    return redirect("/admin/license-requests")
+# ===== ERATGUARD MANUAL LICENSE ADMIN FLOW END =====

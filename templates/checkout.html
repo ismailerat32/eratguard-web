@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>EratGuard PRO · Güvenli Ödeme</title>
+  <title>EratGuard PRO · Lisans Talebi</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{
@@ -20,7 +20,7 @@
       justify-content:center;
     }
     .card{
-      width:min(100%,540px);
+      width:min(100%,560px);
       border:1px solid rgba(32,240,138,.25);
       border-radius:30px;
       padding:22px;
@@ -29,39 +29,15 @@
         linear-gradient(180deg,rgba(8,42,27,.94),rgba(3,20,13,.98));
       box-shadow:0 20px 48px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.06);
     }
-    .top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:20px;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}
+    .brand{display:flex;align-items:center;gap:12px}
     .logo{
-      width:54px;
-      height:54px;
-      border-radius:18px;
-      display:grid;
-      place-items:center;
+      width:54px;height:54px;border-radius:18px;display:grid;place-items:center;
       background:linear-gradient(180deg,#31f99e,#0ecf72);
-      box-shadow:0 0 28px rgba(32,240,138,.20);
-      font-size:26px;
+      box-shadow:0 0 28px rgba(32,240,138,.20);font-size:26px;
     }
-    .brand h1{
-      font-size:22px;
-      line-height:1;
-      letter-spacing:-.6px;
-    }
-    .brand p{
-      margin-top:5px;
-      color:rgba(255,255,255,.58);
-      font-size:12px;
-      font-weight:800;
-    }
+    .brand h1{font-size:22px;line-height:1;letter-spacing:-.6px}
+    .brand p{margin-top:5px;color:rgba(255,255,255,.58);font-size:12px;font-weight:800}
     .pill{
       border:1px solid rgba(32,240,138,.28);
       background:rgba(32,240,138,.10);
@@ -79,53 +55,30 @@
       background:rgba(0,0,0,.16);
       margin-bottom:16px;
     }
-    .kicker{
-      color:#31f99e;
-      font-size:12px;
-      font-weight:900;
-      letter-spacing:1.6px;
-      margin-bottom:9px;
-    }
-    .hero h2{
-      font-size:32px;
-      line-height:1.05;
-      letter-spacing:-1px;
-      margin-bottom:10px;
-    }
-    .hero h2 span{
-      color:#20f08a;
-    }
-    .hero p{
-      color:rgba(255,255,255,.70);
-      font-size:14px;
-      line-height:1.48;
-      font-weight:750;
-    }
-    .info{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-      margin:14px 0;
-    }
+    .kicker{color:#31f99e;font-size:12px;font-weight:900;letter-spacing:1.6px;margin-bottom:9px}
+    .hero h2{font-size:31px;line-height:1.05;letter-spacing:-1px;margin-bottom:10px}
+    .hero h2 span{color:#20f08a}
+    .hero p{color:rgba(255,255,255,.72);font-size:14px;line-height:1.5;font-weight:750}
+    .info{display:grid;grid-template-columns:1fr;gap:10px;margin:14px 0}
     .box{
       border:1px solid rgba(255,255,255,.10);
       background:rgba(0,0,0,.18);
       border-radius:20px;
       padding:15px;
     }
-    .box b{
-      display:block;
-      color:rgba(255,255,255,.62);
-      font-size:12px;
-      margin-bottom:6px;
-    }
-    .box span{
-      color:#fff;
-      font-size:18px;
-      font-weight:950;
-    }
-    .box .green{
-      color:#31f99e;
+    .box b{display:block;color:rgba(255,255,255,.62);font-size:12px;margin-bottom:6px}
+    .box span{color:#fff;font-size:18px;font-weight:950}
+    .box .green{color:#31f99e}
+    .notice{
+      color:#d9fff0;
+      background:rgba(32,240,138,.09);
+      border:1px solid rgba(32,240,138,.22);
+      border-radius:18px;
+      padding:13px;
+      font-size:13px;
+      line-height:1.45;
+      font-weight:850;
+      margin:12px 0;
     }
     .warn{
       color:#ffd166;
@@ -138,28 +91,33 @@
       font-weight:850;
       margin:12px 0;
     }
-    .ready{
-      color:#31f99e;
-      background:rgba(32,240,138,.10);
-      border:1px solid rgba(32,240,138,.22);
-      border-radius:18px;
-      padding:13px;
-      font-size:13px;
-      line-height:1.45;
-      font-weight:850;
-      margin:12px 0;
+    label{display:block;margin-top:12px;color:rgba(255,255,255,.72);font-size:12px;font-weight:900}
+    input,select,textarea{
+      width:100%;
+      margin-top:7px;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius:16px;
+      background:rgba(0,0,0,.24);
+      color:#fff;
+      padding:14px;
+      font-size:14px;
+      outline:none;
     }
+    textarea{min-height:86px;resize:vertical}
     .btn{
+      width:100%;
       min-height:54px;
       border-radius:19px;
       display:flex;
       align-items:center;
       justify-content:center;
       text-decoration:none;
+      border:0;
       color:#03140d;
       background:linear-gradient(180deg,#31f99e,#12dc7a);
       font-weight:950;
-      margin-top:10px;
+      font-size:15px;
+      margin-top:12px;
       box-shadow:0 12px 30px rgba(32,240,138,.15);
     }
     .btn.secondary{
@@ -168,21 +126,9 @@
       border:1px solid rgba(255,255,255,.13);
       box-shadow:none;
     }
-    .mini{
-      margin-top:14px;
-      color:rgba(255,255,255,.50);
-      font-size:12px;
-      line-height:1.45;
-      font-weight:750;
-      text-align:center;
-    }
-    .copy{
-      text-align:center;
-      color:rgba(255,255,255,.42);
-      font-size:11px;
-      font-weight:750;
-      margin-top:16px;
-    }
+    .mini{margin-top:14px;color:rgba(255,255,255,.55);font-size:12px;line-height:1.45;font-weight:750;text-align:center}
+    .copy{text-align:center;color:rgba(255,255,255,.42);font-size:11px;font-weight:750;margin-top:16px}
+    a{color:rgba(32,240,138,.78)}
   </style>
 </head>
 <body>
@@ -192,16 +138,16 @@
         <div class="logo">🛡️</div>
         <div>
           <h1>EratGuard</h1>
-          <p>PRO güvenli ödeme</p>
+          <p>PRO lisans merkezi</p>
         </div>
       </div>
-      <div class="pill">iyzico</div>
+      <div class="pill">Lisans Talebi</div>
     </section>
 
     <section class="hero">
-      <div class="kicker">CANLI ÖDEME HAZIRLIĞI</div>
-      <h2>Güvenli ödeme <span>iyzico ile.</span></h2>
-      <p>Kart bilgileri EratGuard içinde tutulmaz. Ödeme, iyzico güvenli ödeme sayfasında tamamlanır.</p>
+      <div class="kicker">KONTROLLÜ LİSANS AKTİVASYONU</div>
+      <h2>EratGuard PRO <span>lisans talebi</span> oluştur.</h2>
+      <p>{{ message or "Talebiniz için benzersiz sipariş numarası oluşturulur. Ödeme bildirimi kontrol edildikten sonra lisansınız hesabınıza tanımlanır." }}</p>
     </section>
 
     <section class="info">
@@ -215,19 +161,40 @@
       </div>
     </section>
 
-    {% if payment_ready %}
-      <div class="ready">Ödeme bağlantısı hazır. Devam ettiğinizde iyzico güvenli ödeme sayfası açılır.</div>
-      <a class="btn" href="{{ payment_link }}">iyzico Ödeme Sayfasına Git</a>
-    {% else %}
-      <div class="warn">{{ message or "iyzico ödeme linki henüz aktif değil." }}</div>
-      <!-- Test ödeme butonu canlı başvuru görünümünden kaldırıldı. -->
-      <a class="btn secondary" href="/u/pricing">Paketlere Dön</a>
-    {% endif %}
+    <div class="notice">
+      ✅ Kart bilgileriniz EratGuard tarafından saklanmaz.<br>
+      ✅ Talebiniz sipariş numarasıyla kayıt altına alınır.<br>
+      ✅ Ödeme onayı sonrası lisansınız hesabınıza tanımlanır.
+    </div>
 
+    <div class="warn">
+      Bu ekran doğrudan ödeme tahsilatı yapmaz. Lisans aktivasyonu, ödeme bildirimi ve admin onayı sonrası tamamlanır.
+    </div>
+
+    <form method="POST" action="/u/checkout">
+      <input type="hidden" name="plan" value="{{ plan }}">
+
+      <label>İletişim e-postası</label>
+      <input name="email" type="email" placeholder="ornek@eposta.com">
+
+      <label>Ödeme yöntemi</label>
+      <select name="payment_method">
+        <option value="manual_transfer">Banka/EFT/Havale bildirimi</option>
+        <option value="manual_review">Manuel ödeme onayı</option>
+        <option value="support_contact">Destek üzerinden lisans talebi</option>
+      </select>
+
+      <label>Not / ödeme açıklaması</label>
+      <textarea name="note" placeholder="Ödeme yaptıysanız açıklama, dekont bilgisi veya size ulaşabileceğimiz kısa notu yazın."></textarea>
+
+      <button class="btn" type="submit">Lisans Talebi Oluştur</button>
+    </form>
+
+    <a class="btn secondary" href="/u/pricing">Paketlere Dön</a>
     <a class="btn secondary" href="/u/license">Lisans Merkezine Dön</a>
 
-    <p class="mini">Ödeme sonrası lisans aktivasyonu EratGuard PRO lisans merkezi üzerinden yapılır.</p>
-    <div class="copy">© 2026 EratGuard PRO · Tüm hakları saklıdır. · <a style="color:rgba(32,240,138,.72);text-decoration:none;font-weight:900" href="/u/legal">Telif ve Yasal Bildirim</a></div>
+    <p class="mini">Lisans talebi oluşturduktan sonra sipariş numaranızı saklayın. Destek görüşmelerinde bu numara üzerinden işlem yapılır.</p>
+    <div class="copy">© 2026 EratGuard PRO · Tüm hakları saklıdır. · <a href="/u/legal">Telif ve Yasal Bildirim</a></div>
   </main>
 </body>
 </html>

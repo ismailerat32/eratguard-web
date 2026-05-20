@@ -3,547 +3,138 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EratGuard ADMIN Ödeme Talepleri</title>
+<title>EratGuard ADMIN · Lisans Talepleri</title>
 <style>
-  *{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
-  }
-
-  :root{
-    --bg:#000805;
-    --panel:#03170d;
-    --line:rgba(49,249,158,.20);
-    --line2:rgba(156,255,93,.25);
-    --text:#f4fff7;
-    --muted:rgba(235,255,240,.62);
-    --green:#9cff5d;
-    --green2:#31f99e;
-    --gold:#ffe27a;
-    --danger:#ff4d5d;
-  }
-
+  *{box-sizing:border-box;margin:0;padding:0}
   body{
-    margin:0;
     min-height:100vh;
-    color:var(--text);
-    font-family:Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#f4fff7;
     background:
       radial-gradient(circle at 18% 10%, rgba(49,249,158,.16), transparent 27%),
       radial-gradient(circle at 85% 30%, rgba(156,255,93,.10), transparent 24%),
-      linear-gradient(180deg, #000503 0%, #000b06 48%, #000302 100%);
-    overflow-x:hidden;
+      linear-gradient(180deg,#000503,#000b06 48%,#000302);
+    padding:22px 14px 44px;
   }
-
-  body:before{
-    content:"";
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    background:
-      linear-gradient(rgba(156,255,93,.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(156,255,93,.035) 1px, transparent 1px);
-    background-size:44px 44px;
-    mask-image:linear-gradient(to bottom, transparent, black 12%, black 82%, transparent);
-  }
-
-  body:after{
-    content:"";
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    background-image:
-      radial-gradient(circle, rgba(235,255,240,.45) 1px, transparent 1.5px),
-      radial-gradient(circle, rgba(49,249,158,.30) 1px, transparent 1.5px);
-    background-size:96px 96px, 142px 142px;
-    background-position:0 0, 22px 38px;
-    opacity:.25;
-  }
-
-  .page{
-    position:relative;
-    z-index:1;
-    width:min(720px, 100%);
-    margin:0 auto;
-    padding:30px 20px 42px;
-  }
-
-  .topbar{
-    display:flex;
-    align-items:center;
-    gap:14px;
+  .page{width:min(900px,100%);margin:0 auto}
+  .top{
+    border:1px solid rgba(156,255,93,.25);
+    border-radius:26px;
+    padding:20px;
+    background:rgba(3,23,13,.82);
     margin-bottom:16px;
+    box-shadow:0 24px 70px rgba(0,0,0,.28);
   }
-
-  .brand-icon{
-    width:68px;
-    height:68px;
-    border-radius:22px;
-    border:1px solid var(--line2);
-    background:
-      radial-gradient(circle at 50% 35%, rgba(156,255,93,.22), transparent 50%),
-      rgba(4,22,12,.70);
-    box-shadow:0 0 34px rgba(49,249,158,.18);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:var(--green);
-  }
-
-  .brand-icon svg{
-    width:40px;
-    height:40px;
-    fill:none;
-    stroke:currentColor;
-    stroke-width:2.4;
-    stroke-linecap:round;
-    stroke-linejoin:round;
-  }
-
-  .brand h1{
-    margin:0;
-    font-size:clamp(27px, 6.6vw, 40px);
-    line-height:.95;
-    letter-spacing:-.07em;
-    font-weight:950;
-  }
-
-  .brand h1 span{
-    color:var(--green);
-    text-shadow:0 0 18px rgba(156,255,93,.35);
-  }
-
-  .brand p{
-    margin:6px 0 0;
-    color:var(--muted);
-    font-size:clamp(14px, 3.6vw, 19px);
-    font-weight:650;
-    letter-spacing:-.03em;
-  }
-
-  .shell{
-    border:1px solid var(--line2);
-    border-radius:28px;
-    overflow:hidden;
-    background:
-      radial-gradient(circle at 50% 0%, rgba(156,255,93,.17), transparent 34%),
-      linear-gradient(180deg, rgba(8,47,24,.82), rgba(0,12,7,.88));
-    box-shadow:
-      0 0 0 1px rgba(49,249,158,.05) inset,
-      0 28px 80px rgba(0,0,0,.35),
-      0 0 55px rgba(49,249,158,.10);
-  }
-
-  .hero{
-    padding:22px 24px 18px;
-    border-bottom:1px solid rgba(49,249,158,.15);
-  }
-
-  .hero-head{
-    display:flex;
-    align-items:center;
-    gap:13px;
-  }
-
-  .hero-symbol{
-    width:70px;
-    height:70px;
-    border-radius:22px;
-    border:1px solid var(--line2);
-    background:
-      radial-gradient(circle at 50% 30%, rgba(156,255,93,.22), transparent 55%),
-      rgba(1,18,9,.70);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex:0 0 auto;
-    color:var(--green);
-  }
-
-  .hero-symbol svg{
-    width:42px;
-    height:42px;
-    fill:none;
-    stroke:currentColor;
-    stroke-width:2.35;
-    stroke-linecap:round;
-    stroke-linejoin:round;
-  }
-
-  .hero-title h2{
-    margin:0;
-    font-size:clamp(24px, 6vw, 36px);
-    line-height:1.02;
-    letter-spacing:-.06em;
-    font-weight:950;
-  }
-
-  .hero-title h2 span{
-    color:var(--green);
-  }
-
-  .hero-title p{
-    margin:8px 0 0;
-    color:var(--muted);
-    font-size:clamp(13px, 3.4vw, 17px);
-    line-height:1.3;
-    font-weight:650;
-    letter-spacing:-.03em;
-  }
-
-  .content{
-    padding:18px 24px 24px;
-    display:grid;
-    gap:14px;
-  }
-
-  .panel{
-    border:1px solid var(--line);
-    border-radius:22px;
-    padding:15px;
-    background:
-      radial-gradient(circle at 50% 0%, rgba(49,249,158,.08), transparent 48%),
-      rgba(0,12,7,.66);
-    box-shadow:0 18px 50px rgba(0,0,0,.16);
-  }
-
-  .section-head{
-    display:flex;
-    align-items:center;
-    gap:11px;
-    margin-bottom:14px;
-  }
-
-  .section-icon{
-    font-size:29px;
-    line-height:1;
-  }
-
-  .section-head h3{
-    margin:0;
-    font-size:28px;
-    line-height:1.05;
-    letter-spacing:-.055em;
-    font-weight:950;
-  }
-
-  .section-head p{
-    margin:6px 0 0;
-    color:var(--muted);
-    font-size:14px;
-    font-weight:700;
-  }
-
-  .empty{
-    border:1px dashed rgba(49,249,158,.22);
-    border-radius:20px;
-    padding:24px 16px;
-    text-align:center;
-    background:rgba(0,8,5,.42);
-  }
-
-  .empty .big{
-    font-size:42px;
-    margin-bottom:8px;
-  }
-
-  .empty b{
-    display:block;
-    font-size:21px;
-    letter-spacing:-.04em;
-  }
-
-  .empty span{
-    display:block;
-    margin-top:7px;
-    color:var(--muted);
-    font-weight:700;
-    line-height:1.35;
-  }
-
-  .request-list{
-    display:grid;
-    gap:10px;
-  }
-
-  .request-card{
-    border:1px solid rgba(49,249,158,.17);
-    border-radius:18px;
-    padding:12px;
-    background:
-      radial-gradient(circle at 15% 0%, rgba(156,255,93,.10), transparent 40%),
-      rgba(0,9,5,.58);
-  }
-
-  .request-top{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:10px;
-    margin-bottom:10px;
-  }
-
-  .request-user{
-    min-width:0;
-  }
-
-  .request-user b{
-    display:block;
-    font-size:18px;
-    line-height:1.1;
-    letter-spacing:-.04em;
-    word-break:break-word;
-  }
-
-  .request-user span{
-    display:block;
-    margin-top:5px;
-    color:var(--muted);
-    font-size:12px;
-    font-weight:800;
-  }
-
-  .badge{
-    min-width:78px;
-    text-align:center;
-    border-radius:999px;
-    padding:7px 9px;
-    border:1px solid rgba(255,226,122,.34);
-    background:rgba(255,226,122,.10);
-    color:var(--gold);
-    font-weight:950;
-    font-size:11px;
-    text-transform:uppercase;
-  }
-
-  .badge.ok{
-    border-color:rgba(156,255,93,.36);
-    background:rgba(156,255,93,.10);
-    color:var(--green);
-  }
-
-  .badge.reject{
-    border-color:rgba(255,77,93,.36);
-    background:rgba(255,77,93,.10);
-    color:#ff9aa3;
-  }
-
-  .mini-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-  }
-
-  .mini{
-    min-height:48px;
-    border-radius:14px;
-    border:1px solid rgba(235,255,240,.08);
-    background:rgba(0,0,0,.26);
-    padding:9px;
-  }
-
-  .mini span{
-    display:block;
-    color:rgba(235,255,240,.48);
-    font-weight:850;
-    font-size:10.5px;
-    margin-bottom:4px;
-  }
-
-  .mini b{
-    display:block;
-    color:#fff;
-    font-size:12px;
-    line-height:1.18;
-    word-break:break-word;
-  }
-
-  .actions{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-    margin-top:10px;
-  }
-
+  h1{font-size:32px;letter-spacing:-1px;margin-bottom:7px}
+  h1 span{color:#9cff5d}
+  .sub{color:rgba(235,255,240,.66);font-weight:750;line-height:1.45}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
   .btn{
-    min-height:52px;
-    border:0;
-    border-radius:17px;
-    cursor:pointer;
-    text-decoration:none;
-    display:flex;
+    min-height:42px;
+    border-radius:14px;
+    padding:0 14px;
+    display:inline-flex;
     align-items:center;
     justify-content:center;
-    gap:9px;
-    color:#fff;
-    font-size:16px;
+    text-decoration:none;
+    border:0;
     font-weight:950;
-    letter-spacing:-.03em;
-    background:linear-gradient(180deg, #74ff38, #24bf12);
-    box-shadow:0 0 28px rgba(96,255,54,.24);
+    color:#03140d;
+    background:linear-gradient(180deg,#31f99e,#12dc7a);
   }
-
-  .btn.secondary{
+  .btn.secondary{color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
+  .btn.danger{color:#fff;background:rgba(255,77,93,.20);border:1px solid rgba(255,77,93,.35)}
+  .card{
     border:1px solid rgba(49,249,158,.18);
-    background:rgba(0,12,7,.58);
-    box-shadow:none;
-    color:rgba(235,255,240,.86);
+    border-radius:22px;
+    padding:16px;
+    background:rgba(0,12,7,.70);
+    margin-bottom:12px;
   }
-
-  .btn.gold{
-    border:1px solid rgba(255,226,122,.34);
-    background:rgba(255,226,122,.12);
-    color:#fff1a6;
-    box-shadow:none;
+  .row{display:grid;grid-template-columns:160px 1fr;gap:8px;margin:8px 0}
+  .row b{color:rgba(235,255,240,.58);font-size:12px}
+  .row span{font-weight:850;word-break:break-word}
+  .status{
+    display:inline-flex;
+    border-radius:999px;
+    padding:8px 11px;
+    background:rgba(255,209,102,.12);
+    border:1px solid rgba(255,209,102,.25);
+    color:#ffd166;
+    font-weight:950;
+    font-size:12px;
   }
-
-  .footer-actions{
-    display:grid;
-    gap:10px;
+  .status.ok{background:rgba(49,249,158,.10);border-color:rgba(49,249,158,.25);color:#31f99e}
+  .status.bad{background:rgba(255,77,93,.12);border-color:rgba(255,77,93,.30);color:#ff8b96}
+  .empty{
+    text-align:center;
+    border:1px dashed rgba(49,249,158,.25);
+    border-radius:22px;
+    padding:26px;
+    color:rgba(235,255,240,.70);
+    background:rgba(0,0,0,.18);
+    font-weight:850;
   }
-
-  @media(max-width:560px){
-    .page{
-      padding:28px 20px 36px;
-    }
-
-    .hero{
-      padding:20px 24px 16px;
-    }
-
-    .content{
-      padding:16px 24px 22px;
-      gap:12px;
-    }
-
-    .panel{
-      padding:13px;
-      border-radius:20px;
-    }
-
-    .section-head h3{
-      font-size:25px;
-    }
-
-    .btn{
-      min-height:50px;
-      font-size:15.5px;
-    }
+  @media(max-width:620px){
+    .row{grid-template-columns:1fr}
+    h1{font-size:27px}
   }
 </style>
 </head>
 <body>
-
-{% set pending_count = requests|selectattr("status", "equalto", "pending")|list|length if requests else 0 %}
-{% set total_count = requests|length if requests else 0 %}
-
 <div class="page">
-  <header class="topbar">
-    <div class="brand-icon">
-      <svg viewBox="0 0 64 64">
-        <path d="M32 6l22 8v16c0 14-9 24-22 30C19 54 10 44 10 30V14l22-8z"/>
-        <path d="M21 32h22"/>
-        <path d="M23 24h18"/>
-        <path d="M23 40h12"/>
-      </svg>
+  <section class="top">
+    <h1>EratGuard <span>Lisans Talepleri</span></h1>
+    <p class="sub">
+      Kullanıcıların oluşturduğu lisans ve ödeme bildirimleri burada görünür.
+      Onayladığınızda sistem lisans kodu üretir ve kullanıcı hesabına tanımlar.
+    </p>
+    <div class="actions">
+      <a class="btn secondary" href="/admin/dashboard">Admin Paneline Dön</a>
+      <a class="btn secondary" href="/admin/license-requests">Yenile</a>
     </div>
-    <div class="brand">
-      <h1>EratGuard <span>ADMIN</span></h1>
-      <p>Ödeme kontrol merkezi</p>
+  </section>
+
+  {% if requests and requests|length > 0 %}
+    {% for r in requests %}
+      {% set st = r.get("status","payment_waiting") %}
+      <article class="card">
+        <div class="row"><b>Sipariş No</b><span>{{ r.get("order_no","—") }}</span></div>
+        <div class="row"><b>Tarih</b><span>{{ r.get("created_at","—") }}</span></div>
+        <div class="row"><b>Kullanıcı</b><span>{{ r.get("username","—") }}</span></div>
+        <div class="row"><b>E-posta</b><span>{{ r.get("email","—") or "—" }}</span></div>
+        <div class="row"><b>Paket</b><span>{{ r.get("plan_label","—") }} · {{ r.get("plan_price","") }}</span></div>
+        <div class="row"><b>Yöntem</b><span>{{ r.get("payment_method","—") }}</span></div>
+        <div class="row">
+          <b>Durum</b>
+          <span>
+            {% if "approved" in st %}
+              <span class="status ok">{{ st }}</span>
+            {% elif "reject" in st or "cancel" in st %}
+              <span class="status bad">{{ st }}</span>
+            {% else %}
+              <span class="status">{{ st }}</span>
+            {% endif %}
+          </span>
+        </div>
+        <div class="row"><b>Not</b><span>{{ r.get("note","—") or "—" }}</span></div>
+        <div class="row"><b>Lisans</b><span>{{ r.get("license_key","—") or "—" }}</span></div>
+
+        <div class="actions">
+          {% if "approved" not in st and "reject" not in st and "cancel" not in st %}
+            <a class="btn" href="/admin/license-request/approve/{{ r.get('order_no') }}">Onayla ve Lisans Ata</a>
+            <a class="btn danger" href="/admin/license-request/reject/{{ r.get('order_no') }}">İptal Et</a>
+          {% else %}
+            <a class="btn secondary" href="/admin/license-requests">İşlem Tamamlandı</a>
+          {% endif %}
+        </div>
+      </article>
+    {% endfor %}
+  {% else %}
+    <div class="empty">
+      Henüz lisans talebi yok.
     </div>
-  </header>
-
-  <main class="shell">
-    <section class="hero">
-      <div class="hero-head">
-        <div class="hero-symbol">
-          <svg viewBox="0 0 64 64">
-            <rect x="10" y="16" width="44" height="32" rx="6"/>
-            <path d="M10 26h44"/>
-            <path d="M18 38h12"/>
-            <circle cx="47" cy="44" r="8"/>
-            <path d="M43 44h8M47 40v8"/>
-          </svg>
-        </div>
-        <div class="hero-title">
-          <h2>Ödeme <span>Talepleri</span></h2>
-          <p>Premium, lisans ve manuel ödeme isteklerini buradan takip et.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="content">
-      <section class="panel">
-        <div class="section-head">
-          <div class="section-icon">💳</div>
-          <div>
-            <h3>Talep Listesi</h3>
-            <p>{{ total_count }} toplam · {{ pending_count }} bekleyen</p>
-          </div>
-        </div>
-
-        {% if requests %}
-          <div class="request-list">
-            {% for r in requests|reverse %}
-              <article class="request-card">
-                <div class="request-top">
-                  <div class="request-user">
-                    <b>{{ r.get("username", "-") }}</b>
-                    <span>{{ r.get("created_at", r.get("date", "-")) }}</span>
-                  </div>
-
-                  {% set st = r.get("status", "pending") %}
-                  <div class="badge {% if st == 'approved' %}ok{% elif st == 'rejected' %}reject{% endif %}">
-                    {{ st }}
-                  </div>
-                </div>
-
-                <div class="mini-grid">
-                  <div class="mini">
-                    <span>Paket</span>
-                    <b>{{ r.get("plan", "-") }}</b>
-                  </div>
-                  <div class="mini">
-                    <span>Yöntem</span>
-                    <b>{{ r.get("method", "-") }}</b>
-                  </div>
-                  <div class="mini">
-                    <span>Not</span>
-                    <b>{{ r.get("note", "-") }}</b>
-                  </div>
-                  <div class="mini">
-                    <span>Lisans</span>
-                    <b>{{ r.get("license_key", "-") }}</b>
-                  </div>
-                </div>
-
-                <div class="actions">
-                  {% if r.get("username") and r.get("license_key") %}
-                    <a class="btn" href="/admin/approve-payment/{{ r.get('username') }}/{{ r.get('license_key') }}">✅ Onayla</a>
-                  {% else %}
-                    <a class="btn secondary" href="/admin/licenses">🔐 Lisanslar</a>
-                  {% endif %}
-                  <a class="btn gold" href="/admin/panel">👥 Kullanıcılar</a>
-                </div>
-              </article>
-            {% endfor %}
-          </div>
-        {% else %}
-          <div class="empty">
-            <div class="big">🟢</div>
-            <b>Bekleyen ödeme talebi yok</b>
-            <span>Sistem sakin. Yeni ödeme talepleri burada görünecek.</span>
-          </div>
-        {% endif %}
-      </section>
-
-      <div class="footer-actions">
-        <a class="btn" href="/admin">← Admin Dashboard</a>
-        <a class="btn secondary" href="/admin/licenses">🔐 Lisanslar</a>
-      </div>
-    </section>
-  </main>
+  {% endif %}
 </div>
-
 </body>
 </html>
