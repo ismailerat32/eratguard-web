@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-import os, re, sys, json, time, random, string
+import os, re, sys, json, time, random, string, getpass
 from urllib.parse import urljoin, urlparse, urldefrag
 import requests
 
 BASE_URL = os.getenv("BASE_URL", "https://spamshield-peld.onrender.com").rstrip("/")
 ADMIN_USER = os.getenv("ADMIN_USER", "admin")
 ADMIN_PASS = os.getenv("ADMIN_PASS", "")
+ADMIN_CODE = os.getenv("ADMIN_CODE", "")
 USER_PASS = os.getenv("PROBE_USER_PASS", "Probe12345")
 MAX_VISITS = int(os.getenv("MAX_VISITS", "300"))
 TIMEOUT = int(os.getenv("TIMEOUT", "20"))
@@ -251,11 +252,33 @@ def try_register_and_login(sess):
         session_post(sess, BASE_URL + "/login", p, "user-login")
 
 def try_admin_login(sess):
+    global ADMIN_PASS, ADMIN_CODE
+
     session_get(sess, BASE_URL + "/ss-admin-access", "admin")
+
     if not ADMIN_PASS:
-        add_warn("ADMIN_PASS boş; admin POST login atlandı. Tam tarama için ADMIN_PASS ver.")
+        try:
+            ADMIN_PASS = getpass.getpass("Admin şifresi gir: ").strip()
+        except Exception:
+            ADMIN_PASS = ""
+
+    if ADMIN_PASS and not ADMIN_CODE:
+        try:
+            tmp_code = getpass.getpass("Admin kodu varsa gir, yoksa Enter: ").strip()
+            ADMIN_CODE = tmp_code
+        except Exception:
+            ADMIN_CODE = ""
+
+    if not ADMIN_PASS:
+        add_warn("ADMIN_PASS boş; admin POST login atlandı.")
         return
-    session_post(sess, BASE_URL + "/ss-admin-access", {"username": ADMIN_USER, "password": ADMIN_PASS}, "admin-login")
+
+    session_post(
+        sess,
+        BASE_URL + "/ss-admin-access",
+        {"username": ADMIN_USER, "password": ADMIN_PASS, "admin_code": ADMIN_CODE},
+        "admin-login"
+    )
 
 def crawl(sess, label, seeds):
     seen = set()
