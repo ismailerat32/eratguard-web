@@ -33,14 +33,11 @@ def _load_dotenv_fallback():
         pass
 
 
-def _smtp_connect_ipv4(smtp_host, smtp_port, timeout=25):
+def _smtp_connect_ipv4_fast(smtp_host, smtp_port, timeout=8):
     """
-    Render üzerinde bazı ortamlarda SMTP host IPv6 çözülürse
-    [Errno 101] Network is unreachable hatası oluşabiliyor.
-    Bu yardımcı fonksiyon sadece IPv4 A kayıtlarını dener.
+    SMTP bağlantısını kısa timeout ile sadece IPv4 üzerinden dener.
+    Uzun bekleyip Gunicorn worker timeout oluşturmaması için bilinçli olarak hızlı başarısız olur.
     """
-    last_error = None
-
     try:
         addr_infos = socket.getaddrinfo(
             smtp_host,
@@ -54,22 +51,29 @@ def _smtp_connect_ipv4(smtp_host, smtp_port, timeout=25):
     if not addr_infos:
         raise RuntimeError("SMTP IPv4 adresi bulunamadı")
 
-    for family, socktype, proto, canonname, sockaddr in addr_infos:
+    last_error = None
+
+    for family, socktype, proto, canonname, sockaddr in addr_infos[:2]:
         ip = sockaddr[0]
-        server = None
         try:
+            sock = socket.create_connection((ip, smtp_port), timeout=timeout)
             server = smtplib.SMTP(timeout=timeout)
-            server.connect(ip, smtp_port)
+            server.sock = sock
+            server.file = sock.makefile("rb")
+            server.helo_resp = None
+            server.ehlo_resp = None
+            server.esmtp_features = {}
+            server.does_esmtp = False
+            server.getreply()
             return server, ip
         except Exception as e:
             last_error = e
             try:
-                if server:
-                    server.close()
+                sock.close()
             except Exception:
                 pass
 
-    raise RuntimeError(f"SMTP IPv4 bağlantı hatası: {last_error}")
+    raise RuntimeError(f"SMTP IPv4 hızlı bağlantı hatası: {last_error}")
 
 
 def send_mail(host=None, port=None, user=None, password=None, to_email="", subject="", body=""):
@@ -80,6 +84,7 @@ def send_mail(host=None, port=None, user=None, password=None, to_email="", subje
     smtp_user = (user or os.getenv("SMTP_USER", "")).strip()
     smtp_pass = (password or os.getenv("SMTP_PASS", "")).strip()
     smtp_from = (os.getenv("SMTP_FROM", "") or smtp_user).strip()
+    timeout = int(os.getenv("SMTP_TIMEOUT", "8"))
 
     smtp_pass = smtp_pass.replace(" ", "")
 
@@ -88,6 +93,8 @@ def send_mail(host=None, port=None, user=None, password=None, to_email="", subje
 
     if not to_email:
         return False, "Alıcı e-posta eksik"
+
+    server = None
 
     try:
         msg = MIMEMultipart()
@@ -99,15 +106,10 @@ def send_mail(host=None, port=None, user=None, password=None, to_email="", subje
         context = ssl.create_default_context()
 
         if smtp_port == 465:
-            server = smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=25, context=context)
+            server = smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=timeout, context=context)
             connected_via = smtp_host
         else:
-            try:
-                server, connected_via = _smtp_connect_ipv4(smtp_host, smtp_port, timeout=25)
-            except Exception:
-                server = smtplib.SMTP(smtp_host, smtp_port, timeout=25)
-                connected_via = smtp_host
-
+            server, connected_via = _smtp_connect_ipv4_fast(smtp_host, smtp_port, timeout=timeout)
             server.ehlo()
             server.starttls(context=context)
             server.ehlo()
@@ -117,5 +119,11 @@ def send_mail(host=None, port=None, user=None, password=None, to_email="", subje
         server.quit()
 
         return True, f"Mail gönderildi via {connected_via}"
+
     except Exception as e:
+        try:
+            if server:
+                server.close()
+        except Exception:
+            pass
         return False, f"Mail hatası: {e}"
