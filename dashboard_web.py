@@ -50,7 +50,7 @@ except Exception:
     app.secret_key = "eratguard-stable-render-session-secret-2026-admin-mobile"
 # ===== ERATGUARD STABLE SESSION SECRET END =====
 
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "eratguard_dev_key")
+# app.secret_key already configured above with stable EratGuard/Render secret.
 
 LOG_FILE = "logs/log.txt"
 WATCHLIST_FILE = "data/watchlist.json"
