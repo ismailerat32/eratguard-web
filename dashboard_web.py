@@ -1,13 +1,3 @@
-# ===== RENDER BOOT DEBUG START =====
-try:
-    import os as _render_boot_os
-    print("RENDER_BOOT_DEBUG: dashboard_web.py imported", flush=True)
-    print("RENDER_BOOT_DEBUG: PORT=" + str(_render_boot_os.environ.get("PORT")), flush=True)
-    print("RENDER_BOOT_DEBUG: RENDER=" + str(_render_boot_os.environ.get("RENDER")), flush=True)
-except Exception as _render_boot_err:
-    print("RENDER_BOOT_DEBUG_ERROR:", _render_boot_err, flush=True)
-# ===== RENDER BOOT DEBUG END =====
-
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import os
 import json
