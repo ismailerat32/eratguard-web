@@ -56,6 +56,22 @@
             color: #fff;
             font-weight: 700;
         }
+        .btn-link {
+            display: block;
+            width: 100%;
+            margin-top: 12px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(147,197,253,.35);
+            background: rgba(147,197,253,.08);
+            color: #bfdbfe;
+            font-weight: 800;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-link:hover {
+            background: rgba(147,197,253,.14);
+        }
         .alert {
             border-radius: 14px;
             padding: 14px 16px;
@@ -309,6 +325,7 @@
 
         {% if success %}
             <div class="alert success">{{ message }}</div>
+            <a class="btn-link" href="/reset-password-code">Kodum var, şifreyi yenile →</a>
 
             {% if false and reset_code %}
                 <div class="box">
