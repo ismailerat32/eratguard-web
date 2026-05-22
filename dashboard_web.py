@@ -4691,6 +4691,71 @@ def _ss_titanium_analyze_sms(text):
     raw = str(text or "").strip()
     lowered = raw.lower()
 
+    # EratGuard hardened analyzer bridge:
+    # Kullanıcı paneli, APK WebView ve Titanium scan aynı güçlendirilmiş motoru kullansın.
+    if not raw:
+        return {
+            "text": raw,
+            "score": 0,
+            "status": "empty",
+            "label": "Boş mesaj",
+            "recommended_action": "none",
+            "summary": "Analiz için SMS metni gerekli.",
+            "signals": ["SMS metni girilmedi."],
+        }
+
+    try:
+        from analyzer import analyze_sms as _eg_hardened_analyze_sms
+
+        hardened = _eg_hardened_analyze_sms("USER", raw)
+        h_status = str(hardened.get("status", "")).upper()
+        h_score = int(hardened.get("score", 0) or 0)
+        h_category = str(hardened.get("category", "GENEL") or "GENEL")
+        h_reason = str(hardened.get("reason", "") or "")
+
+        if h_status == "SPAM":
+            if h_score >= 60:
+                status = "riskli"
+                label = "Riskli"
+                action = "quarantine"
+                summary = "Mesaj yüksek riskli görünüyor. Karantinaya alınması önerilir."
+            else:
+                status = "supheli"
+                label = "Şüpheli"
+                action = "review"
+                summary = "Mesaj şüpheli sinyaller taşıyor. Kullanıcı onayıyla incelenmelidir."
+        else:
+            status = "guvenli"
+            label = "Güvenli"
+            action = "safe"
+            summary = "Belirgin spam/dolandırıcılık sinyali düşük görünüyor."
+
+        signals = []
+        if h_category:
+            signals.append("Kategori: " + h_category)
+
+        if h_reason and h_reason != "CLEAN":
+            for part in h_reason.split(" + "):
+                part = part.strip()
+                if part:
+                    signals.append("Sinyal: " + part)
+
+        if not signals:
+            signals.append("Belirgin risk sinyali bulunamadı")
+
+        return {
+            "text": raw,
+            "score": max(0, min(h_score, 100)),
+            "status": status,
+            "label": label,
+            "recommended_action": action,
+            "summary": summary,
+            "signals": signals[:8],
+        }
+
+    except Exception as _eg_hardened_err:
+        print("HARDENED_ANALYZER_BRIDGE_ERROR:", _eg_hardened_err, flush=True)
+
     signals = []
     score = 0
 
