@@ -1,0 +1,33 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    signingConfigs {
+        release {
+            storeFile file("../keystore/eratguard-release-key.jks")
+            storePassword System.getenv("ERATGUARD_KEYSTORE_PASSWORD")
+            keyAlias "eratguard"
+            keyPassword System.getenv("ERATGUARD_KEY_PASSWORD")
+        }
+    }
+
+    namespace 'com.eratguard.app'
+    compileSdk 34
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    defaultConfig {
+        applicationId "com.eratguard.app"
+        minSdk 23
+        targetSdk 34
+        versionCode 8
+        versionName "1.0.6-beta"
+    }
+}
