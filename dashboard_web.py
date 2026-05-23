@@ -1144,11 +1144,19 @@ def eg_final_reset_password_code():
 # ===== ERATGUARD ADMIN FORGOT MAIL DIAGNOSTIC START =====
 # Admin-only diagnostic. Public kullanıcıya account var/yok bilgisi sızdırmaz.
 @app.route("/admin/forgot-mail-diagnostic", methods=["GET", "POST"])
+@app.route("/admin-mail-diagnostic", methods=["GET", "POST"])
 def eg_admin_forgot_mail_diagnostic():
-    if not login_required():
-        return redirect(url_for("login"))
-    if not admin_required():
-        return redirect(url_for("index"))
+    admin_ok_func = globals().get("_ss_admin_ok")
+    is_admin_ok = admin_ok_func() if callable(admin_ok_func) else bool(
+        session.get("logged_in") and (
+            session.get("is_admin")
+            or session.get("role") == "admin"
+            or session.get("username") == "admin"
+        )
+    )
+
+    if not is_admin_ok:
+        return redirect("/ss-admin-access")
 
     def _mask_email(v):
         v = str(v or "").strip()
