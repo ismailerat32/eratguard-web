@@ -1335,6 +1335,16 @@ def forgot_password_live():
             reset_link = url_for("eg_final_reset_password_token", token=raw_token, _external=True)
             reset_code = create_reset_code(username)
 
+            try:
+                _ss_titanium_event_for_user(username, "password_reset_requested", {
+                    "channel": "e-posta",
+                    "status": "created",
+                    "source": "forgot_password",
+                    "identity_type": "email" if "@" in identity else "username"
+                })
+            except Exception as e:
+                print("PASSWORD_RESET_NOTIFICATION_ERROR:", e, flush=True)
+
             target_email = str(user.get("email", "") or "").strip()
             if not target_email and "@" in str(username):
                 target_email = str(username)
@@ -4687,6 +4697,25 @@ def _ss_titanium_event(event_type, payload=None):
     })
     _ss_titanium_write_json(_SS_TITANIUM_EVENTS_FILE, events[-300:])
 
+def _ss_titanium_event_for_user(username, event_type, payload=None):
+    try:
+        target_username = str(username or "").strip()
+        if not target_username:
+            return False
+
+        events = _ss_titanium_read_json(_SS_TITANIUM_EVENTS_FILE, [])
+        events.append({
+            "created_at": _ss_titanium_now(),
+            "username": target_username,
+            "event_type": event_type,
+            "payload": payload or {}
+        })
+        _ss_titanium_write_json(_SS_TITANIUM_EVENTS_FILE, events[-300:])
+        return True
+    except Exception as e:
+        print("TITANIUM_EVENT_FOR_USER_ERROR:", e, flush=True)
+        return False
+
 def _ss_titanium_analyze_sms(text):
     raw = str(text or "").strip()
     lowered = raw.lower()
@@ -5968,10 +5997,18 @@ def _ss_notify_event_title(event_type, payload):
             return "Titanium motor riskli mesajı karantinaya aldı"
         return "Titanium SMS taraması tamamlandı"
 
+    if event_type == "password_reset_requested":
+        return "Şifre sıfırlama talebi oluşturuldu"
+
     return "Güvenlik olayı kaydedildi"
 
 def _ss_notify_event_detail(event_type, payload):
     payload = payload or {}
+
+    if str(event_type or "") == "password_reset_requested":
+        channel = payload.get("channel", "e-posta")
+        return f"Hesabın için şifre sıfırlama talebi oluşturuldu. Kod {channel} üzerinden gönderildi. Bu işlemi sen yapmadıysan şifreni değiştir."
+
     score = payload.get("score", "-")
     status = payload.get("status", "bilinmiyor")
 
