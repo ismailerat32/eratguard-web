@@ -7632,7 +7632,7 @@ def ss_public_contact_page():
         <p>EratGuard PRO ile ilgili lisans, ödeme, teknik destek, güvenlik bildirimi ve geri bildirim talepleri için aşağıdaki iletişim kanalları kullanılabilir.</p>
 
         <h3>E-posta</h3>
-        <p>Destek e-posta adresi: <strong>spamshieldprotr@gmail.com</strong></p>
+        <p>Destek e-posta adresi: <strong>eratguardprotr@gmail.com</strong></p>
 
         <h3>Firma / Yayıncı Bilgileri</h3>
         <ul>
@@ -7640,7 +7640,7 @@ def ss_public_contact_page():
           <li>Ürün / Marka: EratGuard PRO</li>
           <li>Hizmet türü: Dijital yazılım / lisans tabanlı güvenlik hizmeti</li>
           <li>Adres: Isparta / Türkiye</li>
-          <li>Destek e-posta: spamshieldprotr@gmail.com</li>
+          <li>Destek e-posta: eratguardprotr@gmail.com</li>
           <li>Ödeme altyapısı: EratGuard lisans talebi ve ödeme onayı süreci</li>
         </ul>
 
