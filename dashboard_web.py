@@ -5011,7 +5011,7 @@ def ss_user_protection_scan_ui_final():
     _ss_titanium_save_analysis(result)
 
     quarantined = None
-    if result.get("score", 0) >= 70:
+    if result.get("score", 0) >= 60:
         quarantined = _ss_titanium_save_quarantine(result, source="protection_page_scan")
 
     _ss_titanium_event("protection_page_scan", {
@@ -5122,7 +5122,9 @@ import html as _ss_analysis_html_escape
 
 def _ss_analysis_safe(v):
     try:
-        return _ss_analysis_html_escape.escape(str(v or ""))
+        if v is None:
+            return ""
+        return _ss_analysis_html_escape.escape(str(v))
     except Exception:
         return ""
 
@@ -5151,7 +5153,7 @@ def _ss_user_analysis_check_titanium_final():
     _ss_titanium_save_analysis(result)
 
     quarantined = None
-    if result.get("score", 0) >= 70:
+    if result.get("score", 0) >= 60:
         quarantined = _ss_titanium_save_quarantine(result, source="analysis_page_scan")
 
     _ss_titanium_event("analysis_page_scan", {
@@ -5268,7 +5270,9 @@ import html as _ss_analysis_html_escape
 
 def _ss_analysis_safe(v):
     try:
-        return _ss_analysis_html_escape.escape(str(v or ""))
+        if v is None:
+            return ""
+        return _ss_analysis_html_escape.escape(str(v))
     except Exception:
         return ""
 
@@ -5297,7 +5301,7 @@ def _ss_user_analysis_check_titanium_final():
     _ss_titanium_save_analysis(result)
 
     quarantined = None
-    if result.get("score", 0) >= 70:
+    if result.get("score", 0) >= 60:
         quarantined = _ss_titanium_save_quarantine(result, source="analysis_page_scan")
 
     _ss_titanium_event("analysis_page_scan", {
