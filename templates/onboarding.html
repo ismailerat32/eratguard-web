@@ -43,7 +43,7 @@
       position: relative;
       width: 100%;
       min-height: 100vh;
-      padding: 34px 22px 28px;
+      padding: 30px 22px 26px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -53,41 +53,41 @@
 
     .corner {
       position: absolute;
-      width: 30px;
-      height: 30px;
-      border-color: rgba(0,240,138,.48);
+      width: 24px;
+      height: 24px;
+      border-color: rgba(0,240,138,.34);
       opacity: .85;
     }
 
     .corner.tl {
       top: 28px;
       left: 22px;
-      border-top: 2px solid;
-      border-left: 2px solid;
+      border-top: 1.5px solid;
+      border-left: 1.5px solid;
       border-radius: 12px 0 0 0;
     }
 
     .corner.tr {
       top: 28px;
       right: 22px;
-      border-top: 2px solid;
-      border-right: 2px solid;
+      border-top: 1.5px solid;
+      border-right: 1.5px solid;
       border-radius: 0 12px 0 0;
     }
 
     .corner.bl {
       bottom: 28px;
       left: 22px;
-      border-bottom: 2px solid;
-      border-left: 2px solid;
+      border-bottom: 1.5px solid;
+      border-left: 1.5px solid;
       border-radius: 0 0 0 12px;
     }
 
     .corner.br {
       bottom: 28px;
       right: 22px;
-      border-bottom: 2px solid;
-      border-right: 2px solid;
+      border-bottom: 1.5px solid;
+      border-right: 1.5px solid;
       border-radius: 0 0 12px 0;
     }
 
@@ -95,13 +95,13 @@
       width: 100%;
       display: flex;
       justify-content: center;
-      padding-top: 50px;
+      padding-top: 34px;
     }
 
     .holo {
       position: relative;
-      width: min(72vw, 310px);
-      height: min(72vw, 310px);
+      width: min(64vw, 270px);
+      height: min(64vw, 270px);
       display: grid;
       place-items: center;
     }
@@ -119,9 +119,9 @@
 
     .shield-box {
       position: relative;
-      width: 142px;
-      height: 142px;
-      border-radius: 34px;
+      width: 126px;
+      height: 126px;
+      border-radius: 30px;
       display: grid;
       place-items: center;
       background:
@@ -148,8 +148,8 @@
     .shield {
       position: relative;
       z-index: 2;
-      width: 72px;
-      height: 86px;
+      width: 62px;
+      height: 74px;
       filter: drop-shadow(0 0 20px rgba(0,240,138,.28));
     }
 
@@ -164,15 +164,15 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 34px;
-      padding: 0 20px;
+      min-height: 24px;
+      padding: 0 17px;
       border-radius: 999px;
       border: 1px solid rgba(0,240,138,.32);
       color: var(--green);
-      font-size: 13px;
-      letter-spacing: 8px;
+      font-size: 12px;
+      letter-spacing: 6px;
       font-weight: 900;
-      text-indent: 8px;
+      text-indent: 6px;
       background: rgba(0,240,138,.035);
       box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
     }
@@ -192,11 +192,11 @@
     }
 
     h1 {
-      margin: 28px 0 0;
-      font-size: clamp(46px, 12vw, 70px);
+      margin: 24px 0 0;
+      font-size: clamp(38px, 10vw, 56px);
       line-height: .96;
-      letter-spacing: -2.2px;
-      font-weight: 1000;
+      letter-spacing: -1.6px;
+      font-weight: 950;
     }
 
     h1 span {
@@ -206,51 +206,51 @@
     }
 
     .desc {
-      margin: 24px auto 0;
+      margin: 18px auto 0;
       max-width: 440px;
       color: var(--muted);
-      font-size: clamp(18px, 4.7vw, 24px);
-      line-height: 1.45;
-      font-weight: 650;
+      font-size: clamp(15.5px, 4vw, 19px);
+      line-height: 1.5;
+      font-weight: 600;
     }
 
     .bottom-area {
       width: 100%;
       max-width: 560px;
-      padding-bottom: 34px;
+      padding-bottom: 24px;
     }
 
     .dots {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 13px;
-      margin-bottom: 38px;
+      gap: 11px;
+      margin-bottom: 28px;
     }
 
     .dot {
-      width: 13px;
-      height: 13px;
+      width: 11px;
+      height: 11px;
       border-radius: 999px;
       background: rgba(244,255,248,.16);
       transition: .2s ease;
     }
 
     .dot.active {
-      width: 32px;
+      width: 28px;
       background: var(--green);
       box-shadow: 0 0 22px rgba(0,240,138,.35);
     }
 
     .btn-next {
       width: 100%;
-      min-height: 76px;
+      min-height: 62px;
       border: 0;
-      border-radius: 24px;
+      border-radius: 20px;
       background: linear-gradient(135deg, #19f58a, #00d879 48%, #15d5d3);
       color: #011108;
-      font-size: clamp(25px, 6vw, 34px);
-      font-weight: 1000;
+      font-size: clamp(20px, 5vw, 26px);
+      font-weight: 950;
       letter-spacing: -.6px;
       box-shadow:
         0 20px 55px rgba(0,240,138,.20),
@@ -258,10 +258,10 @@
     }
 
     .btn-skip {
-      margin-top: 28px;
+      margin-top: 18px;
       text-align: center;
       color: rgba(244,255,248,.40);
-      font-size: 22px;
+      font-size: 17px;
       font-weight: 800;
     }
 
@@ -323,7 +323,7 @@
 
       <div class="slide active">
         <h1>Telefonunu <span>güvende tut.</span></h1>
-        <p class="desc">Spam mesajlara, phishing saldırılarına ve dolandırıcılara karşı AI destekli koruma.</p>
+        <p class="desc">Şüpheli mesajları analiz et, dolandırıcılık risklerini erkenden fark et.</p>
       </div>
 
       <div class="slide">
@@ -350,7 +350,7 @@
         <span class="dot"></span>
       </div>
 
-      <button class="btn-next" onclick="nextSlide()">Başlayalım →</button>
+      <button class="btn-next" onclick="nextSlide()">Devam et →</button>
       <div class="btn-skip" onclick="skipOnboarding()">Atla</div>
     </section>
   </main>
@@ -364,7 +364,7 @@
     function renderSlide() {
       slides.forEach((s, i) => s.classList.toggle("active", i === currentSlide));
       dots.forEach((d, i) => d.classList.toggle("active", i === currentSlide));
-      nextButton.textContent = currentSlide === slides.length - 1 ? "Girişe geç →" : "Başlayalım →";
+      nextButton.textContent = currentSlide === slides.length - 1 ? "Girişe geç →" : "Devam et →";
     }
 
     function nextSlide() {
