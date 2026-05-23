@@ -82,15 +82,18 @@ def _send_mail_brevo(to_email="", subject="", body=""):
 
     sender_email = (
         os.getenv("MAIL_FROM", "")
+        or os.getenv("BREVO_SENDER_EMAIL", "")
         or os.getenv("BREVO_FROM_EMAIL", "")
         or os.getenv("SMTP_FROM", "")
         or os.getenv("SMTP_USER", "")
+        or os.getenv("SMTP_USERNAME", "")
     ).strip()
 
     sender_name = (
         os.getenv("MAIL_FROM_NAME", "")
+        or os.getenv("BREVO_SENDER_NAME", "")
         or os.getenv("BREVO_FROM_NAME", "")
-        or "EratGuard"
+        or "EratGuard PRO"
     ).strip()
 
     if not sender_email:
@@ -135,10 +138,10 @@ def _send_mail_brevo(to_email="", subject="", body=""):
 
 
 def _send_mail_smtp(host=None, port=None, user=None, password=None, to_email="", subject="", body=""):
-    smtp_host = host or os.getenv("SMTP_HOST", "smtp.gmail.com")
+    smtp_host = (host or os.getenv("SMTP_HOST", "") or "smtp.gmail.com").strip()
     smtp_port = int(port or os.getenv("SMTP_PORT", "587"))
-    smtp_user = (user or os.getenv("SMTP_USER", "")).strip()
-    smtp_pass = (password or os.getenv("SMTP_PASS", "")).strip()
+    smtp_user = (user or os.getenv("SMTP_USER", "") or os.getenv("SMTP_USERNAME", "")).strip()
+    smtp_pass = (password or os.getenv("SMTP_PASS", "") or os.getenv("SMTP_PASSWORD", "")).strip()
     smtp_from = (os.getenv("SMTP_FROM", "") or os.getenv("MAIL_FROM", "") or smtp_user).strip()
     timeout = int(os.getenv("SMTP_TIMEOUT", "8"))
 
@@ -165,7 +168,8 @@ def _send_mail_smtp(host=None, port=None, user=None, password=None, to_email="",
             server = smtplib.SMTP_SSL(smtp_host, smtp_port, timeout=timeout, context=context)
             connected_via = smtp_host
         else:
-            server, connected_via = _smtp_connect_ipv4_fast(smtp_host, smtp_port, timeout=timeout)
+            server = smtplib.SMTP(smtp_host, smtp_port, timeout=timeout)
+            connected_via = smtp_host
             server.ehlo()
             server.starttls(context=context)
             server.ehlo()
