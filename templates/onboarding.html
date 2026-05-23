@@ -1,150 +1,387 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>EratGuard — Hoş Geldin</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;overflow:hidden;background:#020e07;font-family:'DM Sans',sans-serif;color:#fff}
-.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,255,100,.1) 0%,transparent 55%),#020e07}
-.corner{position:fixed;width:16px;height:16px;z-index:3}
-.corner.tl{top:12px;left:12px;border-top:1.5px solid rgba(0,255,136,.25);border-left:1.5px solid rgba(0,255,136,.25)}
-.corner.tr{top:12px;right:12px;border-top:1.5px solid rgba(0,255,136,.25);border-right:1.5px solid rgba(0,255,136,.25)}
-.corner.bl{bottom:12px;left:12px;border-bottom:1.5px solid rgba(0,255,136,.25);border-left:1.5px solid rgba(0,255,136,.25)}
-.corner.br{bottom:12px;right:12px;border-bottom:1.5px solid rgba(0,255,136,.25);border-right:1.5px solid rgba(0,255,136,.25)}
-.slides{position:fixed;inset:0;z-index:10}
-.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:56px 28px 40px;opacity:0;transform:translateX(40px);transition:all .4s cubic-bezier(.16,1,.3,1);pointer-events:none}
-.slide.active{opacity:1;transform:translateX(0);pointer-events:all}
-.slide.exit{opacity:0;transform:translateX(-40px)}
-.illustration{position:relative;width:160px;height:160px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ill-ring{position:absolute;border-radius:50%;border:1px solid rgba(0,255,136,.15)}
-.r1{width:160px;height:160px}
-.r2{width:205px;height:205px;border-color:rgba(0,255,136,.07)}
-.ill-icon{width:108px;height:108px;border-radius:30px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(0,255,136,.2);background:linear-gradient(145deg,#001a0d,#003018);box-shadow:0 0 0 8px rgba(0,255,136,.05),0 0 35px rgba(0,255,136,.15);position:relative;z-index:2;font-size:52px;line-height:1}
-.slide-text{text-align:center;flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:16px 0}
-.slide-tag{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:rgba(0,255,136,.6);font-weight:600}
-.slide-title{font-family:'Space Grotesk',sans-serif;font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1.15;color:#fff}
-.slide-title span{color:#00ff88}
-.slide-desc{font-size:14px;color:rgba(255,255,255,.45);line-height:1.6;font-weight:300;max-width:280px;margin:0 auto}
-.features{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:6px}
-.feat-item{display:flex;align-items:center;gap:12px;background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.1);border-radius:14px;padding:12px 14px}
-.feat-icon{font-size:20px;flex-shrink:0;line-height:1}
-.feat-text{font-size:12px;color:rgba(255,255,255,.55);line-height:1.3}
-.feat-text strong{display:block;color:#fff;font-size:13px;font-weight:600;margin-bottom:2px}
-.bottom{width:100%;display:flex;flex-direction:column;gap:12px}
-.dots{display:flex;justify-content:center;gap:6px;margin-bottom:2px}
-.dot{width:6px;height:6px;border-radius:100px;background:rgba(255,255,255,.15);transition:all .3s}
-.dot.active{width:22px;background:#00ff88}
-.btn-next{width:100%;background:linear-gradient(135deg,#00c860,#00e676);color:#001a08;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;border:none;border-radius:16px;padding:16px;cursor:pointer;box-shadow:0 6px 20px rgba(0,200,96,.2);transition:transform .15s;letter-spacing:.2px}
-.btn-next:active{transform:scale(.98)}
-.btn-skip{text-align:center;font-size:13px;color:rgba(255,255,255,.22);cursor:pointer;padding:4px;transition:color .2s}
-.btn-skip:hover{color:rgba(255,255,255,.5)}
-.btn-register{width:100%;background:transparent;color:rgba(255,255,255,.55);font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;border:1.5px solid rgba(255,255,255,.1);border-radius:16px;padding:15px;cursor:pointer;transition:all .2s}
-.btn-register:active{transform:scale(.98);border-color:rgba(0,255,136,.3);color:#00ff88}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>EratGuard PRO</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg: #010504;
+      --green: #00f08a;
+      --green2: #00c96b;
+      --text: #f4fff8;
+      --muted: rgba(244,255,248,.62);
+      --muted2: rgba(244,255,248,.34);
+      --line: rgba(0,240,138,.28);
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(0,240,138,.20), transparent 28%),
+        radial-gradient(circle at 72% 78%, rgba(0,200,107,.12), transparent 30%),
+        linear-gradient(180deg, #010302 0%, #02110a 45%, #000403 100%);
+    }
+
+    .screen {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;
+      padding: 34px 22px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border-color: rgba(0,240,138,.48);
+      opacity: .85;
+    }
+
+    .corner.tl {
+      top: 28px;
+      left: 22px;
+      border-top: 2px solid;
+      border-left: 2px solid;
+      border-radius: 12px 0 0 0;
+    }
+
+    .corner.tr {
+      top: 28px;
+      right: 22px;
+      border-top: 2px solid;
+      border-right: 2px solid;
+      border-radius: 0 12px 0 0;
+    }
+
+    .corner.bl {
+      bottom: 28px;
+      left: 22px;
+      border-bottom: 2px solid;
+      border-left: 2px solid;
+      border-radius: 0 0 0 12px;
+    }
+
+    .corner.br {
+      bottom: 28px;
+      right: 22px;
+      border-bottom: 2px solid;
+      border-right: 2px solid;
+      border-radius: 0 0 12px 0;
+    }
+
+    .top-area {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding-top: 50px;
+    }
+
+    .holo {
+      position: relative;
+      width: min(72vw, 310px);
+      height: min(72vw, 310px);
+      display: grid;
+      place-items: center;
+    }
+
+    .ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(0,240,138,.18);
+      inset: 0;
+      box-shadow: 0 0 40px rgba(0,240,138,.05);
+    }
+
+    .ring.r2 { inset: 36px; opacity: .75; }
+    .ring.r3 { inset: 70px; border-style: dotted; opacity: .55; }
+
+    .shield-box {
+      position: relative;
+      width: 142px;
+      height: 142px;
+      border-radius: 34px;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(0,240,138,.24), transparent 58%),
+        linear-gradient(180deg, rgba(0,240,138,.10), rgba(0,0,0,.18));
+      border: 2px solid rgba(0,240,138,.70);
+      box-shadow:
+        0 0 38px rgba(0,240,138,.28),
+        inset 0 0 22px rgba(0,240,138,.10);
+    }
+
+    .shield-box::after {
+      content: "";
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: 15px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(0,240,138,.42);
+      filter: blur(12px);
+    }
+
+    .shield {
+      position: relative;
+      z-index: 2;
+      width: 72px;
+      height: 86px;
+      filter: drop-shadow(0 0 20px rgba(0,240,138,.28));
+    }
+
+    .content {
+      width: 100%;
+      max-width: 520px;
+      text-align: center;
+      margin-top: -8px;
+    }
+
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 0 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,240,138,.32);
+      color: var(--green);
+      font-size: 13px;
+      letter-spacing: 8px;
+      font-weight: 900;
+      text-indent: 8px;
+      background: rgba(0,240,138,.035);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .slide {
+      display: none;
+      animation: fadeIn .28s ease both;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      margin: 28px 0 0;
+      font-size: clamp(46px, 12vw, 70px);
+      line-height: .96;
+      letter-spacing: -2.2px;
+      font-weight: 1000;
+    }
+
+    h1 span {
+      display: block;
+      color: var(--green);
+      text-shadow: 0 0 34px rgba(0,240,138,.18);
+    }
+
+    .desc {
+      margin: 24px auto 0;
+      max-width: 440px;
+      color: var(--muted);
+      font-size: clamp(18px, 4.7vw, 24px);
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .bottom-area {
+      width: 100%;
+      max-width: 560px;
+      padding-bottom: 34px;
+    }
+
+    .dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 13px;
+      margin-bottom: 38px;
+    }
+
+    .dot {
+      width: 13px;
+      height: 13px;
+      border-radius: 999px;
+      background: rgba(244,255,248,.16);
+      transition: .2s ease;
+    }
+
+    .dot.active {
+      width: 32px;
+      background: var(--green);
+      box-shadow: 0 0 22px rgba(0,240,138,.35);
+    }
+
+    .btn-next {
+      width: 100%;
+      min-height: 76px;
+      border: 0;
+      border-radius: 24px;
+      background: linear-gradient(135deg, #19f58a, #00d879 48%, #15d5d3);
+      color: #011108;
+      font-size: clamp(25px, 6vw, 34px);
+      font-weight: 1000;
+      letter-spacing: -.6px;
+      box-shadow:
+        0 20px 55px rgba(0,240,138,.20),
+        inset 0 1px 0 rgba(255,255,255,.30);
+    }
+
+    .btn-skip {
+      margin-top: 28px;
+      text-align: center;
+      color: rgba(244,255,248,.40);
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    @media (max-height: 760px) {
+      .screen { padding-top: 18px; padding-bottom: 18px; }
+      .top-area { padding-top: 26px; }
+      .holo { width: 250px; height: 250px; }
+      .shield-box { width: 120px; height: 120px; border-radius: 30px; }
+      .shield { width: 62px; height: 74px; }
+      h1 { font-size: clamp(40px, 10vw, 58px); margin-top: 22px; }
+      .desc { font-size: 17px; margin-top: 18px; }
+      .dots { margin-bottom: 24px; }
+      .btn-next { min-height: 64px; border-radius: 21px; }
+      .btn-skip { margin-top: 18px; font-size: 19px; }
+      .bottom-area { padding-bottom: 18px; }
+    }
+  </style>
 </head>
+
 <body>
-<div class="bg"></div>
-<div class="corner tl"></div>
-<div class="corner tr"></div>
-<div class="corner bl"></div>
-<div class="corner br"></div>
-<div class="slides">
-  <div class="slide active" id="slide-0">
-    <div class="illustration">
-      <div class="ill-ring r1"></div>
-      <div class="ill-ring r2"></div>
-      <div class="ill-icon">🛡️</div>
-    </div>
-    <div class="slide-text">
-      <div class="slide-tag">EratGuard PRO</div>
-      <div class="slide-title">Telefonunu<br><span>güvende tut.</span></div>
-      <div class="slide-desc">Spam mesajlara, phishing saldırılarına ve dolandırıcılara karşı AI destekli koruma.</div>
-    </div>
-    <div class="bottom">
-      <div class="dots"><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <main class="screen">
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+
+    <section class="top-area">
+      <div class="holo">
+        <div class="ring r1"></div>
+        <div class="ring r2"></div>
+        <div class="ring r3"></div>
+
+        <div class="shield-box">
+          <svg class="shield" viewBox="0 0 100 120" aria-hidden="true">
+            <defs>
+              <linearGradient id="shieldGrad" x1="0" x2="1">
+                <stop offset="0%" stop-color="#eaffff"/>
+                <stop offset="45%" stop-color="#9fcfd1"/>
+                <stop offset="100%" stop-color="#f5ffff"/>
+              </linearGradient>
+              <linearGradient id="checkGrad" x1="0" x2="1">
+                <stop offset="0%" stop-color="#19f58a"/>
+                <stop offset="100%" stop-color="#16d1d8"/>
+              </linearGradient>
+            </defs>
+            <path d="M50 5 L88 20 V52 C88 82 72 103 50 114 C28 103 12 82 12 52 V20 Z"
+              fill="rgba(255,255,255,.08)" stroke="url(#shieldGrad)" stroke-width="5"/>
+            <path d="M50 13 L80 25 V53 C80 76 68 94 50 104 Z"
+              fill="rgba(255,255,255,.20)"/>
+            <path d="M31 60 L44 73 L72 42"
+              fill="none" stroke="url(#checkGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="content">
+      <div class="brand-pill">ERATGUARD PRO</div>
+
+      <div class="slide active">
+        <h1>Telefonunu <span>güvende tut.</span></h1>
+        <p class="desc">Spam mesajlara, phishing saldırılarına ve dolandırıcılara karşı AI destekli koruma.</p>
+      </div>
+
+      <div class="slide">
+        <h1>Şüpheli SMS’i <span>anında analiz et.</span></h1>
+        <p class="desc">Mesajları risk skoru, kategori ve sinyallere göre değerlendir.</p>
+      </div>
+
+      <div class="slide">
+        <h1>Riskleri <span>erkenden fark et.</span></h1>
+        <p class="desc">Sahte bağlantı, kargo tuzağı ve banka oltalama girişimlerini kontrol et.</p>
+      </div>
+
+      <div class="slide">
+        <h1>Kontrol sende, <span>koruma hazır.</span></h1>
+        <p class="desc">Hesabına giriş yap ve EratGuard PRO panelini kullanmaya başla.</p>
+      </div>
+    </section>
+
+    <section class="bottom-area">
+      <div class="dots">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+
       <button class="btn-next" onclick="nextSlide()">Başlayalım →</button>
       <div class="btn-skip" onclick="skipOnboarding()">Atla</div>
-    </div>
-  </div>
-  <div class="slide" id="slide-1">
-    <div class="illustration">
-      <div class="ill-ring r1"></div>
-      <div class="ill-ring r2"></div>
-      <div class="ill-icon">🤖</div>
-    </div>
-    <div class="slide-text">
-      <div class="slide-tag">Yapay Zeka</div>
-      <div class="slide-title">Her mesajı<br><span>analiz eder.</span></div>
-      <div class="slide-desc">AI motorumuz gelen her SMS'i anlık olarak tarar ve tehdit skorunu hesaplar.</div>
-      <div class="features">
-        <div class="feat-item"><div class="feat-icon">⚡</div><div class="feat-text"><strong>Anlık Tarama</strong>Mesaj gelir gelmez analiz başlar</div></div>
-        <div class="feat-item"><div class="feat-icon">🎯</div><div class="feat-text"><strong>%99 Doğruluk</strong>Gelişmiş Türkçe spam motoru</div></div>
-      </div>
-    </div>
-    <div class="bottom">
-      <div class="dots"><div class="dot"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
-      <button class="btn-next" onclick="nextSlide()">Devam →</button>
-      <div class="btn-skip" onclick="skipOnboarding()">Atla</div>
-    </div>
-  </div>
-  <div class="slide" id="slide-2">
-    <div class="illustration">
-      <div class="ill-ring r1"></div>
-      <div class="ill-ring r2"></div>
-      <div class="ill-icon">⛔</div>
-    </div>
-    <div class="slide-text">
-      <div class="slide-tag">Koruma</div>
-      <div class="slide-title">Tehditleri<br><span>anında engeller.</span></div>
-      <div class="slide-desc">Spam, phishing ve dolandırıcılık girişimleri otomatik olarak engellenir ve raporlanır.</div>
-      <div class="features">
-        <div class="feat-item"><div class="feat-icon">🔒</div><div class="feat-text"><strong>Otomatik Engelleme</strong>Manuel işlem gerektirmez</div></div>
-        <div class="feat-item"><div class="feat-icon">👥</div><div class="feat-text"><strong>Topluluk Koruması</strong>Kullanıcılardan öğrenir</div></div>
-      </div>
-    </div>
-    <div class="bottom">
-      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot active"></div><div class="dot"></div></div>
-      <button class="btn-next" onclick="nextSlide()">Devam →</button>
-      <div class="btn-skip" onclick="skipOnboarding()">Atla</div>
-    </div>
-  </div>
-  <div class="slide" id="slide-3">
-    <div class="illustration">
-      <div class="ill-ring r1"></div>
-      <div class="ill-ring r2"></div>
-      <div class="ill-icon">☑️</div>
-    </div>
-    <div class="slide-text">
-      <div class="slide-tag">Hazırsın!</div>
-      <div class="slide-title">Koruma<br><span>aktif olsun.</span></div>
-      <div class="slide-desc">Hesabına giriş yap veya yeni hesap oluştur. EratGuard hemen çalışmaya başlasın.</div>
-    </div>
-    <div class="bottom">
-      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot active"></div></div>
-      <button class="btn-next" onclick="goToLogin()">Giriş Yap →</button>
-      <button class="btn-register" onclick="goToRegister()">Hesap Oluştur</button>
-    </div>
-  </div>
-</div>
-<script>
-var current=0,total=4;
-function nextSlide(){
-  if(current>=total-1){goToLogin();return}
-  var old=document.getElementById('slide-'+current);
-  old.classList.add('exit');old.classList.remove('active');
-  current++;
-  document.getElementById('slide-'+current).classList.add('active');
-  setTimeout(function(){old.classList.remove('exit')},400);
-}
-function skipOnboarding(){goToLogin()}
-function goToLogin(){window.location.href='/login'}
-function goToRegister(){window.location.href='/register'}
-var sx=0;
-document.addEventListener('touchstart',function(e){sx=e.touches[0].clientX},{passive:true});
-document.addEventListener('touchend',function(e){if(sx-e.changedTouches[0].clientX>50)nextSlide()},{passive:true});
-</script>
+    </section>
+  </main>
+
+  <script>
+    let currentSlide = 0;
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const dots = Array.from(document.querySelectorAll(".dot"));
+    const nextButton = document.querySelector(".btn-next");
+
+    function renderSlide() {
+      slides.forEach((s, i) => s.classList.toggle("active", i === currentSlide));
+      dots.forEach((d, i) => d.classList.toggle("active", i === currentSlide));
+      nextButton.textContent = currentSlide === slides.length - 1 ? "Girişe geç →" : "Başlayalım →";
+    }
+
+    function nextSlide() {
+      if (currentSlide < slides.length - 1) {
+        currentSlide += 1;
+        renderSlide();
+        return;
+      }
+      skipOnboarding();
+    }
+
+    function skipOnboarding() {
+      fetch("/complete-onboarding", { method: "POST" })
+        .finally(function() {
+          window.location.href = "/login";
+        });
+    }
+  </script>
 </body>
 </html>
