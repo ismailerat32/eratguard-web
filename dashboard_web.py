@@ -2919,7 +2919,40 @@ try:
         )
 
     def _eg_real_admin_licenses():
-        return _eg_real_render("admin_licenses.html")
+        import json as _eg_json
+        from pathlib import Path as _eg_Path
+
+        def _eg_load_json_dict(*paths):
+            for raw in paths:
+                try:
+                    fp = _eg_Path(raw)
+                    if fp.exists():
+                        data = _eg_json.loads(fp.read_text(encoding="utf-8"))
+                        return data if isinstance(data, dict) else {}
+                except Exception:
+                    pass
+            return {}
+
+        users = _eg_load_json_dict(
+            "data/users.json",
+            "users.json",
+        )
+
+        licenses = _eg_load_json_dict(
+            "data/generated_licenses.json",
+            "data/licenses.json",
+            "generated_licenses.json",
+            "licenses.json",
+        )
+
+        return _eg_real_render(
+            "admin_licenses.html",
+            users=users,
+            licenses=licenses,
+            error="",
+            success="",
+            new_license_key="",
+        )
 
     def _eg_real_admin_payments():
         return _eg_real_render(

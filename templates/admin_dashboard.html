@@ -534,12 +534,12 @@
           <span class="slice-card"><svg class="ico"><use href="#i-users-admin"/></svg><span class="label">Kullanıcılar</span><span class="under"></span></span>
         </a>
 
-        <a class="slice" style="--a:45deg" href="javascript:void(0)" data-href="/admin/licenses" aria-label="Lisanslar">
+        <a class="slice" style="--a:45deg" href="javascript:void(0)" data-href="/admin/generated-licenses" aria-label="Lisanslar">
           <span class="slice-card"><svg class="ico"><use href="#i-license-admin"/></svg><span class="label">Lisanslar</span><span class="under"></span></span>
         </a>
 
-        <a class="slice" style="--a:90deg" href="javascript:void(0)" data-href="/admin/payment-requests" aria-label="Ödemeler">
-          <span class="slice-card"><svg class="ico"><use href="#i-payment-admin"/></svg><span class="label">Ödemeler</span><span class="under"></span></span>
+        <a class="slice" style="--a:90deg" href="javascript:void(0)" data-href="/admin/payments" aria-label="Talepler">
+          <span class="slice-card"><svg class="ico"><use href="#i-payment-admin"/></svg><span class="label">Talepler</span><span class="under"></span></span>
         </a>
 
         <a class="slice" style="--a:135deg" href="javascript:void(0)" data-href="/admin/spam-logs" aria-label="Güvenlik">
@@ -550,8 +550,8 @@
           <span class="slice-card"><svg class="ico"><use href="#i-report-admin"/></svg><span class="label">Raporlar</span><span class="under"></span></span>
         </a>
 
-        <a class="slice" style="--a:225deg" href="javascript:void(0)" data-href="/admin/whitelist" aria-label="Bildirimler">
-          <span class="slice-card"><svg class="ico"><use href="#i-bell-admin"/></svg><span class="label">Bildirimler</span><span class="under"></span></span>
+        <a class="slice" style="--a:225deg" href="javascript:void(0)" data-href="/admin/whitelist" aria-label="Güvenli Liste">
+          <span class="slice-card"><svg class="ico"><use href="#i-bell-admin"/></svg><span class="label">Güvenli Liste</span><span class="under"></span></span>
         </a>
 
         <a class="slice" style="--a:270deg" href="javascript:void(0)" data-href="/admin/settings" aria-label="Ayarlar">
@@ -1237,4 +1237,270 @@ document.addEventListener("DOMContentLoaded", function () {
   *::selection {
     background: transparent !important;
   }
+
+/* ===== PREMIUM COMMAND CENTER PATCH ===== */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');
+
+:root{
+  --bg:#05050d !important;
+  --green:#00ff88 !important;
+  --lime:#00ff88 !important;
+}
+
+/* SCANLINE */
+body::before{
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.022) 2px, rgba(0,0,0,0.022) 4px) !important;
+  background-size: unset !important;
+  background-position: unset !important;
+  opacity:1 !important;
+}
+
+/* BG */
+html,body{
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, rgba(0,255,136,0.055) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 10% 90%, rgba(0,180,80,0.04) 0%, transparent 50%),
+    #05050d !important;
+  font-family:'Rajdhani',Inter,sans-serif !important;
+}
+
+/* GRID OVERLAY */
+body::after{
+  background-image:
+    linear-gradient(rgba(0,255,136,0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,136,0.032) 1px, transparent 1px) !important;
+  background-size: 50px 50px !important;
+  border-top: none !important;
+  height: 100% !important;
+  bottom: 0 !important;
+  opacity: 1 !important;
+}
+
+/* TOPBAR */
+.topbar{
+  background: rgba(5,5,13,0.97) !important;
+  border-bottom: 1px solid rgba(0,255,136,0.18) !important;
+  box-shadow: 0 1px 0 rgba(0,255,136,0.12), 0 2px 20px rgba(0,0,0,0.5) !important;
+  backdrop-filter: blur(20px) !important;
+  position: relative !important;
+}
+.topbar::after{
+  content: '' !important;
+  position: absolute !important;
+  bottom: -2px !important; left: 0 !important; right: 0 !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,0.5), transparent) !important;
+  pointer-events: none !important;
+}
+
+/* BRAND */
+.brand-icon{
+  border: 1.5px solid rgba(0,255,136,0.4) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 0 14px rgba(0,255,136,0.2), inset 0 0 8px rgba(0,255,136,0.06) !important;
+}
+.brand-title strong{
+  font-family:'Bebas Neue',sans-serif !important;
+  font-size: 22px !important;
+  letter-spacing: 3px !important;
+  color: rgba(0,255,136,0.95) !important;
+  text-shadow: 0 0 16px rgba(0,255,136,0.4) !important;
+}
+.brand-title strong span{ color: #d8ffe8 !important; }
+.brand-title small{
+  font-family:'Share Tech Mono',monospace !important;
+  font-size: 9px !important;
+  letter-spacing: 2px !important;
+  color: rgba(216,255,232,0.35) !important;
+  text-transform: uppercase !important;
+}
+
+/* ADMIN PILL */
+.admin-pill{
+  border: 1px solid rgba(0,255,136,0.25) !important;
+  background: rgba(0,255,136,0.07) !important;
+  border-radius: 3px !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 10px !important;
+  letter-spacing: 2px !important;
+  padding: 5px 12px !important;
+}
+.admin-pill i{
+  background: #00ff88 !important;
+  box-shadow: 0 0 6px #00ff88 !important;
+}
+
+/* ORBIT RINGS */
+.orbit{
+  border-color: rgba(0,255,136,0.15) !important;
+  box-shadow: 0 0 50px rgba(0,255,136,0.06), inset 0 0 80px rgba(0,255,136,0.04) !important;
+}
+.orbit::before{
+  border-color: rgba(0,255,136,0.1) !important;
+  border-style: dashed !important;
+  animation: spinRing 40s linear infinite !important;
+}
+.orbit::after{
+  border-color: rgba(0,255,136,0.06) !important;
+}
+@keyframes spinRing{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
+}
+
+/* SCAN LINES */
+.scan-line{
+  background: linear-gradient(180deg, transparent, rgba(0,255,136,0.55), transparent) !important;
+}
+
+/* REAL SLICES */
+.real-slice{
+  fill: rgba(0,255,136,0.055) !important;
+  stroke: rgba(0,255,136,0.22) !important;
+  stroke-width: 2 !important;
+  filter: drop-shadow(0 0 4px rgba(0,255,136,0.15)) !important;
+  transition: all 0.2s !important;
+}
+.real-slice:hover{
+  fill: rgba(0,255,136,0.14) !important;
+  stroke: rgba(0,255,136,0.5) !important;
+  filter: drop-shadow(0 0 10px rgba(0,255,136,0.4)) !important;
+}
+.real-ring{
+  stroke: rgba(0,255,136,0.2) !important;
+  stroke-dasharray: 5 10 !important;
+}
+.real-inner-ring{
+  stroke: rgba(0,255,136,0.25) !important;
+}
+
+/* SLICE LABELS */
+.label{
+  font-family: 'Rajdhani', sans-serif !important;
+  font-size: clamp(11px,3vw,15px) !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.9) !important;
+}
+.under{
+  background: rgba(0,255,136,0.7) !important;
+  box-shadow: 0 0 8px rgba(0,255,136,0.5) !important;
+}
+.ico{
+  filter:
+    drop-shadow(0 0 7px rgba(0,255,136,0.9))
+    drop-shadow(0 0 18px rgba(0,255,136,0.5)) !important;
+  stroke: #00ff88 !important;
+}
+.slice:hover .ico, .slice:active .ico{
+  filter:
+    drop-shadow(0 0 12px rgba(0,255,136,1))
+    drop-shadow(0 0 28px rgba(0,255,136,0.8)) !important;
+}
+
+/* HUB */
+.hub{
+  background:
+    radial-gradient(circle, #0a1a10, #020a05) !important;
+  border: 2px solid rgba(0,255,136,0.45) !important;
+  box-shadow:
+    0 0 0 6px rgba(0,255,136,0.06),
+    0 0 35px rgba(0,255,136,0.35),
+    0 0 70px rgba(0,255,136,0.1),
+    inset 0 0 25px rgba(0,255,136,0.07) !important;
+  animation: hubCommandPulse 2.5s ease-in-out infinite !important;
+}
+@keyframes hubCommandPulse{
+  0%,100%{
+    box-shadow:0 0 0 6px rgba(0,255,136,0.06),0 0 35px rgba(0,255,136,0.35),0 0 70px rgba(0,255,136,0.1),inset 0 0 25px rgba(0,255,136,0.07);
+  }
+  50%{
+    box-shadow:0 0 0 12px rgba(0,255,136,0.1),0 0 55px rgba(0,255,136,0.55),0 0 100px rgba(0,255,136,0.18),inset 0 0 35px rgba(0,255,136,0.12);
+  }
+}
+.hub::before{
+  background: repeating-conic-gradient(from 0deg, rgba(0,255,136,0.22) 0 1.5deg, transparent 1.5deg 8deg) !important;
+  border-color: rgba(0,255,136,0.3) !important;
+}
+.hub::after{
+  border-color: rgba(0,255,136,0.15) !important;
+}
+
+/* HUB TEXT */
+.admin-flip-front span,
+.hub strong{
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: clamp(22px,7vw,44px) !important;
+  letter-spacing: 4px !important;
+  color: #00ff88 !important;
+  text-shadow:
+    0 0 12px rgba(0,255,136,0.7),
+    0 0 30px rgba(0,255,136,0.3) !important;
+}
+
+/* ADMIN FLIP */
+.admin-flip-face{
+  background: transparent !important;
+}
+.admin-flip-front{
+  background: radial-gradient(circle, rgba(0,255,136,0.06), transparent) !important;
+}
+
+/* STATUS CARD */
+.status-card,
+.safe-card{
+  background: rgba(0,255,136,0.04) !important;
+  border: 1px solid rgba(0,255,136,0.15) !important;
+  border-radius: 6px !important;
+  backdrop-filter: blur(12px) !important;
+}
+.safe-title,
+.status-title{
+  font-family: 'Rajdhani', sans-serif !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+}
+.safe-sub,
+.status-sub{
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 11px !important;
+  letter-spacing: 1px !important;
+  color: rgba(0,255,136,0.6) !important;
+}
+
+/* PULSE */
+.pulse{
+  color: #00ff88 !important;
+  text-shadow: 0 0 10px rgba(0,255,136,0.6) !important;
+  animation: pulseFade 1.5s ease-in-out infinite !important;
+}
+@keyframes pulseFade{
+  0%,100%{opacity:1; text-shadow:0 0 10px rgba(0,255,136,0.6)}
+  50%{opacity:0.4; text-shadow:0 0 4px rgba(0,255,136,0.2)}
+}
+
+/* FEATURES */
+.feat b{ color: #00ff88 !important; }
+.feat span{
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 10px !important;
+  letter-spacing: 1px !important;
+  color: rgba(216,255,232,0.4) !important;
+  text-transform: uppercase !important;
+}
+
+/* MOBILE RESPONSIVE */
+@media(max-width:480px){
+  .label{
+    font-size: clamp(9px,2.5vw,12px) !important;
+    letter-spacing: 0.5px !important;
+  }
+  .brand-title strong{
+    font-size: 17px !important;
+    letter-spacing: 1.5px !important;
+  }
+  .hub::before{ display:none !important; }
+}
+/* ===== END PREMIUM PATCH ===== */
 </style>
