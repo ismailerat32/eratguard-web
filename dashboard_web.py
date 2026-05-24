@@ -2954,39 +2954,168 @@ try:
             new_license_key="",
         )
 
+    def _eg_real_load_json(default, *paths):
+        import json as _eg_json
+        from pathlib import Path as _eg_Path
+
+        for raw in paths:
+            try:
+                fp = _eg_Path(raw)
+                if fp.exists():
+                    data = _eg_json.loads(fp.read_text(encoding="utf-8"))
+                    return data
+            except Exception:
+                pass
+        return default
+
+    def _eg_real_list_from_json(*paths):
+        data = _eg_real_load_json([], *paths)
+        if isinstance(data, list):
+            return data
+        if isinstance(data, dict):
+            out = []
+            for key, value in data.items():
+                if isinstance(value, dict):
+                    item = dict(value)
+                    item.setdefault("id", key)
+                    item.setdefault("key", key)
+                    out.append(item)
+                else:
+                    out.append({"id": key, "value": value})
+            return out
+        return []
+
+    def _eg_real_dict_from_json(*paths):
+        data = _eg_real_load_json({}, *paths)
+        return data if isinstance(data, dict) else {}
+
     def _eg_real_admin_payments():
+        requests_data = _eg_real_load_json(
+            [],
+            "data/payment_requests.json",
+            "payment_requests.json",
+        )
+        if isinstance(requests_data, dict):
+            requests_data = list(requests_data.values())
+        if not isinstance(requests_data, list):
+            requests_data = []
+
         return _eg_real_render(
             "admin_payment_requests.html",
-            requests=globals().get("payment_requests", globals().get("requests", [])),
+            requests=requests_data,
         )
 
     def _eg_real_admin_spam_logs():
+        spam_logs = _eg_real_load_json(
+            [],
+            "data/spam_logs.json",
+            "data/logs.json",
+            "spam_logs.json",
+            "logs.json",
+        )
+        if isinstance(spam_logs, dict):
+            spam_logs = list(spam_logs.values())
+        if not isinstance(spam_logs, list):
+            spam_logs = []
+
         return _eg_real_render(
             "admin_spam_logs.html",
-            spam_logs=globals().get("spam_logs", []),
+            spam_logs=spam_logs,
         )
 
+    def _eg_real_settings_dict():
+        settings = _eg_real_dict_from_json(
+            "data/settings.json",
+            "settings.json",
+        )
+
+        defaults = {
+            "enable_notifications": True,
+            "enable_vibration": True,
+            "enable_auto_delete": False,
+            "sms_limit": 100,
+            "poll_interval": 15,
+            "spam_threshold": 70,
+        }
+
+        for key, value in defaults.items():
+            settings.setdefault(key, value)
+
+        return settings
+
     def _eg_real_admin_overview():
+        users_dict = _eg_real_dict_from_json("data/users.json", "users.json")
+        spam_logs = _eg_real_load_json([], "data/spam_logs.json", "data/logs.json", "spam_logs.json", "logs.json")
+        if isinstance(spam_logs, dict):
+            spam_logs = list(spam_logs.values())
+        if not isinstance(spam_logs, list):
+            spam_logs = []
+
+        settings = _eg_real_settings_dict()
+
+        stats = {
+            "total_users": len(users_dict) if isinstance(users_dict, dict) else 0,
+            "spam_log_count": len(spam_logs),
+            "spam_threshold": settings.get("spam_threshold", 70),
+            "sms_limit": settings.get("sms_limit", 100),
+            "notifications": bool(settings.get("enable_notifications", True)),
+            "vibration": bool(settings.get("enable_vibration", True)),
+            "auto_delete": bool(settings.get("enable_auto_delete", False)),
+            "poll_interval": settings.get("poll_interval", 15),
+        }
+
         return _eg_real_render(
             "admin_overview.html",
-            stats=globals().get("stats", {}),
-            recent_logs=globals().get("recent_logs", []),
+            stats=stats,
+            recent_logs=spam_logs[:10],
         )
 
     def _eg_real_admin_whitelist():
+        whitelist_data = _eg_real_load_json(
+            [],
+            "data/whitelist.json",
+            "data/safe_list.json",
+            "whitelist.json",
+            "safe_list.json",
+        )
+
+        if isinstance(whitelist_data, dict):
+            whitelist = list(whitelist_data.keys())
+        elif isinstance(whitelist_data, list):
+            whitelist = whitelist_data
+        else:
+            whitelist = []
+
         return _eg_real_render(
             "whitelist.html",
-            whitelist=globals().get("whitelist", []),
+            whitelist=whitelist,
         )
 
     def _eg_real_admin_settings():
         return _eg_real_render(
             "admin_settings.html",
-            settings=globals().get("settings", {}),
+            settings=_eg_real_settings_dict(),
         )
 
     def _eg_real_admin_system():
-        return _eg_real_render("admin_system.html")
+        import sys as _eg_sys
+        from pathlib import Path as _eg_Path
+
+        def _state(path):
+            try:
+                return "OK" if _eg_Path(path).exists() else "YOK"
+            except Exception:
+                return "YOK"
+
+        return _eg_real_render(
+            "admin_system.html",
+            mode="PRODUCTION",
+            debug_state="KAPALI",
+            users_state=_state("data/users.json"),
+            licenses_state=_state("data/licenses.json"),
+            settings_state=_state("data/settings.json"),
+            python_version=_eg_sys.version.split()[0],
+        )
 
     def _eg_real_admin_catchall(anything):
         slug = str(anything or "").strip().lower()
@@ -8139,3 +8268,81 @@ try:
 except Exception as _eg_license_override_error:
     print("ONE_TIME_LICENSE_OVERRIDE_WARN:", _eg_license_override_error, flush=True)
 # ===== ERATGUARD ONE-TIME LICENSE VALIDATION END =====
+
+# ===== ERATGUARD ADMIN SYSTEM RESOURCES API START =====
+@app.route("/api/system-resources")
+def _eg_admin_system_resources_api_final():
+    try:
+        import os
+        import time
+
+        cpu_percent = 0
+        memory_percent = 0
+        disk_percent = 0
+
+        try:
+            import psutil
+            cpu_percent = float(psutil.cpu_percent(interval=0.15))
+            memory_percent = float(psutil.virtual_memory().percent)
+            disk_percent = float(psutil.disk_usage(".").percent)
+        except Exception:
+            # CPU fallback from /proc/stat
+            try:
+                def _read_cpu():
+                    with open("/proc/stat", "r", encoding="utf-8") as f:
+                        parts = f.readline().split()[1:]
+                    nums = [int(x) for x in parts[:8]]
+                    idle = nums[3] + (nums[4] if len(nums) > 4 else 0)
+                    total = sum(nums)
+                    return idle, total
+
+                idle1, total1 = _read_cpu()
+                time.sleep(0.12)
+                idle2, total2 = _read_cpu()
+                total_delta = max(total2 - total1, 1)
+                idle_delta = max(idle2 - idle1, 0)
+                cpu_percent = round(100.0 * (1.0 - idle_delta / total_delta), 1)
+            except Exception:
+                cpu_percent = 0
+
+            # Memory fallback from /proc/meminfo
+            try:
+                mem = {}
+                with open("/proc/meminfo", "r", encoding="utf-8") as f:
+                    for line in f:
+                        key, val = line.split(":", 1)
+                        mem[key] = int(val.strip().split()[0])
+                total = float(mem.get("MemTotal", 0))
+                available = float(mem.get("MemAvailable", mem.get("MemFree", 0)))
+                if total > 0:
+                    memory_percent = round(100.0 * (total - available) / total, 1)
+            except Exception:
+                memory_percent = 0
+
+            # Disk fallback
+            try:
+                st = os.statvfs(".")
+                total = float(st.f_blocks * st.f_frsize)
+                free = float(st.f_bavail * st.f_frsize)
+                if total > 0:
+                    disk_percent = round(100.0 * (total - free) / total, 1)
+            except Exception:
+                disk_percent = 0
+
+        return jsonify({
+            "ok": True,
+            "cpu_percent": round(float(cpu_percent), 1),
+            "memory_percent": round(float(memory_percent), 1),
+            "disk_percent": round(float(disk_percent), 1),
+            "network": "LIVE",
+        })
+    except Exception as e:
+        return jsonify({
+            "ok": False,
+            "cpu_percent": 0,
+            "memory_percent": 0,
+            "disk_percent": 0,
+            "network": "LIVE",
+            "error": str(e),
+        }), 200
+# ===== ERATGUARD ADMIN SYSTEM RESOURCES API END =====
