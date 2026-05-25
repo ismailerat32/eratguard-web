@@ -3087,6 +3087,101 @@ def _eg_track_logged_user_activity_final():
 # ===== ERATGUARD USER SESSION TRACKING END =====
 
 
+
+# ===== ERATGUARD STRICT USER AUTH GUARD START =====
+@app.before_request
+def _eg_strict_user_auth_guard_final():
+    try:
+        path = request.path or ""
+
+        public_paths = {
+            "/",
+            "/landing",
+            "/login",
+            "/register",
+            "/logout",
+            "/forgot-password",
+            "/forgot",
+            "/reset-password-code",
+            "/privacy",
+            "/gizlilik",
+            "/terms",
+            "/mesafeli-satis",
+            "/refund",
+            "/iade",
+            "/contact",
+            "/iletisim",
+            "/health",
+            "/ping",
+            "/status",
+            "/splash",
+            "/app-start",
+            "/ss-admin-access",
+            "/favicon.ico",
+        }
+
+        if path in public_paths:
+            return None
+
+        if path.startswith("/static/"):
+            return None
+
+        # Public/legal/API health tarafını bozmayalım.
+        if path.startswith("/api/system-resources"):
+            return None
+
+        # Admin giriş sistemi kendi guard'ını kullansın.
+        if path.startswith("/admin") or path.startswith("/ss-admin"):
+            return None
+
+        protected_prefixes = (
+            "/u",
+            "/dashboard",
+            "/home",
+            "/user",
+            "/main",
+            "/radial",
+            "/protection",
+            "/koruma",
+            "/reports",
+            "/report",
+            "/rapor",
+            "/blocked",
+            "/block",
+            "/analysis",
+            "/analyze",
+            "/analiz",
+            "/notifications",
+            "/notification",
+            "/bildirim",
+            "/settings",
+            "/ayarlar",
+            "/community",
+            "/topluluk",
+            "/license",
+            "/lisans",
+            "/pricing",
+            "/checkout",
+            "/payment",
+            "/odeme",
+            "/satin-al",
+        )
+
+        if path.startswith(protected_prefixes):
+            if not session.get("logged_in") or not session.get("username"):
+                session.clear()
+                return redirect("/login?auth_required=1")
+
+    except Exception as e:
+        try:
+            print("AUTH_GUARD_WARN:", repr(e), flush=True)
+        except Exception:
+            pass
+
+    return None
+# ===== ERATGUARD STRICT USER AUTH GUARD END =====
+
+
 # ===== ERATGUARD REAL ADMIN TEMPLATE RESTORE START =====
 # Final override: FAST/Hafif admin ekranlarını gerçek admin template'lerine geri bağlar.
 try:
