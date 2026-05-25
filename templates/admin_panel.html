@@ -817,6 +817,18 @@
                       <span>Lisans anahtarı</span>
                       <b>{{ user.license_key or 'Yok' }}</b>
                     </div>
+                    <div class="info">
+                      <span>Oturum</span>
+                      <b>{% if user.online %}ONLINE{% else %}OFFLINE{% endif %}</b>
+                    </div>
+                    <div class="info">
+                      <span>Son görülme</span>
+                      <b>{{ user.last_seen or '-' }}</b>
+                    </div>
+                    <div class="info">
+                      <span>Son IP</span>
+                      <b>{{ user.last_ip or '-' }}</b>
+                    </div>
                   </div>
     <details class="license-details">
 

@@ -61,6 +61,102 @@ LICENSE_FILE = "data/license.json"
 LOCALES_DIR = "locales"
 
 
+# ===== ERATGUARD SUPABASE KV START =====
+def _eg_db_enabled():
+    try:
+        flag = str(os.getenv("ERATGUARD_DB_ENABLED", "")).strip().lower()
+        return bool(os.getenv("SUPABASE_URL")) and bool(os.getenv("SUPABASE_SERVICE_ROLE_KEY")) and flag in {"1", "true", "yes", "on"}
+    except Exception:
+        return False
+
+def _eg_supabase_url():
+    return os.getenv("SUPABASE_URL", "").strip().rstrip("/")
+
+def _eg_supabase_key():
+    return os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+
+def _eg_supabase_headers(extra=None):
+    headers = {
+        "apikey": _eg_supabase_key(),
+        "Authorization": "Bearer " + _eg_supabase_key(),
+        "Content-Type": "application/json",
+    }
+    if extra:
+        headers.update(extra)
+    return headers
+
+def _eg_kv_ensure_table():
+    # Table was created from Supabase SQL Editor.
+    # REST mode does not create schema automatically.
+    return _eg_db_enabled()
+
+def _eg_kv_get_json(key, default=None):
+    if not _eg_db_enabled():
+        return default
+    try:
+        import json as _eg_json
+        import urllib.parse as _eg_parse
+        import urllib.request as _eg_request
+
+        encoded_key = _eg_parse.quote(str(key), safe="")
+        url = f"{_eg_supabase_url()}/rest/v1/eratguard_kv?key=eq.{encoded_key}&select=value"
+
+        req = _eg_request.Request(
+            url,
+            headers=_eg_supabase_headers({"Accept": "application/json"}),
+            method="GET",
+        )
+
+        with _eg_request.urlopen(req, timeout=15) as resp:
+            rows = _eg_json.loads(resp.read().decode("utf-8") or "[]")
+
+        if not rows:
+            return default
+
+        value = rows[0].get("value", default)
+        return value if value is not None else default
+
+    except Exception as e:
+        print("EG_DB_READ_WARN:", key, repr(e), flush=True)
+        return default
+
+def _eg_kv_set_json(key, value):
+    if not _eg_db_enabled():
+        return False
+    try:
+        import json as _eg_json
+        import urllib.request as _eg_request
+
+        url = f"{_eg_supabase_url()}/rest/v1/eratguard_kv?on_conflict=key"
+
+        payload = _eg_json.dumps(
+            [{
+                "key": str(key),
+                "value": value if value is not None else {},
+            }],
+            ensure_ascii=False,
+        ).encode("utf-8")
+
+        req = _eg_request.Request(
+            url,
+            data=payload,
+            headers=_eg_supabase_headers({
+                "Prefer": "resolution=merge-duplicates,return=minimal",
+            }),
+            method="POST",
+        )
+
+        with _eg_request.urlopen(req, timeout=15) as resp:
+            return 200 <= resp.status < 300
+
+    except Exception as e:
+        print("EG_DB_WRITE_WARN:", key, repr(e), flush=True)
+        return False
+# ===== ERATGUARD SUPABASE KV END =====
+
+
+
+
 def ensure_default_user():
     os.makedirs("data", exist_ok=True)
     if not os.path.exists(USERS_FILE):
@@ -141,16 +237,48 @@ def get_lang():
 
 
 def load_users():
-    ensure_default_user()
+    os.makedirs("data", exist_ok=True)
+
+    local_users = {}
     try:
-        with open(USERS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
+        if not os.path.exists(USERS_FILE):
+            ensure_default_user()
+        if os.path.exists(USERS_FILE):
+            with open(USERS_FILE, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+                if isinstance(loaded, dict):
+                    local_users = loaded
+    except Exception as e:
+        print("LOCAL_USERS_READ_WARN:", repr(e), flush=True)
+        local_users = {}
+
+    if _eg_db_enabled():
+        db_users = _eg_kv_get_json("users", None)
+
+        if isinstance(db_users, dict) and db_users:
+            try:
+                with open(USERS_FILE, "w", encoding="utf-8") as f:
+                    json.dump(db_users, f, ensure_ascii=False, indent=2)
+            except Exception:
+                pass
+            return db_users
+
+        if isinstance(local_users, dict) and local_users:
+            _eg_kv_set_json("users", local_users)
+            return local_users
+
+    return local_users if isinstance(local_users, dict) else {}
 
 
 def save_users(users):
     os.makedirs("data", exist_ok=True)
+
+    if not isinstance(users, dict):
+        users = {}
+
+    if _eg_db_enabled():
+        _eg_kv_set_json("users", users)
+
     with open(USERS_FILE, "w", encoding="utf-8") as f:
         json.dump(users, f, ensure_ascii=False, indent=2)
 
@@ -391,22 +519,30 @@ def register():
         elif len(password) < 6:
             error = "Şifre kısa." if get_lang() == "tr" else "Password is too short."
         else:
+            from datetime import datetime
+            now = datetime.now().isoformat(timespec="seconds")
+
             users[username] = {
                 "password": generate_password_hash(password),
                 "role": "user",
                 "active": True,
                 "license_key": "NONE",
                 "expires_at": "2099-01-01",
-                "email": email
+                "email": email,
+                "created_at": now,
+                "last_seen": now
             }
             save_users(users)
 
-            # Yeni kayıt olan kullanıcı register ekranında kalmasın;
-            # direkt login olmuş şekilde ana panele girsin.
-            session["username"] = username
-            session["role"] = "user"
+            # Güvenlik: kayıt sonrası otomatik giriş yok.
+            # Kullanıcı hesabını oluşturduktan sonra şifresiyle login olmalı.
+            try:
+                _eg_touch_user_session(username, "register")
+            except Exception:
+                pass
 
-            return redirect(url_for("radial"))
+            session.clear()
+            return redirect(url_for("login") + "?registered=1")
 
     return render_template("register.html", error=error, success=success, t=t, lang=get_lang())
 
@@ -579,6 +715,16 @@ def login():
             session["onboarding_done"] = True
             session["username"] = username
             session["role"] = user.get("role", "user")
+
+            try:
+                from datetime import datetime
+                users[username]["last_login"] = datetime.now().isoformat(timespec="seconds")
+                users[username]["last_seen"] = users[username]["last_login"]
+                save_users(users)
+                _eg_touch_user_session(username, "login")
+            except Exception:
+                pass
+
             users = load_users()
             udata = users.get(username, {})
             if not udata.get("notif_asked"):
@@ -2848,6 +2994,99 @@ def ss_live_admin_all_slice_catchall(anything):
 # Gerçek admin template'leri için kapatıldı.
 # ===== SPAMSHIELD FAST ADMIN SLICE PAGES END =====
 
+
+# ===== ERATGUARD USER SESSION TRACKING START =====
+def _eg_user_sessions_path():
+    from pathlib import Path as _eg_Path
+    p = _eg_Path("data/user_sessions.json")
+    p.parent.mkdir(parents=True, exist_ok=True)
+    return p
+
+def _eg_load_user_sessions():
+    local_data = {}
+    try:
+        import json as _eg_json
+        p = _eg_user_sessions_path()
+        if p.exists():
+            data = _eg_json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                local_data = data
+    except Exception:
+        local_data = {}
+
+    if _eg_db_enabled():
+        db_data = _eg_kv_get_json("user_sessions", None)
+        if isinstance(db_data, dict) and db_data:
+            return db_data
+        if local_data:
+            _eg_kv_set_json("user_sessions", local_data)
+            return local_data
+
+    return local_data
+
+
+def _eg_save_user_sessions(data):
+    if not isinstance(data, dict):
+        data = {}
+
+    if _eg_db_enabled():
+        _eg_kv_set_json("user_sessions", data)
+
+    try:
+        import json as _eg_json
+        p = _eg_user_sessions_path()
+        p.write_text(_eg_json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def _eg_touch_user_session(username, event="activity"):
+    try:
+        from datetime import datetime as _eg_datetime
+        username = str(username or "").strip()
+        if not username:
+            return
+
+        data = _eg_load_user_sessions()
+        now = _eg_datetime.now().isoformat(timespec="seconds")
+        item = data.get(username, {}) if isinstance(data.get(username, {}), dict) else {}
+
+        item["username"] = username
+        item["last_seen"] = now
+        item["last_event"] = event
+
+        try:
+            item["last_ip"] = request.headers.get("X-Forwarded-For", request.remote_addr or "").split(",")[0].strip()
+            item["user_agent"] = request.headers.get("User-Agent", "")[:180]
+        except Exception:
+            pass
+
+        if event in ("login", "register"):
+            item["last_login"] = now
+
+        data[username] = item
+        _eg_save_user_sessions(data)
+    except Exception:
+        pass
+
+@app.before_request
+def _eg_track_logged_user_activity_final():
+    try:
+        username = session.get("username")
+        if not username:
+            return None
+
+        path = request.path or ""
+        if path.startswith("/static/") or path.startswith("/api/system-resources"):
+            return None
+
+        _eg_touch_user_session(username, "activity")
+    except Exception:
+        pass
+    return None
+# ===== ERATGUARD USER SESSION TRACKING END =====
+
+
 # ===== ERATGUARD REAL ADMIN TEMPLATE RESTORE START =====
 # Final override: FAST/Hafif admin ekranlarını gerçek admin template'lerine geri bağlar.
 try:
@@ -2886,13 +3125,37 @@ try:
         except Exception:
             pass
 
+        sessions = {}
+        try:
+            sessions = _eg_load_user_sessions()
+        except Exception:
+            sessions = {}
+
+        def _is_online(last_seen):
+            try:
+                from datetime import datetime
+                if not last_seen:
+                    return False
+                dt = datetime.fromisoformat(str(last_seen))
+                return (datetime.now() - dt).total_seconds() <= 600
+            except Exception:
+                return False
+
         out = []
         if isinstance(data, dict):
             for username, info in data.items():
                 item = dict(info) if isinstance(info, dict) else {"value": info}
+                sess = sessions.get(username, {}) if isinstance(sessions.get(username, {}), dict) else {}
+
                 item.setdefault("username", username)
                 item.setdefault("email", item.get("email", ""))
                 item.setdefault("role", item.get("role", "user"))
+
+                item["last_seen"] = sess.get("last_seen") or item.get("last_seen") or "-"
+                item["last_login"] = sess.get("last_login") or item.get("last_login") or "-"
+                item["last_ip"] = sess.get("last_ip") or item.get("last_ip") or "-"
+                item["online"] = _is_online(item.get("last_seen"))
+
                 out.append(item)
         elif isinstance(data, list):
             out = data
