@@ -7,5 +7,4 @@ requests==2.32.5
 scikit-learn
 numpy
 joblib
-iyzipay
 qrcode
