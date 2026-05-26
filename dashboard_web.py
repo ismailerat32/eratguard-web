@@ -388,6 +388,156 @@ def _eg_password_policy_text():
 
 
 
+# ===== ERATGUARD AUDIT + BRUTE FORCE START =====
+def _eg_json_data_path(name):
+    from pathlib import Path as _eg_Path
+    p = _eg_Path("data") / name
+    p.parent.mkdir(parents=True, exist_ok=True)
+    return p
+
+def _eg_client_ip():
+    try:
+        return (request.headers.get("X-Forwarded-For") or request.remote_addr or "").split(",")[0].strip() or "-"
+    except Exception:
+        return "-"
+
+def _eg_user_agent():
+    try:
+        return (request.headers.get("User-Agent") or "")[:180]
+    except Exception:
+        return ""
+
+def _eg_now_iso():
+    from datetime import datetime
+    return datetime.now().isoformat(timespec="seconds")
+
+def _eg_read_state(key, default):
+    try:
+        if _eg_db_enabled():
+            data = _eg_kv_get_json(key, None)
+            if data is not None:
+                return data
+    except Exception:
+        pass
+
+    try:
+        import json as _eg_json
+        p = _eg_json_data_path(key + ".json")
+        if p.exists():
+            return _eg_json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        pass
+
+    return default
+
+def _eg_write_state(key, value):
+    try:
+        if _eg_db_enabled():
+            _eg_kv_set_json(key, value)
+    except Exception:
+        pass
+
+    try:
+        import json as _eg_json
+        p = _eg_json_data_path(key + ".json")
+        p.write_text(_eg_json.dumps(value, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception:
+        pass
+
+def _eg_audit_log(event, username="", detail=None, level="info"):
+    try:
+        logs = _eg_read_state("audit_logs", [])
+        if not isinstance(logs, list):
+            logs = []
+
+        item = {
+            "time": _eg_now_iso(),
+            "event": str(event or ""),
+            "username": str(username or ""),
+            "level": str(level or "info"),
+            "ip": _eg_client_ip(),
+            "path": str(getattr(request, "path", "") or ""),
+            "user_agent": _eg_user_agent(),
+            "detail": detail if isinstance(detail, dict) else {},
+        }
+
+        logs.append(item)
+        logs = logs[-500:]
+        _eg_write_state("audit_logs", logs)
+    except Exception as e:
+        try:
+            print("AUDIT_LOG_WARN:", repr(e), flush=True)
+        except Exception:
+            pass
+
+def _eg_login_attempt_key(username):
+    return (str(username or "").strip().lower() or "-") + "|" + _eg_client_ip()
+
+def _eg_login_lock_status(username):
+    try:
+        from datetime import datetime
+        attempts = _eg_read_state("login_attempts", {})
+        if not isinstance(attempts, dict):
+            attempts = {}
+
+        item = attempts.get(_eg_login_attempt_key(username), {})
+        locked_until = item.get("locked_until")
+
+        if locked_until:
+            try:
+                until = datetime.fromisoformat(str(locked_until))
+                remaining = int((until - datetime.now()).total_seconds())
+                if remaining > 0:
+                    return True, remaining
+            except Exception:
+                pass
+
+        return False, 0
+    except Exception:
+        return False, 0
+
+def _eg_login_record_failure(username):
+    try:
+        from datetime import datetime, timedelta
+        attempts = _eg_read_state("login_attempts", {})
+        if not isinstance(attempts, dict):
+            attempts = {}
+
+        key = _eg_login_attempt_key(username)
+        item = attempts.get(key, {}) if isinstance(attempts.get(key, {}), dict) else {}
+
+        count = int(item.get("count", 0) or 0) + 1
+        item["count"] = count
+        item["last_failed"] = _eg_now_iso()
+        item["username"] = str(username or "")
+        item["ip"] = _eg_client_ip()
+
+        if count >= 5:
+            item["locked_until"] = (datetime.now() + timedelta(minutes=15)).isoformat(timespec="seconds")
+            _eg_audit_log("login_blocked", username, {"count": count, "locked_minutes": 15}, "warning")
+
+        attempts[key] = item
+        _eg_write_state("login_attempts", attempts)
+        return count
+    except Exception:
+        return 0
+
+def _eg_login_clear_failures(username):
+    try:
+        attempts = _eg_read_state("login_attempts", {})
+        if not isinstance(attempts, dict):
+            return
+
+        key = _eg_login_attempt_key(username)
+        if key in attempts:
+            attempts.pop(key, None)
+            _eg_write_state("login_attempts", attempts)
+    except Exception:
+        pass
+# ===== ERATGUARD AUDIT + BRUTE FORCE END =====
+
+
+
 def admin_required():
     return session.get("role") == "admin"
 
@@ -560,6 +710,7 @@ def register():
                 "last_seen": now
             }
             save_users(users)
+            _eg_audit_log("register_success", username, {"email": email}, "info")
 
             # Güvenlik: kayıt sonrası otomatik giriş yok.
             # Kullanıcı hesabını oluşturduktan sonra şifresiyle login olmalı.
@@ -731,13 +882,26 @@ def login():
         users = load_users()
         user = users.get(username)
 
-        if not user:
+        locked, remaining = _eg_login_lock_status(username)
+        if locked:
+            mins = max(1, remaining // 60)
+            _eg_audit_log("login_blocked", username, {"remaining_seconds": remaining}, "warning")
+            error = f"Çok fazla hatalı giriş denemesi. Lütfen yaklaşık {mins} dakika sonra tekrar deneyin."
+        elif not user:
+            _eg_login_record_failure(username)
+            _eg_audit_log("login_failed", username, {"reason": "user_not_found"}, "warning")
             error = "Kullanıcı adı veya şifre yanlış." if get_lang() == "tr" else "Username or password is incorrect."
         elif not user.get("active", True):
+            _eg_login_record_failure(username)
+            _eg_audit_log("login_failed", username, {"reason": "inactive_user"}, "warning")
             error = "Bu kullanıcı pasif durumda." if get_lang() == "tr" else "This user is inactive."
         elif is_date_expired(user.get("expires_at", "2099-12-31")):
+            _eg_login_record_failure(username)
+            _eg_audit_log("login_failed", username, {"reason": "license_expired"}, "warning")
             error = "Kullanıcı lisans süresi dolmuş." if get_lang() == "tr" else "User license has expired."
         elif check_password_hash(user["password"], password):
+            _eg_login_clear_failures(username)
+
             session["logged_in"] = True
             session["onboarding_done"] = True
             session["username"] = username
@@ -752,15 +916,20 @@ def login():
             except Exception:
                 pass
 
+            _eg_audit_log("login_success", username, {"role": user.get("role", "user")}, "info")
+
             users = load_users()
             udata = users.get(username, {})
             if not udata.get("notif_asked"):
                 return redirect("/notification-permission")
             return redirect(url_for("radial"))
         else:
+            count = _eg_login_record_failure(username)
+            _eg_audit_log("login_failed", username, {"reason": "bad_password", "count": count}, "warning")
             error = "Kullanıcı adı veya şifre yanlış." if get_lang() == "tr" else "Username or password is incorrect."
 
     return render_template("login.html", error=error, t=t, lang=get_lang())
+
 
 
 @app.route("/logout")
@@ -796,6 +965,7 @@ def change_password():
         else:
             users[username]["password"] = generate_password_hash(new_password)
             save_users(users)
+            _eg_audit_log("password_changed", username, {}, "info")
             success = "Şifre başarıyla değiştirildi." if get_lang() == "tr" else "Password changed successfully."
 
     return render_template(
@@ -852,6 +1022,7 @@ def add_user():
                 "email": email
             }
             save_users(users)
+            _eg_audit_log("admin_add_user", username, {"role": role, "active": active, "email": email}, "info")
             success = f"{username} kullanıcısı eklendi." if get_lang() == "tr" else f"User {username} added."
 
     return render_template(
@@ -1252,6 +1423,7 @@ def _eg_reset_update_password(username, new_password):
     users[username]["password"] = _eg_reset_generate_password_hash(new_password)
     users[username].pop("password_hash", None)
     save_users(users)
+    _eg_audit_log("reset_password_changed", username, {}, "info")
     return True
 
 def _eg_reset_validate_passwords(new_password, confirm_password):
