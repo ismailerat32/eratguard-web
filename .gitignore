@@ -178,3 +178,5 @@ eratguard_safe_hacker_probe.py
 ERATGUARD_PLAYSTORE_FINAL_REVIEW/
 sessizlikdenizi
 data/user_sessions.json
+data/audit_logs.json
+data/login_attempts.json
