@@ -69,10 +69,11 @@ button{margin-top:16px;width:100%;padding:12px;border:none;border-radius:12px;ba
             <input type="password" name="current_password" required>
 
             <label>Yeni Şifre</label>
-            <input type="password" name="new_password" required>
+            <input type="password" name="new_password" minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" title="Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir." required>
+            <small style="display:block;margin-top:6px;color:#7b8b84;line-height:1.4">Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir.</small>
 
             <label>Yeni Şifre Tekrar</label>
-            <input type="password" name="new_password2" required>
+            <input type="password" name="new_password2" minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" title="Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir." required>
 
             <button type="submit">Şifreyi Güncelle</button>
         </form>

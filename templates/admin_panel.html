@@ -740,7 +740,8 @@
 
               <div class="field">
                 <label>Şifre</label>
-                <input name="password" type="password" placeholder="geçici şifre" required>
+                <input name="password" type="password" placeholder="Güçlü geçici şifre" minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" title="Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir." required>
+                <small style="display:block;margin-top:6px;color:rgba(255,255,255,.55);line-height:1.4">Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir.</small>
               </div>
 
               <div class="field">

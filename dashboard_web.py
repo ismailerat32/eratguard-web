@@ -361,6 +361,33 @@ def login_required():
     return session.get("logged_in") is True
 
 
+def _eg_password_policy_error(password):
+    password = password or ""
+
+    if len(password) < 8:
+        return "Şifre en az 8 karakter olmalı."
+
+    if not any(c.isupper() for c in password):
+        return "Şifre en az 1 büyük harf içermeli."
+
+    if not any(c.islower() for c in password):
+        return "Şifre en az 1 küçük harf içermeli."
+
+    if not any(c.isdigit() for c in password):
+        return "Şifre en az 1 rakam içermeli."
+
+    special_chars = "!@#$%^&*()_+-=[]{}|;:,.<>?/~`"
+    if not any(c in special_chars for c in password):
+        return "Şifre en az 1 özel karakter içermeli. Örnek: ! @ # ?"
+
+    return None
+
+
+def _eg_password_policy_text():
+    return "Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermeli."
+
+
+
 def admin_required():
     return session.get("role") == "admin"
 
@@ -516,8 +543,8 @@ def register():
             error = "Mail adresi gerekli." if get_lang() == "tr" else "Email is required."
         elif username in users:
             error = "Bu kullanıcı zaten var." if get_lang() == "tr" else "This user already exists."
-        elif len(password) < 6:
-            error = "Şifre kısa." if get_lang() == "tr" else "Password is too short."
+        elif _eg_password_policy_error(password):
+            error = _eg_password_policy_error(password) if get_lang() == "tr" else "Password must be at least 8 characters and include uppercase, lowercase, number and special character."
         else:
             from datetime import datetime
             now = datetime.now().isoformat(timespec="seconds")
@@ -762,8 +789,8 @@ def change_password():
 
         if not user or not check_password_hash(user["password"], current_password):
             error = "Mevcut şifre yanlış." if get_lang() == "tr" else "Current password is incorrect."
-        elif len(new_password) < 6:
-            error = "Yeni şifre en az 6 karakter olmalı." if get_lang() == "tr" else "New password must be at least 6 characters."
+        elif _eg_password_policy_error(new_password):
+            error = _eg_password_policy_error(new_password) if get_lang() == "tr" else "Password must be at least 8 characters and include uppercase, lowercase, number and special character."
         elif new_password != confirm_password:
             error = "Yeni şifreler eşleşmiyor." if get_lang() == "tr" else "New passwords do not match."
         else:
@@ -807,8 +834,8 @@ def add_user():
             error = "Kullanıcı adı boş olamaz." if get_lang() == "tr" else "Username cannot be empty."
         elif username in users:
             error = "Bu kullanıcı zaten var." if get_lang() == "tr" else "This user already exists."
-        elif len(password) < 6:
-            error = "Şifre en az 6 karakter olmalı." if get_lang() == "tr" else "Password must be at least 6 characters."
+        elif _eg_password_policy_error(password):
+            error = _eg_password_policy_error(password) if get_lang() == "tr" else "Password must be at least 8 characters and include uppercase, lowercase, number and special character."
         elif password != confirm_password:
             error = "Şifreler eşleşmiyor." if get_lang() == "tr" else "Passwords do not match."
         elif role not in ["admin", "user"]:
@@ -1205,9 +1232,9 @@ def _eg_reset_page(error=None, message=None, token="", code_mode=False):
     <p>EratGuard hesabın için yeni ve güçlü bir şifre belirle.</p>
     {code_input}
     <label>Yeni şifre</label>
-    <input name="new_password" type="password" minlength="6" required placeholder="En az 6 karakter">
+    <input name="new_password" type="password" minlength="8" required placeholder="En az 8 karakter, büyük/küçük harf, rakam ve özel karakter">
     <label>Yeni şifre tekrar</label>
-    <input name="confirm_password" type="password" minlength="6" required placeholder="Şifreyi tekrar gir">
+    <input name="confirm_password" type="password" minlength="8" required placeholder="Güçlü şifreyi tekrar gir">
     <button type="submit">Şifreyi Güncelle</button>
     {f'<div class="msg">{message}</div>' if message else ''}
     {f'<div class="err">{error}</div>' if error else ''}
@@ -1228,13 +1255,19 @@ def _eg_reset_update_password(username, new_password):
     return True
 
 def _eg_reset_validate_passwords(new_password, confirm_password):
-    if not new_password or len(new_password) < 6:
-        return "Yeni şifre en az 6 karakter olmalı."
+    if not new_password:
+        return "Yeni şifre boş olamaz."
+
+    pw_error = _eg_password_policy_error(new_password)
+    if pw_error:
+        return pw_error
+
     if new_password != confirm_password:
-        return "Yeni şifreler eşleşmiyor."
+        return "Şifreler eşleşmiyor."
+
     return None
 
-@app.route("/reset-password/<token>", methods=["GET", "POST"])
+
 def eg_final_reset_password_token(token):
     from utils.reset_utils import find_valid_token_record, mark_token_used
 
