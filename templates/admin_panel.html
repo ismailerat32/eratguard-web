@@ -653,7 +653,42 @@
         min-height:47px;
       }
     }
-  </style>
+  
+.audit-card{
+  margin:18px 0;
+  padding:18px;
+  border:1px solid rgba(0,255,136,.14);
+  border-radius:22px;
+  background:linear-gradient(180deg,rgba(0,255,136,.055),rgba(255,255,255,.025));
+  box-shadow:0 18px 45px rgba(0,0,0,.22);
+}
+.audit-list{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.audit-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 14px;
+  border-radius:16px;
+  background:rgba(0,0,0,.22);
+  border:1px solid rgba(255,255,255,.06);
+}
+.audit-main{display:flex;flex-direction:column;gap:4px;min-width:0}
+.audit-main b{font-size:13px;color:#fff;word-break:break-word}
+.audit-main span{font-size:12px;color:rgba(255,255,255,.55);word-break:break-word}
+.audit-time{font-size:11px;color:rgba(255,255,255,.42);white-space:nowrap}
+.audit-row.level-warning{border-color:rgba(255,190,80,.24);background:rgba(255,190,80,.07)}
+.audit-row.level-error{border-color:rgba(255,80,80,.24);background:rgba(255,80,80,.07)}
+.empty-state{
+  margin-top:14px;
+  padding:14px;
+  border-radius:16px;
+  background:rgba(255,255,255,.035);
+  color:rgba(255,255,255,.55);
+  font-size:13px;
+}
+
+</style>
 </head>
 
 <body>
@@ -782,6 +817,33 @@
             </div>
 
             <div class="users-grid">
+
+          <section class="audit-card">
+            <div class="section-head">
+              <div>
+                <h3>Son Güvenlik Olayları</h3>
+                <p>Login, kayıt, şifre değişimi ve kilitlenen giriş denemeleri.</p>
+              </div>
+              <span class="mini-badge">{{ audit_logs|length if audit_logs else 0 }} OLAY</span>
+            </div>
+
+            {% if audit_logs %}
+              <div class="audit-list">
+                {% for ev in audit_logs %}
+                  <div class="audit-row level-{{ ev.level or 'info' }}">
+                    <div class="audit-main">
+                      <b>{{ ev.event or 'event' }}</b>
+                      <span>{{ ev.username or '-' }} · {{ ev.ip or '-' }}</span>
+                    </div>
+                    <div class="audit-time">{{ ev.time or '-' }}</div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="empty-state">Henüz güvenlik olayı yok.</div>
+            {% endif %}
+          </section>
+
               {% for user in users %}
                 <article class="user-card" id="user-{{ user.username }}">
                   <div class="user-top">

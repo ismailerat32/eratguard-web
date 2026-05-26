@@ -534,6 +534,21 @@ def _eg_login_clear_failures(username):
             _eg_write_state("login_attempts", attempts)
     except Exception:
         pass
+
+def _eg_recent_audit_logs(limit=12):
+    try:
+        logs = _eg_read_state("audit_logs", [])
+        if not isinstance(logs, list):
+            return []
+
+        out = []
+        for item in reversed(logs[-max(1, int(limit)):]):
+            if isinstance(item, dict):
+                out.append(item)
+        return out
+    except Exception:
+        return []
+
 # ===== ERATGUARD AUDIT + BRUTE FORCE END =====
 
 
@@ -3161,7 +3176,7 @@ def ss_live_admin_all_slice_catchall(anything):
 
     template_map = {
         "dashboard": ("admin_dashboard.html", {}),
-        "panel": ("admin_panel.html", {"users": [], "upgrade_requests": []}),
+        "panel": ("admin_panel.html", {"users": [], "upgrade_requests": [], "audit_logs": _eg_recent_audit_logs(12)}),
         "users": ("admin_panel.html", {"users": [], "upgrade_requests": []}),
         "licenses": ("admin_licenses.html", {}),
         "license": ("admin_licenses.html", {}),
@@ -3479,6 +3494,7 @@ try:
             "admin_panel.html",
             users=_eg_real_users_list(),
             upgrade_requests=globals().get("upgrade_requests", []),
+            audit_logs=_eg_recent_audit_logs(12),
         )
 
     def _eg_real_admin_licenses():
