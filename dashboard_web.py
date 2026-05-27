@@ -8692,6 +8692,29 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 # ===== ERATGUARD SESSION COOKIE HARDENING END =====
 
 # ===== ERATGUARD MANUAL LICENSE ADMIN FLOW START =====
+def _eg_admin_request_ok():
+    try:
+        fn = globals().get("_ss_admin_ok")
+        if callable(fn) and fn():
+            return True
+    except Exception:
+        pass
+
+    try:
+        return bool(
+            session.get("admin_logged_in")
+            or (
+                session.get("logged_in")
+                and (
+                    session.get("is_admin")
+                    or session.get("role") == "admin"
+                    or session.get("username") == "admin"
+                )
+            )
+        )
+    except Exception:
+        return False
+
 def _eg_admin_payment_requests_for_template():
     try:
         return _eg_load_payment_requests()
@@ -8700,7 +8723,7 @@ def _eg_admin_payment_requests_for_template():
 
 
 def _eg_admin_payment_requests_page():
-    if not session.get("admin_logged_in"):
+    if not _eg_admin_request_ok():
         return redirect("/ss-admin-access")
 
     requests_data = _eg_admin_payment_requests_for_template()
@@ -8730,7 +8753,7 @@ def eg_admin_license_requests_live():
 
 @app.route("/admin/license-request/approve/<order_no>", methods=["POST", "GET"])
 def eg_admin_approve_license_request(order_no):
-    if not session.get("admin_logged_in"):
+    if not _eg_admin_request_ok():
         return redirect("/ss-admin-access")
 
     requests_data = _eg_load_payment_requests()
@@ -8779,7 +8802,7 @@ def eg_admin_approve_license_request(order_no):
 
 @app.route("/admin/license-request/reject/<order_no>", methods=["POST", "GET"])
 def eg_admin_reject_license_request(order_no):
-    if not session.get("admin_logged_in"):
+    if not _eg_admin_request_ok():
         return redirect("/ss-admin-access")
 
     requests_data = _eg_load_payment_requests()
