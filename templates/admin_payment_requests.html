@@ -91,7 +91,7 @@
     </p>
     <div class="actions">
       <a class="btn secondary" href="/admin/dashboard">Admin Paneline Dön</a>
-      <a class="btn secondary" href="/admin/license-requests">Yenile</a>
+      <a class="btn secondary" href="/admin/payment-requests">Yenile</a>
     </div>
   </section>
 
@@ -125,7 +125,7 @@
             <a class="btn" href="/admin/license-request/approve/{{ r.get('order_no') }}">Onayla ve Lisans Ata</a>
             <a class="btn danger" href="/admin/license-request/reject/{{ r.get('order_no') }}">İptal Et</a>
           {% else %}
-            <a class="btn secondary" href="/admin/license-requests">İşlem Tamamlandı</a>
+            <a class="btn secondary" href="/admin/payment-requests">İşlem Tamamlandı</a>
           {% endif %}
         </div>
       </article>

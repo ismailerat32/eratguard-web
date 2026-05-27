@@ -3606,6 +3606,34 @@ try:
             spam_logs=spam_logs,
         )
 
+    def _eg_real_admin_security():
+        events = []
+        try:
+            events = _eg_recent_audit_logs(80)
+        except Exception:
+            events = []
+
+        if not isinstance(events, list):
+            events = []
+
+        def _level(ev):
+            try:
+                return str(ev.get("level", "info")).lower()
+            except Exception:
+                return "info"
+
+        warning_events = sum(1 for ev in events if _level(ev) == "warning")
+        critical_events = sum(1 for ev in events if _level(ev) in ("error", "critical"))
+
+        return _eg_real_render(
+            "admin_security.html",
+            events=events,
+            total_events=len(events),
+            warning_events=warning_events,
+            critical_events=critical_events,
+            recent_window="SON 80",
+        )
+
     def _eg_real_settings_dict():
         settings = _eg_real_dict_from_json(
             "data/settings.json",
@@ -3670,7 +3698,7 @@ try:
             whitelist = []
 
         return _eg_real_render(
-            "whitelist.html",
+            "admin_whitelist.html",
             whitelist=whitelist,
         )
 
@@ -3708,10 +3736,12 @@ try:
             return _eg_real_admin_panel()
         if slug in ("licenses", "license", "generated-licenses"):
             return _eg_real_admin_licenses()
-        if slug in ("payment-requests", "payments", "payment"):
+        if slug in ("payment-requests", "payments", "payment", "license-requests"):
             return _eg_real_admin_payments()
-        if slug in ("spam-logs", "security"):
+        if slug == "spam-logs":
             return _eg_real_admin_spam_logs()
+        if slug in ("security", "audit", "logs", "actions"):
+            return _eg_real_admin_security()
         if slug in ("overview", "reports"):
             return _eg_real_admin_overview()
         if slug in ("whitelist", "notifications"):
@@ -8541,9 +8571,7 @@ def _eg_admin_payment_requests_for_template():
         return []
 
 
-@app.route("/admin/payment-requests-live")
-@app.route("/admin/license-requests")
-def eg_admin_license_requests_live():
+def _eg_admin_payment_requests_page():
     if not session.get("admin_logged_in"):
         return redirect("/ss-admin-access")
 
@@ -8558,6 +8586,18 @@ def eg_admin_license_requests_live():
         "admin_payment_requests.html",
         requests=requests_data
     )
+
+
+@app.route("/admin/payment-requests")
+def eg_admin_payment_requests_redirect_final():
+    return _eg_admin_payment_requests_page()
+
+
+@app.route("/admin/payments")
+@app.route("/admin/payment-requests-live")
+@app.route("/admin/license-requests")
+def eg_admin_license_requests_live():
+    return redirect("/admin/payment-requests")
 
 
 @app.route("/admin/license-request/approve/<order_no>", methods=["POST", "GET"])
@@ -8601,8 +8641,12 @@ def eg_admin_approve_license_request(order_no):
     if changed:
         save_users(users)
         _eg_save_payment_requests(requests_data)
+        try:
+            _eg_audit_log("admin_payment_request_approved", username, {"order_no": order_no, "license_key": approved_license}, "info")
+        except Exception as e:
+            print("ADMIN_PAYMENT_APPROVE_AUDIT_WARN:", repr(e), flush=True)
 
-    return redirect("/admin/license-requests")
+    return redirect("/admin/payment-requests")
 
 
 @app.route("/admin/license-request/reject/<order_no>", methods=["POST", "GET"])
@@ -8622,13 +8666,12 @@ def eg_admin_reject_license_request(order_no):
 
     if changed:
         _eg_save_payment_requests(requests_data)
+        try:
+            _eg_audit_log("admin_payment_request_rejected", "", {"order_no": order_no}, "warning")
+        except Exception as e:
+            print("ADMIN_PAYMENT_REJECT_AUDIT_WARN:", repr(e), flush=True)
 
-    return redirect("/admin/license-requests")
-
-
-@app.route("/admin/payment-requests")
-def eg_admin_payment_requests_redirect_final():
-    return redirect("/admin/license-requests")
+    return redirect("/admin/payment-requests")
 # ===== ERATGUARD MANUAL LICENSE ADMIN FLOW END =====
 
 # ===== ERATGUARD ONE-TIME LICENSE VALIDATION START =====

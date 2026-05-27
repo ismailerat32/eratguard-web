@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>EratGuard ADMIN Güvenlik Merkezi</title>
+  <style>
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+      background:
+        radial-gradient(circle at 50% -12%,rgba(49,249,158,.18),transparent 35%),
+        radial-gradient(circle at 100% 85%,rgba(24,198,232,.11),transparent 32%),
+        linear-gradient(180deg,#010403,#020806 55%,#000);
+      color:#effff5;
+      padding:18px;
+    }
+    .wrap{max-width:1180px;margin:0 auto}
+    .top{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      align-items:center;
+      margin:8px 0 18px;
+    }
+    .brand h1{margin:0;font-size:clamp(28px,6vw,54px);letter-spacing:-.06em}
+    .brand h1 span{color:#8cff5a}
+    .brand p{margin:8px 0 0;color:rgba(239,255,245,.62);font-weight:700}
+    .pill{
+      border:1px solid rgba(140,255,90,.22);
+      background:rgba(140,255,90,.08);
+      color:#caffe0;
+      border-radius:999px;
+      padding:11px 14px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .hero{
+      border:1px solid rgba(140,255,90,.16);
+      background:linear-gradient(180deg,rgba(8,33,21,.86),rgba(2,10,6,.90));
+      border-radius:30px;
+      padding:22px;
+      box-shadow:0 24px 80px rgba(0,0,0,.46);
+      overflow:hidden;
+      position:relative;
+    }
+    .hero:before{
+      content:"";
+      position:absolute;
+      width:280px;height:280px;
+      border-radius:50%;
+      background:rgba(49,249,158,.09);
+      filter:blur(35px);
+      right:-110px;top:-120px;
+    }
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin:18px 0;
+      position:relative;
+      z-index:1;
+    }
+    .stat{
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.22);
+      border-radius:22px;
+      padding:16px;
+      min-height:92px;
+    }
+    .stat b{display:block;font-size:27px;color:#8cff5a}
+    .stat span{font-size:12px;color:rgba(239,255,245,.55);font-weight:800;text-transform:uppercase}
+    .grid{
+      display:grid;
+      grid-template-columns:1.3fr .7fr;
+      gap:14px;
+      position:relative;
+      z-index:1;
+    }
+    .panel{
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.20);
+      border-radius:26px;
+      padding:18px;
+    }
+    .panel h2{margin:0 0 12px;font-size:22px}
+    .timeline{display:flex;flex-direction:column;gap:10px}
+    .event{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.035);
+      border-radius:18px;
+      padding:13px;
+    }
+    .event.warning{border-color:rgba(255,196,80,.26);background:rgba(255,196,80,.07)}
+    .event.error,.event.critical{border-color:rgba(255,85,85,.30);background:rgba(255,85,85,.075)}
+    .event b{font-size:14px}
+    .event small{display:block;margin-top:4px;color:rgba(239,255,245,.55);font-weight:700;word-break:break-word}
+    .time{font-size:11px;color:rgba(239,255,245,.42);font-weight:900;white-space:nowrap}
+    .actions{display:grid;gap:10px}
+    .btn{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:46px;
+      border-radius:16px;
+      background:linear-gradient(135deg,#19f58a,#18c6e8);
+      color:#001b0e;
+      text-decoration:none;
+      font-weight:1000;
+      box-shadow:0 12px 30px rgba(25,245,138,.16);
+    }
+    .btn.secondary{
+      background:rgba(255,255,255,.06);
+      color:#effff5;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow:none;
+    }
+    .empty{
+      border:1px dashed rgba(255,255,255,.16);
+      color:rgba(239,255,245,.58);
+      border-radius:20px;
+      padding:22px;
+      font-weight:800;
+      text-align:center;
+    }
+    @media(max-width:760px){
+      body{padding:12px}
+      .top{align-items:flex-start;flex-direction:column}
+      .stats{grid-template-columns:1fr 1fr}
+      .grid{grid-template-columns:1fr}
+      .hero{padding:16px;border-radius:24px}
+      .event{grid-template-columns:1fr}
+      .time{white-space:normal}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top">
+      <div class="brand">
+        <h1>EratGuard <span>Security</span></h1>
+        <p>Admin güvenlik timeline, login olayları, şifre sıfırlama ve kritik hareketler.</p>
+      </div>
+      <div class="pill">🛡️ SECURITY TIMELINE</div>
+    </div>
+
+    <section class="hero">
+      <div class="stats">
+        <div class="stat"><b>{{ total_events }}</b><span>Toplam olay</span></div>
+        <div class="stat"><b>{{ warning_events }}</b><span>Uyarı</span></div>
+        <div class="stat"><b>{{ critical_events }}</b><span>Kritik</span></div>
+        <div class="stat"><b>{{ recent_window }}</b><span>Gösterim</span></div>
+      </div>
+
+      <div class="grid">
+        <section class="panel">
+          <h2>Son Güvenlik Olayları</h2>
+          {% if events %}
+            <div class="timeline">
+              {% for ev in events %}
+                <article class="event {{ ev.get('level','info') }}">
+                  <div>
+                    <b>{{ ev.get("event", ev.get("type", "security_event")) }}</b>
+                    <small>{{ ev.get("username","-") }} · {{ ev.get("ip","-") }}</small>
+                    {% if ev.get("detail") %}
+                      <small>{{ ev.get("detail") }}</small>
+                    {% endif %}
+                  </div>
+                  <div class="time">{{ ev.get("time","-") }}</div>
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty">Henüz güvenlik olayı yok.</div>
+          {% endif %}
+        </section>
+
+        <aside class="panel">
+          <h2>Hızlı Aksiyonlar</h2>
+          <div class="actions">
+            <a class="btn" href="/admin/users">👥 Kullanıcı Merkezi</a>
+            <a class="btn secondary" href="/admin/spam-logs">📜 Spam Logları</a>
+            <a class="btn secondary" href="/admin/system">🖥️ Sistem Sağlığı</a>
+            <a class="btn secondary" href="/admin/dashboard">← Admin Dashboard</a>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
