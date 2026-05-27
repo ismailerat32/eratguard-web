@@ -1705,47 +1705,54 @@ def forgot_password_live():
         )
 
         if username and user:
-            raw_token = create_reset_token(username)
-            reset_link = url_for("eg_final_reset_password_token", token=raw_token, _external=True)
-            reset_code = create_reset_code(username)
-
             try:
-                _ss_titanium_event_for_user(username, "password_reset_requested", {
-                    "channel": "e-posta",
-                    "status": "created",
-                    "source": "forgot_password",
-                    "identity_type": "email" if "@" in identity else "username"
-                })
-            except Exception as e:
-                print("PASSWORD_RESET_NOTIFICATION_ERROR:", e, flush=True)
-
-            target_email = str(user.get("email", "") or "").strip()
-            if not target_email and "@" in str(username):
-                target_email = str(username)
-
-            print("FORGOT_DEBUG_TARGET:", _eg_mask_email(target_email), flush=True)
-
-            if target_email:
-                subject = "EratGuard Şifre Sıfırlama"
-                body = (
-                    f"Merhaba {username}\n\n"
-                    f"EratGuard hesabın için şifre sıfırlama isteği oluşturuldu.\n\n"
-                    f"Aşağıdaki bağlantı ile yeni şifre oluşturabilirsin:\n"
-                    f"{reset_link}\n\n"
-                    f"Alternatif olarak 6 haneli kodun: {reset_code}\n"
-                    f"Kod ekranı: {url_for('eg_final_reset_password_code', _external=True)}\n\n"
-                    f"Bu işlemi sen yapmadıysan bu mesajı yok sayabilirsin.\n"
-                )
+                raw_token = create_reset_token(username)
+                reset_link = url_for("eg_final_reset_password_token", token=raw_token, _external=True)
+                reset_code = create_reset_code(username)
 
                 try:
-                    ok, msg = send_mail(
-                        to_email=target_email,
-                        subject=subject,
-                        body=body
-                    )
-                    print("Password reset mail:", ok, msg, flush=True)
+                    _ss_titanium_event_for_user(username, "password_reset_requested", {
+                        "channel": "e-posta",
+                        "status": "created",
+                        "source": "forgot_password",
+                        "identity_type": "email" if "@" in identity else "username"
+                    })
                 except Exception as e:
-                    print("Password reset mail error:", e, flush=True)
+                    print("PASSWORD_RESET_NOTIFICATION_ERROR:", repr(e), flush=True)
+
+                target_email = str(user.get("email", "") or "").strip()
+                if not target_email and "@" in str(username):
+                    target_email = str(username)
+
+                print("FORGOT_DEBUG_TARGET:", _eg_mask_email(target_email), flush=True)
+
+                if target_email:
+                    subject = "EratGuard Şifre Sıfırlama"
+                    body = (
+                        f"Merhaba {username}\n\n"
+                        f"EratGuard hesabın için şifre sıfırlama isteği oluşturuldu.\n\n"
+                        f"Aşağıdaki bağlantı ile yeni şifre oluşturabilirsin:\n"
+                        f"{reset_link}\n\n"
+                        f"Alternatif olarak 6 haneli kodun: {reset_code}\n"
+                        f"Kod ekranı: {url_for('eg_final_reset_password_code', _external=True)}\n\n"
+                        f"Bu işlemi sen yapmadıysan bu mesajı yok sayabilirsin.\n"
+                    )
+
+                    try:
+                        ok, msg = send_mail(
+                            to_email=target_email,
+                            subject=subject,
+                            body=body
+                        )
+                        print("Password reset mail:", ok, msg, flush=True)
+                    except Exception as e:
+                        print("Password reset mail error:", repr(e), flush=True)
+                else:
+                    print("FORGOT_WARN: matched account has no target email:", str(username)[:2] + "***", flush=True)
+
+            except Exception as e:
+                # Kullanıcıya 500 gösterme. Güvenlik mesajı aynı kalır, detay sadece log'a düşer.
+                print("FORGOT_SAFE_POST_ERROR:", repr(e), flush=True)
 
         # Security: never reveal whether the account exists.
         # Reset code/link must not be displayed on the web page.
