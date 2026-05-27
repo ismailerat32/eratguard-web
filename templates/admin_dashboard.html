@@ -531,35 +531,35 @@
 
       <nav class="slices">
         <a class="slice" style="--a:0deg" href="javascript:void(0)" data-href="/admin/users" aria-label="Kullanıcılar">
-          <span class="slice-card"><svg class="ico"><use href="#i-users-admin"/></svg><span class="label">Kullanıcılar</span><span class="under"></span></span>
+          <span class="slice-card"><svg class="ico"><use href="#i-users-admin"/></svg><span class="label">Kullanıcılar</span><span class="under">{{ admin_stats.users|default("Kullanıcı") }}</span></span>
         </a>
 
         <a class="slice" style="--a:45deg" href="javascript:void(0)" data-href="/admin/licenses" aria-label="Lisanslar">
-          <span class="slice-card"><svg class="ico"><use href="#i-license-admin"/></svg><span class="label">Lisanslar</span><span class="under"></span></span>
+          <span class="slice-card"><svg class="ico"><use href="#i-license-admin"/></svg><span class="label">Lisanslar</span><span class="under">{{ admin_stats.licenses|default("Lisans") }}</span></span>
         </a>
 
         <a class="slice" style="--a:90deg" href="javascript:void(0)" data-href="/admin/payment-requests" aria-label="Talepler">
-          <span class="slice-card"><svg class="ico"><use href="#i-payment-admin"/></svg><span class="label">Talepler</span><span class="under"></span></span>
+          <span class="slice-card"><svg class="ico"><use href="#i-payment-admin"/></svg><span class="label">Talepler</span><span class="under">{{ admin_stats.payments|default("Talep") }}</span></span>
         </a>
 
         <a class="slice" style="--a:135deg" href="javascript:void(0)" data-href="/admin/security" aria-label="Güvenlik">
-          <span class="slice-card"><svg class="ico"><use href="#i-security-admin"/></svg><span class="label">Güvenlik</span><span class="under"></span></span>
+          <span class="slice-card"><svg class="ico"><use href="#i-security-admin"/></svg><span class="label">Güvenlik</span><span class="under">{{ admin_stats.security|default("Güvenlik") }}</span></span>
         </a>
 
         <a class="slice" style="--a:180deg" href="javascript:void(0)" data-href="/admin/overview" aria-label="Raporlar">
-          <span class="slice-card"><svg class="ico"><use href="#i-report-admin"/></svg><span class="label">Raporlar</span><span class="under"></span></span>
+          <span class="slice-card"><svg class="ico"><use href="#i-report-admin"/></svg><span class="label">Raporlar</span><span class="under">{{ admin_stats.reports|default("Rapor") }}</span></span>
         </a>
 
         <a class="slice" style="--a:225deg" href="javascript:void(0)" data-href="/admin/whitelist" aria-label="Güvenli Liste">
-          <span class="slice-card"><svg class="ico"><use href="#i-bell-admin"/></svg><span class="label">Güvenli Liste</span><span class="under"></span></span>
+          <span class="slice-card"><svg class="ico"><use href="#i-bell-admin"/></svg><span class="label">Güvenli Liste</span><span class="under">{{ admin_stats.whitelist|default("Liste") }}</span></span>
         </a>
 
         <a class="slice" style="--a:270deg" href="javascript:void(0)" data-href="/admin/settings" aria-label="Ayarlar">
-          <span class="slice-card"><svg class="ico"><use href="#i-settings-admin"/></svg><span class="label">Ayarlar</span><span class="under"></span></span>
+          <span class="slice-card"><svg class="ico"><use href="#i-settings-admin"/></svg><span class="label">Ayarlar</span><span class="under">{{ admin_stats.settings|default("Ayar") }}</span></span>
         </a>
 
         <a class="slice" style="--a:315deg" href="javascript:void(0)" data-href="/admin/system" aria-label="Sistem">
-          <span class="slice-card"><svg class="ico"><use href="#i-system-admin"/></svg><span class="label">Sistem</span><span class="under"></span></span>
+          <span class="slice-card"><svg class="ico"><use href="#i-system-admin"/></svg><span class="label">Sistem</span><span class="under">{{ admin_stats.system|default("Sistem") }}</span></span>
         </a>
       </nav>
 

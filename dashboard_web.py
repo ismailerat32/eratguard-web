@@ -3490,8 +3490,136 @@ try:
             return _eg_real_redirect("/ss-admin-access")
         return _eg_real_redirect("/admin/dashboard")
 
+    def _eg_real_admin_dashboard_stats():
+        import json as _eg_json
+        from pathlib import Path as _eg_Path
+
+        def _load(default, *paths):
+            for raw in paths:
+                try:
+                    fp = _eg_Path(raw)
+                    if fp.exists():
+                        data = _eg_json.loads(fp.read_text(encoding="utf-8"))
+                        return data
+                except Exception:
+                    pass
+            return default
+
+        users_data = {}
+        try:
+            loader = globals().get("load_users")
+            if callable(loader):
+                users_data = loader()
+        except Exception:
+            users_data = {}
+
+        if not isinstance(users_data, dict):
+            users_data = _load({}, "data/users.json", "users.json")
+        if not isinstance(users_data, dict):
+            users_data = {}
+
+        licenses_data = _load({}, "data/generated_licenses.json", "data/licenses.json", "generated_licenses.json", "licenses.json")
+        if isinstance(licenses_data, list):
+            license_count = len(licenses_data)
+        elif isinstance(licenses_data, dict):
+            license_count = len(licenses_data)
+        else:
+            license_count = 0
+
+        payment_requests = _load([], "data/payment_requests.json", "payment_requests.json")
+        if isinstance(payment_requests, dict):
+            payment_requests = list(payment_requests.values())
+        if not isinstance(payment_requests, list):
+            payment_requests = []
+
+        pending_requests = 0
+        for item in payment_requests:
+            try:
+                st = str(item.get("status", "")).lower()
+                if "approved" not in st and "reject" not in st and "cancel" not in st:
+                    pending_requests += 1
+            except Exception:
+                pass
+
+        spam_logs = _load([], "data/spam_logs.json", "data/logs.json", "spam_logs.json", "logs.json")
+        if isinstance(spam_logs, dict):
+            spam_logs = list(spam_logs.values())
+        if not isinstance(spam_logs, list):
+            spam_logs = []
+
+        whitelist = _load([], "data/whitelist.json", "data/safe_list.json", "whitelist.json", "safe_list.json")
+        if isinstance(whitelist, dict):
+            whitelist_count = len(whitelist)
+        elif isinstance(whitelist, list):
+            whitelist_count = len(whitelist)
+        else:
+            whitelist_count = 0
+
+        audit_logs = []
+        try:
+            audit_logs = _eg_recent_audit_logs(80)
+        except Exception:
+            audit_logs = []
+        if not isinstance(audit_logs, list):
+            audit_logs = []
+
+        security_warnings = 0
+        for ev in audit_logs:
+            try:
+                level = str(ev.get("level", "info")).lower()
+                if level in ("warning", "error", "critical"):
+                    security_warnings += 1
+            except Exception:
+                pass
+
+        def _state(path):
+            try:
+                return "OK" if _eg_Path(path).exists() else "YOK"
+            except Exception:
+                return "YOK"
+
+        system_ok = (
+            _state("data/users.json") == "OK"
+            and _state("data/settings.json") == "OK"
+        )
+
+        admin_count = 0
+        banned_count = 0
+        active_count = 0
+        for _, u in users_data.items():
+            if not isinstance(u, dict):
+                continue
+            if str(u.get("role", "")).lower() == "admin":
+                admin_count += 1
+            if u.get("is_banned"):
+                banned_count += 1
+            if u.get("active", True) and not u.get("is_banned"):
+                active_count += 1
+
+        return {
+            "users": str(len(users_data)) + " kullanıcı",
+            "users_detail": str(active_count) + " aktif",
+            "licenses": str(license_count) + " lisans",
+            "licenses_detail": str(admin_count) + " admin",
+            "payments": str(pending_requests) + " bekliyor",
+            "payments_detail": str(len(payment_requests)) + " talep",
+            "security": str(security_warnings) + " uyarı",
+            "security_detail": str(len(audit_logs)) + " olay",
+            "reports": str(len(spam_logs)) + " log",
+            "reports_detail": "analiz",
+            "whitelist": str(whitelist_count) + " kayıt",
+            "whitelist_detail": "güvenli",
+            "settings": "aktif",
+            "settings_detail": "policy",
+            "system": "OK" if system_ok else "kontrol",
+            "system_detail": "production",
+        }
+
     def _eg_real_admin_dashboard():
-        return _eg_real_render("admin_dashboard.html")
+        return _eg_real_render(
+            "admin_dashboard.html",
+            admin_stats=_eg_real_admin_dashboard_stats()
+        )
 
     def _eg_real_admin_panel():
         return _eg_real_render(
