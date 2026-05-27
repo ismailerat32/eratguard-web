@@ -3116,10 +3116,7 @@ def onboarding():
 
 @app.route("/app-start")
 def user_app_start():
-    if session.get("logged_in"):
-        return redirect("/radial")
-    if not session.get("onboarding_done"):
-        return render_template("onboarding.html")
+    # APK public entry: session/cookie olsa bile önce EratGuard karşılama ekranı gösterilir.
     return render_template("splash_user_app.html")
 
 @app.route("/ss-admin-app-start")
