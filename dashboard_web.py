@@ -3475,6 +3475,49 @@ try:
                 item["last_ip"] = sess.get("last_ip") or item.get("last_ip") or "-"
                 item["online"] = _is_online(item.get("last_seen"))
 
+                role = str(item.get("role", "user") or "user").lower()
+                license_type = str(item.get("license_type") or item.get("license_mode") or "").lower()
+                license_key = str(item.get("license_key") or "").strip()
+                expires_at = str(item.get("expires_at") or item.get("license_expiry") or "").strip()
+
+                if role == "admin" or item.get("is_admin"):
+                    item["account_status"] = "ADMIN"
+                    item["license_status"] = "SYSTEM"
+                    item["risk_label"] = "Yetkili"
+                    item["health_status"] = "admin"
+                elif item.get("is_banned"):
+                    item["account_status"] = "BANLI"
+                    item["license_status"] = license_type.upper() if license_type else "KONTROL"
+                    item["risk_label"] = "Yüksek"
+                    item["health_status"] = "danger"
+                elif not item.get("active", True):
+                    item["account_status"] = "PASİF"
+                    item["license_status"] = license_type.upper() if license_type else "KONTROL"
+                    item["risk_label"] = "Orta"
+                    item["health_status"] = "warning"
+                elif license_key:
+                    item["account_status"] = "AKTİF"
+                    if license_type:
+                        item["license_status"] = license_type.upper()
+                    elif expires_at and expires_at.startswith("2099"):
+                        item["license_status"] = "LIFETIME"
+                    else:
+                        item["license_status"] = "LİSANSLI"
+                    item["risk_label"] = "Düşük"
+                    item["health_status"] = "good"
+                else:
+                    item["account_status"] = "AKTİF"
+                    item["license_status"] = "TRIAL"
+                    item["risk_label"] = "Kontrol"
+                    item["health_status"] = "watch"
+
+                if item.get("online"):
+                    item["last_seen_label"] = "Şu an online"
+                elif item.get("last_seen") and item.get("last_seen") != "-":
+                    item["last_seen_label"] = item.get("last_seen")
+                else:
+                    item["last_seen_label"] = "Kayıt yok"
+
                 out.append(item)
         elif isinstance(data, list):
             out = data

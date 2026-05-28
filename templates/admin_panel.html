@@ -862,6 +862,13 @@
                     {% endif %}
                   </div>
 
+                  <div class="premium-user-badges health-{{ user.health_status or 'watch' }}">
+                    <span>🛡️ {{ user.account_status or 'AKTİF' }}</span>
+                    <span>🔑 {{ user.license_status or 'TRIAL' }}</span>
+                    <span>📡 {% if user.online %}ONLINE{% else %}OFFLINE{% endif %}</span>
+                    <span>⚠️ Risk: {{ user.risk_label or 'Kontrol' }}</span>
+                  </div>
+
                   <details class="user-actions-details">
 
 
@@ -1350,6 +1357,78 @@
 
     .accordion-body{
       padding:8px !important;
+    }
+  }
+</style>
+
+
+<style id="admin-users-premium-health-badges">
+  /* ===== ADMIN USERS PREMIUM HEALTH BADGES ===== */
+
+  .premium-user-badges{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+    margin:10px 0 2px;
+  }
+
+  .premium-user-badges span{
+    min-height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    border-radius:12px;
+    padding:6px 8px;
+    font-size:11px;
+    font-weight:950;
+    letter-spacing:-.02em;
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.045);
+    color:rgba(244,255,248,.86);
+    overflow:hidden;
+    word-break:break-word;
+  }
+
+  .premium-user-badges.health-good span{
+    border-color:rgba(49,249,158,.18);
+    background:rgba(49,249,158,.065);
+  }
+
+  .premium-user-badges.health-admin span{
+    border-color:rgba(140,255,90,.24);
+    background:rgba(140,255,90,.075);
+    color:#d9ffd1;
+  }
+
+  .premium-user-badges.health-warning span,
+  .premium-user-badges.health-watch span{
+    border-color:rgba(255,196,80,.24);
+    background:rgba(255,196,80,.075);
+  }
+
+  .premium-user-badges.health-danger span{
+    border-color:rgba(255,85,85,.26);
+    background:rgba(255,85,85,.08);
+    color:#ffd6d6;
+  }
+
+  .user-actions-details .info-grid{
+    margin-top:8px !important;
+  }
+
+  @media(max-width:560px){
+    .premium-user-badges{
+      grid-template-columns:1fr 1fr;
+      gap:6px;
+      margin-top:9px;
+    }
+
+    .premium-user-badges span{
+      min-height:31px;
+      font-size:10.3px;
+      border-radius:10px;
+      padding:5px 6px;
     }
   }
 </style>
