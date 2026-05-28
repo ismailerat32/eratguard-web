@@ -751,6 +751,61 @@
             </div>
           </section>
 
+
+          <section class="premium-release-center release-{{ release_level|default('watch') }}">
+            <div class="release-head">
+              <div>
+                <span class="release-eyebrow">FINAL GATE</span>
+                <h3>🚀 Release Readiness Center</h3>
+                <p>SpamShield PRO için dokümantasyon, yapı, secret riski, cleanup ve production sinyallerini tek merkezden kontrol eder.</p>
+              </div>
+
+              <div class="release-score-box">
+                <b>{{ release_score|default(0) }}%</b>
+                <span>{{ release_label|default("RELEASE KONTROL") }}</span>
+              </div>
+            </div>
+
+            <div class="release-metrics">
+              <div class="release-metric good">
+                <strong>{{ release_good|default(0) }}</strong>
+                <span>Hazır</span>
+              </div>
+              <div class="release-metric watch">
+                <strong>{{ release_watch|default(0) }}</strong>
+                <span>İzleme</span>
+              </div>
+              <div class="release-metric danger">
+                <strong>{{ release_danger|default(0) }}</strong>
+                <span>Blok</span>
+              </div>
+            </div>
+
+            <div class="release-grid">
+              {% for item in release_items|default([]) %}
+              <article class="release-card release-card-{{ item.level|default('watch') }}">
+                <div class="release-card-top">
+                  <div>
+                    <h4>{{ item.title }}</h4>
+                    <code>{{ item.path }}</code>
+                  </div>
+                  <span class="release-status">{{ item.status }}</span>
+                </div>
+                <p>{{ item.desc }}</p>
+                <div class="release-card-foot">
+                  <span>Tür: {{ item.kind|upper }}</span>
+                  <span>Seviye: {{ item.level|upper }}</span>
+                </div>
+              </article>
+              {% else %}
+              <article class="release-empty">
+                <strong>Release kontrol maddesi bulunamadı.</strong>
+                <span>Backend release_items verisi üretmedi; dashboard_web.py render context kontrol edilmeli.</span>
+              </article>
+              {% endfor %}
+            </div>
+          </section>
+
           <div class="system-panels">
             <section class="panel">
               <h3>🛡️ Güvenlik Durumu</h3>
@@ -1310,6 +1365,288 @@
     }
   }
 </style>
+
+<style id="admin-system-premium-release-readiness-center">
+  .premium-release-center{
+    margin-top:22px;
+    padding:22px;
+    border-radius:28px;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(34,197,94,.22), transparent 34%),
+      radial-gradient(circle at 85% 20%, rgba(59,130,246,.20), transparent 34%),
+      linear-gradient(135deg, rgba(2,6,23,.98), rgba(15,23,42,.96));
+    border:1px solid rgba(148,163,184,.22);
+    box-shadow:0 28px 80px rgba(2,6,23,.46);
+    color:#e5e7eb;
+    overflow:hidden;
+    position:relative;
+  }
+
+  .premium-release-center:before{
+    content:"";
+    position:absolute;
+    inset:-2px;
+    background:
+      linear-gradient(120deg, transparent 0%, rgba(255,255,255,.06) 35%, transparent 65%),
+      linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(255,255,255,.02) 1px, transparent 1px);
+    background-size:100% 100%, 32px 32px, 32px 32px;
+    opacity:.42;
+    pointer-events:none;
+  }
+
+  .release-head,
+  .release-metrics,
+  .release-grid{
+    position:relative;
+    z-index:1;
+  }
+
+  .release-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    margin-bottom:18px;
+  }
+
+  .release-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:6px 10px;
+    border-radius:999px;
+    background:rgba(34,197,94,.13);
+    color:#86efac;
+    border:1px solid rgba(134,239,172,.22);
+    font-size:11px;
+    font-weight:950;
+    letter-spacing:.13em;
+  }
+
+  .release-head h3{
+    margin:10px 0 6px;
+    font-size:23px;
+    letter-spacing:-.035em;
+    color:#f8fafc;
+  }
+
+  .release-head p{
+    margin:0;
+    max-width:720px;
+    color:#cbd5e1;
+    font-size:13px;
+    line-height:1.58;
+  }
+
+  .release-score-box{
+    width:166px;
+    min-width:166px;
+    min-height:122px;
+    border-radius:24px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    background:
+      linear-gradient(135deg, rgba(15,23,42,.94), rgba(30,41,59,.86));
+    border:1px solid rgba(255,255,255,.13);
+    box-shadow:inset 0 0 30px rgba(255,255,255,.045), 0 18px 44px rgba(0,0,0,.34);
+    position:relative;
+    overflow:hidden;
+  }
+
+  .release-score-box:after{
+    content:"";
+    position:absolute;
+    inset:auto 14px 12px 14px;
+    height:4px;
+    border-radius:999px;
+    background:linear-gradient(90deg, #22c55e, #3b82f6, #f59e0b);
+  }
+
+  .release-score-box b{
+    display:block;
+    font-size:34px;
+    line-height:1;
+    color:#fff;
+  }
+
+  .release-score-box span{
+    display:block;
+    max-width:130px;
+    margin-top:8px;
+    font-size:10px;
+    line-height:1.25;
+    font-weight:950;
+    color:#cbd5e1;
+  }
+
+  .release-metrics{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:12px;
+    margin:16px 0 20px;
+  }
+
+  .release-metric{
+    padding:14px;
+    border-radius:18px;
+    background:rgba(15,23,42,.64);
+    border:1px solid rgba(148,163,184,.18);
+  }
+
+  .release-metric strong{
+    display:block;
+    font-size:27px;
+    color:#fff;
+  }
+
+  .release-metric span{
+    display:block;
+    margin-top:4px;
+    color:#cbd5e1;
+    font-size:12px;
+    font-weight:850;
+  }
+
+  .release-metric.good{border-color:rgba(34,197,94,.34)}
+  .release-metric.watch{border-color:rgba(245,158,11,.34)}
+  .release-metric.danger{border-color:rgba(239,68,68,.40)}
+
+  .release-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:12px;
+  }
+
+  .release-card{
+    padding:15px;
+    border-radius:20px;
+    background:rgba(15,23,42,.74);
+    border:1px solid rgba(148,163,184,.18);
+    box-shadow:0 14px 34px rgba(0,0,0,.22);
+  }
+
+  .release-card-good{border-color:rgba(34,197,94,.25)}
+  .release-card-watch{border-color:rgba(245,158,11,.28)}
+  .release-card-danger{border-color:rgba(239,68,68,.34)}
+
+  .release-card-top{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:flex-start;
+  }
+
+  .release-card h4{
+    margin:0 0 5px;
+    font-size:15px;
+    color:#f8fafc;
+  }
+
+  .release-card code{
+    font-size:11px;
+    color:#93c5fd;
+    background:rgba(59,130,246,.1);
+    border:1px solid rgba(147,197,253,.16);
+    border-radius:999px;
+    padding:4px 8px;
+    word-break:break-word;
+  }
+
+  .release-status{
+    white-space:nowrap;
+    padding:6px 9px;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:950;
+    color:#e5e7eb;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
+  }
+
+  .release-card-good .release-status{
+    color:#bbf7d0;
+    background:rgba(34,197,94,.12);
+    border-color:rgba(34,197,94,.22);
+  }
+
+  .release-card-watch .release-status{
+    color:#fde68a;
+    background:rgba(245,158,11,.12);
+    border-color:rgba(245,158,11,.24);
+  }
+
+  .release-card-danger .release-status{
+    color:#fecaca;
+    background:rgba(239,68,68,.12);
+    border-color:rgba(239,68,68,.26);
+  }
+
+  .release-card p{
+    margin:12px 0;
+    color:#cbd5e1;
+    line-height:1.5;
+    font-size:13px;
+  }
+
+  .release-card-foot{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    gap:8px;
+    padding-top:10px;
+    border-top:1px solid rgba(148,163,184,.16);
+    color:#94a3b8;
+    font-size:11px;
+    font-weight:850;
+  }
+
+  .release-empty{
+    grid-column:1 / -1;
+    padding:16px;
+    border-radius:18px;
+    background:rgba(15,23,42,.7);
+    border:1px dashed rgba(148,163,184,.3);
+    color:#cbd5e1;
+  }
+
+  .release-empty strong,
+  .release-empty span{
+    display:block;
+  }
+
+  .release-empty span{
+    margin-top:5px;
+    color:#94a3b8;
+    font-size:13px;
+  }
+
+  @media (max-width: 860px){
+    .release-head{
+      flex-direction:column;
+      align-items:flex-start;
+    }
+
+    .release-score-box{
+      width:100%;
+      min-width:0;
+    }
+
+    .release-grid{
+      grid-template-columns:1fr;
+    }
+  }
+
+  @media (max-width: 720px){
+    .release-metrics{
+      grid-template-columns:1fr;
+    }
+  }
+</style>
+
 
 
 </body>

@@ -4025,6 +4025,106 @@ try:
             ops_level = "good"
             ops_label = "OPERASYON SAĞLIKLI"
 
+        def _eg_release_item(_eg_title, _eg_path, _eg_required=True, _eg_kind="file", _eg_note=""):
+            try:
+                _eg_p = _eg_Path(_eg_path)
+                _eg_exists = _eg_p.exists()
+            except Exception:
+                _eg_exists = False
+
+            if _eg_exists:
+                _eg_level = "good"
+                _eg_status = "HAZIR"
+                _eg_desc = _eg_note or f"{_eg_title} bulundu ve release paketi için hazır görünüyor."
+            elif _eg_required:
+                _eg_level = "danger"
+                _eg_status = "EKSİK"
+                _eg_desc = _eg_note or f"{_eg_title} eksik; release öncesi tamamlanmalı."
+            else:
+                _eg_level = "watch"
+                _eg_status = "OPSİYONEL"
+                _eg_desc = _eg_note or f"{_eg_title} bulunamadı; opsiyonel ama production güveni için önerilir."
+
+            return {
+                "title": _eg_title,
+                "path": _eg_path,
+                "kind": _eg_kind,
+                "level": _eg_level,
+                "status": _eg_status,
+                "desc": _eg_desc,
+            }
+
+        def _eg_release_risk_item(_eg_title, _eg_path, _eg_bad_if_exists=True, _eg_kind="risk", _eg_note=""):
+            try:
+                _eg_p = _eg_Path(_eg_path)
+                _eg_exists = _eg_p.exists()
+            except Exception:
+                _eg_exists = False
+
+            if _eg_bad_if_exists and _eg_exists:
+                _eg_level = "danger"
+                _eg_status = "RİSK"
+                _eg_desc = _eg_note or f"{_eg_title} bulundu; release paketine girmemeli."
+            elif _eg_bad_if_exists and not _eg_exists:
+                _eg_level = "good"
+                _eg_status = "TEMİZ"
+                _eg_desc = _eg_note or f"{_eg_title} bulunmadı; bu release için iyi."
+            else:
+                _eg_level = "watch"
+                _eg_status = "KONTROL"
+                _eg_desc = _eg_note or f"{_eg_title} manuel kontrol edilmeli."
+
+            return {
+                "title": _eg_title,
+                "path": _eg_path,
+                "kind": _eg_kind,
+                "level": _eg_level,
+                "status": _eg_status,
+                "desc": _eg_desc,
+            }
+
+        _eg_has_deps = _eg_Path("requirements.txt").exists() or _eg_Path("package.json").exists()
+        _eg_has_gitignore = _eg_Path(".gitignore").exists()
+
+        release_items = [
+            _eg_release_item("README", "README.md", True, "docs", "Kurulum, kullanım ve özellik anlatımı için ana release dokümanı."),
+            _eg_release_item("CHANGELOG", "CHANGELOG.md", False, "docs", "Sürüm geçmişi için önerilir; final release güvenini artırır."),
+            _eg_release_item("LICENSE", "LICENSE", False, "legal", "Lisans bilgisi için önerilir; dağıtım netliği sağlar."),
+            _eg_release_item("Environment Example", ".env.example", True, "config", "Gerçek secret içermeyen örnek ortam değişkenleri dosyası."),
+            _eg_release_item("Git Ignore", ".gitignore", True, "repo", "Secret, cache ve geçici dosyaların repoya girmesini engeller."),
+            {
+                "title": "Dependency Manifest",
+                "path": "requirements.txt / package.json",
+                "kind": "deps",
+                "level": "good" if _eg_has_deps else "danger",
+                "status": "HAZIR" if _eg_has_deps else "EKSİK",
+                "desc": "Python veya Node bağımlılık manifesti bulundu." if _eg_has_deps else "requirements.txt veya package.json bulunamadı; kurulum tekrarlanabilirliği için gerekli.",
+            },
+            _eg_release_risk_item("Real Environment File", ".env", True, "risk", "Gerçek .env dosyası repoda bulunmamalı; secret sızıntısı riski oluşturur."),
+            _eg_release_risk_item("Python Cache", "__pycache__", True, "cleanup", "Python cache klasörü release paketine dahil edilmemeli."),
+            _eg_release_risk_item("Pytest Cache", ".pytest_cache", True, "cleanup", "Test cache klasörü release öncesi temizlenmeli."),
+            _eg_release_item("Admin Backend", "dashboard_web.py", True, "core", "Admin backend dosyası mevcut ve compile kontrolünden geçti."),
+            _eg_release_item("Admin System Template", "templates/admin_system.html", True, "ui", "Production admin system UI template mevcut."),
+            _eg_release_item("Payment Database Signal", "payments.db", False, "payment", "Ödeme altyapısı için yerel database sinyali; production ortamında ayrıca doğrulanmalı."),
+            _eg_release_item("License Store Signal", "license_keys.json", False, "license", "Lisans altyapısı için veri sinyali; production ortamında güvenli saklama ayrıca doğrulanmalı."),
+        ]
+
+        release_good = sum(1 for item in release_items if item.get("level") == "good")
+        release_watch = sum(1 for item in release_items if item.get("level") == "watch")
+        release_danger = sum(1 for item in release_items if item.get("level") == "danger")
+        release_total = len(release_items) or 1
+        release_score = int((release_good / release_total) * 100)
+
+        if release_danger:
+            release_level = "danger"
+            release_label = "RELEASE BLOKLU"
+        elif release_watch:
+            release_level = "watch"
+            release_label = "RELEASE İZLEMEDE"
+        else:
+            release_level = "good"
+            release_label = "RELEASE READY"
+
         health_items = [
             _health_item("Kullanıcı Datası", "data/users.json", True),
             _health_item("Lisans Datası", "data/licenses.json", True),
@@ -4077,6 +4177,13 @@ try:
             ops_good=ops_good,
             ops_watch=ops_watch,
             ops_danger=ops_danger,
+            release_items=release_items,
+            release_score=release_score,
+            release_label=release_label,
+            release_level=release_level,
+            release_good=release_good,
+            release_watch=release_watch,
+            release_danger=release_danger,
             danger_count=danger_count,
             watch_count=watch_count,
             ok_count=ok_count,
