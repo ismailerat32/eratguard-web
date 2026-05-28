@@ -1,3 +1,17 @@
+{% set admin_stats = admin_stats|default({
+  "users": 0,
+  "licenses": 0,
+  "payments": 0,
+  "spam_logs": 0,
+  "safe_list": 0,
+  "system_score": 0,
+  "health_score": 0,
+  "ops_score": 0,
+  "release_score": 0
+}, true) %}
+{% set admin_user_stats = admin_user_stats|default(admin_stats, true) %}
+{% set stats = stats|default(admin_stats, true) %}
+
 <!doctype html>
 <html lang="tr">
 <head>
@@ -432,7 +446,8 @@
 </head>
 
 <body>
-  <svg width="0" height="0" style="position:absolute;visibility:hidden" aria-hidden="true">
+
+<svg width="0" height="0" style="position:absolute;visibility:hidden" aria-hidden="true">
     <symbol id="i-admin-shield" viewBox="0 0 64 64">
       <path d="M32 6 52 14v15c0 14-8 24-20 29C20 53 12 43 12 29V14L32 6Z"/>
       <path d="m23 32 6 6 13-15"/>

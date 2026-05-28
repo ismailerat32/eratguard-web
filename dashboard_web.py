@@ -1,3 +1,37 @@
+def _eg_default_admin_stats():
+    from pathlib import Path as _eg_Path
+    import json as _eg_json
+
+    def _count_json_items(_eg_path):
+        try:
+            _eg_p = _eg_Path(_eg_path)
+            if not _eg_p.exists():
+                return 0
+            _eg_data = _eg_json.loads(_eg_p.read_text(encoding="utf-8"))
+            if isinstance(_eg_data, list):
+                return len(_eg_data)
+            if isinstance(_eg_data, dict):
+                for _eg_key in ("users", "licenses", "items", "data", "logs", "requests"):
+                    if isinstance(_eg_data.get(_eg_key), list):
+                        return len(_eg_data.get(_eg_key))
+                return len(_eg_data)
+            return 0
+        except Exception:
+            return 0
+
+    return {
+        "users": _count_json_items("data/users.json"),
+        "licenses": _count_json_items("data/licenses.json"),
+        "payments": _count_json_items("data/payment_requests.json"),
+        "spam_logs": _count_json_items("data/spam_logs.json"),
+        "safe_list": _count_json_items("data/safe_list.json"),
+        "system_score": 0,
+        "health_score": 0,
+        "ops_score": 0,
+        "release_score": 0,
+    }
+
+
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import os
 import json
@@ -15,19 +49,37 @@ load_dotenv()
 def _ss_get_last_scan_time():
     try:
         import json as _j
-        logs = _j.load(open("data/spam_logs.json", encoding="utf-8"))
-        if logs:
-            last = logs[-1]
-            ts = last.get("timestamp", "")
-            if ts:
-                from datetime import datetime as _dt
-                t = _dt.fromisoformat(ts.replace("Z",""))
-                diff = (_dt.now() - t).seconds // 60
-                if diff < 1: return "Az önce"
-                if diff < 60: return f"{diff} dk önce"
-                return f"{diff//60} saat önce"
-    except: pass
-    return "Henüz yok"
+        from pathlib import Path as _Path
+        from datetime import datetime as _dt
+
+        log_path = _Path("data/spam_logs.json")
+        if not log_path.exists():
+            return "Henüz yok"
+
+        logs = _j.loads(log_path.read_text(encoding="utf-8"))
+        if not logs:
+            return "Henüz yok"
+
+        last = logs[-1] if isinstance(logs, list) else None
+        if not isinstance(last, dict):
+            return "Henüz yok"
+
+        ts = last.get("timestamp", "")
+        if not ts:
+            return "Henüz yok"
+
+        t = _dt.fromisoformat(str(ts).replace("Z", ""))
+        diff = int((_dt.now() - t).total_seconds() // 60)
+
+        if diff < 1:
+            return "Az önce"
+        if diff < 60:
+            return f"{diff} dk önce"
+        return f"{diff // 60} saat önce"
+    except Exception:
+        return "Henüz yok"
+
+
 
 app = Flask(__name__)
 
@@ -1612,6 +1664,94 @@ a{{color:#a9c8ff}}
     return html
 
 # ===== ERATGUARD ADMIN FORGOT MAIL DIAGNOSTIC END =====
+
+
+
+# ===== ERATGUARD ADMIN_STATS BEFORE APP.RUN SAFE OVERRIDE START =====
+try:
+    def _ss_final_safe_admin_stats():
+        try:
+            if "_eg_real_admin_dashboard_stats" in globals():
+                data = _eg_real_admin_dashboard_stats()
+                if isinstance(data, dict):
+                    return data
+        except Exception:
+            pass
+
+        try:
+            if "_eg_default_admin_stats" in globals():
+                data = _eg_default_admin_stats()
+                if isinstance(data, dict):
+                    return data
+        except Exception:
+            pass
+
+        return {
+            "users": 0,
+            "licenses": 0,
+            "payments": 0,
+            "spam_logs": 0,
+            "safe_list": 0,
+            "system_score": 0,
+            "health_score": 0,
+            "ops_score": 0,
+            "release_score": 0,
+        }
+
+    @app.context_processor
+    def _ss_global_admin_stats_context():
+        _stats = _ss_final_safe_admin_stats()
+        return {
+            "admin_stats": _stats,
+            "admin_user_stats": _stats,
+            "stats": _stats,
+        }
+
+    def _ss_final_render_admin_dashboard():
+        _stats = _ss_final_safe_admin_stats()
+        return render_template(
+            "admin_dashboard.html",
+            admin_stats=_stats,
+            admin_user_stats=_stats,
+            stats=_stats,
+        )
+
+    _ss_old_admin_catchall_stats_safe = None
+    try:
+        _ss_old_admin_catchall_stats_safe = app.view_functions.get("ss_live_admin_all_slice_catchall")
+    except Exception:
+        _ss_old_admin_catchall_stats_safe = None
+
+    def _ss_final_admin_catchall_stats_safe(anything=None, **kwargs):
+        slug = str(anything or "").strip().lower()
+
+        if slug in ("", "dashboard", "home", "admin", "index"):
+            return _ss_final_render_admin_dashboard()
+
+        if _ss_old_admin_catchall_stats_safe:
+            return _ss_old_admin_catchall_stats_safe(anything)
+
+        return _ss_final_render_admin_dashboard()
+
+    for _ss_ep in (
+        "ss_live_admin_all_slice_catchall",
+        "ss_live_admin_dashboard",
+        "admin_dashboard",
+        "admin_home",
+        "admin_index",
+    ):
+        try:
+            if _ss_ep in app.view_functions:
+                if _ss_ep == "ss_live_admin_all_slice_catchall":
+                    app.view_functions[_ss_ep] = _ss_final_admin_catchall_stats_safe
+                else:
+                    app.view_functions[_ss_ep] = lambda **kwargs: _ss_final_render_admin_dashboard()
+        except Exception:
+            pass
+
+except Exception as _ss_admin_stats_before_run_err:
+    print("ADMIN_STATS BEFORE APP.RUN SAFE OVERRIDE ERROR:", _ss_admin_stats_before_run_err)
+# ===== ERATGUARD ADMIN_STATS BEFORE APP.RUN SAFE OVERRIDE END =====
 
 
 if __name__ == "__main__":
@@ -4219,6 +4359,7 @@ try:
             licenses_state=_state("data/licenses.json"),
             settings_state=_state("data/settings.json"),
             python_version=_eg_sys.version.split()[0],
+            admin_stats=_eg_default_admin_stats(),
             health_items=health_items,
             health_score=health_score,
             health_label=health_label,
@@ -10140,3 +10281,5 @@ body{{
 """
     return html
 # ===== ERATGUARD PREMIUM ADMIN USER DETAIL PAGE END =====
+
+
