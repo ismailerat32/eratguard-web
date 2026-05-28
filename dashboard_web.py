@@ -3956,6 +3956,75 @@ try:
                     "error": repr(e),
                 }
 
+        from datetime import datetime as _eg_dt
+
+        def _eg_file_mtime_label(_eg_path):
+            try:
+                _eg_p = _eg_Path(_eg_path)
+                if not _eg_p.exists():
+                    return "YOK"
+                return _eg_dt.fromtimestamp(_eg_p.stat().st_mtime).strftime("%Y-%m-%d %H:%M")
+            except Exception:
+                return "BİLİNMİYOR"
+
+        _eg_ops_sources = [
+            ("dashboard_web.py", "Admin backend", "core"),
+            ("templates/admin_system.html", "Admin system UI", "ui"),
+            ("templates/admin_users.html", "Admin users UI", "ui"),
+            ("templates/admin_user_detail.html", "Admin user detail UI", "ui"),
+            ("payments.db", "Payment database", "data"),
+            ("license_keys.json", "License key store", "license"),
+            ("license_audit.log", "License audit log", "audit"),
+            ("admin_audit.log", "Admin audit log", "audit"),
+            ("security_events.log", "Security events log", "security"),
+        ]
+
+        ops_events = []
+        for _eg_path, _eg_title, _eg_kind in _eg_ops_sources:
+            try:
+                _eg_exists = _eg_Path(_eg_path).exists()
+            except Exception:
+                _eg_exists = False
+
+            if _eg_exists:
+                _eg_level = "good"
+                _eg_status = "AKTİF"
+                _eg_desc = f"{_eg_title} production ortamında izlenebilir durumda."
+            elif _eg_kind in ("audit", "security"):
+                _eg_level = "watch"
+                _eg_status = "İZLEMEDE"
+                _eg_desc = f"{_eg_title} henüz oluşmamış olabilir; ilk olaydan sonra kayıt üretmesi beklenir."
+            else:
+                _eg_level = "danger"
+                _eg_status = "EKSİK"
+                _eg_desc = f"{_eg_title} bulunamadı; release öncesi kontrol edilmeli."
+
+            ops_events.append({
+                "title": _eg_title,
+                "path": _eg_path,
+                "kind": _eg_kind,
+                "level": _eg_level,
+                "status": _eg_status,
+                "time": _eg_file_mtime_label(_eg_path),
+                "desc": _eg_desc,
+            })
+
+        ops_good = sum(1 for item in ops_events if item.get("level") == "good")
+        ops_watch = sum(1 for item in ops_events if item.get("level") == "watch")
+        ops_danger = sum(1 for item in ops_events if item.get("level") == "danger")
+        ops_total = len(ops_events) or 1
+        ops_score = int((ops_good / ops_total) * 100)
+
+        if ops_danger:
+            ops_level = "danger"
+            ops_label = "OPERASYON KONTROLÜ GEREKİYOR"
+        elif ops_watch:
+            ops_level = "watch"
+            ops_label = "OPERASYON İZLEMEDE"
+        else:
+            ops_level = "good"
+            ops_label = "OPERASYON SAĞLIKLI"
+
         health_items = [
             _health_item("Kullanıcı Datası", "data/users.json", True),
             _health_item("Lisans Datası", "data/licenses.json", True),
@@ -4001,6 +4070,13 @@ try:
             health_score=health_score,
             health_label=health_label,
             health_level=health_level,
+            ops_events=ops_events,
+            ops_score=ops_score,
+            ops_label=ops_label,
+            ops_level=ops_level,
+            ops_good=ops_good,
+            ops_watch=ops_watch,
+            ops_danger=ops_danger,
             danger_count=danger_count,
             watch_count=watch_count,
             ok_count=ok_count,

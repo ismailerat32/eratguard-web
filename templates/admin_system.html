@@ -690,6 +690,67 @@
             </div>
           </section>
 
+
+          <section class="premium-ops-center ops-{{ ops_level|default('watch') }}">
+            <div class="ops-head">
+              <div>
+                <span class="ops-eyebrow">LIVE OPERATIONS</span>
+                <h3>🛡️ Security / Ops Event Center</h3>
+                <p>Admin, lisans, ödeme ve güvenlik altyapısının production odaklı operasyon görünümü.</p>
+              </div>
+
+              <div class="ops-score-ring">
+                <b>{{ ops_score|default(0) }}%</b>
+                <span>{{ ops_label|default("OPERASYON KONTROL") }}</span>
+              </div>
+            </div>
+
+            <div class="ops-metrics">
+              <div class="ops-metric good">
+                <strong>{{ ops_good|default(0) }}</strong>
+                <span>Aktif</span>
+              </div>
+              <div class="ops-metric watch">
+                <strong>{{ ops_watch|default(0) }}</strong>
+                <span>İzlemede</span>
+              </div>
+              <div class="ops-metric danger">
+                <strong>{{ ops_danger|default(0) }}</strong>
+                <span>Kontrol</span>
+              </div>
+            </div>
+
+            <div class="ops-timeline">
+              {% for event in ops_events|default([]) %}
+              <article class="ops-event ops-event-{{ event.level|default('watch') }}">
+                <div class="ops-dot"></div>
+
+                <div class="ops-card">
+                  <div class="ops-card-top">
+                    <div>
+                      <h4>{{ event.title }}</h4>
+                      <code>{{ event.path }}</code>
+                    </div>
+                    <span class="ops-status">{{ event.status }}</span>
+                  </div>
+
+                  <p>{{ event.desc }}</p>
+
+                  <div class="ops-card-foot">
+                    <span>Tür: {{ event.kind|upper }}</span>
+                    <span>Son aktivite: {{ event.time }}</span>
+                  </div>
+                </div>
+              </article>
+              {% else %}
+              <article class="ops-empty">
+                <strong>Operasyon olayı bulunamadı.</strong>
+                <span>Sistem ilk audit/security aktivitesinden sonra timeline üretmeye başlayacaktır.</span>
+              </article>
+              {% endfor %}
+            </div>
+          </section>
+
           <div class="system-panels">
             <section class="panel">
               <h3>🛡️ Güvenlik Durumu</h3>
@@ -959,6 +1020,297 @@
     }
   }
 </style>
+
+<style id="admin-system-premium-ops-event-center">
+  .premium-ops-center{
+    margin-top:22px;
+    padding:22px;
+    border-radius:26px;
+    background:
+      radial-gradient(circle at top left, rgba(59,130,246,.22), transparent 34%),
+      radial-gradient(circle at bottom right, rgba(16,185,129,.18), transparent 32%),
+      linear-gradient(135deg, rgba(15,23,42,.98), rgba(17,24,39,.96));
+    border:1px solid rgba(148,163,184,.22);
+    box-shadow:0 24px 70px rgba(2,6,23,.42);
+    color:#e5e7eb;
+    overflow:hidden;
+    position:relative;
+  }
+
+  .premium-ops-center:before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size:36px 36px;
+    opacity:.28;
+    pointer-events:none;
+  }
+
+  .ops-head,
+  .ops-metrics,
+  .ops-timeline{
+    position:relative;
+    z-index:1;
+  }
+
+  .ops-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    margin-bottom:18px;
+  }
+
+  .ops-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:6px 10px;
+    border-radius:999px;
+    background:rgba(59,130,246,.14);
+    color:#93c5fd;
+    border:1px solid rgba(147,197,253,.22);
+    font-size:11px;
+    font-weight:900;
+    letter-spacing:.12em;
+  }
+
+  .ops-head h3{
+    margin:10px 0 6px;
+    font-size:22px;
+    letter-spacing:-.03em;
+    color:#f8fafc;
+  }
+
+  .ops-head p{
+    margin:0;
+    max-width:680px;
+    color:#cbd5e1;
+    font-size:13px;
+    line-height:1.55;
+  }
+
+  .ops-score-ring{
+    width:150px;
+    min-width:150px;
+    height:150px;
+    border-radius:999px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    background:
+      radial-gradient(circle at center, rgba(15,23,42,.95) 0 56%, transparent 57%),
+      conic-gradient(from 180deg, #22c55e, #3b82f6, #f59e0b, #22c55e);
+    box-shadow:inset 0 0 34px rgba(255,255,255,.05), 0 18px 44px rgba(0,0,0,.34);
+    border:1px solid rgba(255,255,255,.12);
+  }
+
+  .ops-score-ring b{
+    display:block;
+    font-size:30px;
+    line-height:1;
+    color:#fff;
+  }
+
+  .ops-score-ring span{
+    display:block;
+    max-width:112px;
+    margin-top:8px;
+    font-size:10px;
+    line-height:1.25;
+    font-weight:900;
+    color:#cbd5e1;
+  }
+
+  .ops-metrics{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:12px;
+    margin:16px 0 20px;
+  }
+
+  .ops-metric{
+    padding:14px;
+    border-radius:18px;
+    background:rgba(15,23,42,.62);
+    border:1px solid rgba(148,163,184,.18);
+  }
+
+  .ops-metric strong{
+    display:block;
+    font-size:26px;
+    color:#fff;
+  }
+
+  .ops-metric span{
+    display:block;
+    margin-top:4px;
+    color:#cbd5e1;
+    font-size:12px;
+    font-weight:800;
+  }
+
+  .ops-metric.good{border-color:rgba(34,197,94,.34)}
+  .ops-metric.watch{border-color:rgba(245,158,11,.34)}
+  .ops-metric.danger{border-color:rgba(239,68,68,.38)}
+
+  .ops-timeline{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding-left:10px;
+  }
+
+  .ops-event{
+    display:grid;
+    grid-template-columns:18px 1fr;
+    gap:12px;
+    position:relative;
+  }
+
+  .ops-event:before{
+    content:"";
+    position:absolute;
+    left:8px;
+    top:24px;
+    bottom:-18px;
+    width:2px;
+    background:linear-gradient(to bottom, rgba(148,163,184,.35), transparent);
+  }
+
+  .ops-event:last-child:before{
+    display:none;
+  }
+
+  .ops-dot{
+    width:16px;
+    height:16px;
+    border-radius:999px;
+    margin-top:18px;
+    background:#f59e0b;
+    box-shadow:0 0 0 6px rgba(245,158,11,.12), 0 0 22px rgba(245,158,11,.34);
+  }
+
+  .ops-event-good .ops-dot{
+    background:#22c55e;
+    box-shadow:0 0 0 6px rgba(34,197,94,.12), 0 0 22px rgba(34,197,94,.34);
+  }
+
+  .ops-event-danger .ops-dot{
+    background:#ef4444;
+    box-shadow:0 0 0 6px rgba(239,68,68,.12), 0 0 22px rgba(239,68,68,.34);
+  }
+
+  .ops-card{
+    padding:15px;
+    border-radius:20px;
+    background:rgba(15,23,42,.72);
+    border:1px solid rgba(148,163,184,.18);
+    box-shadow:0 14px 34px rgba(0,0,0,.22);
+  }
+
+  .ops-event-good .ops-card{border-color:rgba(34,197,94,.24)}
+  .ops-event-watch .ops-card{border-color:rgba(245,158,11,.26)}
+  .ops-event-danger .ops-card{border-color:rgba(239,68,68,.3)}
+
+  .ops-card-top{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:flex-start;
+  }
+
+  .ops-card h4{
+    margin:0 0 5px;
+    font-size:15px;
+    color:#f8fafc;
+  }
+
+  .ops-card code{
+    font-size:11px;
+    color:#93c5fd;
+    background:rgba(59,130,246,.1);
+    border:1px solid rgba(147,197,253,.16);
+    border-radius:999px;
+    padding:4px 8px;
+  }
+
+  .ops-status{
+    white-space:nowrap;
+    padding:6px 9px;
+    border-radius:999px;
+    font-size:10px;
+    font-weight:900;
+    color:#e5e7eb;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
+  }
+
+  .ops-card p{
+    margin:12px 0;
+    color:#cbd5e1;
+    line-height:1.5;
+    font-size:13px;
+  }
+
+  .ops-card-foot{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:space-between;
+    gap:8px;
+    padding-top:10px;
+    border-top:1px solid rgba(148,163,184,.16);
+    color:#94a3b8;
+    font-size:11px;
+    font-weight:800;
+  }
+
+  .ops-empty{
+    padding:16px;
+    border-radius:18px;
+    background:rgba(15,23,42,.7);
+    border:1px dashed rgba(148,163,184,.3);
+    color:#cbd5e1;
+  }
+
+  .ops-empty strong,
+  .ops-empty span{
+    display:block;
+  }
+
+  .ops-empty span{
+    margin-top:5px;
+    color:#94a3b8;
+    font-size:13px;
+  }
+
+  @media (max-width: 760px){
+    .ops-head{
+      flex-direction:column;
+      align-items:flex-start;
+    }
+
+    .ops-score-ring{
+      width:126px;
+      min-width:126px;
+      height:126px;
+    }
+
+    .ops-metrics{
+      grid-template-columns:1fr;
+    }
+
+    .ops-card-top{
+      flex-direction:column;
+    }
+  }
+</style>
+
 
 </body>
 </html>
