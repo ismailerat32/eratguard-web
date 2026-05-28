@@ -9166,3 +9166,284 @@ def _eg_admin_system_resources_api_final():
             "error": str(e),
         }), 200
 # ===== ERATGUARD ADMIN SYSTEM RESOURCES API END =====
+
+# ===== ERATGUARD PREMIUM ADMIN USER ACTION ROUTES START =====
+def _eg_admin_users_action_ok():
+    try:
+        fn = globals().get("_eg_admin_request_ok")
+        if callable(fn) and fn():
+            return True
+    except Exception:
+        pass
+
+    try:
+        fn = globals().get("_ss_admin_ok")
+        if callable(fn) and fn():
+            return True
+    except Exception:
+        pass
+
+    try:
+        return bool(
+            session.get("admin_logged_in")
+            or (
+                session.get("logged_in")
+                and (
+                    session.get("is_admin")
+                    or session.get("role") == "admin"
+                    or session.get("username") == "admin"
+                )
+            )
+        )
+    except Exception:
+        return False
+
+
+def _eg_admin_users_redirect(ok="done", extra=""):
+    try:
+        suffix = "?ok=" + str(ok)
+        if extra:
+            suffix += "&" + str(extra).lstrip("&")
+        return redirect("/admin/users" + suffix)
+    except Exception:
+        return redirect("/admin/users")
+
+
+@app.route("/admin/add-user", methods=["POST"])
+def eg_premium_admin_add_user_action():
+    if not _eg_admin_users_action_ok():
+        return redirect("/ss-admin-access")
+
+    username = (request.form.get("username") or "").strip()
+    email = (request.form.get("email") or "").strip()
+    password = request.form.get("password") or ""
+    role = (request.form.get("role") or "user").strip().lower()
+    license_type = (request.form.get("license_type") or "trial").strip().lower()
+    license_expiry = (request.form.get("license_expiry") or "").strip()
+
+    if not username:
+        return _eg_admin_users_redirect("missing_username")
+
+    if role not in ("user", "admin"):
+        role = "user"
+
+    try:
+        users = load_users()
+        if not isinstance(users, dict):
+            users = {}
+
+        if username in users:
+            return _eg_admin_users_redirect("user_exists")
+
+        if not password:
+            return _eg_admin_users_redirect("missing_password")
+
+        pw_error = None
+        try:
+            pw_error = _eg_password_policy_error(password)
+        except Exception:
+            pw_error = None
+
+        if pw_error:
+            return _eg_admin_users_redirect("weak_password")
+
+        license_key = "ADMIN-SYSTEM" if role == "admin" else generate_unique_license_key(users)
+        expires_at = "2099-12-31" if license_type == "lifetime" or role == "admin" else (license_expiry or "2027-12-31")
+
+        users[username] = {
+            "password": generate_password_hash(password),
+            "role": role,
+            "active": True,
+            "email": email,
+            "license_type": "admin" if role == "admin" else license_type,
+            "license_key": license_key,
+            "license_expiry": expires_at,
+            "expires_at": expires_at,
+            "created_at": __import__("datetime").datetime.now().isoformat(timespec="seconds"),
+        }
+
+        save_users(users)
+
+        try:
+            _eg_audit_log("admin_user_created", username, {
+                "role": role,
+                "license_type": license_type,
+                "email_present": bool(email)
+            }, "info")
+        except Exception as e:
+            print("ADMIN_USER_CREATE_AUDIT_WARN:", repr(e), flush=True)
+
+        return _eg_admin_users_redirect("user_created")
+
+    except Exception as e:
+        print("ADMIN_ADD_USER_ERROR:", repr(e), flush=True)
+        return _eg_admin_users_redirect("user_create_error")
+
+
+@app.route("/admin/update-license/<target_username>", methods=["POST"])
+def eg_premium_admin_update_license_action(target_username):
+    if not _eg_admin_users_action_ok():
+        return redirect("/ss-admin-access")
+
+    license_type = (request.form.get("license_type") or "trial").strip().lower()
+    license_expiry = (request.form.get("license_expiry") or "").strip()
+
+    try:
+        users = load_users()
+        if not isinstance(users, dict) or target_username not in users:
+            return _eg_admin_users_redirect("user_not_found")
+
+        user = users.get(target_username, {})
+        if not isinstance(user, dict):
+            user = {}
+
+        user["license_type"] = license_type
+        user["license_expiry"] = license_expiry
+        if license_expiry:
+            user["expires_at"] = license_expiry
+
+        if license_type == "lifetime":
+            user["expires_at"] = "2099-12-31"
+            user["license_expiry"] = "2099-12-31"
+
+        if not user.get("license_key"):
+            user["license_key"] = generate_unique_license_key(users)
+
+        users[target_username] = user
+        save_users(users)
+
+        try:
+            _eg_audit_log("admin_license_updated", target_username, {
+                "license_type": license_type,
+                "license_expiry": user.get("license_expiry") or user.get("expires_at")
+            }, "info")
+        except Exception as e:
+            print("ADMIN_LICENSE_UPDATE_AUDIT_WARN:", repr(e), flush=True)
+
+        return _eg_admin_users_redirect("license_updated")
+
+    except Exception as e:
+        print("ADMIN_UPDATE_LICENSE_ERROR:", repr(e), flush=True)
+        return _eg_admin_users_redirect("license_update_error")
+
+
+@app.route("/admin/generate-license/<target_username>", methods=["POST"])
+def eg_premium_admin_generate_license_action(target_username):
+    if not _eg_admin_users_action_ok():
+        return redirect("/ss-admin-access")
+
+    try:
+        users = load_users()
+        if not isinstance(users, dict) or target_username not in users:
+            return _eg_admin_users_redirect("user_not_found")
+
+        license_key = generate_unique_license_key(users)
+        user = users.get(target_username, {})
+        if not isinstance(user, dict):
+            user = {}
+
+        user["license_key"] = license_key
+        user["active"] = True
+        if not user.get("license_type"):
+            user["license_type"] = "pro"
+        if not user.get("expires_at"):
+            user["expires_at"] = "2027-12-31"
+
+        users[target_username] = user
+        save_users(users)
+
+        try:
+            _eg_audit_log("admin_license_generated", target_username, {
+                "license_key": license_key
+            }, "info")
+        except Exception as e:
+            print("ADMIN_LICENSE_GENERATE_AUDIT_WARN:", repr(e), flush=True)
+
+        return _eg_admin_users_redirect("license_generated", "license_key=" + license_key)
+
+    except Exception as e:
+        print("ADMIN_GENERATE_LICENSE_ERROR:", repr(e), flush=True)
+        return _eg_admin_users_redirect("license_generate_error")
+
+
+@app.route("/admin/approve-upgrade/<target_username>", methods=["POST"])
+def eg_premium_admin_approve_upgrade_action(target_username):
+    if not _eg_admin_users_action_ok():
+        return redirect("/ss-admin-access")
+
+    try:
+        users = load_users()
+        if not isinstance(users, dict) or target_username not in users:
+            return _eg_admin_users_redirect("user_not_found")
+
+        user = users.get(target_username, {})
+        if not isinstance(user, dict):
+            user = {}
+
+        if not user.get("license_key"):
+            user["license_key"] = generate_unique_license_key(users)
+
+        user["active"] = True
+        user["license_type"] = "pro"
+        user["plan"] = "pro_admin_approved"
+        user["expires_at"] = user.get("expires_at") or "2027-12-31"
+        user["license_expiry"] = user.get("license_expiry") or user["expires_at"]
+
+        users[target_username] = user
+        save_users(users)
+
+        try:
+            _eg_audit_log("admin_premium_approved", target_username, {
+                "license_type": user.get("license_type"),
+                "expires_at": user.get("expires_at")
+            }, "info")
+        except Exception as e:
+            print("ADMIN_PREMIUM_APPROVE_AUDIT_WARN:", repr(e), flush=True)
+
+        return _eg_admin_users_redirect("premium_approved")
+
+    except Exception as e:
+        print("ADMIN_APPROVE_UPGRADE_ERROR:", repr(e), flush=True)
+        return _eg_admin_users_redirect("premium_approve_error")
+
+
+@app.route("/admin/toggle-ban/<target_username>", methods=["POST"])
+def eg_premium_admin_toggle_ban_action(target_username):
+    if not _eg_admin_users_action_ok():
+        return redirect("/ss-admin-access")
+
+    try:
+        users = load_users()
+        if not isinstance(users, dict) or target_username not in users:
+            return _eg_admin_users_redirect("user_not_found")
+
+        if str(target_username).lower() == "admin":
+            return _eg_admin_users_redirect("admin_protected")
+
+        user = users.get(target_username, {})
+        if not isinstance(user, dict):
+            user = {}
+
+        new_state = not bool(user.get("is_banned"))
+        user["is_banned"] = new_state
+        user["active"] = False if new_state else True
+
+        users[target_username] = user
+        save_users(users)
+
+        try:
+            _eg_audit_log(
+                "admin_user_banned" if new_state else "admin_user_unbanned",
+                target_username,
+                {"is_banned": new_state},
+                "warning" if new_state else "info"
+            )
+        except Exception as e:
+            print("ADMIN_TOGGLE_BAN_AUDIT_WARN:", repr(e), flush=True)
+
+        return _eg_admin_users_redirect("user_banned" if new_state else "user_unbanned")
+
+    except Exception as e:
+        print("ADMIN_TOGGLE_BAN_ERROR:", repr(e), flush=True)
+        return _eg_admin_users_redirect("ban_toggle_error")
+# ===== ERATGUARD PREMIUM ADMIN USER ACTION ROUTES END =====
