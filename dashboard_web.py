@@ -9447,3 +9447,348 @@ def eg_premium_admin_toggle_ban_action(target_username):
         print("ADMIN_TOGGLE_BAN_ERROR:", repr(e), flush=True)
         return _eg_admin_users_redirect("ban_toggle_error")
 # ===== ERATGUARD PREMIUM ADMIN USER ACTION ROUTES END =====
+
+# ===== ERATGUARD PREMIUM ADMIN USER DETAIL PAGE START =====
+@app.route("/admin/user/<target_username>")
+def eg_premium_admin_user_detail_page(target_username):
+    try:
+        ok_fn = globals().get("_eg_admin_users_action_ok")
+        if callable(ok_fn):
+            admin_ok = ok_fn()
+        else:
+            admin_ok = bool(
+                session.get("admin_logged_in")
+                or (
+                    session.get("logged_in")
+                    and (
+                        session.get("is_admin")
+                        or session.get("role") == "admin"
+                        or session.get("username") == "admin"
+                    )
+                )
+            )
+    except Exception:
+        admin_ok = False
+
+    if not admin_ok:
+        return redirect("/ss-admin-access")
+
+    import html as _eg_html
+    import json as _eg_json
+    from pathlib import Path as _eg_Path
+
+    def _safe(v):
+        return _eg_html.escape(str(v if v is not None else ""))
+
+    def _mask_key(v):
+        v = str(v or "")
+        if len(v) <= 10:
+            return v or "-"
+        return v[:9] + "..." + v[-5:]
+
+    users = {}
+    try:
+        users = load_users()
+    except Exception:
+        users = {}
+
+    if not isinstance(users, dict):
+        users = {}
+
+    user = users.get(target_username)
+    if not isinstance(user, dict):
+        return """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EratGuard ADMIN · Kullanıcı Bulunamadı</title>
+<style>
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#010805;color:#effff5;font-family:Arial,sans-serif;padding:20px}
+.card{max-width:520px;border:1px solid rgba(140,255,90,.18);background:#06170f;border-radius:24px;padding:24px;text-align:center}
+a{color:#9cff5d;font-weight:900}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>Kullanıcı bulunamadı</h1>
+<p>Bu kullanıcı canlı kullanıcı datasında yok.</p>
+<a href="/admin/users">← Kullanıcı merkezine dön</a>
+</div>
+</body>
+</html>
+""", 404
+
+    sessions = {}
+    try:
+        loader = globals().get("_eg_load_user_sessions")
+        if callable(loader):
+            sessions = loader()
+    except Exception:
+        sessions = {}
+
+    if not isinstance(sessions, dict):
+        sessions = {}
+
+    sess = sessions.get(target_username, {})
+    if not isinstance(sess, dict):
+        sess = {}
+
+    audit_events = []
+    try:
+        audit_events = _eg_recent_audit_logs(200)
+    except Exception:
+        audit_events = []
+
+    if not isinstance(audit_events, list):
+        audit_events = []
+
+    user_events = []
+    for ev in audit_events:
+        try:
+            if str(ev.get("username", "")) == str(target_username):
+                user_events.append(ev)
+        except Exception:
+            pass
+
+    user_events = user_events[:30]
+
+    role = str(user.get("role", "user") or "user")
+    active = bool(user.get("active", True))
+    banned = bool(user.get("is_banned", False))
+    license_type = str(user.get("license_type") or user.get("license_mode") or "trial")
+    license_key = str(user.get("license_key") or "-")
+    expires_at = str(user.get("expires_at") or user.get("license_expiry") or "-")
+    email = str(user.get("email") or "-")
+    last_seen = str(sess.get("last_seen") or user.get("last_seen") or "-")
+    last_login = str(sess.get("last_login") or user.get("last_login") or "-")
+    last_ip = str(sess.get("last_ip") or user.get("last_ip") or "-")
+    user_agent = str(sess.get("user_agent") or "-")
+
+    if role.lower() == "admin" or user.get("is_admin"):
+        account_status = "ADMIN"
+        risk_label = "Yetkili"
+        health = "admin"
+    elif banned:
+        account_status = "BANLI"
+        risk_label = "Yüksek"
+        health = "danger"
+    elif not active:
+        account_status = "PASİF"
+        risk_label = "Orta"
+        health = "warning"
+    else:
+        account_status = "AKTİF"
+        risk_label = "Düşük"
+        health = "good"
+
+    events_html = ""
+    if user_events:
+        for ev in user_events:
+            level = _safe(ev.get("level", "info"))
+            event = _safe(ev.get("event", ev.get("type", "event")))
+            ip = _safe(ev.get("ip", "-"))
+            time = _safe(ev.get("time", "-"))
+            detail = ev.get("detail", "")
+            try:
+                if isinstance(detail, dict):
+                    detail = _eg_json.dumps(detail, ensure_ascii=False)
+            except Exception:
+                detail = str(detail)
+            events_html += f"""
+            <article class="event level-{level}">
+              <div>
+                <b>{event}</b>
+                <span>{ip}</span>
+                <small>{_safe(detail)}</small>
+              </div>
+              <em>{time}</em>
+            </article>
+            """
+    else:
+        events_html = '<div class="empty">Bu kullanıcı için audit olayı bulunamadı.</div>'
+
+    html = f"""
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EratGuard ADMIN · {_safe(target_username)}</title>
+<style>
+*{{box-sizing:border-box;-webkit-tap-highlight-color:transparent}}
+body{{
+  margin:0;
+  min-height:100vh;
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  background:
+    radial-gradient(circle at 50% -10%,rgba(49,249,158,.18),transparent 36%),
+    radial-gradient(circle at 100% 80%,rgba(24,198,232,.10),transparent 34%),
+    linear-gradient(180deg,#010403,#020806 56%,#000);
+  color:#effff5;
+  padding:18px;
+}}
+.wrap{{max-width:1120px;margin:0 auto}}
+.top{{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin:8px 0 18px}}
+.brand h1{{margin:0;font-size:clamp(30px,7vw,58px);letter-spacing:-.07em}}
+.brand h1 span{{color:#8cff5a}}
+.brand p{{margin:8px 0 0;color:rgba(239,255,245,.62);font-weight:800}}
+.btn{{
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:15px;
+  padding:0 15px;
+  background:linear-gradient(135deg,#19f58a,#18c6e8);
+  color:#001b0e;
+  text-decoration:none;
+  font-weight:1000;
+}}
+.btn.secondary{{background:rgba(255,255,255,.06);color:#effff5;border:1px solid rgba(255,255,255,.10)}}
+.hero{{
+  border:1px solid rgba(140,255,90,.16);
+  background:linear-gradient(180deg,rgba(8,33,21,.86),rgba(2,10,6,.92));
+  border-radius:30px;
+  padding:20px;
+  box-shadow:0 24px 80px rgba(0,0,0,.46);
+}}
+.profile{{
+  display:grid;
+  grid-template-columns:1fr 1.1fr;
+  gap:14px;
+}}
+.card{{
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(0,0,0,.20);
+  border-radius:24px;
+  padding:18px;
+}}
+.avatar{{
+  width:82px;height:82px;border-radius:26px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#19f58a,#8cff5a);
+  color:#021009;
+  font-size:38px;
+  font-weight:1000;
+  box-shadow:0 16px 42px rgba(49,249,158,.18);
+}}
+.user-head{{display:flex;align-items:center;gap:14px;margin-bottom:16px}}
+.user-head h2{{margin:0;font-size:30px;letter-spacing:-.05em}}
+.user-head p{{margin:5px 0 0;color:rgba(239,255,245,.58);font-weight:800}}
+.badges{{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}}
+.badges span{{
+  min-height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.045);
+  font-weight:950;
+  font-size:13px;
+}}
+.badges.health-good span{{border-color:rgba(49,249,158,.20);background:rgba(49,249,158,.06)}}
+.badges.health-admin span{{border-color:rgba(140,255,90,.25);background:rgba(140,255,90,.075)}}
+.badges.health-warning span{{border-color:rgba(255,196,80,.25);background:rgba(255,196,80,.08)}}
+.badges.health-danger span{{border-color:rgba(255,85,85,.27);background:rgba(255,85,85,.08);color:#ffd6d6}}
+.grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px}}
+.info{{
+  min-height:74px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.035);
+  border-radius:17px;
+  padding:12px;
+}}
+.info span{{display:block;color:rgba(239,255,245,.52);font-size:11px;font-weight:900;text-transform:uppercase;margin-bottom:7px}}
+.info b{{display:block;font-size:13px;word-break:break-word}}
+.timeline{{display:flex;flex-direction:column;gap:10px}}
+.event{{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.035);
+  border-radius:17px;
+  padding:12px;
+}}
+.event b{{display:block;font-size:13px}}
+.event span,.event small{{display:block;color:rgba(239,255,245,.55);font-size:12px;margin-top:4px;word-break:break-word}}
+.event em{{font-style:normal;color:rgba(239,255,245,.42);font-size:11px;font-weight:900;white-space:nowrap}}
+.event.level-warning{{border-color:rgba(255,196,80,.24);background:rgba(255,196,80,.07)}}
+.event.level-error,.event.level-critical{{border-color:rgba(255,85,85,.28);background:rgba(255,85,85,.075)}}
+.empty{{border:1px dashed rgba(255,255,255,.16);border-radius:18px;padding:18px;text-align:center;color:rgba(239,255,245,.58);font-weight:850}}
+.actions{{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}}
+@media(max-width:760px){{
+  body{{padding:12px}}
+  .top{{flex-direction:column}}
+  .profile{{grid-template-columns:1fr}}
+  .grid{{grid-template-columns:1fr}}
+  .hero{{padding:14px;border-radius:24px}}
+  .event{{grid-template-columns:1fr}}
+  .event em{{white-space:normal}}
+}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>EratGuard <span>User Detail</span></h1>
+      <p>Admin kullanıcı profili, lisans durumu ve işlem geçmişi.</p>
+    </div>
+    <a class="btn secondary" href="/admin/users">← Kullanıcı Merkezi</a>
+  </header>
+
+  <section class="hero">
+    <div class="profile">
+      <section class="card">
+        <div class="user-head">
+          <div class="avatar">{_safe(target_username[:1].upper())}</div>
+          <div>
+            <h2>{_safe(target_username)}</h2>
+            <p>{_safe(role.upper())} · {_safe(email)}</p>
+          </div>
+        </div>
+
+        <div class="badges health-{_safe(health)}">
+          <span>🛡️ {_safe(account_status)}</span>
+          <span>🔑 {_safe(license_type.upper())}</span>
+          <span>📡 {_safe('ONLINE' if last_seen != '-' else 'OFFLINE')}</span>
+          <span>⚠️ Risk: {_safe(risk_label)}</span>
+        </div>
+
+        <div class="actions">
+          <a class="btn" href="/admin/users#user-{_safe(target_username)}">Kartı Aç</a>
+          <a class="btn secondary" href="/admin/security">Security Timeline</a>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="grid">
+          <div class="info"><span>Lisans Anahtarı</span><b>{_safe(_mask_key(license_key))}</b></div>
+          <div class="info"><span>Bitiş</span><b>{_safe(expires_at)}</b></div>
+          <div class="info"><span>Son Login</span><b>{_safe(last_login)}</b></div>
+          <div class="info"><span>Son Görülme</span><b>{_safe(last_seen)}</b></div>
+          <div class="info"><span>Son IP</span><b>{_safe(last_ip)}</b></div>
+          <div class="info"><span>Aktif</span><b>{_safe('EVET' if active else 'HAYIR')}</b></div>
+          <div class="info"><span>Ban</span><b>{_safe('EVET' if banned else 'HAYIR')}</b></div>
+          <div class="info"><span>User Agent</span><b>{_safe(user_agent[:140])}</b></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:14px">
+      <h2 style="margin:0 0 12px">Son Kullanıcı Olayları</h2>
+      <div class="timeline">
+        {events_html}
+      </div>
+    </section>
+  </section>
+</main>
+</body>
+</html>
+"""
+    return html
+# ===== ERATGUARD PREMIUM ADMIN USER DETAIL PAGE END =====

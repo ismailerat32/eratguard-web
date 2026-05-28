@@ -961,6 +961,8 @@
 
                   </details>
     <div class="actions">
+                    <a class="btn secondary" href="/admin/user/{{ user.username }}">🧾 Detay</a>
+
                     <form class="inline-form" method="POST" action="/admin/generate-license/{{ user.username }}">
                       <button class="btn secondary" type="submit">🔑 Lisans</button>
                     </form>
@@ -1662,6 +1664,22 @@
   });
 })();
 </script>
+
+
+<style id="admin-users-detail-button-polish">
+  .user-actions-details .actions > a.btn{
+    text-decoration:none !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+
+  @media(max-width:560px){
+    .user-actions-details .actions{
+      grid-template-columns:1fr 1fr !important;
+    }
+  }
+</style>
 
 </body>
 </html>
