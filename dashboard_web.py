@@ -1754,11 +1754,34 @@ except Exception as _ss_admin_stats_before_run_err:
 # ===== ERATGUARD ADMIN_STATS BEFORE APP.RUN SAFE OVERRIDE END =====
 
 
-if __name__ == "__main__":
-    ensure_default_user()
-    ensure_default_settings()
-    port = int(os.getenv("PORT", 8080))
-    app.run(host="0.0.0.0", port=port, debug=False)
+
+# ===== ERATGUARD EMERGENCY ADMIN RADIAL STATS ROUTE START =====
+try:
+    def _ss_emergency_admin_dashboard_with_stats():
+        try:
+            _stats = _eg_real_admin_dashboard_stats()
+            if not isinstance(_stats, dict):
+                _stats = _eg_default_admin_stats()
+        except Exception:
+            _stats = _eg_default_admin_stats()
+
+        return render_template(
+            "admin_dashboard.html",
+            admin_stats=_stats,
+            admin_user_stats=_stats,
+            stats=_stats,
+        )
+
+    for _ss_ep in ("admin_dashboard", "admin_home", "admin_index", "ss_live_admin_dashboard"):
+        try:
+            if _ss_ep in app.view_functions:
+                app.view_functions[_ss_ep] = lambda **kwargs: _ss_emergency_admin_dashboard_with_stats()
+        except Exception:
+            pass
+except Exception as _e:
+    print("EMERGENCY ADMIN RADIAL STATS ROUTE ERROR:", _e)
+# ===== ERATGUARD EMERGENCY ADMIN RADIAL STATS ROUTE END =====
+
 
 @app.route("/activate-license/<target_username>", methods=["POST"])
 def activate_license(target_username):
@@ -10282,4 +10305,9 @@ body{{
     return html
 # ===== ERATGUARD PREMIUM ADMIN USER DETAIL PAGE END =====
 
+# ===== ERATGUARD APP RUN FINAL START =====
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
+# ===== ERATGUARD APP RUN FINAL END =====
 
