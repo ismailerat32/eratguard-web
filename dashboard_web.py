@@ -3881,7 +3881,107 @@ try:
 
     def _eg_real_admin_system():
         import sys as _eg_sys
+        import json as _eg_json
         from pathlib import Path as _eg_Path
+        from datetime import datetime as _eg_datetime
+
+        def _fmt_size(size):
+            try:
+                size = float(size)
+                for unit in ["B", "KB", "MB", "GB"]:
+                    if size < 1024:
+                        return f"{size:.0f} {unit}" if unit == "B" else f"{size:.1f} {unit}"
+                    size /= 1024
+                return f"{size:.1f} TB"
+            except Exception:
+                return "-"
+
+        def _count_records(path):
+            try:
+                fp = _eg_Path(path)
+                if not fp.exists():
+                    return 0
+                data = _eg_json.loads(fp.read_text(encoding="utf-8"))
+                if isinstance(data, dict):
+                    return len(data)
+                if isinstance(data, list):
+                    return len(data)
+                return 1
+            except Exception:
+                return 0
+
+        def _health_item(label, path, critical=True):
+            try:
+                fp = _eg_Path(path)
+                exists = fp.exists()
+                size = fp.stat().st_size if exists else 0
+                modified = "-"
+                if exists:
+                    modified = _eg_datetime.fromtimestamp(fp.stat().st_mtime).isoformat(timespec="seconds")
+
+                records = _count_records(path) if exists else 0
+
+                if exists and (records > 0 or not critical):
+                    status = "OK"
+                    level = "good"
+                elif exists:
+                    status = "BOŞ"
+                    level = "watch"
+                else:
+                    status = "YOK"
+                    level = "danger" if critical else "watch"
+
+                return {
+                    "label": label,
+                    "path": path,
+                    "status": status,
+                    "level": level,
+                    "exists": exists,
+                    "size": _fmt_size(size),
+                    "records": records,
+                    "modified": modified,
+                    "critical": critical,
+                }
+            except Exception as e:
+                return {
+                    "label": label,
+                    "path": path,
+                    "status": "HATA",
+                    "level": "danger",
+                    "exists": False,
+                    "size": "-",
+                    "records": 0,
+                    "modified": "-",
+                    "critical": critical,
+                    "error": repr(e),
+                }
+
+        health_items = [
+            _health_item("Kullanıcı Datası", "data/users.json", True),
+            _health_item("Lisans Datası", "data/licenses.json", True),
+            _health_item("Üretilen Lisanslar", "data/generated_licenses.json", False),
+            _health_item("Ödeme Talepleri", "data/payment_requests.json", False),
+            _health_item("Ayarlar", "data/settings.json", True),
+            _health_item("Spam Logları", "data/spam_logs.json", False),
+            _health_item("Güvenli Liste", "data/safe_list.json", False),
+            _health_item("User Sessions", "data/user_sessions.json", False),
+        ]
+
+        ok_count = sum(1 for item in health_items if item.get("level") == "good")
+        danger_count = sum(1 for item in health_items if item.get("level") == "danger")
+        watch_count = sum(1 for item in health_items if item.get("level") == "watch")
+        total_count = len(health_items) or 1
+
+        health_score = int((ok_count / total_count) * 100)
+        if danger_count:
+            health_label = "KONTROL GEREKİYOR"
+            health_level = "danger"
+        elif watch_count:
+            health_label = "İZLEMEDE"
+            health_level = "watch"
+        else:
+            health_label = "SAĞLIKLI"
+            health_level = "good"
 
         def _state(path):
             try:
@@ -3897,6 +3997,13 @@ try:
             licenses_state=_state("data/licenses.json"),
             settings_state=_state("data/settings.json"),
             python_version=_eg_sys.version.split()[0],
+            health_items=health_items,
+            health_score=health_score,
+            health_label=health_label,
+            health_level=health_level,
+            danger_count=danger_count,
+            watch_count=watch_count,
+            ok_count=ok_count,
         )
 
     def _eg_real_admin_catchall(anything):
