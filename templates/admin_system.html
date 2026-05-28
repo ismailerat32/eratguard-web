@@ -654,6 +654,43 @@
             </section>
           </div>
 
+
+          <section class="premium-command-center command-{{ command_level|default('watch') }}">
+            <div class="command-hero">
+              <div>
+                <span class="command-eyebrow">SPAMSHIELD PRO CONTROL CENTER</span>
+                <h2>⚡ Executive Production Command</h2>
+                <p>{{ command_desc|default("Health, Ops ve Release merkezleri tek executive production görünümünde toplanır.") }}</p>
+              </div>
+
+              <div class="command-score-orb">
+                <b>{{ command_score|default(0) }}%</b>
+                <span>{{ command_label|default("SYSTEM WATCH") }}</span>
+              </div>
+            </div>
+
+            <div class="command-cards">
+              {% for card in command_cards|default([]) %}
+              <article class="command-card command-card-{{ card.level|default('watch') }}">
+                <div class="command-card-icon">{{ card.icon }}</div>
+                <div class="command-card-body">
+                  <div class="command-card-top">
+                    <h3>{{ card.title }}</h3>
+                    <strong>{{ card.score }}%</strong>
+                  </div>
+                  <p>{{ card.desc }}</p>
+                  <span>{{ card.label }}</span>
+                </div>
+              </article>
+              {% else %}
+              <article class="command-empty">
+                <strong>Command summary hazır değil.</strong>
+                <span>Backend command_cards context kontrol edilmeli.</span>
+              </article>
+              {% endfor %}
+            </div>
+          </section>
+
           <section class="premium-health-center health-{{ health_level|default('watch') }}">
             <div class="health-head">
               <div>
@@ -1646,6 +1683,284 @@
     }
   }
 </style>
+
+<style id="admin-system-premium-command-center-polish">
+  .premium-command-center{
+    margin:8px 0 24px;
+    padding:24px;
+    border-radius:30px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(59,130,246,.26), transparent 34%),
+      radial-gradient(circle at 82% 8%, rgba(34,197,94,.22), transparent 34%),
+      radial-gradient(circle at 50% 100%, rgba(168,85,247,.18), transparent 36%),
+      linear-gradient(135deg, rgba(2,6,23,.99), rgba(15,23,42,.97));
+    border:1px solid rgba(148,163,184,.24);
+    box-shadow:0 30px 90px rgba(2,6,23,.52);
+    color:#e5e7eb;
+    overflow:hidden;
+    position:relative;
+  }
+
+  .premium-command-center:before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      linear-gradient(120deg, transparent 0%, rgba(255,255,255,.07) 42%, transparent 68%),
+      linear-gradient(90deg, rgba(255,255,255,.026) 1px, transparent 1px),
+      linear-gradient(0deg, rgba(255,255,255,.022) 1px, transparent 1px);
+    background-size:100% 100%, 34px 34px, 34px 34px;
+    opacity:.5;
+    pointer-events:none;
+  }
+
+  .premium-command-center:after{
+    content:"";
+    position:absolute;
+    width:260px;
+    height:260px;
+    right:-90px;
+    top:-90px;
+    border-radius:999px;
+    background:rgba(59,130,246,.16);
+    filter:blur(8px);
+    pointer-events:none;
+  }
+
+  .command-hero,
+  .command-cards{
+    position:relative;
+    z-index:1;
+  }
+
+  .command-hero{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:22px;
+    margin-bottom:20px;
+  }
+
+  .command-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    padding:7px 11px;
+    border-radius:999px;
+    background:rgba(59,130,246,.14);
+    color:#bfdbfe;
+    border:1px solid rgba(147,197,253,.23);
+    font-size:11px;
+    font-weight:950;
+    letter-spacing:.14em;
+  }
+
+  .command-hero h2{
+    margin:12px 0 8px;
+    font-size:28px;
+    line-height:1.08;
+    letter-spacing:-.045em;
+    color:#f8fafc;
+  }
+
+  .command-hero p{
+    margin:0;
+    max-width:760px;
+    color:#cbd5e1;
+    line-height:1.58;
+    font-size:14px;
+  }
+
+  .command-score-orb{
+    width:176px;
+    min-width:176px;
+    height:176px;
+    border-radius:999px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    background:
+      radial-gradient(circle at center, rgba(15,23,42,.97) 0 55%, transparent 56%),
+      conic-gradient(from 210deg, #22c55e, #3b82f6, #8b5cf6, #f59e0b, #22c55e);
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:
+      inset 0 0 42px rgba(255,255,255,.055),
+      0 22px 54px rgba(0,0,0,.38);
+  }
+
+  .command-score-orb b{
+    display:block;
+    font-size:38px;
+    line-height:1;
+    color:#fff;
+  }
+
+  .command-score-orb span{
+    display:block;
+    max-width:128px;
+    margin-top:9px;
+    color:#dbeafe;
+    font-size:11px;
+    line-height:1.25;
+    font-weight:950;
+    letter-spacing:.04em;
+  }
+
+  .command-cards{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:13px;
+  }
+
+  .command-card{
+    display:flex;
+    gap:13px;
+    padding:15px;
+    border-radius:22px;
+    background:rgba(15,23,42,.68);
+    border:1px solid rgba(148,163,184,.18);
+    box-shadow:0 14px 34px rgba(0,0,0,.22);
+  }
+
+  .command-card-good{
+    border-color:rgba(34,197,94,.30);
+  }
+
+  .command-card-watch{
+    border-color:rgba(245,158,11,.32);
+  }
+
+  .command-card-danger{
+    border-color:rgba(239,68,68,.38);
+  }
+
+  .command-card-icon{
+    width:42px;
+    min-width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:16px;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
+    font-size:20px;
+  }
+
+  .command-card-body{
+    flex:1;
+    min-width:0;
+  }
+
+  .command-card-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+  }
+
+  .command-card h3{
+    margin:0;
+    color:#f8fafc;
+    font-size:15px;
+    letter-spacing:-.02em;
+  }
+
+  .command-card strong{
+    color:#fff;
+    font-size:18px;
+  }
+
+  .command-card p{
+    margin:8px 0 10px;
+    color:#cbd5e1;
+    font-size:12px;
+    line-height:1.48;
+  }
+
+  .command-card span{
+    display:inline-flex;
+    padding:6px 9px;
+    border-radius:999px;
+    color:#e5e7eb;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
+    font-size:10px;
+    font-weight:950;
+  }
+
+  .command-card-good span{
+    color:#bbf7d0;
+    background:rgba(34,197,94,.12);
+    border-color:rgba(34,197,94,.22);
+  }
+
+  .command-card-watch span{
+    color:#fde68a;
+    background:rgba(245,158,11,.12);
+    border-color:rgba(245,158,11,.24);
+  }
+
+  .command-card-danger span{
+    color:#fecaca;
+    background:rgba(239,68,68,.12);
+    border-color:rgba(239,68,68,.26);
+  }
+
+  .command-empty{
+    grid-column:1 / -1;
+    padding:16px;
+    border-radius:18px;
+    background:rgba(15,23,42,.72);
+    border:1px dashed rgba(148,163,184,.3);
+    color:#cbd5e1;
+  }
+
+  .command-empty strong,
+  .command-empty span{
+    display:block;
+  }
+
+  .command-empty span{
+    margin-top:5px;
+    color:#94a3b8;
+    font-size:13px;
+  }
+
+  @media (max-width: 980px){
+    .command-hero{
+      flex-direction:column;
+      align-items:flex-start;
+    }
+
+    .command-score-orb{
+      width:146px;
+      min-width:146px;
+      height:146px;
+    }
+
+    .command-cards{
+      grid-template-columns:1fr;
+    }
+  }
+
+  @media (max-width: 640px){
+    .premium-command-center{
+      padding:18px;
+      border-radius:24px;
+    }
+
+    .command-hero h2{
+      font-size:23px;
+    }
+
+    .command-card{
+      flex-direction:column;
+    }
+  }
+</style>
+
 
 
 

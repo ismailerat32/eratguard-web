@@ -4150,13 +4150,66 @@ try:
             health_level = "watch"
         else:
             health_label = "SAĞLIKLI"
-            health_level = "good"
 
-        def _state(path):
-            try:
-                return "OK" if _eg_Path(path).exists() else "YOK"
-            except Exception:
-                return "YOK"
+        command_score = int((health_score + ops_score + release_score) / 3)
+
+        command_danger = 0
+        command_watch = 0
+
+        if health_level == "danger":
+            command_danger += 1
+        elif health_level == "watch":
+            command_watch += 1
+
+        if ops_level == "danger":
+            command_danger += 1
+        elif ops_level == "watch":
+            command_watch += 1
+
+        if release_level == "danger":
+            command_danger += 1
+        elif release_level == "watch":
+            command_watch += 1
+
+        if command_danger:
+            command_level = "danger"
+            command_label = "SYSTEM BLOCKED"
+            command_desc = "Production öncesi kritik maddeler var. Health, Ops veya Release merkezindeki blokları kapatmadan final çıkış önerilmez."
+        elif command_watch:
+            command_level = "watch"
+            command_label = "SYSTEM WATCH"
+            command_desc = "Sistem çalışır durumda; ancak production güveni için izleme/opsiyonel maddeler tamamlanmalı."
+        else:
+            command_level = "good"
+            command_label = "SYSTEM READY"
+            command_desc = "Health, Ops ve Release merkezleri hazır görünüyor. Production çıkışı için güçlü sinyal var."
+
+        command_cards = [
+            {
+                "title": "Production Health",
+                "score": health_score,
+                "level": health_level,
+                "label": health_label,
+                "desc": "Temel veri, servis ve sistem bileşenlerinin canlı sağlık görünümü.",
+                "icon": "🧬",
+            },
+            {
+                "title": "Security / Ops",
+                "score": ops_score,
+                "level": ops_level,
+                "label": ops_label,
+                "desc": "Admin, lisans, ödeme ve audit operasyonlarının güvenlik görünümü.",
+                "icon": "🛡️",
+            },
+            {
+                "title": "Release Readiness",
+                "score": release_score,
+                "level": release_level,
+                "label": release_label,
+                "desc": "Dokümantasyon, secret riski, cleanup ve release gate kontrolleri.",
+                "icon": "🚀",
+            },
+        ]
 
         return _eg_real_render(
             "admin_system.html",
@@ -4184,6 +4237,11 @@ try:
             release_good=release_good,
             release_watch=release_watch,
             release_danger=release_danger,
+            command_score=command_score,
+            command_label=command_label,
+            command_level=command_level,
+            command_desc=command_desc,
+            command_cards=command_cards,
             danger_count=danger_count,
             watch_count=watch_count,
             ok_count=ok_count,
