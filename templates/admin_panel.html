@@ -816,6 +816,28 @@
               <div class="mini-badge">{{ total }} KAYIT</div>
             </div>
 
+            <div class="admin-user-filter-panel">
+              <div class="filter-search">
+                <span>🔎</span>
+                <input id="adminUserSearch" type="search" placeholder="Kullanıcı, rol, lisans veya IP ara..." autocomplete="off">
+              </div>
+
+              <div class="filter-tabs" id="adminUserFilters">
+                <button type="button" class="filter-tab active" data-filter="all">Tümü</button>
+                <button type="button" class="filter-tab" data-filter="admin">Admin</button>
+                <button type="button" class="filter-tab" data-filter="active">Aktif</button>
+                <button type="button" class="filter-tab" data-filter="banned">Banlı</button>
+                <button type="button" class="filter-tab" data-filter="online">Online</button>
+                <button type="button" class="filter-tab" data-filter="licensed">Lisanslı</button>
+                <button type="button" class="filter-tab" data-filter="trial">Trial</button>
+              </div>
+
+              <div class="filter-result">
+                <b id="adminUserVisibleCount">{{ total }}</b>
+                <span>/ {{ total }} kullanıcı gösteriliyor</span>
+              </div>
+            </div>
+
             <div class="users-grid">
 
           <section class="audit-card">
@@ -845,7 +867,17 @@
           </section>
 
               {% for user in users %}
-                <article class="user-card" id="user-{{ user.username }}">
+                <article
+                  class="user-card"
+                  id="user-{{ user.username }}"
+                  data-user-card="1"
+                  data-username="{{ user.username|lower }}"
+                  data-role="{{ user.role|default('user')|lower }}"
+                  data-status="{% if user.is_banned %}banned{% elif user.active is sameas false %}passive{% else %}active{% endif %}"
+                  data-online="{% if user.online %}online{% else %}offline{% endif %}"
+                  data-license="{{ user.license_status|default(user.license_type|default('trial'))|lower }}"
+                  data-search="{{ user.username|lower }} {{ user.role|default('user')|lower }} {{ user.email|default('')|lower }} {{ user.license_status|default('')|lower }} {{ user.license_type|default('')|lower }} {{ user.license_key|default('')|lower }} {{ user.last_ip|default('')|lower }}"
+                >
                   <div class="user-top">
                     <div class="identity">
                       <div class="avatar">{{ user.username[0].upper() }}</div>
@@ -1432,6 +1464,204 @@
     }
   }
 </style>
+
+
+<style id="admin-users-search-filter-premium">
+  /* ===== ADMIN USERS SEARCH FILTER PREMIUM ===== */
+
+  .admin-user-filter-panel{
+    border:1px solid rgba(49,249,158,.14);
+    background:
+      radial-gradient(circle at 12% 0%, rgba(156,255,93,.10), transparent 34%),
+      rgba(0,8,5,.38);
+    border-radius:22px;
+    padding:13px;
+    margin:0 0 14px;
+    display:grid;
+    gap:11px;
+  }
+
+  .filter-search{
+    min-height:48px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border:1px solid rgba(255,255,255,.09);
+    background:rgba(0,0,0,.22);
+    border-radius:16px;
+    padding:0 13px;
+  }
+
+  .filter-search span{
+    font-size:18px;
+    filter:drop-shadow(0 0 8px rgba(156,255,93,.20));
+  }
+
+  .filter-search input{
+    width:100%;
+    border:0;
+    outline:0;
+    background:transparent;
+    color:#f4fff8;
+    font-size:15px;
+    font-weight:850;
+    min-height:46px;
+  }
+
+  .filter-search input::placeholder{
+    color:rgba(244,255,248,.42);
+    font-weight:800;
+  }
+
+  .filter-tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  .filter-tab{
+    border:1px solid rgba(255,255,255,.09);
+    background:rgba(255,255,255,.045);
+    color:rgba(244,255,248,.76);
+    border-radius:999px;
+    min-height:34px;
+    padding:0 12px;
+    font-size:12px;
+    font-weight:950;
+    cursor:pointer;
+  }
+
+  .filter-tab.active{
+    border-color:rgba(156,255,93,.34);
+    background:linear-gradient(135deg,rgba(49,249,158,.24),rgba(24,198,232,.16));
+    color:#eaffef;
+    box-shadow:0 10px 24px rgba(49,249,158,.10);
+  }
+
+  .filter-result{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    min-height:34px;
+    border-radius:14px;
+    background:rgba(255,255,255,.035);
+    color:rgba(244,255,248,.56);
+    font-size:12px;
+    font-weight:850;
+  }
+
+  .filter-result b{
+    color:#9cff5d;
+    font-size:14px;
+  }
+
+  .user-card.admin-filter-hidden{
+    display:none !important;
+  }
+
+  @media(max-width:560px){
+    .admin-user-filter-panel{
+      padding:11px !important;
+      border-radius:18px !important;
+      gap:9px !important;
+    }
+
+    .filter-search{
+      min-height:44px !important;
+      border-radius:14px !important;
+      padding:0 11px !important;
+    }
+
+    .filter-search input{
+      min-height:42px !important;
+      font-size:13.5px !important;
+    }
+
+    .filter-tabs{
+      gap:6px !important;
+    }
+
+    .filter-tab{
+      min-height:31px !important;
+      font-size:11px !important;
+      padding:0 10px !important;
+    }
+  }
+</style>
+
+<script id="admin-users-search-filter-premium-js">
+(function(){
+  function ready(fn){
+    if(document.readyState === "loading"){
+      document.addEventListener("DOMContentLoaded", fn);
+    } else {
+      fn();
+    }
+  }
+
+  ready(function(){
+    var search = document.getElementById("adminUserSearch");
+    var filters = document.querySelectorAll(".filter-tab");
+    var cards = Array.prototype.slice.call(document.querySelectorAll("[data-user-card='1']"));
+    var countEl = document.getElementById("adminUserVisibleCount");
+    var currentFilter = "all";
+
+    function matchFilter(card){
+      var role = (card.getAttribute("data-role") || "").toLowerCase();
+      var status = (card.getAttribute("data-status") || "").toLowerCase();
+      var online = (card.getAttribute("data-online") || "").toLowerCase();
+      var license = (card.getAttribute("data-license") || "").toLowerCase();
+
+      if(currentFilter === "all") return true;
+      if(currentFilter === "admin") return role === "admin" || license.indexOf("system") !== -1;
+      if(currentFilter === "active") return status === "active";
+      if(currentFilter === "banned") return status === "banned";
+      if(currentFilter === "online") return online === "online";
+      if(currentFilter === "licensed") return license && license !== "trial" && license !== "kontrol";
+      if(currentFilter === "trial") return !license || license === "trial";
+      return true;
+    }
+
+    function applyFilter(){
+      var q = (search && search.value ? search.value : "").toLowerCase().trim();
+      var visible = 0;
+
+      cards.forEach(function(card){
+        var hay = (card.getAttribute("data-search") || "").toLowerCase();
+        var okSearch = !q || hay.indexOf(q) !== -1;
+        var okFilter = matchFilter(card);
+
+        if(okSearch && okFilter){
+          card.classList.remove("admin-filter-hidden");
+          visible++;
+        } else {
+          card.classList.add("admin-filter-hidden");
+        }
+      });
+
+      if(countEl){
+        countEl.textContent = String(visible);
+      }
+    }
+
+    if(search){
+      search.addEventListener("input", applyFilter);
+    }
+
+    filters.forEach(function(btn){
+      btn.addEventListener("click", function(){
+        filters.forEach(function(x){ x.classList.remove("active"); });
+        btn.classList.add("active");
+        currentFilter = btn.getAttribute("data-filter") || "all";
+        applyFilter();
+      });
+    });
+
+    applyFilter();
+  });
+})();
+</script>
 
 </body>
 </html>
