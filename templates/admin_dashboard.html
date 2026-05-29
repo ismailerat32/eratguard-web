@@ -1227,6 +1227,292 @@
 }
 </style>
 
+
+<style id="eratguard-stage4g-mobile-grid-polish-v1">
+/* =========================================================
+   STAGE 4G - ERATGUARD MOBILE GRID VISUAL POLISH
+   Amaç:
+   - Mobil dashboard'u daha kompakt, premium ve EratGuard çizgisine uygun yapmak
+   - Büyük/kaba kart görünümünü düzeltmek
+   - APK/WebView için okunaklı ama daha sıkı layout
+   ========================================================= */
+
+:root{
+  --eg-neon:#8dff3f;
+  --eg-green:#20f777;
+  --eg-dark:#05070d;
+  --eg-card:#081421;
+  --eg-card-2:#0b1f2f;
+  --eg-border:rgba(141,255,63,.22);
+  --eg-border-blue:rgba(60,140,255,.20);
+  --eg-text:#f7fff4;
+  --eg-muted:#a6b8c8;
+}
+
+/* Genel dashboard tonu */
+.ss-premium-dashboard{
+  max-width:1180px !important;
+}
+
+.ss-premium-hero,
+.ss-metric-card,
+.ss-panel,
+.ss-action-card{
+  border-color:var(--eg-border-blue) !important;
+  background:
+    radial-gradient(circle at top left, rgba(141,255,63,.08), transparent 38%),
+    linear-gradient(180deg, rgba(10,24,39,.96), rgba(5,8,16,.98)) !important;
+}
+
+.ss-premium-logo{
+  background:rgba(141,255,63,.10) !important;
+  border-color:rgba(141,255,63,.28) !important;
+  box-shadow:0 0 24px rgba(141,255,63,.18) !important;
+}
+
+.ss-premium-status{
+  border-color:rgba(141,255,63,.32) !important;
+  background:rgba(141,255,63,.11) !important;
+  color:#d9ffc7 !important;
+}
+
+.ss-premium-dot{
+  background:var(--eg-neon) !important;
+  box-shadow:0 0 18px rgba(141,255,63,.85) !important;
+}
+
+.ss-metric-sub,
+.ss-health-item span{
+  color:#8dff9a !important;
+}
+
+/* Mobil premium polish */
+@media (max-width: 760px){
+
+  body{
+    background:
+      radial-gradient(circle at top, rgba(141,255,63,.06), transparent 28%),
+      #05070d !important;
+  }
+
+  .ss-premium-dashboard{
+    padding:14px 12px 28px !important;
+  }
+
+  /* Hero daha kompakt */
+  .ss-premium-hero{
+    border-radius:22px !important;
+    padding:16px !important;
+    margin-bottom:14px !important;
+    gap:12px !important;
+  }
+
+  .ss-premium-title{
+    gap:12px !important;
+    align-items:center !important;
+  }
+
+  .ss-premium-logo{
+    width:54px !important;
+    height:54px !important;
+    border-radius:18px !important;
+    font-size:25px !important;
+  }
+
+  .ss-premium-title h1{
+    font-size:25px !important;
+    line-height:1.05 !important;
+    letter-spacing:-.7px !important;
+  }
+
+  .ss-premium-title p{
+    font-size:13px !important;
+    line-height:1.25 !important;
+    margin-top:6px !important;
+    max-width:260px !important;
+  }
+
+  .ss-premium-status{
+    width:100% !important;
+    min-height:42px !important;
+    padding:9px 12px !important;
+    border-radius:16px !important;
+    font-size:15px !important;
+    justify-content:center !important;
+  }
+
+  /* Mobilde metrikler 2 kolon: daha profesyonel ve kısa */
+  .ss-metric-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+    gap:10px !important;
+    margin-bottom:14px !important;
+  }
+
+  .ss-metric-card{
+    min-height:118px !important;
+    padding:13px !important;
+    border-radius:18px !important;
+  }
+
+  .ss-metric-top{
+    gap:9px !important;
+    align-items:flex-start !important;
+  }
+
+  .ss-icon{
+    width:38px !important;
+    height:38px !important;
+    border-radius:13px !important;
+    font-size:19px !important;
+  }
+
+  .ss-metric-label{
+    font-size:12px !important;
+    line-height:1.15 !important;
+    min-height:28px !important;
+  }
+
+  .ss-metric-value{
+    font-size:27px !important;
+    line-height:1 !important;
+    margin-top:4px !important;
+  }
+
+  .ss-metric-sub{
+    font-size:11px !important;
+    line-height:1.15 !important;
+    margin-top:8px !important;
+  }
+
+  /* Sistem merkezi daha sıkı */
+  .ss-main-grid{
+    gap:12px !important;
+    margin-bottom:14px !important;
+  }
+
+  .ss-panel{
+    padding:14px !important;
+    border-radius:19px !important;
+  }
+
+  .ss-panel-head{
+    margin-bottom:12px !important;
+  }
+
+  .ss-panel h2{
+    font-size:20px !important;
+    line-height:1.1 !important;
+  }
+
+  .ss-panel-link{
+    font-size:13px !important;
+  }
+
+  .ss-health-row{
+    grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+    gap:9px !important;
+  }
+
+  .ss-health-item{
+    padding:11px 8px !important;
+    border-radius:15px !important;
+    min-height:78px !important;
+  }
+
+  .ss-health-item strong{
+    font-size:12px !important;
+    margin-top:6px !important;
+  }
+
+  .ss-health-item span{
+    font-size:11px !important;
+    margin-top:4px !important;
+  }
+
+  /* Aksiyon kartları mobilde kompakt liste/kart arası */
+  .ss-action-grid{
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+  }
+
+  .ss-action-card{
+    min-height:96px !important;
+    padding:14px !important;
+    border-radius:18px !important;
+    flex-direction:row !important;
+    align-items:center !important;
+    gap:12px !important;
+  }
+
+  .ss-action-card > div:first-child{
+    display:grid !important;
+    grid-template-columns:44px 1fr !important;
+    column-gap:12px !important;
+    align-items:center !important;
+    width:100% !important;
+  }
+
+  .ss-action-card .ss-icon{
+    grid-row:1 / span 2 !important;
+  }
+
+  .ss-action-card h3{
+    margin:0 0 4px !important;
+    font-size:16px !important;
+    line-height:1.1 !important;
+  }
+
+  .ss-action-card p{
+    font-size:12px !important;
+    line-height:1.25 !important;
+  }
+
+  .ss-action-link{
+    display:none !important;
+  }
+
+  .ss-activity-item{
+    padding:9px !important;
+    border-radius:14px !important;
+  }
+
+  .ss-activity-item b{
+    font-size:12px !important;
+  }
+
+  .ss-activity-item small{
+    font-size:11px !important;
+  }
+}
+
+/* Çok dar ekran */
+@media (max-width: 390px){
+  .ss-premium-title h1{
+    font-size:22px !important;
+  }
+
+  .ss-premium-title p{
+    font-size:12px !important;
+  }
+
+  .ss-metric-grid{
+    gap:8px !important;
+  }
+
+  .ss-metric-card{
+    padding:11px !important;
+  }
+
+  .ss-metric-value{
+    font-size:24px !important;
+  }
+
+  .ss-metric-label{
+    font-size:11px !important;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -1771,7 +2057,7 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
     <div class="ss-premium-status">
       <span class="ss-premium-dot"></span>
-      All Systems Operational
+      Tüm Sistemler Aktif
     </div>
   </div>
 
@@ -1780,52 +2066,52 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="ss-metric-top">
         <div class="ss-icon blue">🛡️</div>
         <div>
-          <div class="ss-metric-label">Total Threats Blocked</div>
+          <div class="ss-metric-label">Engellenen Tehditler</div>
           <div class="ss-metric-value">152,847</div>
         </div>
       </div>
-      <div class="ss-metric-sub">↑ 18.6% vs last 7 days</div>
+      <div class="ss-metric-sub">↑ Son 7 güne göre %18.6</div>
     </div>
 
     <div class="ss-metric-card">
       <div class="ss-metric-top">
         <div class="ss-icon purple">💳</div>
         <div>
-          <div class="ss-metric-label">Active Licenses</div>
+          <div class="ss-metric-label">Aktif Lisanslar</div>
           <div class="ss-metric-value">1,248</div>
         </div>
       </div>
-      <div class="ss-metric-sub">↑ 12.4% growth</div>
+      <div class="ss-metric-sub">↑ %12.4 artış</div>
     </div>
 
     <div class="ss-metric-card">
       <div class="ss-metric-top">
         <div class="ss-icon yellow">🔔</div>
         <div>
-          <div class="ss-metric-label">Notifications Today</div>
+          <div class="ss-metric-label">Bugünkü Bildirimler</div>
           <div class="ss-metric-value">32</div>
         </div>
       </div>
-      <div class="ss-metric-sub">High priority alerts ready</div>
+      <div class="ss-metric-sub">Öncelikli uyarılar hazır</div>
     </div>
 
     <div class="ss-metric-card">
       <div class="ss-metric-top">
         <div class="ss-icon green">💚</div>
         <div>
-          <div class="ss-metric-label">System Health</div>
+          <div class="ss-metric-label">Sistem Sağlığı</div>
           <div class="ss-metric-value">100%</div>
         </div>
       </div>
-      <div class="ss-metric-sub">All services online</div>
+      <div class="ss-metric-sub">Tüm servisler aktif</div>
     </div>
   </div>
 
   <div class="ss-main-grid">
     <div class="ss-panel">
       <div class="ss-panel-head">
-        <h2>System Health Center</h2>
-        <a class="ss-panel-link" href="/admin/system">View Details</a>
+        <h2>Sistem Sağlığı Center</h2>
+        <a class="ss-panel-link" href="/admin/system">Detaylar</a>
       </div>
       <div class="ss-health-row">
         <div class="ss-health-item">⚙️<strong>API</strong><span>Online</span></div>
@@ -1838,8 +2124,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     <div class="ss-panel">
       <div class="ss-panel-head">
-        <h2>Recent Activity</h2>
-        <a class="ss-panel-link" href="/admin/notifications">View All</a>
+        <h2>Son Aktiviteler</h2>
+        <a class="ss-panel-link" href="/admin/notifications">Tümünü Gör</a>
       </div>
       <div class="ss-activity-list">
         <div class="ss-activity-item">
@@ -1862,73 +2148,73 @@ document.addEventListener("DOMContentLoaded", function () {
     <a class="ss-action-card" href="/admin/system">
       <div>
         <div class="ss-icon green">💚</div>
-        <h3>System Health</h3>
+        <h3>Sistem Sağlığı</h3>
         <p>Servisleri, performansı ve kritik sistem durumunu izle.</p>
       </div>
-      <div class="ss-action-link">View Details →</div>
+      <div class="ss-action-link">Detaylar →</div>
     </a>
 
     <a class="ss-action-card" href="/admin/licenses">
       <div>
         <div class="ss-icon purple">💳</div>
-        <h3>License Center</h3>
+        <h3>Lisans Merkezi</h3>
         <p>Lisansları, cihaz aktivasyonlarını ve abonelik durumunu yönet.</p>
       </div>
-      <div class="ss-action-link">Manage Licenses →</div>
+      <div class="ss-action-link">Lisansları Yönet →</div>
     </a>
 
     <a class="ss-action-card" href="/admin/analysis">
       <div>
         <div class="ss-icon red">🎯</div>
-        <h3>Threat Analysis</h3>
+        <h3>Tehdit Analizi</h3>
         <p>Tehditleri analiz et, güvenlik içgörülerini görüntüle.</p>
       </div>
-      <div class="ss-action-link">Analyze Now →</div>
+      <div class="ss-action-link">Analiz Et →</div>
     </a>
 
     <a class="ss-action-card" href="/admin/notifications">
       <div>
         <div class="ss-icon yellow">🔔</div>
-        <h3>Notifications</h3>
+        <h3>Bildirimler</h3>
         <p>Bildirimleri, uyarıları ve yüksek risk alarm kurallarını yönet.</p>
       </div>
-      <div class="ss-action-link">View All →</div>
+      <div class="ss-action-link">Tümünü Gör →</div>
     </a>
 
     <a class="ss-action-card" href="/admin/blocked">
       <div>
         <div class="ss-icon red">⛔</div>
-        <h3>Blocked Items</h3>
+        <h3>Engellenenler</h3>
         <p>Engellenen tehditleri, kayıtları ve aksiyon geçmişini incele.</p>
       </div>
-      <div class="ss-action-link">View Blocked →</div>
+      <div class="ss-action-link">Engellenenleri Gör →</div>
     </a>
 
     <a class="ss-action-card" href="/admin/community">
       <div>
         <div class="ss-icon blue">👥</div>
-        <h3>Community</h3>
+        <h3>Topluluk</h3>
         <p>Topluluk, geri bildirim ve güvenlik paylaşım merkezine git.</p>
       </div>
-      <div class="ss-action-link">Go Community →</div>
+      <div class="ss-action-link">Go Topluluk →</div>
     </a>
 
     <a class="ss-action-card" href="/admin/mobile">
       <div>
         <div class="ss-icon green">🤖</div>
-        <h3>Mobile / APK</h3>
+        <h3>Mobil / APK</h3>
         <p>APK, mobil görünüm ve cihaz koruma ayarlarını yönet.</p>
       </div>
-      <div class="ss-action-link">Open Mobile →</div>
+      <div class="ss-action-link">Mobil Alanı Aç →</div>
     </a>
 
     <a class="ss-action-card" href="/admin/payments">
       <div>
         <div class="ss-icon blue">💼</div>
-        <h3>Payments</h3>
+        <h3>Ödemeler</h3>
         <p>Ödeme, faturalama ve iyzico entegrasyon durumunu kontrol et.</p>
       </div>
-      <div class="ss-action-link">View Payments →</div>
+      <div class="ss-action-link">View Ödemeler →</div>
     </a>
   </div>
 
