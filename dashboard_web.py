@@ -10433,6 +10433,37 @@ except Exception as _eg_stage4f_force_error:
 # ===== ERATGUARD STAGE4F LIVE ROUTE FORCE END =====
 
 
+
+
+# ===== ERATGUARD ADMIN ROOT REDIRECT FINAL START =====
+# /admin timeout riskini bitirir: ana admin adresini doğrudan çalışan grid dashboard'a yönlendirir.
+try:
+    def _eg_admin_root_redirect_final(**kwargs):
+        try:
+            return redirect("/admin/dashboard", code=302)
+        except Exception:
+            return (
+                "<!doctype html><html><head><meta charset='UTF-8'>"
+                "<meta http-equiv='refresh' content='0;url=/admin/dashboard'>"
+                "<title>EratGuard PRO Admin</title></head><body>"
+                "<h2>EratGuard PRO Admin</h2>"
+                "<p>Dashboard'a yönlendiriliyorsunuz...</p>"
+                "<p><a href='/admin/dashboard'>Admin Dashboard</a></p>"
+                "</body></html>"
+            ), 302
+
+    try:
+        for _eg_rule in list(app.url_map.iter_rules()):
+            if str(_eg_rule.rule) in ("/admin", "/admin/"):
+                app.view_functions[_eg_rule.endpoint] = _eg_admin_root_redirect_final
+    except Exception:
+        pass
+
+except Exception as _eg_admin_root_redirect_error:
+    print("ERATGUARD ADMIN ROOT REDIRECT ERROR:", _eg_admin_root_redirect_error)
+# ===== ERATGUARD ADMIN ROOT REDIRECT FINAL END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
