@@ -10306,6 +10306,133 @@ body{{
 # ===== ERATGUARD PREMIUM ADMIN USER DETAIL PAGE END =====
 
 # ===== ERATGUARD APP RUN FINAL START =====
+
+
+# ===== ERATGUARD STAGE4F LIVE ROUTE FORCE START =====
+# Amaç:
+# - Canlı /admin ve /admin/dashboard adreslerini eski radial/inline dashboard yerine
+#   templates/admin_dashboard.html içindeki EratGuard premium grid dashboard'a zorla bağlar.
+# - /admin/system için güvenli fallback sağlar.
+try:
+    def _eg_stage4f_safe_admin_stats():
+        try:
+            if "_eg_real_admin_dashboard_stats" in globals():
+                return _eg_real_admin_dashboard_stats()
+        except Exception:
+            pass
+        return {
+            "users": 0,
+            "licenses": 0,
+            "blocked": 0,
+            "notifications": 0,
+            "system_health": "OK",
+        }
+
+    def _eg_stage4f_force_admin_dashboard(**kwargs):
+        try:
+            return render_template(
+                "admin_dashboard.html",
+                admin_stats=_eg_stage4f_safe_admin_stats(),
+                stage4f_grid=True,
+                brand="EratGuard PRO",
+            )
+        except Exception as e:
+            return (
+                "<!doctype html><html><head><meta charset='UTF-8'>"
+                "<title>EratGuard PRO Admin</title></head><body>"
+                "<h2>EratGuard PRO Admin</h2>"
+                "<p>Dashboard template yüklenemedi.</p>"
+                "<pre>" + str(e) + "</pre>"
+                "</body></html>"
+            ), 500
+
+    def _eg_stage4f_force_admin_system(**kwargs):
+        try:
+            return render_template(
+                "admin_system.html",
+                admin_stats=_eg_stage4f_safe_admin_stats(),
+                brand="EratGuard PRO",
+                mode="production",
+                system_health="OK",
+            )
+        except Exception as e:
+            return (
+                "<!doctype html><html><head><meta charset='UTF-8'>"
+                "<title>EratGuard PRO System</title></head><body>"
+                "<h2>EratGuard PRO System</h2>"
+                "<p>Sistem sayfası güvenli fallback ile açıldı.</p>"
+                "<pre>" + str(e) + "</pre>"
+                "<p><a href='/admin'>Admin Dashboard</a></p>"
+                "</body></html>"
+            ), 200
+
+    def _eg_stage4f_admin_catch_all(anything=None, **kwargs):
+        slug = str(anything or "").strip().strip("/")
+        if slug in ("", "dashboard"):
+            return _eg_stage4f_force_admin_dashboard()
+        if slug in ("system", "health", "system-health"):
+            return _eg_stage4f_force_admin_system()
+        try:
+            template_map = {
+                "overview": "admin_overview.html",
+                "analysis": "admin_overview.html",
+                "licenses": "admin_licenses.html",
+                "license-manager": "admin_licenses.html",
+                "settings": "admin_settings.html",
+                "spam-logs": "admin_spam_logs.html",
+                "notifications": "admin_notifications.html",
+                "blocked": "admin_blocked.html",
+                "whitelist": "admin_whitelist.html",
+                "payment-requests": "admin_payment_requests.html",
+                "payments": "admin_payment_requests.html",
+            }
+            tpl = template_map.get(slug)
+            if tpl:
+                return render_template(tpl, admin_stats=_eg_stage4f_safe_admin_stats(), brand="EratGuard PRO")
+        except Exception:
+            pass
+        return _eg_stage4f_force_admin_dashboard()
+
+    # Eski endpointleri zorla yeni grid renderer'a bağla.
+    for _eg_ep in (
+        "ss_live_admin_dashboard",
+        "admin_dashboard",
+        "admin_home",
+        "admin_index",
+        "_eg_real_admin_dashboard",
+        "_ss_emergency_admin_dashboard_with_stats",
+        "_ss_final_render_admin_dashboard",
+    ):
+        try:
+            if _eg_ep in app.view_functions:
+                app.view_functions[_eg_ep] = _eg_stage4f_force_admin_dashboard
+        except Exception:
+            pass
+
+    # /admin/<path:anything> catch-all endpointini güvenli yönlendir.
+    try:
+        for _eg_rule in list(app.url_map.iter_rules()):
+            if str(_eg_rule.rule) == "/admin/<path:anything>":
+                app.view_functions[_eg_rule.endpoint] = _eg_stage4f_admin_catch_all
+    except Exception:
+        pass
+
+    # Exact /admin/system route ekle. Varsa sorun etmeden geç.
+    try:
+        app.add_url_rule(
+            "/admin/system",
+            "eg_stage4f_exact_admin_system",
+            _eg_stage4f_force_admin_system,
+            methods=["GET", "POST"],
+        )
+    except Exception:
+        pass
+
+except Exception as _eg_stage4f_force_error:
+    print("ERATGUARD STAGE4F LIVE ROUTE FORCE ERROR:", _eg_stage4f_force_error)
+# ===== ERATGUARD STAGE4F LIVE ROUTE FORCE END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
