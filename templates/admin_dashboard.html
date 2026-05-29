@@ -443,6 +443,790 @@
 }
 </style>
 
+
+<style id="admin-active-radial-text-fit-v1">
+  /* ===== ACTIVE ADMIN RADIAL TEXT FIT / APK WEBVIEW ===== */
+
+  @media (max-width: 760px){
+    html, body{
+      overflow-x:hidden !important;
+      width:100% !important;
+    }
+
+    .page,
+    .wrap,
+    .shell,
+    .admin-shell,
+    .admin-dashboard,
+    main{
+      max-width:100vw !important;
+      overflow-x:hidden !important;
+    }
+
+    .brand{
+      max-width:94vw !important;
+      margin-left:auto !important;
+      margin-right:auto !important;
+    }
+
+    .brand h1{
+      font-size:28px !important;
+      line-height:1.05 !important;
+      letter-spacing:.02em !important;
+    }
+
+    .brand small,
+    .brand p{
+      font-size:10px !important;
+      letter-spacing:.28em !important;
+      white-space:normal !important;
+    }
+
+    .wheel,
+    .radial,
+    .admin-wheel,
+    .radial-menu,
+    .slices{
+      width:min(94vw, 390px) !important;
+      height:min(94vw, 390px) !important;
+      max-width:390px !important;
+      max-height:390px !important;
+      margin-left:auto !important;
+      margin-right:auto !important;
+      transform:none !important;
+    }
+
+    .center,
+    .center-orb,
+    .admin-center,
+    .wheel-center{
+      width:112px !important;
+      height:112px !important;
+      min-width:112px !important;
+      min-height:112px !important;
+    }
+
+    .center,
+    .center *,
+    .center-orb,
+    .center-orb *,
+    .admin-center,
+    .admin-center *,
+    .wheel-center,
+    .wheel-center *{
+      font-size:34px !important;
+      line-height:1 !important;
+      letter-spacing:.16em !important;
+    }
+
+    .slice,
+    .slice-card{
+      overflow:visible !important;
+    }
+
+    .slice-card{
+      padding:6px 4px !important;
+      gap:3px !important;
+      transform:scale(.82) !important;
+      transform-origin:center !important;
+    }
+
+    .slice .ico,
+    .slice svg{
+      width:27px !important;
+      height:27px !important;
+      min-width:27px !important;
+      min-height:27px !important;
+      margin-bottom:4px !important;
+    }
+
+    .slice .label{
+      font-size:10.5px !important;
+      line-height:1.05 !important;
+      letter-spacing:.02em !important;
+      white-space:nowrap !important;
+      text-align:center !important;
+      margin:0 !important;
+    }
+
+    .slice .under{
+      display:block !important;
+      max-width:74px !important;
+      font-size:10px !important;
+      line-height:1.08 !important;
+      letter-spacing:0 !important;
+      white-space:normal !important;
+      text-align:center !important;
+      opacity:.78 !important;
+      margin-top:2px !important;
+      word-break:keep-all !important;
+    }
+
+    .status-card,
+    .admin-status,
+    .status-panel,
+    .ready-card{
+      width:88vw !important;
+      max-width:390px !important;
+      margin:14px auto 0 !important;
+      padding:16px 14px !important;
+      border-radius:18px !important;
+    }
+
+    .status-title{
+      font-size:24px !important;
+      line-height:1.1 !important;
+      letter-spacing:.01em !important;
+    }
+
+    .status-sub{
+      font-size:13px !important;
+      line-height:1.25 !important;
+      letter-spacing:.10em !important;
+    }
+  }
+
+  @media (max-width: 430px){
+    .wheel,
+    .radial,
+    .admin-wheel,
+    .radial-menu,
+    .slices{
+      width:min(94vw, 360px) !important;
+      height:min(94vw, 360px) !important;
+      max-width:360px !important;
+      max-height:360px !important;
+    }
+
+    .center,
+    .center-orb,
+    .admin-center,
+    .wheel-center{
+      width:102px !important;
+      height:102px !important;
+      min-width:102px !important;
+      min-height:102px !important;
+    }
+
+    .center,
+    .center *,
+    .center-orb,
+    .center-orb *,
+    .admin-center,
+    .admin-center *,
+    .wheel-center,
+    .wheel-center *{
+      font-size:30px !important;
+    }
+
+    .slice-card{
+      transform:scale(.76) !important;
+    }
+
+    .slice .ico,
+    .slice svg{
+      width:24px !important;
+      height:24px !important;
+      min-width:24px !important;
+      min-height:24px !important;
+    }
+
+    .slice .label{
+      font-size:9.5px !important;
+    }
+
+    .slice .under{
+      max-width:64px !important;
+      font-size:9.2px !important;
+      line-height:1.05 !important;
+    }
+
+    .status-title{
+      font-size:22px !important;
+    }
+
+    .status-sub{
+      font-size:12px !important;
+      letter-spacing:.07em !important;
+    }
+  }
+</style>
+
+
+<style id="admin-radial-text-hard-lock-v3">
+/* =========================================================
+   ADMIN RADIAL TEXT HARD LOCK v3
+   Amaç:
+   - Yazıları dilim rotate/transform etkisinden kurtarır
+   - Mobilde ve APK WebView'da kayık label görüntüsünü ezer
+   - Tüm radial item yazılarını yatay, ortalı, okunur yapar
+   ========================================================= */
+
+@media (max-width: 900px){
+
+  /* Radial ana alanı sabitle */
+  .wheel,
+  .radial,
+  .radial-menu,
+  .pizza-menu,
+  .admin-radial,
+  .admin-wheel {
+    position: relative !important;
+    overflow: visible !important;
+  }
+
+  /* Tüm radial buton/iç link yapısını normalize et */
+  .wheel a,
+  .wheel button,
+  .radial a,
+  .radial button,
+  .radial-menu a,
+  .radial-menu button,
+  .pizza-menu a,
+  .pizza-menu button,
+  .admin-radial a,
+  .admin-radial button,
+  .admin-wheel a,
+  .admin-wheel button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    line-height: 1.08 !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+  }
+
+  /* Yazı taşıyan tüm span/div/p elementlerini sert kilitle */
+  .wheel a span,
+  .wheel button span,
+  .radial a span,
+  .radial button span,
+  .radial-menu a span,
+  .radial-menu button span,
+  .pizza-menu a span,
+  .pizza-menu button span,
+  .admin-radial a span,
+  .admin-radial button span,
+  .admin-wheel a span,
+  .admin-wheel button span,
+
+  .wheel a div,
+  .wheel button div,
+  .radial a div,
+  .radial button div,
+  .radial-menu a div,
+  .radial-menu button div,
+  .pizza-menu a div,
+  .pizza-menu button div,
+  .admin-radial a div,
+  .admin-radial button div,
+  .admin-wheel a div,
+  .admin-wheel button div,
+
+  .wheel a p,
+  .wheel button p,
+  .radial a p,
+  .radial button p,
+  .radial-menu a p,
+  .radial-menu button p,
+  .pizza-menu a p,
+  .pizza-menu button p,
+  .admin-radial a p,
+  .admin-radial button p,
+  .admin-wheel a p,
+  .admin-wheel button p {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+
+    transform: none !important;
+    rotate: 0deg !important;
+
+    display: block !important;
+    width: 100% !important;
+    max-width: 86px !important;
+    margin: 0 auto !important;
+    padding: 0 4px !important;
+
+    text-align: center !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.15px !important;
+    font-size: clamp(9px, 2.55vw, 12px) !important;
+    font-weight: 800 !important;
+
+    white-space: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+    text-wrap: balance !important;
+
+    z-index: 50 !important;
+    pointer-events: none !important;
+  }
+
+  /* İkon + yazı varsa dikey merkezle */
+  .wheel a,
+  .wheel button,
+  .radial a,
+  .radial button,
+  .radial-menu a,
+  .radial-menu button,
+  .pizza-menu a,
+  .pizza-menu button,
+  .admin-radial a,
+  .admin-radial button,
+  .admin-wheel a,
+  .admin-wheel button {
+    flex-direction: column !important;
+    gap: 3px !important;
+  }
+
+  /* SVG/icon/text içeren elementlerin yamulmasını engelle */
+  .wheel svg,
+  .radial svg,
+  .radial-menu svg,
+  .pizza-menu svg,
+  .admin-radial svg,
+  .admin-wheel svg,
+  .wheel i,
+  .radial i,
+  .radial-menu i,
+  .pizza-menu i,
+  .admin-radial i,
+  .admin-wheel i {
+    transform: none !important;
+    rotate: 0deg !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Çok küçük ekranlarda yazıyı biraz daha sıkıştır */
+  @media (max-width: 420px){
+    .wheel a span,
+    .wheel button span,
+    .radial a span,
+    .radial button span,
+    .radial-menu a span,
+    .radial-menu button span,
+    .pizza-menu a span,
+    .pizza-menu button span,
+    .admin-radial a span,
+    .admin-radial button span,
+    .admin-wheel a span,
+    .admin-wheel button span {
+      max-width: 74px !important;
+      font-size: clamp(8px, 2.35vw, 10.5px) !important;
+      line-height: 1.04 !important;
+      letter-spacing: -0.25px !important;
+    }
+  }
+}
+</style>
+
+
+<style id="admin-stage4f-premium-grid-dashboard-v1">
+/* =========================================================
+   STAGE 4F - RADIAL RETIRED / PREMIUM GRID DASHBOARD
+   - Ana dashboard radial menüden kurtarıldı
+   - APK/WebView uyumlu premium grid yapı
+   - Kayık yazı, rotate, slice, transform problemi yok
+   ========================================================= */
+
+:root{
+  --ss-bg-0:#050914;
+  --ss-bg-1:#07101f;
+  --ss-card:#0b1628;
+  --ss-card-2:#101f36;
+  --ss-border:rgba(80,145,255,.20);
+  --ss-border-strong:rgba(80,145,255,.36);
+  --ss-text:#f4f8ff;
+  --ss-muted:#9fb1c9;
+  --ss-blue:#2684ff;
+  --ss-cyan:#38d5ff;
+  --ss-green:#27e376;
+  --ss-purple:#a855f7;
+  --ss-yellow:#fbbf24;
+  --ss-red:#ff4d5e;
+}
+
+/* Radial / pizza / wheel alanlarını ana dashboard'dan emekli et */
+.wheel,
+.radial,
+.radial-menu,
+.pizza-menu,
+.admin-radial,
+.admin-wheel,
+.radial-dashboard,
+.radial-container,
+.pizza-dashboard,
+.wheel-menu,
+.slice-menu,
+[class*="radial"],
+[class*="pizza"],
+[class*="wheel"]{
+  display:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+
+/* Yeni ana dashboard */
+.ss-premium-dashboard{
+  width:100%;
+  max-width:1280px;
+  margin:0 auto;
+  padding:18px;
+  color:var(--ss-text);
+  box-sizing:border-box;
+}
+
+.ss-premium-hero{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:20px;
+  border:1px solid var(--ss-border);
+  border-radius:24px;
+  background:
+    radial-gradient(circle at top left, rgba(38,132,255,.28), transparent 36%),
+    linear-gradient(135deg, rgba(11,22,40,.98), rgba(6,13,25,.96));
+  box-shadow:0 18px 48px rgba(0,0,0,.28);
+  margin-bottom:16px;
+}
+
+.ss-premium-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.ss-premium-logo{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg, rgba(38,132,255,.35), rgba(56,213,255,.16));
+  border:1px solid rgba(56,213,255,.28);
+  box-shadow:0 0 28px rgba(38,132,255,.22);
+  font-size:25px;
+}
+
+.ss-premium-title h1{
+  margin:0;
+  font-size:clamp(22px, 4vw, 34px);
+  line-height:1.05;
+  letter-spacing:-.7px;
+}
+
+.ss-premium-title p{
+  margin:6px 0 0;
+  color:var(--ss-muted);
+  font-size:14px;
+}
+
+.ss-premium-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid rgba(39,227,118,.28);
+  background:rgba(39,227,118,.10);
+  color:#b9ffd5;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.ss-premium-dot{
+  width:9px;
+  height:9px;
+  border-radius:99px;
+  background:var(--ss-green);
+  box-shadow:0 0 16px rgba(39,227,118,.75);
+}
+
+.ss-metric-grid{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:14px;
+  margin-bottom:16px;
+}
+
+.ss-metric-card,
+.ss-panel,
+.ss-action-card{
+  border:1px solid var(--ss-border);
+  background:
+    linear-gradient(180deg, rgba(16,31,54,.96), rgba(7,16,31,.96));
+  border-radius:20px;
+  box-shadow:0 14px 36px rgba(0,0,0,.22);
+}
+
+.ss-metric-card{
+  padding:16px;
+  min-height:112px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+
+.ss-metric-top{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.ss-icon{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:none;
+  font-size:22px;
+  border:1px solid rgba(255,255,255,.08);
+}
+
+.ss-icon.blue{background:rgba(38,132,255,.14); color:#58a6ff;}
+.ss-icon.green{background:rgba(39,227,118,.13); color:#4dff91;}
+.ss-icon.purple{background:rgba(168,85,247,.14); color:#bf7cff;}
+.ss-icon.yellow{background:rgba(251,191,36,.13); color:#ffd166;}
+.ss-icon.red{background:rgba(255,77,94,.13); color:#ff6b7a;}
+
+.ss-metric-label{
+  color:var(--ss-muted);
+  font-size:13px;
+  font-weight:700;
+}
+
+.ss-metric-value{
+  font-size:clamp(24px, 4vw, 34px);
+  font-weight:900;
+  letter-spacing:-.8px;
+  margin-top:4px;
+}
+
+.ss-metric-sub{
+  color:#77ffad;
+  font-size:12px;
+  font-weight:800;
+}
+
+.ss-main-grid{
+  display:grid;
+  grid-template-columns:1.45fr .85fr;
+  gap:16px;
+  margin-bottom:16px;
+}
+
+.ss-panel{
+  padding:18px;
+}
+
+.ss-panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.ss-panel h2{
+  margin:0;
+  font-size:18px;
+  letter-spacing:-.3px;
+}
+
+.ss-panel-link{
+  color:#58a6ff;
+  font-size:13px;
+  text-decoration:none;
+  font-weight:800;
+}
+
+.ss-health-row{
+  display:grid;
+  grid-template-columns:repeat(5, minmax(0, 1fr));
+  gap:10px;
+}
+
+.ss-health-item{
+  padding:14px 8px;
+  border-radius:16px;
+  background:rgba(5,12,24,.62);
+  border:1px solid rgba(80,145,255,.14);
+  text-align:center;
+}
+
+.ss-health-item strong{
+  display:block;
+  margin-top:8px;
+  font-size:13px;
+}
+
+.ss-health-item span{
+  display:block;
+  margin-top:6px;
+  color:#77ffad;
+  font-size:12px;
+  font-weight:800;
+}
+
+.ss-activity-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.ss-activity-item{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  padding:10px;
+  border-radius:14px;
+  background:rgba(5,12,24,.48);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.ss-activity-item b{
+  display:block;
+  font-size:13px;
+}
+
+.ss-activity-item small{
+  display:block;
+  color:var(--ss-muted);
+  margin-top:3px;
+}
+
+.ss-action-grid{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:14px;
+}
+
+.ss-action-card{
+  min-height:168px;
+  padding:18px;
+  text-decoration:none;
+  color:var(--ss-text);
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  transition:transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.ss-action-card:hover{
+  transform:translateY(-2px);
+  border-color:var(--ss-border-strong);
+  background:
+    radial-gradient(circle at top left, rgba(38,132,255,.12), transparent 42%),
+    linear-gradient(180deg, rgba(16,31,54,.98), rgba(7,16,31,.98));
+}
+
+.ss-action-card h3{
+  margin:12px 0 6px;
+  font-size:17px;
+  letter-spacing:-.3px;
+}
+
+.ss-action-card p{
+  margin:0;
+  color:var(--ss-muted);
+  font-size:13px;
+  line-height:1.35;
+}
+
+.ss-action-link{
+  margin-top:14px;
+  color:#58a6ff;
+  font-size:13px;
+  font-weight:900;
+}
+
+.ss-mobile-bottom-note{
+  display:none;
+  margin-top:14px;
+  padding:12px;
+  border-radius:16px;
+  background:rgba(38,132,255,.10);
+  border:1px solid rgba(38,132,255,.20);
+  color:#cfe5ff;
+  font-size:13px;
+  line-height:1.4;
+}
+
+/* Tablet */
+@media (max-width: 980px){
+  .ss-metric-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+
+  .ss-main-grid{
+    grid-template-columns:1fr;
+  }
+
+  .ss-action-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* APK / Mobil */
+@media (max-width: 620px){
+  .ss-premium-dashboard{
+    padding:12px;
+  }
+
+  .ss-premium-hero{
+    align-items:flex-start;
+    flex-direction:column;
+    border-radius:20px;
+    padding:16px;
+  }
+
+  .ss-premium-status{
+    width:100%;
+    justify-content:center;
+  }
+
+  .ss-metric-grid,
+  .ss-action-grid,
+  .ss-health-row{
+    grid-template-columns:1fr;
+  }
+
+  .ss-metric-card{
+    min-height:96px;
+  }
+
+  .ss-action-card{
+    min-height:132px;
+    border-radius:18px;
+  }
+
+  .ss-action-card h3{
+    font-size:16px;
+  }
+
+  .ss-panel{
+    padding:14px;
+    border-radius:18px;
+  }
+
+  .ss-mobile-bottom-note{
+    display:block;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -734,6 +1518,464 @@ document.addEventListener("DOMContentLoaded", function () {
     stage.classList.toggle("is-flipped");
   }, 60000);
 });
+</script>
+
+
+<style id="admin-apk-radial-final-label-fix-v2">
+  /* ===== FINAL APK ADMIN RADIAL LABEL FIX ===== */
+
+  @media (max-width: 760px){
+    .wheel,
+    .radial,
+    .admin-wheel,
+    .radial-menu,
+    .slices{
+      width:min(92vw, 360px) !important;
+      height:min(92vw, 360px) !important;
+      max-width:360px !important;
+      max-height:360px !important;
+      margin-left:auto !important;
+      margin-right:auto !important;
+      transform:none !important;
+    }
+
+    .slice-card{
+      transform:scale(.70) !important;
+      transform-origin:center !important;
+      padding:4px 2px !important;
+      gap:2px !important;
+      min-width:62px !important;
+      max-width:76px !important;
+      overflow:visible !important;
+    }
+
+    .slice .ico,
+    .slice svg{
+      width:22px !important;
+      height:22px !important;
+      min-width:22px !important;
+      min-height:22px !important;
+      margin-bottom:3px !important;
+    }
+
+    .slice .label{
+      font-size:9px !important;
+      line-height:1.02 !important;
+      letter-spacing:0 !important;
+      white-space:nowrap !important;
+      text-align:center !important;
+      margin:0 !important;
+      color:#f5fff8 !important;
+      text-shadow:0 0 8px rgba(49,249,158,.55) !important;
+    }
+
+    .slice .under{
+      display:block !important;
+      max-width:54px !important;
+      font-size:9px !important;
+      line-height:1 !important;
+      letter-spacing:0 !important;
+      white-space:nowrap !important;
+      text-align:center !important;
+      opacity:.72 !important;
+      margin-top:2px !important;
+      color:rgba(235,255,240,.74) !important;
+      overflow:hidden !important;
+      text-overflow:ellipsis !important;
+    }
+
+    .center,
+    .center-orb,
+    .admin-center,
+    .wheel-center{
+      width:98px !important;
+      height:98px !important;
+      min-width:98px !important;
+      min-height:98px !important;
+    }
+
+    .center,
+    .center *,
+    .center-orb,
+    .center-orb *,
+    .admin-center,
+    .admin-center *,
+    .wheel-center,
+    .wheel-center *{
+      font-size:29px !important;
+      line-height:1 !important;
+      letter-spacing:.14em !important;
+    }
+
+    .brand h1{
+      font-size:27px !important;
+      line-height:1.05 !important;
+    }
+
+    .brand small,
+    .brand p{
+      font-size:9.5px !important;
+      letter-spacing:.25em !important;
+      white-space:normal !important;
+    }
+
+    .status-card,
+    .admin-status,
+    .status-panel,
+    .ready-card{
+      width:88vw !important;
+      max-width:380px !important;
+      margin:14px auto 0 !important;
+      padding:16px 14px !important;
+    }
+
+    .status-title{
+      font-size:23px !important;
+      line-height:1.1 !important;
+    }
+
+    .status-sub{
+      font-size:12px !important;
+      line-height:1.25 !important;
+      letter-spacing:.06em !important;
+    }
+  }
+
+  @media (max-width: 430px){
+    .wheel,
+    .radial,
+    .admin-wheel,
+    .radial-menu,
+    .slices{
+      width:min(92vw, 342px) !important;
+      height:min(92vw, 342px) !important;
+      max-width:342px !important;
+      max-height:342px !important;
+    }
+
+    .slice-card{
+      transform:scale(.64) !important;
+      max-width:68px !important;
+    }
+
+    .slice .label{
+      font-size:8.4px !important;
+    }
+
+    .slice .under{
+      max-width:46px !important;
+      font-size:8.2px !important;
+    }
+
+    .slice .ico,
+    .slice svg{
+      width:20px !important;
+      height:20px !important;
+      min-width:20px !important;
+      min-height:20px !important;
+    }
+
+    .center,
+    .center-orb,
+    .admin-center,
+    .wheel-center{
+      width:90px !important;
+      height:90px !important;
+      min-width:90px !important;
+      min-height:90px !important;
+    }
+
+    .center,
+    .center *,
+    .center-orb,
+    .center-orb *,
+    .admin-center,
+    .admin-center *,
+    .wheel-center,
+    .wheel-center *{
+      font-size:26px !important;
+    }
+  }
+</style>
+
+<script id="admin-apk-radial-final-label-fix-v2">
+(function(){
+  function compactAdminRadialLabels(){
+    try{
+      if (!window.matchMedia || !window.matchMedia("(max-width: 760px)").matches) return;
+
+      document.querySelectorAll(".slice .under").forEach(function(el){
+        if (!el.dataset.originalText){
+          el.dataset.originalText = (el.textContent || "").trim();
+        }
+
+        var t = (el.dataset.originalText || el.textContent || "").trim().toLowerCase();
+
+        var num = t.match(/\d+/);
+        if (num){
+          el.textContent = num[0];
+          return;
+        }
+
+        if (t.indexOf("aktif") >= 0){
+          el.textContent = "OK";
+          return;
+        }
+
+        if (t.indexOf("kontrol") >= 0){
+          el.textContent = "OK";
+          return;
+        }
+
+        if (t.indexOf("sistem") >= 0){
+          el.textContent = "OK";
+          return;
+        }
+
+        if (t.indexOf("ayar") >= 0){
+          el.textContent = "OK";
+          return;
+        }
+
+        if (t.indexOf("güven") >= 0 || t.indexOf("guven") >= 0){
+          el.textContent = "OK";
+          return;
+        }
+
+        el.textContent = "—";
+      });
+    }catch(e){}
+  }
+
+  compactAdminRadialLabels();
+  document.addEventListener("DOMContentLoaded", compactAdminRadialLabels);
+  window.addEventListener("resize", compactAdminRadialLabels);
+})();
+</script>
+
+
+<script id="admin-stage4f-radial-retire-grid-v1">
+(function(){
+  function installPremiumGrid(){
+    if(document.getElementById("ss-premium-dashboard")) return;
+
+    var html = `
+<section class="ss-premium-dashboard" id="ss-premium-dashboard">
+  <div class="ss-premium-hero">
+    <div class="ss-premium-title">
+      <div class="ss-premium-logo">🛡️</div>
+      <div>
+        <h1>EratGuard PRO Admin</h1>
+        <p>Premium güvenlik merkezi — hızlı, okunaklı, APK/WebView uyumlu.</p>
+      </div>
+    </div>
+    <div class="ss-premium-status">
+      <span class="ss-premium-dot"></span>
+      All Systems Operational
+    </div>
+  </div>
+
+  <div class="ss-metric-grid">
+    <div class="ss-metric-card">
+      <div class="ss-metric-top">
+        <div class="ss-icon blue">🛡️</div>
+        <div>
+          <div class="ss-metric-label">Total Threats Blocked</div>
+          <div class="ss-metric-value">152,847</div>
+        </div>
+      </div>
+      <div class="ss-metric-sub">↑ 18.6% vs last 7 days</div>
+    </div>
+
+    <div class="ss-metric-card">
+      <div class="ss-metric-top">
+        <div class="ss-icon purple">💳</div>
+        <div>
+          <div class="ss-metric-label">Active Licenses</div>
+          <div class="ss-metric-value">1,248</div>
+        </div>
+      </div>
+      <div class="ss-metric-sub">↑ 12.4% growth</div>
+    </div>
+
+    <div class="ss-metric-card">
+      <div class="ss-metric-top">
+        <div class="ss-icon yellow">🔔</div>
+        <div>
+          <div class="ss-metric-label">Notifications Today</div>
+          <div class="ss-metric-value">32</div>
+        </div>
+      </div>
+      <div class="ss-metric-sub">High priority alerts ready</div>
+    </div>
+
+    <div class="ss-metric-card">
+      <div class="ss-metric-top">
+        <div class="ss-icon green">💚</div>
+        <div>
+          <div class="ss-metric-label">System Health</div>
+          <div class="ss-metric-value">100%</div>
+        </div>
+      </div>
+      <div class="ss-metric-sub">All services online</div>
+    </div>
+  </div>
+
+  <div class="ss-main-grid">
+    <div class="ss-panel">
+      <div class="ss-panel-head">
+        <h2>System Health Center</h2>
+        <a class="ss-panel-link" href="/admin/system">View Details</a>
+      </div>
+      <div class="ss-health-row">
+        <div class="ss-health-item">⚙️<strong>API</strong><span>Online</span></div>
+        <div class="ss-health-item">🌐<strong>Web</strong><span>Online</span></div>
+        <div class="ss-health-item">🗄️<strong>DB</strong><span>Online</span></div>
+        <div class="ss-health-item">🤖<strong>APK</strong><span>Online</span></div>
+        <div class="ss-health-item">🛡️<strong>Security</strong><span>Online</span></div>
+      </div>
+    </div>
+
+    <div class="ss-panel">
+      <div class="ss-panel-head">
+        <h2>Recent Activity</h2>
+        <a class="ss-panel-link" href="/admin/notifications">View All</a>
+      </div>
+      <div class="ss-activity-list">
+        <div class="ss-activity-item">
+          <div class="ss-icon red">🚫</div>
+          <div><b>Malware detected and blocked</b><small>Threat engine blocked suspicious package</small></div>
+        </div>
+        <div class="ss-activity-item">
+          <div class="ss-icon purple">💳</div>
+          <div><b>License activated</b><small>New protected device added</small></div>
+        </div>
+        <div class="ss-activity-item">
+          <div class="ss-icon green">✅</div>
+          <div><b>Database backup completed</b><small>System integrity checkpoint created</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ss-action-grid">
+    <a class="ss-action-card" href="/admin/system">
+      <div>
+        <div class="ss-icon green">💚</div>
+        <h3>System Health</h3>
+        <p>Servisleri, performansı ve kritik sistem durumunu izle.</p>
+      </div>
+      <div class="ss-action-link">View Details →</div>
+    </a>
+
+    <a class="ss-action-card" href="/admin/licenses">
+      <div>
+        <div class="ss-icon purple">💳</div>
+        <h3>License Center</h3>
+        <p>Lisansları, cihaz aktivasyonlarını ve abonelik durumunu yönet.</p>
+      </div>
+      <div class="ss-action-link">Manage Licenses →</div>
+    </a>
+
+    <a class="ss-action-card" href="/admin/analysis">
+      <div>
+        <div class="ss-icon red">🎯</div>
+        <h3>Threat Analysis</h3>
+        <p>Tehditleri analiz et, güvenlik içgörülerini görüntüle.</p>
+      </div>
+      <div class="ss-action-link">Analyze Now →</div>
+    </a>
+
+    <a class="ss-action-card" href="/admin/notifications">
+      <div>
+        <div class="ss-icon yellow">🔔</div>
+        <h3>Notifications</h3>
+        <p>Bildirimleri, uyarıları ve yüksek risk alarm kurallarını yönet.</p>
+      </div>
+      <div class="ss-action-link">View All →</div>
+    </a>
+
+    <a class="ss-action-card" href="/admin/blocked">
+      <div>
+        <div class="ss-icon red">⛔</div>
+        <h3>Blocked Items</h3>
+        <p>Engellenen tehditleri, kayıtları ve aksiyon geçmişini incele.</p>
+      </div>
+      <div class="ss-action-link">View Blocked →</div>
+    </a>
+
+    <a class="ss-action-card" href="/admin/community">
+      <div>
+        <div class="ss-icon blue">👥</div>
+        <h3>Community</h3>
+        <p>Topluluk, geri bildirim ve güvenlik paylaşım merkezine git.</p>
+      </div>
+      <div class="ss-action-link">Go Community →</div>
+    </a>
+
+    <a class="ss-action-card" href="/admin/mobile">
+      <div>
+        <div class="ss-icon green">🤖</div>
+        <h3>Mobile / APK</h3>
+        <p>APK, mobil görünüm ve cihaz koruma ayarlarını yönet.</p>
+      </div>
+      <div class="ss-action-link">Open Mobile →</div>
+    </a>
+
+    <a class="ss-action-card" href="/admin/payments">
+      <div>
+        <div class="ss-icon blue">💼</div>
+        <h3>Payments</h3>
+        <p>Ödeme, faturalama ve iyzico entegrasyon durumunu kontrol et.</p>
+      </div>
+      <div class="ss-action-link">View Payments →</div>
+    </a>
+  </div>
+
+  <div class="ss-mobile-bottom-note">
+    Radial dashboard ana ekrandan emekli edildi. Bu yeni grid yapı mobilde, APK içinde ve küçük ekranlarda yazı kayması yapmayacak şekilde tasarlandı.
+  </div>
+</section>
+`;
+
+    var target =
+      document.querySelector("main") ||
+      document.querySelector(".content") ||
+      document.querySelector(".dashboard") ||
+      document.querySelector(".admin-content") ||
+      document.body;
+
+    var wrap = document.createElement("div");
+    wrap.innerHTML = html.trim();
+
+    if(target === document.body){
+      document.body.insertBefore(wrap.firstElementChild, document.body.firstChild);
+    }else{
+      target.insertBefore(wrap.firstElementChild, target.firstChild);
+    }
+
+    var radialSelectors = [
+      ".wheel",".radial",".radial-menu",".pizza-menu",".admin-radial",".admin-wheel",
+      ".radial-dashboard",".radial-container",".pizza-dashboard",".wheel-menu",".slice-menu"
+    ];
+
+    radialSelectors.forEach(function(sel){
+      document.querySelectorAll(sel).forEach(function(el){
+        el.setAttribute("data-ss-retired-radial","true");
+        el.style.display = "none";
+        el.style.visibility = "hidden";
+        el.style.opacity = "0";
+        el.style.pointerEvents = "none";
+      });
+    });
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", installPremiumGrid);
+  }else{
+    installPremiumGrid();
+  }
+})();
 </script>
 
 </body>
