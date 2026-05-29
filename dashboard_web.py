@@ -10464,6 +10464,29 @@ except Exception as _eg_admin_root_redirect_error:
 # ===== ERATGUARD ADMIN ROOT REDIRECT FINAL END =====
 
 
+
+
+# ===== ERATGUARD ADMIN BEFORE REQUEST REDIRECT START =====
+# En güçlü /admin fix:
+# Flask route seçmeden önce /admin ve /admin/ adreslerini çalışan premium grid dashboard'a yönlendirir.
+try:
+    from flask import request as _eg_stage4f_request
+    from flask import redirect as _eg_stage4f_redirect
+
+    @app.before_request
+    def _eg_stage4f_admin_root_before_request_redirect():
+        try:
+            _path = str(getattr(_eg_stage4f_request, "path", "") or "").rstrip("/")
+            if _path == "/admin":
+                return _eg_stage4f_redirect("/admin/dashboard", code=302)
+        except Exception:
+            return None
+
+except Exception as _eg_stage4f_before_redirect_error:
+    print("ERATGUARD ADMIN BEFORE REQUEST REDIRECT ERROR:", _eg_stage4f_before_redirect_error)
+# ===== ERATGUARD ADMIN BEFORE REQUEST REDIRECT END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
