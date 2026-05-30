@@ -10636,23 +10636,15 @@ try:
                 )
 
             if _path == "/admin/notifications":
-                return (
-                    "<!doctype html><html lang='tr'><head><meta charset='UTF-8'>"
-                    "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-                    "<title>EratGuard ADMIN Bildirimler</title>"
-                    "<style>"
-                    "body{margin:0;background:#05070d;color:#f7fff4;font-family:Arial,sans-serif}"
-                    ".wrap{max-width:980px;margin:0 auto;padding:18px}"
-                    ".hero{border:1px solid rgba(141,255,63,.25);border-radius:24px;padding:20px;background:linear-gradient(180deg,#081421,#05070d)}"
-                    "h1{margin:0;font-size:30px}.muted{color:#a6b8c8}.grid{display:grid;gap:12px;margin-top:16px}"
-                    ".card{border:1px solid rgba(80,145,255,.22);border-radius:18px;padding:16px;background:#0b1628}"
-                    ".btn{display:inline-block;margin-top:14px;padding:10px 14px;border-radius:999px;background:rgba(141,255,63,.12);border:1px solid rgba(141,255,63,.28);color:#d9ffc7;text-decoration:none;font-weight:900}"
-                    "</style></head><body><div class='wrap'>"
-                    "<section class='hero'><h1>🔔 EratGuard ADMIN Bildirimler</h1>"
-                    "<p class='muted'>Admin bildirimleri ve uyarı merkezi burada yönetilecek.</p>"
-                    "<a class='btn' href='/admin/dashboard'>← Admin Dashboard</a></section>"
-                    "<div class='grid'><div class='card'><b>Bildirim Merkezi</b><p class='muted'>Bu modül Stage 4L ile güvenli placeholder olarak aktif edildi.</p></div></div>"
-                    "</div></body></html>"
+                return _eg4l_render_template(
+                    "admin_notifications.html",
+                    notifications=[],
+                    notification_stats={
+                        "total": 0,
+                        "today": 0,
+                        "critical": 0,
+                    },
+                    brand="EratGuard PRO",
                 )
 
         except Exception as _eg4l_err:

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EratGuard ADMIN Bildirim Merkezi</title>
+
+<style>
+:root{
+  --eg-bg:#05070d;
+  --eg-card:#081421;
+  --eg-card2:#0b1f2f;
+  --eg-border:rgba(141,255,63,.24);
+  --eg-blue:rgba(80,145,255,.24);
+  --eg-text:#f7fff4;
+  --eg-muted:#a6b8c8;
+  --eg-green:#8dff3f;
+  --eg-yellow:#fbbf24;
+  --eg-red:#ff4d5e;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top left, rgba(141,255,63,.08), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(38,132,255,.08), transparent 34%),
+    var(--eg-bg);
+  color:var(--eg-text);
+  font-family:Arial, sans-serif;
+}
+.wrap{
+  width:100%;
+  max-width:1180px;
+  margin:0 auto;
+  padding:18px;
+}
+.hero{
+  border:1px solid var(--eg-border);
+  border-radius:24px;
+  padding:20px;
+  background:
+    radial-gradient(circle at top left, rgba(141,255,63,.12), transparent 36%),
+    linear-gradient(180deg, rgba(8,20,33,.98), rgba(5,8,16,.98));
+  box-shadow:0 20px 52px rgba(0,0,0,.34);
+  margin-bottom:16px;
+}
+.kicker{
+  color:var(--eg-green);
+  font-size:12px;
+  font-weight:1000;
+  letter-spacing:2px;
+  margin-bottom:8px;
+}
+.hero h1{
+  margin:0;
+  font-size:clamp(26px, 6vw, 40px);
+  line-height:1.05;
+}
+.hero p{
+  margin:8px 0 0;
+  color:var(--eg-muted);
+}
+.back-link{
+  display:inline-flex;
+  margin-top:14px;
+  color:#d9ffc7;
+  text-decoration:none;
+  font-weight:900;
+  padding:10px 13px;
+  border-radius:999px;
+  border:1px solid var(--eg-border);
+  background:rgba(141,255,63,.10);
+}
+.grid{
+  display:grid;
+  grid-template-columns:1fr .85fr;
+  gap:14px;
+}
+.card{
+  background:
+    linear-gradient(180deg, rgba(11,31,47,.96), rgba(5,12,21,.98));
+  border:1px solid var(--eg-blue);
+  padding:16px;
+  border-radius:18px;
+  box-shadow:0 12px 30px rgba(0,0,0,.23);
+}
+.card h2{
+  margin:0 0 10px;
+  font-size:20px;
+}
+.card p{
+  color:var(--eg-muted);
+  line-height:1.45;
+}
+.form{
+  display:grid;
+  gap:12px;
+}
+.input,
+.select,
+.textarea{
+  width:100%;
+  padding:13px 14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  outline:none;
+  color:var(--eg-text);
+  background:#050b14;
+  font-size:15px;
+}
+.textarea{
+  min-height:130px;
+  resize:vertical;
+}
+.btn{
+  border:0;
+  padding:13px 15px;
+  border-radius:14px;
+  color:#071008;
+  background:var(--eg-green);
+  font-weight:1000;
+  font-size:15px;
+  cursor:pointer;
+}
+.btn-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.ghost{
+  display:inline-flex;
+  text-decoration:none;
+  color:#d9ffc7;
+  padding:12px 14px;
+  border-radius:14px;
+  border:1px solid var(--eg-border);
+  background:rgba(141,255,63,.10);
+  font-weight:900;
+}
+.notice-list{
+  display:grid;
+  gap:10px;
+}
+.notice{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  padding:13px;
+  background:rgba(5,11,20,.58);
+}
+.notice-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:8px;
+}
+.notice b{
+  font-size:15px;
+}
+.badge{
+  padding:6px 9px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:1000;
+  white-space:nowrap;
+}
+.badge.normal{
+  color:#dbeafe;
+  background:rgba(80,145,255,.14);
+  border:1px solid rgba(80,145,255,.25);
+}
+.badge.high{
+  color:#fff1c2;
+  background:rgba(251,191,36,.14);
+  border:1px solid rgba(251,191,36,.25);
+}
+.badge.critical{
+  color:#ffd4d8;
+  background:rgba(255,77,94,.14);
+  border:1px solid rgba(255,77,94,.25);
+}
+.notice small{
+  display:block;
+  margin-top:7px;
+  color:var(--eg-muted);
+}
+.status-row{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:10px;
+  margin-bottom:14px;
+}
+.stat{
+  border:1px solid rgba(141,255,63,.18);
+  border-radius:16px;
+  padding:13px;
+  background:rgba(141,255,63,.07);
+}
+.stat b{
+  display:block;
+  font-size:24px;
+}
+.stat span{
+  color:var(--eg-muted);
+  font-size:12px;
+}
+@media(max-width:820px){
+  .grid{grid-template-columns:1fr}
+  .status-row{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .wrap{padding:12px}
+  .hero{padding:16px;border-radius:22px}
+  .btn-row{display:grid}
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="kicker">ERATGUARD ADMIN</div>
+    <h1>🔔 Bildirim Merkezi</h1>
+    <p>Admin uyarıları, kullanıcı bilgilendirmeleri ve kritik sistem mesajları buradan yönetilir.</p>
+    <a class="back-link" href="/admin/dashboard">← Admin Dashboard</a>
+  </section>
+
+  <div class="status-row">
+    <div class="stat"><b>{{ notification_stats.total|default(0) }}</b><span>Toplam bildirim</span></div>
+    <div class="stat"><b>{{ notification_stats.today|default(0) }}</b><span>Bugünkü bildirim</span></div>
+    <div class="stat"><b>{{ notification_stats.critical|default(0) }}</b><span>Kritik uyarı</span></div>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Yeni Bildirim Oluştur</h2>
+      <p>Kullanıcılara veya tüm sisteme gönderilecek admin bildirimini hazırla.</p>
+
+      <form class="form" method="POST" action="/admin/notifications">
+        <input class="input" name="title" placeholder="Başlık: Örn. Kritik güvenlik güncellemesi" required>
+
+        <select class="select" name="priority">
+          <option value="normal">Normal</option>
+          <option value="high">Yüksek</option>
+          <option value="critical">Kritik</option>
+        </select>
+
+        <select class="select" name="target">
+          <option value="all">Tüm kullanıcılar</option>
+          <option value="premium">Premium kullanıcılar</option>
+          <option value="admin">Admin içi not</option>
+        </select>
+
+        <textarea class="textarea" name="message" placeholder="Bildirim mesajını yaz..." required></textarea>
+
+        <div class="btn-row">
+          <button class="btn" type="submit">Bildirim Hazırla</button>
+          <a class="ghost" href="/admin/dashboard">Dashboard’a Dön</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Son Bildirimler</h2>
+      <div class="notice-list">
+        {% for n in notifications %}
+        <div class="notice">
+          <div class="notice-top">
+            <b>{{ n.get("title", "Bildirim") }}</b>
+            <span class="badge {{ n.get('priority', 'normal') }}">{{ n.get("priority", "normal")|upper }}</span>
+          </div>
+          <p>{{ n.get("message", "-") }}</p>
+          <small>{{ n.get("created_at", "Yeni") }} · Hedef: {{ n.get("target", "all") }}</small>
+        </div>
+        {% else %}
+        <div class="notice">
+          <div class="notice-top">
+            <b>Bildirim merkezi aktif</b>
+            <span class="badge normal">NORMAL</span>
+          </div>
+          <p>Henüz kayıtlı bildirim yok. Bu modül EratGuard admin paneline gerçek sayfa olarak bağlandı.</p>
+          <small>Stage 4N · Sistem hazır</small>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+</body>
+</html>
