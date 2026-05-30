@@ -1,0 +1,76 @@
+
+
+    <section class="wheel-wrap" aria-label="EratGuard ADMIN radial menü">
+      <div class="orbit"></div>
+
+      <svg class="real-slice-wheel" viewBox="0 0 1000 1000" aria-hidden="true">
+        <defs>
+          <radialGradient id="sliceFill" cx="50%" cy="35%" r="72%">
+            <stop offset="0%" stop-color="#38ff9b" stop-opacity=".16"/>
+            <stop offset="50%" stop-color="#0c3b25" stop-opacity=".30"/>
+            <stop offset="100%" stop-color="#020806" stop-opacity=".76"/>
+          </radialGradient>
+        </defs>
+        <g>
+          <path class="real-slice" d="M 375.62 128.26 A 392.00 392.00 0 0 1 624.38 128.26 L 553.94 338.78 A 170.00 170.00 0 0 0 446.06 338.78 Z"/>
+          <path class="real-slice" d="M 674.91 149.19 A 392.00 392.00 0 0 1 850.81 325.09 L 652.14 424.15 A 170.00 170.00 0 0 0 575.85 347.86 Z"/>
+          <path class="real-slice" d="M 871.74 375.62 A 392.00 392.00 0 0 1 871.74 624.38 L 661.22 553.94 A 170.00 170.00 0 0 0 661.22 446.06 Z"/>
+          <path class="real-slice" d="M 850.81 674.91 A 392.00 392.00 0 0 1 674.91 850.81 L 575.85 652.14 A 170.00 170.00 0 0 0 652.14 575.85 Z"/>
+          <path class="real-slice" d="M 624.38 871.74 A 392.00 392.00 0 0 1 375.62 871.74 L 446.06 661.22 A 170.00 170.00 0 0 0 553.94 661.22 Z"/>
+          <path class="real-slice" d="M 325.09 850.81 A 392.00 392.00 0 0 1 149.19 674.91 L 347.86 575.85 A 170.00 170.00 0 0 0 424.15 652.14 Z"/>
+          <path class="real-slice" d="M 128.26 624.38 A 392.00 392.00 0 0 1 128.26 375.62 L 338.78 446.06 A 170.00 170.00 0 0 0 338.78 553.94 Z"/>
+          <path class="real-slice" d="M 149.19 325.09 A 392.00 392.00 0 0 1 325.09 149.19 L 424.15 347.86 A 170.00 170.00 0 0 0 347.86 424.15 Z"/>
+        </g>
+        <circle cx="500" cy="500" r="407" class="real-ring"/>
+        <circle cx="500" cy="500" r="246" class="real-inner-ring"/>
+      </svg>
+
+      <nav class="slices">
+        <a class="slice" style="--a:0deg" href="javascript:void(0)" data-href="/admin/users" aria-label="Kullanıcılar">
+          <span class="slice-card"><svg class="ico"><use href="#i-users-admin"/></svg><span class="label">Kullanıcılar</span><span class="under">{{ admin_stats.users|default("Kullanıcı") }}</span></span>
+        </a>
+
+        <a class="slice" style="--a:45deg" href="javascript:void(0)" data-href="/admin/licenses" aria-label="Lisanslar">
+          <span class="slice-card"><svg class="ico"><use href="#i-license-admin"/></svg><span class="label">Lisanslar</span><span class="under">{{ admin_stats.licenses|default("Lisans") }}</span></span>
+        </a>
+
+        <a class="slice" style="--a:90deg" href="javascript:void(0)" data-href="/admin/payment-requests" aria-label="Talepler">
+          <span class="slice-card"><svg class="ico"><use href="#i-payment-admin"/></svg><span class="label">Talepler</span><span class="under">{{ admin_stats.payments|default("Talep") }}</span></span>
+        </a>
+
+        <a class="slice" style="--a:135deg" href="javascript:void(0)" data-href="/admin/security" aria-label="Güvenlik">
+          <span class="slice-card"><svg class="ico"><use href="#i-security-admin"/></svg><span class="label">Güvenlik</span><span class="under">{{ admin_stats.security|default("Güvenlik") }}</span></span>
+        </a>
+
+        <a class="slice" style="--a:180deg" href="javascript:void(0)" data-href="/admin/overview" aria-label="Raporlar">
+          <span class="slice-card"><svg class="ico"><use href="#i-report-admin"/></svg><span class="label">Raporlar</span><span class="under">{{ admin_stats.reports|default("Rapor") }}</span></span>
+        </a>
+
+        <a class="slice" style="--a:225deg" href="javascript:void(0)" data-href="/admin/whitelist" aria-label="Güvenli Liste">
+          <span class="slice-card"><svg class="ico"><use href="#i-bell-admin"/></svg><span class="label">Güvenli Liste</span><span class="under">{{ admin_stats.whitelist|default("Liste") }}</span></span>
+        </a>
+
+        <a class="slice" style="--a:270deg" href="javascript:void(0)" data-href="/admin/settings" aria-label="Ayarlar">
+          <span class="slice-card"><svg class="ico"><use href="#i-settings-admin"/></svg><span class="label">Ayarlar</span><span class="under">{{ admin_stats.settings|default("Ayar") }}</span></span>
+        </a>
+
+        <a class="slice" style="--a:315deg" href="javascript:void(0)" data-href="/admin/system" aria-label="Sistem">
+          <span class="slice-card"><svg class="ico"><use href="#i-system-admin"/></svg><span class="label">Sistem</span><span class="under">{{ admin_stats.system|default("Sistem") }}</span></span>
+        </a>
+      </nav>
+
+      <div class="hub" aria-hidden="true">
+  <div class="admin-center-flip">
+    <div class="admin-flip-stage" id="adminFlipStage">
+      <div class="admin-flip-face admin-flip-front">
+        <span>ADMIN</span>
+      </div>
+      <div class="admin-flip-face admin-flip-back">
+        <img src="/static/uploads/admin_me.jpg?v=flip_center_2" alt="Admin foto">
+      </div>
+    </div>
+  </div>
+</div>
+    </section>
+
+    

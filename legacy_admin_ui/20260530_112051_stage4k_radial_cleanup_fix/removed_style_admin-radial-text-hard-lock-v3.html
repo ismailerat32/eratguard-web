@@ -1,0 +1,176 @@
+
+<style id="admin-radial-text-hard-lock-v3">
+/* =========================================================
+   ADMIN RADIAL TEXT HARD LOCK v3
+   Amaç:
+   - Yazıları dilim rotate/transform etkisinden kurtarır
+   - Mobilde ve APK WebView'da kayık label görüntüsünü ezer
+   - Tüm radial item yazılarını yatay, ortalı, okunur yapar
+   ========================================================= */
+
+@media (max-width: 900px){
+
+  /* Radial ana alanı sabitle */
+  .wheel,
+  .radial,
+  .radial-menu,
+  .pizza-menu,
+  .admin-radial,
+  .admin-wheel {
+    position: relative !important;
+    overflow: visible !important;
+  }
+
+  /* Tüm radial buton/iç link yapısını normalize et */
+  .wheel a,
+  .wheel button,
+  .radial a,
+  .radial button,
+  .radial-menu a,
+  .radial-menu button,
+  .pizza-menu a,
+  .pizza-menu button,
+  .admin-radial a,
+  .admin-radial button,
+  .admin-wheel a,
+  .admin-wheel button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    line-height: 1.08 !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+  }
+
+  /* Yazı taşıyan tüm span/div/p elementlerini sert kilitle */
+  .wheel a span,
+  .wheel button span,
+  .radial a span,
+  .radial button span,
+  .radial-menu a span,
+  .radial-menu button span,
+  .pizza-menu a span,
+  .pizza-menu button span,
+  .admin-radial a span,
+  .admin-radial button span,
+  .admin-wheel a span,
+  .admin-wheel button span,
+
+  .wheel a div,
+  .wheel button div,
+  .radial a div,
+  .radial button div,
+  .radial-menu a div,
+  .radial-menu button div,
+  .pizza-menu a div,
+  .pizza-menu button div,
+  .admin-radial a div,
+  .admin-radial button div,
+  .admin-wheel a div,
+  .admin-wheel button div,
+
+  .wheel a p,
+  .wheel button p,
+  .radial a p,
+  .radial button p,
+  .radial-menu a p,
+  .radial-menu button p,
+  .pizza-menu a p,
+  .pizza-menu button p,
+  .admin-radial a p,
+  .admin-radial button p,
+  .admin-wheel a p,
+  .admin-wheel button p {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+
+    transform: none !important;
+    rotate: 0deg !important;
+
+    display: block !important;
+    width: 100% !important;
+    max-width: 86px !important;
+    margin: 0 auto !important;
+    padding: 0 4px !important;
+
+    text-align: center !important;
+    line-height: 1.08 !important;
+    letter-spacing: -0.15px !important;
+    font-size: clamp(9px, 2.55vw, 12px) !important;
+    font-weight: 800 !important;
+
+    white-space: normal !important;
+    word-break: keep-all !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+    text-wrap: balance !important;
+
+    z-index: 50 !important;
+    pointer-events: none !important;
+  }
+
+  /* İkon + yazı varsa dikey merkezle */
+  .wheel a,
+  .wheel button,
+  .radial a,
+  .radial button,
+  .radial-menu a,
+  .radial-menu button,
+  .pizza-menu a,
+  .pizza-menu button,
+  .admin-radial a,
+  .admin-radial button,
+  .admin-wheel a,
+  .admin-wheel button {
+    flex-direction: column !important;
+    gap: 3px !important;
+  }
+
+  /* SVG/icon/text içeren elementlerin yamulmasını engelle */
+  .wheel svg,
+  .radial svg,
+  .radial-menu svg,
+  .pizza-menu svg,
+  .admin-radial svg,
+  .admin-wheel svg,
+  .wheel i,
+  .radial i,
+  .radial-menu i,
+  .pizza-menu i,
+  .admin-radial i,
+  .admin-wheel i {
+    transform: none !important;
+    rotate: 0deg !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Çok küçük ekranlarda yazıyı biraz daha sıkıştır */
+  @media (max-width: 420px){
+    .wheel a span,
+    .wheel button span,
+    .radial a span,
+    .radial button span,
+    .radial-menu a span,
+    .radial-menu button span,
+    .pizza-menu a span,
+    .pizza-menu button span,
+    .admin-radial a span,
+    .admin-radial button span,
+    .admin-wheel a span,
+    .admin-wheel button span {
+      max-width: 74px !important;
+      font-size: clamp(8px, 2.35vw, 10.5px) !important;
+      line-height: 1.04 !important;
+      letter-spacing: -0.25px !important;
+    }
+  }
+}
+</style>
+
+
