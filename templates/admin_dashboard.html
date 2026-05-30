@@ -1513,6 +1513,367 @@
 }
 </style>
 
+
+<style id="eratguard-stage4h-active-complete-cards-v1">
+/* ===== ERATGUARD STAGE 4H: ACTIVE + COMPLETE ADMIN MOBILE CARDS ===== */
+
+:root {
+  --eg-active-ring: rgba(128, 255, 118, .42);
+  --eg-active-soft: rgba(128, 255, 118, .10);
+  --eg-card-line: rgba(95, 170, 255, .20);
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.ss-premium-dashboard,
+.admin-dashboard,
+.dashboard,
+main {
+  padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.eg-clickable-card {
+  cursor: pointer !important;
+  position: relative !important;
+  user-select: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease, background .16s ease !important;
+}
+
+.eg-clickable-card:hover,
+.eg-clickable-card:focus-visible {
+  transform: translateY(-2px) !important;
+  border-color: var(--eg-active-ring) !important;
+  box-shadow: 0 0 0 1px var(--eg-active-ring), 0 14px 36px rgba(0,0,0,.30) !important;
+}
+
+.eg-clickable-card:active {
+  transform: scale(.985) !important;
+  background: linear-gradient(145deg, rgba(128,255,118,.10), rgba(0,120,255,.07)) !important;
+}
+
+.eg-clickable-card::after {
+  content: "Aç";
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .02em;
+  color: #a8ff9f;
+  background: rgba(128,255,118,.10);
+  border: 1px solid rgba(128,255,118,.25);
+  border-radius: 999px;
+  padding: 4px 8px;
+  opacity: .86;
+  pointer-events: none;
+}
+
+.eg-stage4h-actions {
+  margin: 26px 0 8px;
+  padding: 22px;
+  border-radius: 28px;
+  border: 1px solid rgba(75,150,255,.24);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(69,255,122,.13), transparent 34%),
+    linear-gradient(145deg, rgba(6,22,34,.96), rgba(4,10,20,.98));
+  box-shadow: 0 16px 46px rgba(0,0,0,.34);
+}
+
+.eg-stage4h-actions-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.eg-stage4h-actions-title {
+  color: #f7fbff;
+  font-size: clamp(24px, 6vw, 34px);
+  font-weight: 950;
+  line-height: 1.05;
+}
+
+.eg-stage4h-actions-sub {
+  color: #9feea2;
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.eg-stage4h-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.eg-stage4h-action {
+  min-height: 92px;
+  border-radius: 22px;
+  border: 1px solid var(--eg-card-line);
+  background: rgba(2, 12, 24, .78);
+  color: #f4f8ff;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  padding: 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+  transition: transform .16s ease, border-color .16s ease, background .16s ease;
+}
+
+.eg-stage4h-action:active {
+  transform: scale(.985);
+}
+
+.eg-stage4h-action strong {
+  font-size: 16px;
+  line-height: 1.05;
+}
+
+.eg-stage4h-action span {
+  color: #9eff9a;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+@media (max-width: 760px) {
+  .eg-stage4h-actions {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .eg-stage4h-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .eg-stage4h-action {
+    min-height: 88px;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 380px) {
+  .eg-stage4h-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
+
+<style id="eratguard-stage4h-command-center-v1">
+/* =========================================================
+   STAGE 4H - ERATGUARD COMMAND CENTER
+   Amaç:
+   - Dashboard'u pasif kart vitrini olmaktan çıkarır
+   - Tıklanabilirlik, hızlı işlem ve kontrol hissi ekler
+   - APK/WebView'da büyük dokunmatik butonlar sağlar
+   ========================================================= */
+
+.ss-command-controls{
+  margin:0 0 16px;
+  padding:18px;
+  border-radius:22px;
+  border:1px solid rgba(141,255,63,.25);
+  background:
+    radial-gradient(circle at top left, rgba(141,255,63,.12), transparent 38%),
+    linear-gradient(180deg, rgba(8,24,34,.98), rgba(4,8,14,.98));
+  box-shadow:0 18px 42px rgba(0,0,0,.28);
+}
+
+.ss-command-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:14px;
+}
+
+.ss-command-head h2{
+  margin:0;
+  font-size:20px;
+  letter-spacing:-.4px;
+  color:#f7fff4;
+}
+
+.ss-command-head p{
+  margin:5px 0 0;
+  color:#a6b8c8;
+  font-size:13px;
+}
+
+.ss-command-live{
+  padding:9px 12px;
+  border-radius:999px;
+  color:#d9ffc7;
+  background:rgba(141,255,63,.10);
+  border:1px solid rgba(141,255,63,.25);
+  font-weight:900;
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.ss-control-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0, 1fr));
+  gap:12px;
+}
+
+.ss-control-btn{
+  display:grid;
+  grid-template-columns:44px 1fr;
+  grid-template-rows:auto auto;
+  column-gap:12px;
+  align-items:center;
+  text-decoration:none;
+  color:#f7fff4;
+  min-height:78px;
+  padding:14px;
+  border-radius:18px;
+  border:1px solid rgba(80,145,255,.22);
+  background:
+    linear-gradient(180deg, rgba(13,30,48,.98), rgba(6,14,25,.98));
+  box-shadow:0 10px 24px rgba(0,0,0,.20);
+  transition:transform .14s ease, border-color .14s ease, background .14s ease, box-shadow .14s ease;
+}
+
+.ss-control-btn:hover,
+.ss-control-btn:active{
+  transform:translateY(-2px) scale(1.01);
+  border-color:rgba(141,255,63,.45);
+  box-shadow:0 16px 34px rgba(0,0,0,.32), 0 0 22px rgba(141,255,63,.08);
+}
+
+.ss-control-btn span{
+  grid-row:1 / span 2;
+  width:44px;
+  height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:15px;
+  background:rgba(141,255,63,.10);
+  border:1px solid rgba(141,255,63,.18);
+  font-size:22px;
+}
+
+.ss-control-btn b{
+  font-size:15px;
+  line-height:1.1;
+}
+
+.ss-control-btn small{
+  color:#a6b8c8;
+  font-size:12px;
+  margin-top:4px;
+}
+
+.ss-control-btn.primary{
+  border-color:rgba(141,255,63,.38);
+  background:
+    radial-gradient(circle at top left, rgba(141,255,63,.16), transparent 42%),
+    linear-gradient(180deg, rgba(13,36,38,.98), rgba(5,13,20,.98));
+}
+
+.ss-control-btn.danger{
+  border-color:rgba(255,190,60,.25);
+}
+
+/* Ana aksiyon kartlarını daha tıklanır yap */
+.ss-action-card{
+  position:relative !important;
+  border-color:rgba(80,145,255,.24) !important;
+  cursor:pointer !important;
+}
+
+.ss-action-card::after{
+  content:"Aç →";
+  position:absolute;
+  right:14px;
+  top:14px;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  color:#d9ffc7;
+  background:rgba(141,255,63,.10);
+  border:1px solid rgba(141,255,63,.22);
+}
+
+.ss-action-card:hover,
+.ss-action-card:active{
+  transform:translateY(-3px) scale(1.01) !important;
+  border-color:rgba(141,255,63,.42) !important;
+}
+
+/* Hero daha command center */
+.ss-premium-hero{
+  border-color:rgba(141,255,63,.28) !important;
+}
+
+.ss-premium-title h1{
+  color:#f7fff4 !important;
+}
+
+@media (max-width: 760px){
+  .ss-command-controls{
+    padding:14px !important;
+    border-radius:20px !important;
+    margin-bottom:14px !important;
+  }
+
+  .ss-command-head{
+    align-items:flex-start !important;
+    flex-direction:column !important;
+    gap:10px !important;
+  }
+
+  .ss-command-head h2{
+    font-size:19px !important;
+  }
+
+  .ss-command-live{
+    width:100% !important;
+    text-align:center !important;
+    box-sizing:border-box !important;
+  }
+
+  .ss-control-grid{
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+  }
+
+  .ss-control-btn{
+    min-height:72px !important;
+    padding:12px !important;
+    border-radius:17px !important;
+  }
+
+  .ss-control-btn b{
+    font-size:15px !important;
+  }
+
+  .ss-control-btn small{
+    font-size:12px !important;
+  }
+
+  .ss-action-card::after{
+    content:"Yönet →";
+    top:12px !important;
+    right:12px !important;
+    font-size:11px !important;
+  }
+
+  .ss-action-card{
+    padding-right:76px !important;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -2051,13 +2412,13 @@ document.addEventListener("DOMContentLoaded", function () {
     <div class="ss-premium-title">
       <div class="ss-premium-logo">🛡️</div>
       <div>
-        <h1>EratGuard PRO Admin</h1>
-        <p>Premium güvenlik merkezi — hızlı, okunaklı, APK/WebView uyumlu.</p>
+        <h1>EratGuard PRO Command Center</h1>
+        <p>Canlı yönetim, hızlı kontrol ve güvenlik operasyon merkezi.</p>
       </div>
     </div>
     <div class="ss-premium-status">
       <span class="ss-premium-dot"></span>
-      Tüm Sistemler Aktif
+      Canlı Sistem Aktif
     </div>
   </div>
 
@@ -2107,6 +2468,56 @@ document.addEventListener("DOMContentLoaded", function () {
     </div>
   </div>
 
+
+<div class="ss-command-controls" id="ss-command-quick-controls">
+  <div class="ss-command-head">
+    <div>
+      <h2>Hızlı Kontroller</h2>
+      <p>Admin işlemlerini tek dokunuşla başlat.</p>
+    </div>
+    <span class="ss-command-live">● Yönetim Aktif</span>
+  </div>
+
+  <div class="ss-control-grid">
+    <a class="ss-control-btn primary" href="/admin/system">
+      <span>🛡️</span>
+      <b>Koruma Durumu</b>
+      <small>Servisleri kontrol et</small>
+    </a>
+
+    <a class="ss-control-btn" href="/admin/licenses">
+      <span>💳</span>
+      <b>Lisans Kontrol</b>
+      <small>Aktif lisansları yönet</small>
+    </a>
+
+    <a class="ss-control-btn" href="/admin/spam-logs">
+      <span>📜</span>
+      <b>Logları Tara</b>
+      <small>Spam kayıtlarını incele</small>
+    </a>
+
+    <a class="ss-control-btn" href="/admin/notifications">
+      <span>🔔</span>
+      <b>Bildirim Gönder</b>
+      <small>Uyarı merkezini aç</small>
+    </a>
+
+    <a class="ss-control-btn" href="/admin/payment-requests">
+      <span>💼</span>
+      <b>Ödeme Talepleri</b>
+      <small>Onay bekleyenleri gör</small>
+    </a>
+
+    <a class="ss-control-btn danger" href="/admin/settings">
+      <span>⚙️</span>
+      <b>Sistem Ayarları</b>
+      <small>Güvenli yapılandırma</small>
+    </a>
+  </div>
+</div>
+
+
   <div class="ss-main-grid">
     <div class="ss-panel">
       <div class="ss-panel-head">
@@ -2124,7 +2535,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     <div class="ss-panel">
       <div class="ss-panel-head">
-        <h2>Son Aktiviteler</h2>
+        <h2>Operasyon Akışı</h2>
         <a class="ss-panel-link" href="/admin/notifications">Tümünü Gör</a>
       </div>
       <div class="ss-activity-list">
@@ -2260,6 +2671,222 @@ document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener("DOMContentLoaded", installPremiumGrid);
   }else{
     installPremiumGrid();
+  }
+})();
+</script>
+
+
+<script id="eratguard-stage4h-active-complete-cards-v1-js">
+(function(){
+  const ROUTES = {"blocked": "/u/blocked", "licenses": "/send-license/<target_username>", "notifications": "/u/notifications", "system": "/health", "analysis": "/u/analysis", "community": "/u/community"};
+
+  function norm(t) {
+    return (t || "").toLocaleLowerCase("tr-TR").replace(/\s+/g, " ").trim();
+  }
+
+  function routeForText(text) {
+    const t = norm(text);
+
+    if (t.includes("engellenen") || t.includes("tehdit")) return ROUTES.blocked;
+    if (t.includes("lisans")) return ROUTES.licenses;
+    if (t.includes("bildirim") || t.includes("uyarı") || t.includes("uyar")) return ROUTES.notifications;
+    if (t.includes("sağlığı") || t.includes("sagligi") || t.includes("api") || t.includes("web") || t.includes("db") || t.includes("apk")) return ROUTES.system;
+    if (t.includes("analiz") || t.includes("analysis")) return ROUTES.analysis;
+    if (t.includes("topluluk") || t.includes("community")) return ROUTES.community;
+
+    return "";
+  }
+
+  function activateCards() {
+    const selectors = [
+      ".stat-card",
+      ".metric-card",
+      ".dashboard-card",
+      ".health-card",
+      ".service-card",
+      ".ss-card",
+      ".ss-premium-card",
+      ".ss-premium-stat",
+      ".ss-health-card",
+      ".system-card",
+      "[class*='card']"
+    ];
+
+    const cards = Array.from(document.querySelectorAll(selectors.join(",")));
+
+    cards.forEach(function(card) {
+      if (!card || card.closest("a")) return;
+
+      const text = card.innerText || card.textContent || "";
+      const route = routeForText(text);
+      if (!route) return;
+
+      card.classList.add("eg-clickable-card");
+      card.setAttribute("role", "button");
+      card.setAttribute("tabindex", "0");
+      card.setAttribute("data-eg-href", route);
+
+      card.addEventListener("click", function(e) {
+        const target = e.target;
+        if (target && target.closest && target.closest("a,button,input,select,textarea")) return;
+        window.location.href = route;
+      });
+
+      card.addEventListener("keydown", function(e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          window.location.href = route;
+        }
+      });
+    });
+
+    document.querySelectorAll("a").forEach(function(a) {
+      const tx = norm(a.innerText || a.textContent || "");
+      if (tx === "detaylar" && !a.getAttribute("href")) {
+        a.setAttribute("href", ROUTES.system);
+      }
+    });
+  }
+
+  function addCompleteActions() {
+    if (document.getElementById("eg-stage4h-actions")) return;
+
+    const html = `
+      <section id="eg-stage4h-actions" class="eg-stage4h-actions">
+        <div class="eg-stage4h-actions-head">
+          <div class="eg-stage4h-actions-title">Hızlı Yönetim</div>
+          <div class="eg-stage4h-actions-sub">Aktif kartlar</div>
+        </div>
+        <div class="eg-stage4h-grid">
+          <a class="eg-stage4h-action" href="${ROUTES.blocked}"><strong>Tehditler</strong><span>Engellenen kayıtlar</span></a>
+          <a class="eg-stage4h-action" href="${ROUTES.licenses}"><strong>Lisanslar</strong><span>Aktif müşteri erişimi</span></a>
+          <a class="eg-stage4h-action" href="${ROUTES.notifications}"><strong>Bildirimler</strong><span>Öncelikli uyarılar</span></a>
+          <a class="eg-stage4h-action" href="${ROUTES.system}"><strong>Sistem Sağlığı</strong><span>API / Web / DB / APK</span></a>
+          <a class="eg-stage4h-action" href="${ROUTES.analysis}"><strong>Analiz</strong><span>Güvenlik görünümü</span></a>
+          <a class="eg-stage4h-action" href="${ROUTES.community}"><strong>Topluluk</strong><span>Kullanıcı merkezi</span></a>
+        </div>
+      </section>
+    `;
+
+    const anchors = [
+      document.querySelector(".ss-premium-dashboard"),
+      document.querySelector(".admin-dashboard"),
+      document.querySelector(".dashboard"),
+      document.querySelector("main"),
+      document.body
+    ].filter(Boolean);
+
+    const root = anchors[0];
+    root.insertAdjacentHTML("beforeend", html);
+  }
+
+  function boot() {
+    activateCards();
+    addCompleteActions();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    boot();
+  }
+})();
+</script>
+
+
+<script id="eratguard-stage4h-fix1-admin-route-lock-v1">
+(function(){
+  const ADMIN_ROUTES = {"dashboard": "/admin/dashboard", "blocked": "/admin/blocked", "licenses": "/admin/generated-licenses", "notifications": "/admin/notifications", "system": "/admin/system", "analysis": "/admin/analysis", "community": "/admin/community"};
+
+  function norm(t) {
+    return (t || "").toLocaleLowerCase("tr-TR").replace(/\s+/g, " ").trim();
+  }
+
+  function routeForText(text) {
+    const t = norm(text);
+
+    if (t.includes("engellenen") || t.includes("tehdit")) return ADMIN_ROUTES.blocked;
+    if (t.includes("lisans")) return ADMIN_ROUTES.licenses;
+    if (t.includes("bildirim") || t.includes("uyarı") || t.includes("uyar")) return ADMIN_ROUTES.notifications;
+    if (t.includes("sağlığı") || t.includes("sagligi") || t.includes("api") || t.includes("web") || t.includes("db") || t.includes("apk")) return ADMIN_ROUTES.system;
+    if (t.includes("analiz") || t.includes("analysis")) return ADMIN_ROUTES.analysis;
+    if (t.includes("topluluk") || t.includes("community")) return ADMIN_ROUTES.community;
+
+    return "";
+  }
+
+  function relockCards(){
+    document.querySelectorAll(".eg-clickable-card,[data-eg-href]").forEach(function(card){
+      const route = routeForText(card.innerText || card.textContent || "");
+      if (!route) return;
+
+      card.setAttribute("data-eg-href", route);
+
+      const clone = card.cloneNode(true);
+      card.parentNode.replaceChild(clone, card);
+
+      clone.classList.add("eg-clickable-card");
+      clone.setAttribute("role", "button");
+      clone.setAttribute("tabindex", "0");
+      clone.setAttribute("data-eg-href", route);
+
+      clone.addEventListener("click", function(e){
+        const target = e.target;
+        if (target && target.closest && target.closest("a,button,input,select,textarea")) return;
+        window.location.href = route;
+      });
+
+      clone.addEventListener("keydown", function(e){
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          window.location.href = route;
+        }
+      });
+    });
+
+    document.querySelectorAll(".eg-stage4h-action").forEach(function(a){
+      const route = routeForText(a.innerText || a.textContent || "");
+      if (route) a.setAttribute("href", route);
+    });
+
+    document.querySelectorAll("a").forEach(function(a){
+      const tx = norm(a.innerText || a.textContent || "");
+      if (tx === "detaylar") {
+        a.setAttribute("href", ADMIN_ROUTES.system);
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", relockCards);
+  } else {
+    relockCards();
+  }
+
+  setTimeout(relockCards, 300);
+})();
+</script>
+
+
+<script id="eratguard-stage4h-command-center-actions-v1">
+(function(){
+  function enhanceCommandCenter(){
+    document.querySelectorAll(".ss-action-card, .ss-control-btn").forEach(function(el){
+      el.setAttribute("role", "button");
+      el.setAttribute("tabindex", "0");
+      el.addEventListener("keydown", function(e){
+        if(e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          var href = el.getAttribute("href");
+          if(href){ window.location.href = href; }
+        }
+      });
+    });
+  }
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", enhanceCommandCenter);
+  }else{
+    enhanceCommandCenter();
   }
 })();
 </script>
