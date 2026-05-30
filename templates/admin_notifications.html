@@ -343,7 +343,9 @@ body{
             <b>{{ n.get("title", "Bildirim") }}</b>
             <span class="badge {{ n.get('priority', 'normal') }}">{{ n.get("priority", "normal")|upper }}</span>
           </div>
+
           <p>{{ n.get("message", "-") }}</p>
+
           <small>
             {{ n.get("created_at", "Yeni") }} · Hedef: {{ n.get("target", "all") }}
             <span class="eg-status {{ n.get('status', 'created') }}">{{ n.get("status", "created")|upper }}</span>

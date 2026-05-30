@@ -11592,6 +11592,178 @@ except Exception as _eg4r_boot_err:
 # ===== ERATGUARD STAGE4R NOTIFICATION MANAGEMENT END =====
 
 
+
+
+# ===== ERATGUARD STAGE4R HOTFIX CREATE MANAGEMENT ROUTE START =====
+# Amaç:
+# - /admin/notifications POST create işlemini de yönetim butonlu Stage 4R renderer'a bağlar.
+# - Böylece bildirim oluşturulduktan sonra Arşivle/Sil butonları kesin görünür.
+try:
+    from flask import request as _eg4r_hot_request
+    from flask import render_template as _eg4r_hot_render_template
+    import json as _eg4r_hot_json
+    from pathlib import Path as _eg4r_hot_Path
+    from datetime import datetime as _eg4r_hot_datetime
+
+    _EG4R_HOT_FILE = _eg4r_hot_Path("data/admin_notifications.json")
+
+    def _eg4r_hot_load():
+        try:
+            _EG4R_HOT_FILE.parent.mkdir(parents=True, exist_ok=True)
+            if not _EG4R_HOT_FILE.exists():
+                _EG4R_HOT_FILE.write_text("[]", encoding="utf-8")
+            data = _eg4r_hot_json.loads(_EG4R_HOT_FILE.read_text(encoding="utf-8") or "[]")
+            return data if isinstance(data, list) else []
+        except Exception as _err:
+            print("ERATGUARD STAGE4R HOT LOAD ERROR:", _err)
+            return []
+
+    def _eg4r_hot_save(items):
+        try:
+            _EG4R_HOT_FILE.parent.mkdir(parents=True, exist_ok=True)
+            _EG4R_HOT_FILE.write_text(
+                _eg4r_hot_json.dumps(items, ensure_ascii=False, indent=2),
+                encoding="utf-8"
+            )
+            return True
+        except Exception as _err:
+            print("ERATGUARD STAGE4R HOT SAVE ERROR:", _err)
+            return False
+
+    def _eg4r_hot_stats(items):
+        active = [
+            x for x in items
+            if isinstance(x, dict) and str(x.get("status", "created")).lower() != "archived"
+        ]
+        today = _eg4r_hot_datetime.now().strftime("%Y-%m-%d")
+        return {
+            "total": len(active),
+            "today": sum(1 for x in active if str(x.get("created_at", "")).startswith(today)),
+            "critical": sum(1 for x in active if str(x.get("priority", "")).lower() == "critical"),
+        }
+
+    def _eg4r_hot_render(success="", error=""):
+        items = _eg4r_hot_load()
+        return _eg4r_hot_render_template(
+            "admin_notifications.html",
+            notifications=list(reversed(items[-80:])),
+            notification_stats=_eg4r_hot_stats(items),
+            success=success,
+            error=error,
+            brand="EratGuard PRO",
+        )
+
+    def _eg_stage4r_hotfix_admin_notifications():
+        try:
+            path = str(getattr(_eg4r_hot_request, "path", "") or "").rstrip("/")
+            if path != "/admin/notifications":
+                return None
+
+            method = str(getattr(_eg4r_hot_request, "method", "GET")).upper()
+            if method == "GET":
+                return _eg4r_hot_render()
+
+            if method != "POST":
+                return None
+
+            form = getattr(_eg4r_hot_request, "form", {}) or {}
+            action = str(form.get("action", "")).strip().lower()
+            items = _eg4r_hot_load()
+
+            if action in ("archive", "restore", "delete"):
+                notification_id = str(form.get("notification_id", "")).strip()
+                if not notification_id:
+                    return _eg4r_hot_render(error="Bildirim ID bulunamadı.")
+
+                found = False
+                new_items = []
+
+                for item in items:
+                    if not isinstance(item, dict):
+                        new_items.append(item)
+                        continue
+
+                    if str(item.get("id", "")).strip() == notification_id:
+                        found = True
+                        if action == "archive":
+                            item["status"] = "archived"
+                            item["archived_at"] = _eg4r_hot_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            new_items.append(item)
+                        elif action == "restore":
+                            item["status"] = "created"
+                            item.pop("archived_at", None)
+                            new_items.append(item)
+                        elif action == "delete":
+                            continue
+                    else:
+                        new_items.append(item)
+
+                if not found:
+                    return _eg4r_hot_render(error="Bildirim bulunamadı.")
+
+                if not _eg4r_hot_save(new_items):
+                    return _eg4r_hot_render(error="Bildirim güncellenemedi.")
+
+                if action == "archive":
+                    return _eg4r_hot_render(success="Bildirim arşivlendi.")
+                if action == "restore":
+                    return _eg4r_hot_render(success="Bildirim tekrar aktif edildi.")
+                if action == "delete":
+                    return _eg4r_hot_render(success="Bildirim silindi.")
+
+            # Create action: action boşsa veya create ise yeni bildirim oluştur.
+            title = str(form.get("title", "")).strip()
+            priority = str(form.get("priority", "normal")).strip().lower()
+            target = str(form.get("target", "all")).strip().lower()
+            message = str(form.get("message", "")).strip()
+
+            if not title or not message:
+                return _eg4r_hot_render(error="Başlık ve mesaj zorunludur.")
+
+            if priority not in {"normal", "high", "critical"}:
+                priority = "normal"
+
+            if target not in {"all", "premium", "admin"}:
+                target = "all"
+
+            now = _eg4r_hot_datetime.now()
+            item = {
+                "id": "EG-NOTIF-" + now.strftime("%Y%m%d%H%M%S%f"),
+                "title": title[:160],
+                "priority": priority,
+                "target": target,
+                "message": message[:1200],
+                "created_at": now.strftime("%Y-%m-%d %H:%M:%S"),
+                "status": "created",
+            }
+
+            items.append(item)
+            items = items[-300:]
+
+            if not _eg4r_hot_save(items):
+                return _eg4r_hot_render(error="Bildirim kaydedilemedi.")
+
+            return _eg4r_hot_render(success="Bildirim başarıyla kaydedildi.")
+
+        except Exception as _err:
+            print("ERATGUARD STAGE4R HOTFIX ADMIN ROUTE ERROR:", _err)
+            return None
+
+    try:
+        _eg4r_hot_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg4r_hot_funcs[:] = [
+            f for f in _eg4r_hot_funcs
+            if getattr(f, "__name__", "") != "_eg_stage4r_hotfix_admin_notifications"
+        ]
+        _eg4r_hot_funcs.insert(0, _eg_stage4r_hotfix_admin_notifications)
+    except Exception as _err:
+        print("ERATGUARD STAGE4R HOTFIX INSERT ERROR:", _err)
+
+except Exception as _boot_err:
+    print("ERATGUARD STAGE4R HOTFIX CREATE MANAGEMENT ROUTE ERROR:", _boot_err)
+# ===== ERATGUARD STAGE4R HOTFIX CREATE MANAGEMENT ROUTE END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
