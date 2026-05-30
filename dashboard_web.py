@@ -10594,7 +10594,7 @@ try:
             if _path in ("/admin/panel", "/admin/users"):
                 return _eg4l_render_template(
                     "admin_panel.html",
-                    users=[],
+                    users={},
                     upgrade_requests=[],
                     audit_logs=[],
                     brand="EratGuard PRO",
@@ -10604,6 +10604,14 @@ try:
                 return _eg4l_render_template(
                     "admin_licenses.html",
                     brand="EratGuard PRO",
+                    licenses={},
+                    generated_licenses={},
+                    users={},
+                    license_requests=[],
+                    payment_requests=[],
+                    error="",
+                    success="",
+                    new_license_key="",
                 )
 
             if _path == "/admin/spam-logs":
@@ -10688,9 +10696,9 @@ try:
                 return _eg4l_lic_render_template(
                     "admin_licenses.html",
                     brand="EratGuard PRO",
-                    licenses=[],
-                    generated_licenses=[],
-                    users=[],
+                    licenses={},
+                    generated_licenses={},
+                    users={},
                     license_requests=[],
                     payment_requests=[],
                     admin_stats={
