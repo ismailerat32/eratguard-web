@@ -10487,6 +10487,47 @@ except Exception as _eg_stage4f_before_redirect_error:
 # ===== ERATGUARD ADMIN BEFORE REQUEST REDIRECT END =====
 
 
+
+
+# ===== ERATGUARD STAGE4J SINGLE ADMIN ENTRY LOCK START =====
+# Amaç:
+# - Eski radial/splash/alternatif admin girişleri kafa karıştırmasın.
+# - Tek ana admin girişi: /admin/dashboard
+# - Silmek yerine route seviyesinde rafa kaldırır.
+try:
+    from flask import request as _eg4j_request
+    from flask import redirect as _eg4j_redirect
+
+    @app.before_request
+    def _eg_stage4j_single_admin_entry_guard():
+        try:
+            _path = str(getattr(_eg4j_request, "path", "") or "").rstrip("/")
+
+            if _path in (
+                "/splash_admin",
+                "/radial",
+                "/radial-menu",
+                "/radial-demo",
+            ):
+                return _eg4j_redirect("/admin/dashboard", code=302)
+
+            if _path == "/admin/payments":
+                return _eg4j_redirect("/admin/payment-requests", code=302)
+
+            if _path in ("/admin/generated-licenses", "/admin/license-manager"):
+                return _eg4j_redirect("/admin/licenses", code=302)
+
+            if _path == "/admin/security":
+                return _eg4j_redirect("/admin/overview", code=302)
+
+        except Exception:
+            return None
+
+except Exception as _eg_stage4j_single_admin_entry_error:
+    print("ERATGUARD STAGE4J SINGLE ADMIN ENTRY LOCK ERROR:", _eg_stage4j_single_admin_entry_error)
+# ===== ERATGUARD STAGE4J SINGLE ADMIN ENTRY LOCK END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
