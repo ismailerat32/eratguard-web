@@ -10528,6 +10528,51 @@ except Exception as _eg_stage4j_single_admin_entry_error:
 # ===== ERATGUARD STAGE4J SINGLE ADMIN ENTRY LOCK END =====
 
 
+
+
+# ===== ERATGUARD STAGE4J PREPEND ADMIN GUARD START =====
+# En öncelikli redirect guard:
+# Bazı eski before_request blokları /radial, /admin/payments, /admin/security için önce cevap döndürüyordu.
+# Bu guard Flask before_request listesine en baştan yerleşir.
+try:
+    from flask import request as _eg4j_pre_request
+    from flask import redirect as _eg4j_pre_redirect
+
+    def _eg_stage4j_prepend_single_admin_guard():
+        try:
+            _path = str(getattr(_eg4j_pre_request, "path", "") or "").rstrip("/")
+
+            if _path in (
+                "/radial",
+                "/radial-menu",
+                "/radial-demo",
+                "/splash_admin",
+            ):
+                return _eg4j_pre_redirect("/admin/dashboard", code=302)
+
+            if _path == "/admin/payments":
+                return _eg4j_pre_redirect("/admin/payment-requests", code=302)
+
+            if _path in ("/admin/security", "/admin/generated-licenses", "/admin/license-manager"):
+                if _path == "/admin/security":
+                    return _eg4j_pre_redirect("/admin/overview", code=302)
+                return _eg4j_pre_redirect("/admin/licenses", code=302)
+
+        except Exception:
+            return None
+
+    try:
+        _eg_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg_funcs[:] = [f for f in _eg_funcs if getattr(f, "__name__", "") != "_eg_stage4j_prepend_single_admin_guard"]
+        _eg_funcs.insert(0, _eg_stage4j_prepend_single_admin_guard)
+    except Exception as _eg_prepend_err:
+        print("ERATGUARD STAGE4J PREPEND INSERT ERROR:", _eg_prepend_err)
+
+except Exception as _eg_stage4j_prepend_error:
+    print("ERATGUARD STAGE4J PREPEND ADMIN GUARD ERROR:", _eg_stage4j_prepend_error)
+# ===== ERATGUARD STAGE4J PREPEND ADMIN GUARD END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
