@@ -1874,6 +1874,264 @@ main {
 }
 </style>
 
+
+<style id="eratguard-stage4i-real-8-module-admin-v2">
+/* =========================================================
+   STAGE 4I v2 - REAL 8 MODULE ERATGUARD ADMIN CONTROL CENTER
+   Mobil-first, sidebar yok, yatay taşma yok, 8 ana kontrol alanı.
+   ========================================================= */
+
+.eg-admin-8-panel{
+  margin:0 0 16px;
+  padding:18px;
+  border-radius:24px;
+  border:1px solid rgba(141,255,63,.28);
+  background:
+    radial-gradient(circle at top left, rgba(141,255,63,.15), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(38,132,255,.12), transparent 38%),
+    linear-gradient(180deg, rgba(7,22,25,.98), rgba(3,7,13,.99));
+  box-shadow:0 20px 52px rgba(0,0,0,.34), 0 0 34px rgba(141,255,63,.06);
+}
+
+.eg-admin-8-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:16px;
+}
+
+.eg-admin-8-kicker{
+  color:#8dff3f;
+  font-size:12px;
+  font-weight:1000;
+  letter-spacing:2.2px;
+  margin-bottom:6px;
+}
+
+.eg-admin-8-head h2{
+  margin:0;
+  color:#f7fff4;
+  font-size:clamp(24px, 4vw, 34px);
+  line-height:1.05;
+  letter-spacing:-.8px;
+}
+
+.eg-admin-8-head p{
+  margin:8px 0 0;
+  color:#a6b8c8;
+  font-size:14px;
+  line-height:1.35;
+}
+
+.eg-admin-8-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid rgba(141,255,63,.28);
+  background:rgba(141,255,63,.10);
+  color:#d9ffc7;
+  font-size:13px;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.eg-admin-8-status span{
+  width:9px;
+  height:9px;
+  border-radius:999px;
+  background:#8dff3f;
+  box-shadow:0 0 18px rgba(141,255,63,.85);
+}
+
+.eg-admin-8-grid{
+  display:grid;
+  grid-template-columns:repeat(4, minmax(0, 1fr));
+  gap:12px;
+}
+
+.eg-admin-module{
+  position:relative;
+  min-height:172px;
+  padding:16px;
+  border-radius:20px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  text-decoration:none;
+  color:#f7fff4;
+  border:1px solid rgba(80,145,255,.22);
+  background:
+    radial-gradient(circle at top left, rgba(141,255,63,.10), transparent 36%),
+    linear-gradient(180deg, rgba(12,28,41,.98), rgba(5,12,21,.98));
+  overflow:hidden;
+  box-shadow:0 13px 30px rgba(0,0,0,.25);
+  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.eg-admin-module:hover,
+.eg-admin-module:active{
+  transform:translateY(-3px) scale(1.01);
+  border-color:rgba(141,255,63,.48);
+  box-shadow:0 18px 42px rgba(0,0,0,.38), 0 0 28px rgba(141,255,63,.08);
+}
+
+.eg-module-icon{
+  width:48px;
+  height:48px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  background:rgba(141,255,63,.10);
+  border:1px solid rgba(141,255,63,.22);
+}
+
+.eg-module-body h3{
+  margin:14px 0 7px;
+  font-size:18px;
+  line-height:1.1;
+}
+
+.eg-module-body p{
+  margin:0;
+  color:#a6b8c8;
+  font-size:13px;
+  line-height:1.35;
+}
+
+.eg-module-body b{
+  display:inline-flex;
+  margin-top:14px;
+  padding:8px 11px;
+  border-radius:999px;
+  color:#d9ffc7;
+  font-size:12px;
+  background:rgba(141,255,63,.10);
+  border:1px solid rgba(141,255,63,.22);
+}
+
+/* Eski 4 istatistik kartı ana odak değil */
+.ss-metric-grid{
+  opacity:.50 !important;
+  margin-top:4px !important;
+}
+
+.ss-metric-card{
+  min-height:82px !important;
+}
+
+/* Hızlı kontroller 8 modülden sonra ikincil kalsın */
+.ss-command-controls{
+  opacity:.85 !important;
+}
+
+/* Desktop/tablet */
+@media (max-width: 980px){
+  .eg-admin-8-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Mobil: sidebar yok, yatay scroll yok, 8 modül ana ekran */
+@media (max-width: 760px){
+  html, body{
+    width:100% !important;
+    max-width:100% !important;
+    overflow-x:hidden !important;
+  }
+
+  .ss-premium-dashboard{
+    width:100% !important;
+    max-width:100% !important;
+    padding:12px !important;
+    box-sizing:border-box !important;
+  }
+
+  .eg-admin-8-panel{
+    padding:14px !important;
+    border-radius:22px !important;
+    margin-bottom:14px !important;
+  }
+
+  .eg-admin-8-head{
+    flex-direction:column !important;
+    gap:11px !important;
+    margin-bottom:14px !important;
+  }
+
+  .eg-admin-8-head h2{
+    font-size:25px !important;
+  }
+
+  .eg-admin-8-head p{
+    font-size:13px !important;
+  }
+
+  .eg-admin-8-status{
+    width:100% !important;
+    justify-content:center !important;
+    box-sizing:border-box !important;
+  }
+
+  .eg-admin-8-grid{
+    grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+    gap:10px !important;
+  }
+
+  .eg-admin-module{
+    min-height:150px !important;
+    padding:13px !important;
+    border-radius:18px !important;
+  }
+
+  .eg-module-icon{
+    width:42px !important;
+    height:42px !important;
+    border-radius:15px !important;
+    font-size:21px !important;
+  }
+
+  .eg-module-body h3{
+    font-size:15px !important;
+    margin:11px 0 6px !important;
+  }
+
+  .eg-module-body p{
+    font-size:11.5px !important;
+    line-height:1.25 !important;
+  }
+
+  .eg-module-body b{
+    margin-top:10px !important;
+    padding:7px 9px !important;
+    font-size:11px !important;
+  }
+}
+
+@media (max-width: 390px){
+  .eg-admin-8-grid{
+    gap:8px !important;
+  }
+
+  .eg-admin-module{
+    min-height:138px !important;
+    padding:11px !important;
+  }
+
+  .eg-module-body h3{
+    font-size:14px !important;
+  }
+
+  .eg-module-body p{
+    font-size:11px !important;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -2412,8 +2670,8 @@ document.addEventListener("DOMContentLoaded", function () {
     <div class="ss-premium-title">
       <div class="ss-premium-logo">🛡️</div>
       <div>
-        <h1>EratGuard PRO Command Center</h1>
-        <p>Canlı yönetim, hızlı kontrol ve güvenlik operasyon merkezi.</p>
+        <h1>EratGuard ADMIN Control Center</h1>
+        <p>8 ana modül, tam kontrol ve canlı yönetim merkezi.</p>
       </div>
     </div>
     <div class="ss-premium-status">
@@ -2421,6 +2679,96 @@ document.addEventListener("DOMContentLoaded", function () {
       Canlı Sistem Aktif
     </div>
   </div>
+
+  
+<section class="eg-admin-8-panel" id="eg-real-admin-8-module-panel">
+  <div class="eg-admin-8-head">
+    <div>
+      <div class="eg-admin-8-kicker">ERATGUARD ADMIN</div>
+      <h2>8 Modül Kontrol Merkezi</h2>
+      <p>Kullanıcı, lisans, ödeme, güvenlik ve sistem yönetimi tek ekranda.</p>
+    </div>
+    <div class="eg-admin-8-status">
+      <span></span>
+      Admin Kontrol Aktif
+    </div>
+  </div>
+
+  <div class="eg-admin-8-grid">
+    <a class="eg-admin-module users" href="/admin/panel">
+      <div class="eg-module-icon">👥</div>
+      <div class="eg-module-body">
+        <h3>Kullanıcılar</h3>
+        <p>Kullanıcıları, yetkileri ve erişimleri yönet.</p>
+        <b>Yönet →</b>
+      </div>
+    </a>
+
+    <a class="eg-admin-module licenses" href="/admin/licenses">
+      <div class="eg-module-icon">💳</div>
+      <div class="eg-module-body">
+        <h3>Lisanslar</h3>
+        <p>Aktif lisansları ve cihaz erişimlerini kontrol et.</p>
+        <b>Aç →</b>
+      </div>
+    </a>
+
+    <a class="eg-admin-module payments" href="/admin/payment-requests">
+      <div class="eg-module-icon">💼</div>
+      <div class="eg-module-body">
+        <h3>Ödemeler</h3>
+        <p>Ödeme taleplerini ve onay bekleyen işlemleri incele.</p>
+        <b>Kontrol Et →</b>
+      </div>
+    </a>
+
+    <a class="eg-admin-module security" href="/admin/overview">
+      <div class="eg-module-icon">🛡️</div>
+      <div class="eg-module-body">
+        <h3>Güvenlik</h3>
+        <p>Tehdit analizi ve güvenlik durumunu izle.</p>
+        <b>Analiz Et →</b>
+      </div>
+    </a>
+
+    <a class="eg-admin-module notifications" href="/admin/notifications">
+      <div class="eg-module-icon">🔔</div>
+      <div class="eg-module-body">
+        <h3>Bildirimler</h3>
+        <p>Admin uyarılarını ve kullanıcı bildirimlerini yönet.</p>
+        <b>Gönder →</b>
+      </div>
+    </a>
+
+    <a class="eg-admin-module reports" href="/admin/spam-logs">
+      <div class="eg-module-icon">📊</div>
+      <div class="eg-module-body">
+        <h3>Raporlar</h3>
+        <p>Logları, olay kayıtlarını ve sistem raporlarını görüntüle.</p>
+        <b>Raporla →</b>
+      </div>
+    </a>
+
+    <a class="eg-admin-module whitelist" href="/admin/whitelist">
+      <div class="eg-module-icon">✅</div>
+      <div class="eg-module-body">
+        <h3>Güvenli Liste</h3>
+        <p>Güvenilir kayıtları ve izin verilen öğeleri düzenle.</p>
+        <b>Listeyi Aç →</b>
+      </div>
+    </a>
+
+    <a class="eg-admin-module settings" href="/admin/settings">
+      <div class="eg-module-icon">⚙️</div>
+      <div class="eg-module-body">
+        <h3>Sistem Ayarları</h3>
+        <p>Admin ayarları ve sistem yapılandırmasını düzenle.</p>
+        <b>Ayarları Aç →</b>
+      </div>
+    </a>
+  </div>
+</section>
+
 
   <div class="ss-metric-grid">
     <div class="ss-metric-card">
@@ -2887,6 +3235,30 @@ document.addEventListener("DOMContentLoaded", function () {
     document.addEventListener("DOMContentLoaded", enhanceCommandCenter);
   }else{
     enhanceCommandCenter();
+  }
+})();
+</script>
+
+
+<script id="eratguard-stage4i-real-8-module-admin-js-v2">
+(function(){
+  function enhance8ModuleAdmin(){
+    document.querySelectorAll(".eg-admin-module").forEach(function(el){
+      el.setAttribute("role", "button");
+      el.setAttribute("tabindex", "0");
+      el.addEventListener("keydown", function(e){
+        if(e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          var href = el.getAttribute("href");
+          if(href){ window.location.href = href; }
+        }
+      });
+    });
+  }
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", enhance8ModuleAdmin);
+  }else{
+    enhance8ModuleAdmin();
   }
 })();
 </script>
