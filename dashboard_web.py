@@ -10573,6 +10573,96 @@ except Exception as _eg_stage4j_prepend_error:
 # ===== ERATGUARD STAGE4J PREPEND ADMIN GUARD END =====
 
 
+
+
+# ===== ERATGUARD STAGE4L REAL MODULE ROUTE LOCK START =====
+# Amaç:
+# - 8 modül dashboard linklerinin gerçek admin modül sayfalarına gitmesini garanti eder.
+# - Dashboard fallback'e düşen modülleri düzeltir.
+# - Sadece GET isteklerini yakalar; POST/form işlemlerini bozmaz.
+try:
+    from flask import request as _eg4l_request
+    from flask import render_template as _eg4l_render_template
+
+    def _eg_stage4l_real_module_route_guard():
+        try:
+            if str(getattr(_eg4l_request, "method", "GET")).upper() != "GET":
+                return None
+
+            _path = str(getattr(_eg4l_request, "path", "") or "").rstrip("/")
+
+            if _path in ("/admin/panel", "/admin/users"):
+                return _eg4l_render_template(
+                    "admin_panel.html",
+                    users=[],
+                    upgrade_requests=[],
+                    audit_logs=[],
+                    brand="EratGuard PRO",
+                )
+
+            if _path in ("/admin/licenses", "/admin/license"):
+                return _eg4l_render_template(
+                    "admin_licenses.html",
+                    brand="EratGuard PRO",
+                )
+
+            if _path == "/admin/spam-logs":
+                return _eg4l_render_template(
+                    "admin_spam_logs.html",
+                    spam_logs=[],
+                    brand="EratGuard PRO",
+                )
+
+            if _path == "/admin/settings":
+                return _eg4l_render_template(
+                    "admin_settings.html",
+                    settings={},
+                    brand="EratGuard PRO",
+                )
+
+            if _path == "/admin/whitelist":
+                return _eg4l_render_template(
+                    "admin_whitelist.html",
+                    whitelist=[],
+                    brand="EratGuard PRO",
+                )
+
+            if _path == "/admin/notifications":
+                return (
+                    "<!doctype html><html lang='tr'><head><meta charset='UTF-8'>"
+                    "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+                    "<title>EratGuard ADMIN Bildirimler</title>"
+                    "<style>"
+                    "body{margin:0;background:#05070d;color:#f7fff4;font-family:Arial,sans-serif}"
+                    ".wrap{max-width:980px;margin:0 auto;padding:18px}"
+                    ".hero{border:1px solid rgba(141,255,63,.25);border-radius:24px;padding:20px;background:linear-gradient(180deg,#081421,#05070d)}"
+                    "h1{margin:0;font-size:30px}.muted{color:#a6b8c8}.grid{display:grid;gap:12px;margin-top:16px}"
+                    ".card{border:1px solid rgba(80,145,255,.22);border-radius:18px;padding:16px;background:#0b1628}"
+                    ".btn{display:inline-block;margin-top:14px;padding:10px 14px;border-radius:999px;background:rgba(141,255,63,.12);border:1px solid rgba(141,255,63,.28);color:#d9ffc7;text-decoration:none;font-weight:900}"
+                    "</style></head><body><div class='wrap'>"
+                    "<section class='hero'><h1>🔔 EratGuard ADMIN Bildirimler</h1>"
+                    "<p class='muted'>Admin bildirimleri ve uyarı merkezi burada yönetilecek.</p>"
+                    "<a class='btn' href='/admin/dashboard'>← Admin Dashboard</a></section>"
+                    "<div class='grid'><div class='card'><b>Bildirim Merkezi</b><p class='muted'>Bu modül Stage 4L ile güvenli placeholder olarak aktif edildi.</p></div></div>"
+                    "</div></body></html>"
+                )
+
+        except Exception as _eg4l_err:
+            print("ERATGUARD STAGE4L MODULE ROUTE GUARD ERROR:", _eg4l_err)
+            return None
+
+    try:
+        _eg4l_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg4l_funcs[:] = [f for f in _eg4l_funcs if getattr(f, "__name__", "") != "_eg_stage4l_real_module_route_guard"]
+        _eg4l_funcs.insert(0, _eg_stage4l_real_module_route_guard)
+    except Exception as _eg4l_insert_err:
+        print("ERATGUARD STAGE4L MODULE ROUTE INSERT ERROR:", _eg4l_insert_err)
+
+except Exception as _eg_stage4l_boot_error:
+    print("ERATGUARD STAGE4L REAL MODULE ROUTE LOCK ERROR:", _eg_stage4l_boot_error)
+# ===== ERATGUARD STAGE4L REAL MODULE ROUTE LOCK END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)

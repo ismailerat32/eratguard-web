@@ -3,133 +3,165 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Whitelist Paneli</title>
+<title>EratGuard ADMIN Güvenli Liste</title>
 
 <style>
-body {
-    margin: 0;
-    background: #0b1020;
-    color: white;
-    font-family: Arial, sans-serif;
+:root{
+  --eg-bg:#05070d;
+  --eg-card:#081421;
+  --eg-card2:#0b1f2f;
+  --eg-border:rgba(141,255,63,.24);
+  --eg-blue:rgba(80,145,255,.24);
+  --eg-text:#f7fff4;
+  --eg-muted:#a6b8c8;
+  --eg-green:#8dff3f;
+  --eg-red:#ff4d5e;
 }
-
-.wrap {
-    max-width: 1100px;
-    margin: 30px auto;
-    padding: 20px;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top left, rgba(141,255,63,.08), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(38,132,255,.08), transparent 34%),
+    var(--eg-bg);
+  color:var(--eg-text);
+  font-family:Arial, sans-serif;
 }
-
-.top {
-    margin-bottom: 24px;
+.wrap{
+  width:100%;
+  max-width:1100px;
+  margin:0 auto;
+  padding:18px;
 }
-
-.top h1 {
-    font-size: 40px;
-    margin: 0 0 12px 0;
-    font-weight: 800;
+.hero{
+  border:1px solid var(--eg-border);
+  border-radius:24px;
+  padding:20px;
+  background:
+    radial-gradient(circle at top left, rgba(141,255,63,.12), transparent 36%),
+    linear-gradient(180deg, rgba(8,20,33,.98), rgba(5,8,16,.98));
+  box-shadow:0 20px 52px rgba(0,0,0,.34);
+  margin-bottom:16px;
 }
-
-.back-link {
-    color: #93c5fd;
-    text-decoration: none;
-    font-weight: 600;
-    display: inline-block;
-    margin-top: 6px;
+.kicker{
+  color:var(--eg-green);
+  font-size:12px;
+  font-weight:1000;
+  letter-spacing:2px;
+  margin-bottom:8px;
 }
-
-.card {
-    background: #1a1f2e;
-    padding: 16px;
-    border-radius: 16px;
-    margin-bottom: 14px;
+.hero h1{
+  margin:0;
+  font-size:clamp(26px, 6vw, 40px);
+  line-height:1.05;
 }
-
-.row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
+.hero p{
+  margin:8px 0 0;
+  color:var(--eg-muted);
 }
-
-.add-form {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
+.back-link{
+  display:inline-flex;
+  margin-top:14px;
+  color:#d9ffc7;
+  text-decoration:none;
+  font-weight:900;
+  padding:10px 13px;
+  border-radius:999px;
+  border:1px solid var(--eg-border);
+  background:rgba(141,255,63,.10);
 }
-
-.add-form input {
-    padding: 12px 14px;
-    border-radius: 12px;
-    border: none;
-    min-width: 260px;
-    flex: 1;
-    font-size: 16px;
+.card{
+  background:
+    linear-gradient(180deg, rgba(11,31,47,.96), rgba(5,12,21,.98));
+  border:1px solid var(--eg-blue);
+  padding:16px;
+  border-radius:18px;
+  margin-bottom:12px;
+  box-shadow:0 12px 30px rgba(0,0,0,.23);
 }
-
-.btn-add {
-    background: #22c55e;
-    border: none;
-    padding: 12px 16px;
-    border-radius: 12px;
-    color: white;
-    font-weight: 700;
-    font-size: 16px;
+.add-form{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:center;
 }
-
-.btn-remove {
-    background: #dc2626;
-    border: none;
-    padding: 10px 14px;
-    border-radius: 12px;
-    color: white;
-    font-weight: 700;
-    font-size: 15px;
+.add-form input{
+  width:100%;
+  padding:13px 14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.12);
+  outline:none;
+  color:var(--eg-text);
+  background:#050b14;
+  font-size:16px;
 }
-
-.sender {
-    font-size: 18px;
-    font-weight: 700;
-    color: #f3f4f6;
-    word-break: break-word;
+.btn-add,
+.btn-remove{
+  border:0;
+  padding:12px 15px;
+  border-radius:14px;
+  color:#071008;
+  font-weight:1000;
+  font-size:15px;
 }
-
-.empty {
-    color: #cbd5e1;
+.btn-add{background:var(--eg-green)}
+.btn-remove{background:var(--eg-red);color:white}
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.sender{
+  font-size:17px;
+  font-weight:900;
+  color:#f3f4f6;
+  word-break:break-word;
+}
+.empty{
+  color:var(--eg-muted);
+  text-align:center;
+  padding:24px;
+}
+@media(max-width:620px){
+  .wrap{padding:12px}
+  .hero{padding:16px;border-radius:22px}
+  .add-form{grid-template-columns:1fr}
+  .btn-add{width:100%}
 }
 </style>
 </head>
 <body>
 
 <div class="wrap">
+  <section class="hero">
+    <div class="kicker">ERATGUARD ADMIN</div>
+    <h1>✅ Güvenli Liste</h1>
+    <p>Güvenilir göndericileri ve izin verilen kayıtları buradan yönet.</p>
+    <a class="back-link" href="/admin/dashboard">← Admin Dashboard</a>
+  </section>
 
-    <div class="top">
-        <h1>🧠 Whitelist Paneli</h1>
-        <a class="back-link" href="/admin">← Admin panele dön</a>
+  <div class="card">
+    <form class="add-form" method="POST" action="/admin/whitelist/add">
+      <input type="text" name="sender" placeholder="Örn: HALKBANK" required>
+      <button class="btn-add" type="submit">➕ Ekle</button>
+    </form>
+  </div>
+
+  {% for sender in whitelist %}
+  <div class="card">
+    <div class="row">
+      <div class="sender">{{ sender }}</div>
+      <form method="POST" action="/admin/whitelist/remove">
+        <input type="hidden" name="sender" value="{{ sender }}">
+        <button class="btn-remove" type="submit">Kaldır</button>
+      </form>
     </div>
-
-    <div class="card">
-        <form class="add-form" method="POST" action="/admin/whitelist/add">
-            <input type="text" name="sender" placeholder="Örn: HALKBANK" required>
-            <button class="btn-add" type="submit">➕ Ekle</button>
-        </form>
-    </div>
-
-    {% for sender in whitelist %}
-    <div class="card">
-        <div class="row">
-            <div class="sender">{{ sender }}</div>
-            <form method="POST" action="/admin/whitelist/remove">
-                <input type="hidden" name="sender" value="{{ sender }}">
-                <button class="btn-remove" type="submit">❌ Kaldır</button>
-            </form>
-        </div>
-    </div>
-    {% else %}
-    <div class="card empty">Liste boş</div>
-    {% endfor %}
-
+  </div>
+  {% else %}
+  <div class="card empty">Güvenli liste şu anda boş.</div>
+  {% endfor %}
 </div>
 
 </body>
