@@ -10786,6 +10786,141 @@ except Exception as _eg4n_boot_error:
 # ===== ERATGUARD STAGE4N PREPEND NOTIFICATIONS ROUTE END =====
 
 
+
+
+# ===== ERATGUARD STAGE4O NOTIFICATIONS JSON STORAGE START =====
+# Amaç:
+# - /admin/notifications formunu gerçek JSON kayıt sistemine bağlar.
+# - GET: data/admin_notifications.json içinden son bildirimleri gösterir.
+# - POST: title/priority/target/message değerlerini güvenli şekilde kaydeder.
+try:
+    from flask import request as _eg4o_request
+    from flask import render_template as _eg4o_render_template
+    import json as _eg4o_json
+    from pathlib import Path as _eg4o_Path
+    from datetime import datetime as _eg4o_datetime
+
+    _EG4O_NOTIFICATIONS_FILE = _eg4o_Path("data/admin_notifications.json")
+
+    def _eg4o_load_notifications():
+        try:
+            _EG4O_NOTIFICATIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
+            if not _EG4O_NOTIFICATIONS_FILE.exists():
+                _EG4O_NOTIFICATIONS_FILE.write_text("[]", encoding="utf-8")
+            data = _eg4o_json.loads(_EG4O_NOTIFICATIONS_FILE.read_text(encoding="utf-8") or "[]")
+            if isinstance(data, list):
+                return data
+            return []
+        except Exception as _load_err:
+            print("ERATGUARD STAGE4O LOAD NOTIFICATIONS ERROR:", _load_err)
+            return []
+
+    def _eg4o_save_notifications(items):
+        try:
+            _EG4O_NOTIFICATIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
+            _EG4O_NOTIFICATIONS_FILE.write_text(
+                _eg4o_json.dumps(items, ensure_ascii=False, indent=2),
+                encoding="utf-8"
+            )
+            return True
+        except Exception as _save_err:
+            print("ERATGUARD STAGE4O SAVE NOTIFICATIONS ERROR:", _save_err)
+            return False
+
+    def _eg4o_notification_stats(items):
+        today = _eg4o_datetime.now().strftime("%Y-%m-%d")
+        return {
+            "total": len(items),
+            "today": sum(1 for x in items if str(x.get("created_at", "")).startswith(today)),
+            "critical": sum(1 for x in items if str(x.get("priority", "")).lower() == "critical"),
+        }
+
+    def _eg4o_render_notifications(success="", error=""):
+        items = _eg4o_load_notifications()
+        # En yeni kayıtlar üstte, maksimum 50 kayıt göster.
+        display_items = list(reversed(items[-50:]))
+        return _eg4o_render_template(
+            "admin_notifications.html",
+            notifications=display_items,
+            notification_stats=_eg4o_notification_stats(items),
+            success=success,
+            error=error,
+            brand="EratGuard PRO",
+        )
+
+    def _eg_stage4o_notifications_json_route():
+        try:
+            _path = str(getattr(_eg4o_request, "path", "") or "").rstrip("/")
+            if _path != "/admin/notifications":
+                return None
+
+            method = str(getattr(_eg4o_request, "method", "GET")).upper()
+
+            if method == "GET":
+                return _eg4o_render_notifications()
+
+            if method == "POST":
+                form = getattr(_eg4o_request, "form", {}) or {}
+
+                title = str(form.get("title", "")).strip()
+                priority = str(form.get("priority", "normal")).strip().lower()
+                target = str(form.get("target", "all")).strip().lower()
+                message = str(form.get("message", "")).strip()
+
+                allowed_priorities = {"normal", "high", "critical"}
+                allowed_targets = {"all", "premium", "admin"}
+
+                if priority not in allowed_priorities:
+                    priority = "normal"
+                if target not in allowed_targets:
+                    target = "all"
+
+                if not title or not message:
+                    return _eg4o_render_notifications(error="Başlık ve mesaj zorunludur.")
+
+                items = _eg4o_load_notifications()
+                now = _eg4o_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                item = {
+                    "id": "EG-NOTIF-" + _eg4o_datetime.now().strftime("%Y%m%d%H%M%S"),
+                    "title": title[:160],
+                    "priority": priority,
+                    "target": target,
+                    "message": message[:1200],
+                    "created_at": now,
+                    "status": "created",
+                }
+
+                items.append(item)
+                # Dosya büyümesini engelle: son 300 kayıt sakla.
+                items = items[-300:]
+
+                if not _eg4o_save_notifications(items):
+                    return _eg4o_render_notifications(error="Bildirim kaydedilemedi.")
+
+                return _eg4o_render_notifications(success="Bildirim başarıyla kaydedildi.")
+
+            return None
+
+        except Exception as _eg4o_route_err:
+            print("ERATGUARD STAGE4O NOTIFICATIONS ROUTE ERROR:", _eg4o_route_err)
+            return None
+
+    try:
+        _eg4o_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg4o_funcs[:] = [
+            f for f in _eg4o_funcs
+            if getattr(f, "__name__", "") != "_eg_stage4o_notifications_json_route"
+        ]
+        _eg4o_funcs.insert(0, _eg_stage4o_notifications_json_route)
+    except Exception as _eg4o_insert_err:
+        print("ERATGUARD STAGE4O NOTIFICATIONS INSERT ERROR:", _eg4o_insert_err)
+
+except Exception as _eg4o_boot_error:
+    print("ERATGUARD STAGE4O NOTIFICATIONS JSON STORAGE ERROR:", _eg4o_boot_error)
+# ===== ERATGUARD STAGE4O NOTIFICATIONS JSON STORAGE END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
