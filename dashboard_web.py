@@ -11001,6 +11001,107 @@ except Exception as _eg4p_boot_error:
 # ===== ERATGUARD STAGE4P USER NOTIFICATIONS FEED END =====
 
 
+
+
+# ===== ERATGUARD STAGE4P FORCE USER NOTIFICATIONS ROUTE START =====
+# Amaç:
+# - Eski kullanıcı bildirim route override'larını ezer.
+# - /u/notifications her zaman admin JSON feed sayfasını gösterir.
+try:
+    from flask import request as _eg4p_force_request
+    from flask import render_template as _eg4p_force_render_template
+    import json as _eg4p_force_json
+    from pathlib import Path as _eg4p_force_Path
+
+    _EG4P_FORCE_NOTIFICATIONS_FILE = _eg4p_force_Path("data/admin_notifications.json")
+
+    def _eg4p_force_load_items():
+        try:
+            if not _EG4P_FORCE_NOTIFICATIONS_FILE.exists():
+                return []
+            data = _eg4p_force_json.loads(
+                _EG4P_FORCE_NOTIFICATIONS_FILE.read_text(encoding="utf-8") or "[]"
+            )
+            if not isinstance(data, list):
+                return []
+
+            visible = []
+            for item in data:
+                if not isinstance(item, dict):
+                    continue
+                target = str(item.get("target", "all")).lower().strip()
+                if target == "admin":
+                    continue
+                visible.append(item)
+
+            return list(reversed(visible[-50:]))
+        except Exception as _eg4p_force_load_err:
+            print("ERATGUARD STAGE4P FORCE LOAD ERROR:", _eg4p_force_load_err)
+            return []
+
+    def _eg4p_force_stats(items):
+        return {
+            "total": len(items),
+            "high": sum(1 for x in items if str(x.get("priority", "")).lower() == "high"),
+            "critical": sum(1 for x in items if str(x.get("priority", "")).lower() == "critical"),
+        }
+
+    def _eg_stage4p_force_user_notifications_page(**kwargs):
+        try:
+            items = _eg4p_force_load_items()
+            return _eg4p_force_render_template(
+                "user_notifications_admin_feed.html",
+                notifications=items,
+                notification_stats=_eg4p_force_stats(items),
+                brand="EratGuard PRO",
+            )
+        except Exception as _eg4p_force_render_err:
+            print("ERATGUARD STAGE4P FORCE RENDER ERROR:", _eg4p_force_render_err)
+            return (
+                "<!doctype html><html lang='tr'><head><meta charset='UTF-8'>"
+                "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+                "<title>EratGuard PRO Bildirimler</title></head><body>"
+                "<h1>EratGuard PRO Bildirimler</h1>"
+                "<p>Bildirim sayfası güvenli fallback ile açıldı.</p>"
+                "<p><a href='/dashboard'>Kullanıcı Paneli</a></p>"
+                "</body></html>"
+            )
+
+    def _eg_stage4p_force_before_request():
+        try:
+            if str(getattr(_eg4p_force_request, "method", "GET")).upper() != "GET":
+                return None
+            _path = str(getattr(_eg4p_force_request, "path", "") or "").rstrip("/")
+            if _path == "/u/notifications":
+                return _eg_stage4p_force_user_notifications_page()
+        except Exception as _eg4p_force_before_err:
+            print("ERATGUARD STAGE4P FORCE BEFORE ERROR:", _eg4p_force_before_err)
+            return None
+
+    # before_request listesinin en başına koy.
+    try:
+        _eg4p_force_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg4p_force_funcs[:] = [
+            f for f in _eg4p_force_funcs
+            if getattr(f, "__name__", "") != "_eg_stage4p_force_before_request"
+        ]
+        _eg4p_force_funcs.insert(0, _eg_stage4p_force_before_request)
+    except Exception as _eg4p_force_insert_err:
+        print("ERATGUARD STAGE4P FORCE INSERT ERROR:", _eg4p_force_insert_err)
+
+    # Var olan /u/notifications endpoint'lerini de doğrudan yeni renderer'a bağla.
+    try:
+        for _eg4p_rule in list(app.url_map.iter_rules()):
+            if str(_eg4p_rule.rule).rstrip("/") == "/u/notifications":
+                app.view_functions[_eg4p_rule.endpoint] = _eg_stage4p_force_user_notifications_page
+    except Exception as _eg4p_force_route_err:
+        print("ERATGUARD STAGE4P FORCE ROUTE MAP ERROR:", _eg4p_force_route_err)
+
+except Exception as _eg4p_force_boot_err:
+    print("ERATGUARD STAGE4P FORCE USER NOTIFICATIONS ROUTE ERROR:", _eg4p_force_boot_err)
+# ===== ERATGUARD STAGE4P FORCE USER NOTIFICATIONS ROUTE END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
