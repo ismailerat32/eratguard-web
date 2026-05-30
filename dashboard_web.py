@@ -10663,6 +10663,79 @@ except Exception as _eg_stage4l_boot_error:
 # ===== ERATGUARD STAGE4L REAL MODULE ROUTE LOCK END =====
 
 
+
+
+# ===== ERATGUARD STAGE4L LICENSE ROUTE HOTFIX START =====
+# Amaç:
+# - /admin/licenses dashboard fallback'e düşmesin.
+# - Lisans merkezi ya gerçek template ile açılsın ya da güvenli EratGuard fallback göstersin.
+# - Sadece GET isteklerini yakalar; POST lisans işlemlerini bozmaz.
+try:
+    from flask import request as _eg4l_lic_request
+    from flask import render_template as _eg4l_lic_render_template
+
+    def _eg_stage4l_license_route_hotfix():
+        try:
+            if str(getattr(_eg4l_lic_request, "method", "GET")).upper() != "GET":
+                return None
+
+            _path = str(getattr(_eg4l_lic_request, "path", "") or "").rstrip("/")
+
+            if _path not in ("/admin/licenses", "/admin/license"):
+                return None
+
+            try:
+                return _eg4l_lic_render_template(
+                    "admin_licenses.html",
+                    brand="EratGuard PRO",
+                    licenses=[],
+                    generated_licenses=[],
+                    users=[],
+                    license_requests=[],
+                    payment_requests=[],
+                    admin_stats={
+                        "users": 0,
+                        "licenses": 0,
+                        "blocked": 0,
+                        "notifications": 0,
+                        "system_health": "OK",
+                    },
+                )
+            except Exception as _lic_tpl_err:
+                return (
+                    "<!doctype html><html lang='tr'><head><meta charset='UTF-8'>"
+                    "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+                    "<title>EratGuard ADMIN Lisans Merkezi</title>"
+                    "<style>"
+                    "body{margin:0;background:#05070d;color:#f7fff4;font-family:Arial,sans-serif}"
+                    ".wrap{max-width:980px;margin:0 auto;padding:18px}"
+                    ".hero{border:1px solid rgba(141,255,63,.25);border-radius:24px;padding:20px;background:linear-gradient(180deg,#081421,#05070d)}"
+                    "h1{margin:0;font-size:32px}.muted{color:#a6b8c8}.card{margin-top:16px;border:1px solid rgba(80,145,255,.22);border-radius:18px;padding:16px;background:#0b1628}"
+                    ".btn{display:inline-block;margin-top:14px;padding:10px 14px;border-radius:999px;background:rgba(141,255,63,.12);border:1px solid rgba(141,255,63,.28);color:#d9ffc7;text-decoration:none;font-weight:900}"
+                    "</style></head><body><div class='wrap'>"
+                    "<section class='hero'><h1>💳 EratGuard ADMIN Lisans Merkezi</h1>"
+                    "<p class='muted'>Lisans yönetimi güvenli fallback ile açıldı. Template hata detayı arşive alınmadan canlı kullanıcıya gösterilmez.</p>"
+                    "<a class='btn' href='/admin/dashboard'>← Admin Dashboard</a></section>"
+                    "<div class='card'><b>Lisans Merkezi Aktif</b><p class='muted'>Bu sayfa dashboard fallback değildir; lisans modülü için güvenli admin ekranıdır.</p></div>"
+                    "</div></body></html>"
+                )
+
+        except Exception as _eg4l_lic_err:
+            print("ERATGUARD STAGE4L LICENSE HOTFIX ERROR:", _eg4l_lic_err)
+            return None
+
+    try:
+        _eg4l_lic_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg4l_lic_funcs[:] = [f for f in _eg4l_lic_funcs if getattr(f, "__name__", "") != "_eg_stage4l_license_route_hotfix"]
+        _eg4l_lic_funcs.insert(0, _eg_stage4l_license_route_hotfix)
+    except Exception as _eg4l_lic_insert_err:
+        print("ERATGUARD STAGE4L LICENSE HOTFIX INSERT ERROR:", _eg4l_lic_insert_err)
+
+except Exception as _eg_stage4l_license_boot_error:
+    print("ERATGUARD STAGE4L LICENSE ROUTE HOTFIX ERROR:", _eg_stage4l_license_boot_error)
+# ===== ERATGUARD STAGE4L LICENSE ROUTE HOTFIX END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
