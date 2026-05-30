@@ -1393,6 +1393,205 @@ main {
 }
 </style>
 
+
+<style id="admin-stage4s-apk-dashboard-compress-v1">
+/* ===== ERATGUARD STAGE 4S APK DASHBOARD COMPRESSION =====
+   APK/WebView admin ana ekranı daha kısa, net ve tekrar etmeyen hale getirir.
+   Ana odak: 8 Modül Kontrol Merkezi.
+*/
+
+/* 1) Tekrar eden hızlı kontrol / hızlı yönetim / ikinci aksiyon grid blokları */
+#ss-command-quick-controls,
+.ss-command-controls,
+.ss-control-grid,
+.ss-action-grid,
+.ss-quick-grid,
+.ss-quick-actions,
+.ss-premium-actions,
+.quick-actions,
+.quick-controls,
+.quick-management,
+.fast-controls,
+.fast-management,
+.eg-stage4h-actions,
+.eg-stage4h-action-grid,
+.eg-stage4h-actions-title,
+[class*="quick-control"],
+[class*="quick-action"],
+[class*="quick-management"]{
+  display:none !important;
+}
+
+/* 2) Stage 4H ile gelen ikinci uzun admin kart listesini ve dev görsel hissini bastır */
+[class*="eg-stage4h"]{
+  display:none !important;
+}
+
+/* Script/style tag etkilenmez; sadece görsel class'lı elemanlar gizlenir */
+script[class*="eg-stage4h"],
+style[class*="eg-stage4h"]{
+  display:initial !important;
+}
+
+/* 3) Radial emeklilik notu final APK ekranında gereksiz yer kaplamasın */
+.ss-mobile-bottom-note,
+.ss-mobile-note,
+.eg-radial-retired-note,
+[class*="radial-retired"],
+[class*="mobile-bottom-note"]{
+  display:none !important;
+}
+
+/* 4) Büyük dekoratif kalkan / ikon bloklarını gizle */
+.status-shield,
+.eg-big-shield,
+.eg-admin-giant-visual,
+.eg-hero-illustration,
+.eg-bottom-illustration,
+.admin-big-visual,
+.admin-shield-visual,
+[class*="giant-shield"],
+[class*="big-shield"],
+[class*="bottom-illustration"]{
+  display:none !important;
+}
+
+/* 5) 8 modül panelini APK’da daha kompakt yap */
+.eg-admin-8-panel{
+  margin-top:14px !important;
+  padding:20px !important;
+}
+
+.eg-admin-module{
+  min-height:145px !important;
+  padding:18px !important;
+  border-radius:18px !important;
+}
+
+.eg-admin-module h3,
+.eg-admin-module .title{
+  font-size:22px !important;
+  line-height:1.12 !important;
+}
+
+.eg-admin-module p,
+.eg-admin-module .desc{
+  font-size:15px !important;
+  line-height:1.35 !important;
+}
+
+.eg-admin-module .eg-module-icon,
+.eg-admin-module .icon{
+  width:62px !important;
+  height:62px !important;
+  min-width:62px !important;
+}
+
+/* 6) Metrikler ve alt paneller daha kısa */
+.ss-metric-grid{
+  gap:12px !important;
+}
+
+.ss-metric-card{
+  min-height:auto !important;
+  padding:16px !important;
+  border-radius:18px !important;
+}
+
+.ss-metric-card h3,
+.ss-metric-card .metric-title{
+  font-size:15px !important;
+}
+
+.ss-metric-card .value,
+.ss-metric-card strong,
+.ss-metric-number{
+  font-size:32px !important;
+}
+
+.ss-panel,
+.ss-system-health,
+.ss-operation-flow,
+.ss-main-grid > *{
+  padding:18px !important;
+  border-radius:20px !important;
+}
+
+/* 7) APK özel sıkıştırma */
+@media(max-width:720px){
+  .ss-premium-dashboard,
+  .eg-admin-dashboard,
+  main,
+  .dashboard,
+  .admin-content{
+    padding-bottom:24px !important;
+  }
+
+  .ss-premium-hero,
+  .eg-admin-hero{
+    padding:18px !important;
+    border-radius:22px !important;
+    margin-bottom:14px !important;
+  }
+
+  .ss-premium-hero h1,
+  .eg-admin-hero h1{
+    font-size:34px !important;
+    line-height:1.08 !important;
+  }
+
+  .ss-premium-hero p,
+  .eg-admin-hero p{
+    font-size:16px !important;
+    line-height:1.35 !important;
+  }
+
+  .eg-admin-8-panel h2{
+    font-size:32px !important;
+    line-height:1.08 !important;
+  }
+
+  .eg-admin-8-panel > p{
+    font-size:16px !important;
+    line-height:1.35 !important;
+  }
+}
+
+@media(max-width:430px){
+  .eg-admin-8-panel{
+    padding:16px !important;
+  }
+
+  .eg-admin-module{
+    min-height:132px !important;
+    padding:14px !important;
+  }
+
+  .eg-admin-module h3,
+  .eg-admin-module .title{
+    font-size:20px !important;
+  }
+
+  .eg-admin-module p,
+  .eg-admin-module .desc{
+    font-size:14px !important;
+  }
+
+  .eg-admin-module .eg-module-icon,
+  .eg-admin-module .icon{
+    width:56px !important;
+    height:56px !important;
+    min-width:56px !important;
+  }
+
+  .ss-metric-card .value,
+  .ss-metric-card strong,
+  .ss-metric-number{
+    font-size:30px !important;
+  }
+}
+</style>
+
 </head>
 
 <body>
@@ -1896,7 +2095,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="eg-module-body">
         <h3>Lisanslar</h3>
         <p>Aktif lisansları ve cihaz erişimlerini kontrol et.</p>
-        <b>Aç →</b>
+        <b>Yönet →</b>
       </div>
     </a>
 
@@ -1905,7 +2104,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="eg-module-body">
         <h3>Ödemeler</h3>
         <p>Ödeme taleplerini ve onay bekleyen işlemleri incele.</p>
-        <b>Kontrol Et →</b>
+        <b>Yönet →</b>
       </div>
     </a>
 
@@ -1923,7 +2122,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="eg-module-body">
         <h3>Bildirimler</h3>
         <p>Admin uyarılarını ve kullanıcı bildirimlerini yönet.</p>
-        <b>Gönder →</b>
+        <b>Yönet →</b>
       </div>
     </a>
 
@@ -1932,7 +2131,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="eg-module-body">
         <h3>Raporlar</h3>
         <p>Logları, olay kayıtlarını ve sistem raporlarını görüntüle.</p>
-        <b>Raporla →</b>
+        <b>Yönet →</b>
       </div>
     </a>
 
@@ -1941,7 +2140,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="eg-module-body">
         <h3>Güvenli Liste</h3>
         <p>Güvenilir kayıtları ve izin verilen öğeleri düzenle.</p>
-        <b>Listeyi Aç →</b>
+        <b>Yönet →</b>
       </div>
     </a>
 
@@ -1950,7 +2149,7 @@ document.addEventListener("DOMContentLoaded", function () {
       <div class="eg-module-body">
         <h3>Sistem Ayarları</h3>
         <p>Admin ayarları ve sistem yapılandırmasını düzenle.</p>
-        <b>Ayarları Aç →</b>
+        <b>Yönet →</b>
       </div>
     </a>
   </div>
@@ -2028,13 +2227,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     <a class="ss-control-btn" href="/admin/spam-logs">
       <span>📜</span>
-      <b>Logları Tara</b>
-      <small>Spam kayıtlarını incele</small>
+      <b>Güvenlik Logları</b>
+      <small>Güvenlik kayıtlarını incele</small>
     </a>
 
     <a class="ss-control-btn" href="/admin/notifications">
       <span>🔔</span>
-      <b>Bildirim Gönder</b>
+      <b>Bildirimler</b>
       <small>Uyarı merkezini aç</small>
     </a>
 
