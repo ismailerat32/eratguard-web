@@ -10701,6 +10701,9 @@ try:
                     users={},
                     license_requests=[],
                     payment_requests=[],
+                    error="",
+                    success="",
+                    new_license_key="",
                     admin_stats={
                         "users": 0,
                         "licenses": 0,
