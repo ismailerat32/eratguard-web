@@ -11304,6 +11304,294 @@ except Exception as _eg4q_boot_err:
 # ===== ERATGUARD STAGE4Q PREMIUM NOTIFICATION FILTER END =====
 
 
+
+
+# ===== ERATGUARD STAGE4R NOTIFICATION MANAGEMENT START =====
+# Amaç:
+# - Admin bildirimlerini arşivleme, geri alma ve silme yönetimi ekler.
+# - Kullanıcı tarafında archived bildirimleri gizler.
+try:
+    from flask import request as _eg4r_request
+    from flask import render_template as _eg4r_render_template
+    from flask import session as _eg4r_session
+    import json as _eg4r_json
+    from pathlib import Path as _eg4r_Path
+    from datetime import datetime as _eg4r_datetime
+
+    _EG4R_NOTIFICATIONS_FILE = _eg4r_Path("data/admin_notifications.json")
+    _EG4R_USERS_FILE = _eg4r_Path("data/users.json")
+    _EG4R_LICENSES_FILE = _eg4r_Path("data/licenses.json")
+
+    def _eg4r_load_json(path, fallback):
+        try:
+            if not path.exists():
+                return fallback
+            data = _eg4r_json.loads(path.read_text(encoding="utf-8") or "")
+            return data
+        except Exception as _err:
+            print("ERATGUARD STAGE4R LOAD JSON ERROR:", path, _err)
+            return fallback
+
+    def _eg4r_save_notifications(items):
+        try:
+            _EG4R_NOTIFICATIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
+            _EG4R_NOTIFICATIONS_FILE.write_text(
+                _eg4r_json.dumps(items, ensure_ascii=False, indent=2),
+                encoding="utf-8"
+            )
+            return True
+        except Exception as _err:
+            print("ERATGUARD STAGE4R SAVE ERROR:", _err)
+            return False
+
+    def _eg4r_load_notifications():
+        data = _eg4r_load_json(_EG4R_NOTIFICATIONS_FILE, [])
+        return data if isinstance(data, list) else []
+
+    def _eg4r_stats(items):
+        active = [x for x in items if isinstance(x, dict) and str(x.get("status", "created")).lower() != "archived"]
+        return {
+            "total": len(active),
+            "today": sum(1 for x in active if str(x.get("created_at", "")).startswith(_eg4r_datetime.now().strftime("%Y-%m-%d"))),
+            "critical": sum(1 for x in active if str(x.get("priority", "")).lower() == "critical"),
+        }
+
+    def _eg4r_render_admin(success="", error=""):
+        items = _eg4r_load_notifications()
+        display_items = list(reversed(items[-80:]))
+        return _eg4r_render_template(
+            "admin_notifications.html",
+            notifications=display_items,
+            notification_stats=_eg4r_stats(items),
+            success=success,
+            error=error,
+            brand="EratGuard PRO",
+        )
+
+    def _eg4r_admin_manage_route():
+        try:
+            _path = str(getattr(_eg4r_request, "path", "") or "").rstrip("/")
+            if _path != "/admin/notifications":
+                return None
+
+            method = str(getattr(_eg4r_request, "method", "GET")).upper()
+
+            if method == "GET":
+                return _eg4r_render_admin()
+
+            if method != "POST":
+                return None
+
+            form = getattr(_eg4r_request, "form", {}) or {}
+            action = str(form.get("action", "")).strip().lower()
+            notification_id = str(form.get("notification_id", "")).strip()
+
+            # Yeni bildirim oluşturma POST'unu Stage 4O'ya bırak.
+            if action not in ("archive", "restore", "delete"):
+                return None
+
+            if not notification_id:
+                return _eg4r_render_admin(error="Bildirim ID bulunamadı.")
+
+            items = _eg4r_load_notifications()
+            found = False
+            new_items = []
+
+            for item in items:
+                if not isinstance(item, dict):
+                    new_items.append(item)
+                    continue
+
+                if str(item.get("id", "")).strip() == notification_id:
+                    found = True
+
+                    if action == "archive":
+                        item["status"] = "archived"
+                        item["archived_at"] = _eg4r_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        new_items.append(item)
+
+                    elif action == "restore":
+                        item["status"] = "created"
+                        item.pop("archived_at", None)
+                        new_items.append(item)
+
+                    elif action == "delete":
+                        # Bilerek eklemiyoruz: JSON’dan kaldırılır.
+                        continue
+                else:
+                    new_items.append(item)
+
+            if not found:
+                return _eg4r_render_admin(error="Bildirim bulunamadı.")
+
+            if not _eg4r_save_notifications(new_items):
+                return _eg4r_render_admin(error="Bildirim güncellenemedi.")
+
+            if action == "archive":
+                return _eg4r_render_admin(success="Bildirim arşivlendi.")
+            if action == "restore":
+                return _eg4r_render_admin(success="Bildirim tekrar aktif edildi.")
+            if action == "delete":
+                return _eg4r_render_admin(success="Bildirim silindi.")
+
+            return _eg4r_render_admin()
+
+        except Exception as _err:
+            print("ERATGUARD STAGE4R ADMIN ROUTE ERROR:", _err)
+            return None
+
+    def _eg4r_date_active(value):
+        try:
+            if not value:
+                return False
+            exp = _eg4r_datetime.strptime(str(value).strip()[:10], "%Y-%m-%d").date()
+            return exp >= _eg4r_datetime.now().date()
+        except Exception:
+            return False
+
+    def _eg4r_current_user_is_premium():
+        try:
+            username = str(_eg4r_session.get("username") or "").strip()
+            role = str(_eg4r_session.get("role") or "").lower().strip()
+            is_admin = bool(_eg4r_session.get("is_admin")) or role == "admin" or username.lower() == "admin"
+
+            if is_admin:
+                return True
+            if not username:
+                return False
+
+            users = _eg4r_load_json(_EG4R_USERS_FILE, {})
+            licenses = _eg4r_load_json(_EG4R_LICENSES_FILE, {})
+            user = {}
+
+            if isinstance(users, dict):
+                user = users.get(username) or users.get(username.lower()) or {}
+
+            if not isinstance(user, dict):
+                user = {}
+
+            if user.get("active") is False:
+                return False
+
+            premium_types = {"pro", "premium", "lifetime", "admin", "pro_monthly", "pro_yearly"}
+            license_type = str(user.get("license_type") or user.get("license_mode") or user.get("plan") or "").lower().strip()
+
+            if license_type in premium_types:
+                return True
+
+            license_key = str(user.get("license_key") or "").strip().upper()
+            if not license_key or license_key == "NONE":
+                return False
+
+            for date_key in ("expires_at", "license_expiry", "expiry"):
+                if _eg4r_date_active(user.get(date_key)):
+                    return True
+
+            if isinstance(licenses, dict):
+                lic = licenses.get(license_key)
+                if isinstance(lic, dict):
+                    status = str(lic.get("status") or "").lower()
+                    used = lic.get("used")
+                    lic_user = str(lic.get("username") or lic.get("used_by") or "").strip()
+                    lic_type = str(lic.get("license_type") or lic.get("type") or lic.get("plan") or "").lower().strip()
+
+                    if lic_type in premium_types and (status in ("active", "used", "approved") or used is True or lic_user == username):
+                        return True
+
+                    for date_key in ("license_expiry", "expiry", "expires_at"):
+                        if _eg4r_date_active(lic.get(date_key)) and (status in ("active", "used", "approved") or used is True or lic_user == username):
+                            return True
+
+            return False
+        except Exception as _err:
+            print("ERATGUARD STAGE4R PREMIUM CHECK ERROR:", _err)
+            return False
+
+    def _eg4r_user_items():
+        items = _eg4r_load_notifications()
+        premium_user = _eg4r_current_user_is_premium()
+        visible = []
+
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+
+            if str(item.get("status", "created")).lower() == "archived":
+                continue
+
+            target = str(item.get("target", "all")).lower().strip()
+
+            if target == "admin":
+                continue
+
+            if target == "premium" and not premium_user:
+                continue
+
+            visible.append(item)
+
+        return list(reversed(visible[-50:]))
+
+    def _eg4r_user_stats(items):
+        return {
+            "total": len(items),
+            "high": sum(1 for x in items if str(x.get("priority", "")).lower() == "high"),
+            "critical": sum(1 for x in items if str(x.get("priority", "")).lower() == "critical"),
+        }
+
+    def _eg4r_render_user(**kwargs):
+        try:
+            items = _eg4r_user_items()
+            return _eg4r_render_template(
+                "user_notifications_admin_feed.html",
+                notifications=items,
+                notification_stats=_eg4r_user_stats(items),
+                brand="EratGuard PRO",
+            )
+        except Exception as _err:
+            print("ERATGUARD STAGE4R USER RENDER ERROR:", _err)
+            return None
+
+    def _eg_stage4r_before_request():
+        try:
+            _path = str(getattr(_eg4r_request, "path", "") or "").rstrip("/")
+            _method = str(getattr(_eg4r_request, "method", "GET")).upper()
+
+            if _path == "/admin/notifications":
+                result = _eg4r_admin_manage_route()
+                if result is not None:
+                    return result
+
+            if _path == "/u/notifications" and _method == "GET":
+                return _eg4r_render_user()
+
+            return None
+        except Exception as _err:
+            print("ERATGUARD STAGE4R BEFORE ERROR:", _err)
+            return None
+
+    try:
+        _eg4r_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg4r_funcs[:] = [
+            f for f in _eg4r_funcs
+            if getattr(f, "__name__", "") != "_eg_stage4r_before_request"
+        ]
+        _eg4r_funcs.insert(0, _eg_stage4r_before_request)
+    except Exception as _err:
+        print("ERATGUARD STAGE4R INSERT ERROR:", _err)
+
+    try:
+        for _eg4r_rule in list(app.url_map.iter_rules()):
+            _rule = str(_eg4r_rule.rule).rstrip("/")
+            if _rule == "/u/notifications":
+                app.view_functions[_eg4r_rule.endpoint] = _eg4r_render_user
+    except Exception as _err:
+        print("ERATGUARD STAGE4R ROUTE MAP ERROR:", _err)
+
+except Exception as _eg4r_boot_err:
+    print("ERATGUARD STAGE4R NOTIFICATION MANAGEMENT ERROR:", _eg4r_boot_err)
+# ===== ERATGUARD STAGE4R NOTIFICATION MANAGEMENT END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)

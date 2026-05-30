@@ -179,6 +179,56 @@ body{
   background:rgba(255,77,94,.14);
   border:1px solid rgba(255,77,94,.25);
 }
+.eg-notice-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+.eg-notice-actions form{
+  margin:0;
+}
+.eg-mini-btn{
+  border:1px solid rgba(255,255,255,.12);
+  padding:8px 10px;
+  border-radius:999px;
+  font-weight:1000;
+  font-size:12px;
+  cursor:pointer;
+  color:#f7fff4;
+  background:rgba(255,255,255,.06);
+}
+.eg-mini-btn.archive{
+  color:#fff1c2;
+  border-color:rgba(251,191,36,.28);
+  background:rgba(251,191,36,.10);
+}
+.eg-mini-btn.restore{
+  color:#d9ffc7;
+  border-color:rgba(141,255,63,.28);
+  background:rgba(141,255,63,.10);
+}
+.eg-mini-btn.delete{
+  color:#ffd4d8;
+  border-color:rgba(255,77,94,.28);
+  background:rgba(255,77,94,.10);
+}
+.eg-status{
+  display:inline-flex;
+  margin-left:8px;
+  padding:5px 8px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:1000;
+  color:#a6b8c8;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.05);
+}
+.eg-status.archived{
+  color:#fff1c2;
+  border-color:rgba(251,191,36,.25);
+  background:rgba(251,191,36,.10);
+}
 .notice small{
   display:block;
   margin-top:7px;
@@ -294,7 +344,32 @@ body{
             <span class="badge {{ n.get('priority', 'normal') }}">{{ n.get("priority", "normal")|upper }}</span>
           </div>
           <p>{{ n.get("message", "-") }}</p>
-          <small>{{ n.get("created_at", "Yeni") }} · Hedef: {{ n.get("target", "all") }}</small>
+          <small>
+            {{ n.get("created_at", "Yeni") }} · Hedef: {{ n.get("target", "all") }}
+            <span class="eg-status {{ n.get('status', 'created') }}">{{ n.get("status", "created")|upper }}</span>
+          </small>
+
+          <div class="eg-notice-actions">
+            {% if n.get("status", "created") == "archived" %}
+            <form method="POST" action="/admin/notifications">
+              <input type="hidden" name="action" value="restore">
+              <input type="hidden" name="notification_id" value="{{ n.get('id', '') }}">
+              <button class="eg-mini-btn restore" type="submit">Geri Al</button>
+            </form>
+            {% else %}
+            <form method="POST" action="/admin/notifications">
+              <input type="hidden" name="action" value="archive">
+              <input type="hidden" name="notification_id" value="{{ n.get('id', '') }}">
+              <button class="eg-mini-btn archive" type="submit">Arşivle</button>
+            </form>
+            {% endif %}
+
+            <form method="POST" action="/admin/notifications" onsubmit="return confirm('Bu bildirimi silmek istiyor musunuz?');">
+              <input type="hidden" name="action" value="delete">
+              <input type="hidden" name="notification_id" value="{{ n.get('id', '') }}">
+              <button class="eg-mini-btn delete" type="submit">Sil</button>
+            </form>
+          </div>
         </div>
         {% else %}
         <div class="notice">
