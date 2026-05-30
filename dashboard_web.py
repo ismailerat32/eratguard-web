@@ -11102,6 +11102,208 @@ except Exception as _eg4p_force_boot_err:
 # ===== ERATGUARD STAGE4P FORCE USER NOTIFICATIONS ROUTE END =====
 
 
+
+
+# ===== ERATGUARD STAGE4Q PREMIUM NOTIFICATION FILTER START =====
+# Amaç:
+# - Kullanıcı bildirimlerinde hedef filtrelerini gerçek lisans durumuna bağlar.
+# - target=all herkes görür.
+# - target=admin kullanıcı tarafında görünmez.
+# - target=premium sadece premium/pro/lisanslı aktif kullanıcıya görünür.
+try:
+    from flask import request as _eg4q_request
+    from flask import render_template as _eg4q_render_template
+    from flask import session as _eg4q_session
+    import json as _eg4q_json
+    from pathlib import Path as _eg4q_Path
+    from datetime import datetime as _eg4q_datetime
+
+    _EG4Q_USERS_FILE = _eg4q_Path("data/users.json")
+    _EG4Q_LICENSES_FILE = _eg4q_Path("data/licenses.json")
+    _EG4Q_NOTIFICATIONS_FILE = _eg4q_Path("data/admin_notifications.json")
+
+    def _eg4q_load_json(path, fallback):
+        try:
+            if not path.exists():
+                return fallback
+            data = _eg4q_json.loads(path.read_text(encoding="utf-8") or "")
+            return data
+        except Exception as _eg4q_json_err:
+            print("ERATGUARD STAGE4Q JSON LOAD ERROR:", path, _eg4q_json_err)
+            return fallback
+
+    def _eg4q_date_active(value):
+        try:
+            if not value:
+                return False
+            raw = str(value).strip()
+            if not raw:
+                return False
+            # 2099-12-31, 2026-05-30 gibi tarihleri destekle.
+            day = raw[:10]
+            exp = _eg4q_datetime.strptime(day, "%Y-%m-%d").date()
+            return exp >= _eg4q_datetime.now().date()
+        except Exception:
+            return False
+
+    def _eg4q_current_user_is_premium():
+        try:
+            username = str(_eg4q_session.get("username") or "").strip()
+            role = str(_eg4q_session.get("role") or "").lower().strip()
+            is_admin = bool(_eg4q_session.get("is_admin")) or role == "admin" or username.lower() == "admin"
+
+            if is_admin:
+                return True
+
+            if not username:
+                return False
+
+            users = _eg4q_load_json(_EG4Q_USERS_FILE, {})
+            licenses = _eg4q_load_json(_EG4Q_LICENSES_FILE, {})
+
+            user = {}
+            if isinstance(users, dict):
+                user = users.get(username) or users.get(username.lower()) or {}
+
+            if not isinstance(user, dict):
+                user = {}
+
+            if user.get("active") is False:
+                return False
+
+            license_type = str(
+                user.get("license_type")
+                or user.get("license_mode")
+                or user.get("plan")
+                or ""
+            ).lower().strip()
+
+            premium_types = {"pro", "premium", "lifetime", "admin", "pro_monthly", "pro_yearly"}
+
+            if license_type in premium_types:
+                return True
+
+            license_key = str(user.get("license_key") or "").strip().upper()
+            if not license_key or license_key == "NONE":
+                return False
+
+            # Kullanıcıda geçerli tarih varsa lisanslı kabul et.
+            for date_key in ("expires_at", "license_expiry", "expiry"):
+                if _eg4q_date_active(user.get(date_key)):
+                    return True
+
+            if isinstance(licenses, dict):
+                lic = licenses.get(license_key)
+                if isinstance(lic, dict):
+                    status = str(lic.get("status") or "").lower()
+                    used = lic.get("used")
+                    lic_user = str(lic.get("username") or lic.get("used_by") or "").strip()
+
+                    lic_type = str(
+                        lic.get("license_type")
+                        or lic.get("type")
+                        or lic.get("plan")
+                        or ""
+                    ).lower().strip()
+
+                    if lic_type in premium_types:
+                        if status in ("active", "used", "approved") or used is True or lic_user == username:
+                            return True
+
+                    for date_key in ("license_expiry", "expiry", "expires_at"):
+                        if _eg4q_date_active(lic.get(date_key)):
+                            if status in ("active", "used", "approved") or used is True or lic_user == username:
+                                return True
+
+            return False
+
+        except Exception as _eg4q_premium_err:
+            print("ERATGUARD STAGE4Q PREMIUM CHECK ERROR:", _eg4q_premium_err)
+            return False
+
+    def _eg4q_load_filtered_notifications():
+        try:
+            data = _eg4q_load_json(_EG4Q_NOTIFICATIONS_FILE, [])
+            if not isinstance(data, list):
+                return []
+
+            premium_user = _eg4q_current_user_is_premium()
+
+            visible = []
+            for item in data:
+                if not isinstance(item, dict):
+                    continue
+
+                target = str(item.get("target", "all")).lower().strip()
+
+                if target == "admin":
+                    continue
+
+                if target == "premium" and not premium_user:
+                    continue
+
+                visible.append(item)
+
+            return list(reversed(visible[-50:]))
+
+        except Exception as _eg4q_filter_err:
+            print("ERATGUARD STAGE4Q FILTER ERROR:", _eg4q_filter_err)
+            return []
+
+    def _eg4q_stats(items):
+        return {
+            "total": len(items),
+            "high": sum(1 for x in items if str(x.get("priority", "")).lower() == "high"),
+            "critical": sum(1 for x in items if str(x.get("priority", "")).lower() == "critical"),
+        }
+
+    def _eg_stage4q_user_notifications_page(**kwargs):
+        try:
+            items = _eg4q_load_filtered_notifications()
+            return _eg4q_render_template(
+                "user_notifications_admin_feed.html",
+                notifications=items,
+                notification_stats=_eg4q_stats(items),
+                brand="EratGuard PRO",
+            )
+        except Exception as _eg4q_render_err:
+            print("ERATGUARD STAGE4Q RENDER ERROR:", _eg4q_render_err)
+            return None
+
+    def _eg_stage4q_before_request():
+        try:
+            if str(getattr(_eg4q_request, "method", "GET")).upper() != "GET":
+                return None
+
+            _path = str(getattr(_eg4q_request, "path", "") or "").rstrip("/")
+            if _path == "/u/notifications":
+                return _eg_stage4q_user_notifications_page()
+        except Exception as _eg4q_before_err:
+            print("ERATGUARD STAGE4Q BEFORE ERROR:", _eg4q_before_err)
+            return None
+
+    try:
+        _eg4q_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg4q_funcs[:] = [
+            f for f in _eg4q_funcs
+            if getattr(f, "__name__", "") != "_eg_stage4q_before_request"
+        ]
+        _eg4q_funcs.insert(0, _eg_stage4q_before_request)
+    except Exception as _eg4q_insert_err:
+        print("ERATGUARD STAGE4Q INSERT ERROR:", _eg4q_insert_err)
+
+    try:
+        for _eg4q_rule in list(app.url_map.iter_rules()):
+            if str(_eg4q_rule.rule).rstrip("/") == "/u/notifications":
+                app.view_functions[_eg4q_rule.endpoint] = _eg_stage4q_user_notifications_page
+    except Exception as _eg4q_route_err:
+        print("ERATGUARD STAGE4Q ROUTE MAP ERROR:", _eg4q_route_err)
+
+except Exception as _eg4q_boot_err:
+    print("ERATGUARD STAGE4Q PREMIUM NOTIFICATION FILTER ERROR:", _eg4q_boot_err)
+# ===== ERATGUARD STAGE4Q PREMIUM NOTIFICATION FILTER END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
