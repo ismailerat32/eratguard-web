@@ -10921,6 +10921,86 @@ except Exception as _eg4o_boot_error:
 # ===== ERATGUARD STAGE4O NOTIFICATIONS JSON STORAGE END =====
 
 
+
+
+# ===== ERATGUARD STAGE4P USER NOTIFICATIONS FEED START =====
+# Amaç:
+# - Admin tarafından data/admin_notifications.json içine kaydedilen bildirimleri kullanıcı tarafında gösterir.
+# - target=admin kullanıcıya gösterilmez.
+# - target=all ve target=premium şimdilik kullanıcı feed'inde görünür.
+try:
+    from flask import request as _eg4p_request
+    from flask import render_template as _eg4p_render_template
+    import json as _eg4p_json
+    from pathlib import Path as _eg4p_Path
+
+    _EG4P_NOTIFICATIONS_FILE = _eg4p_Path("data/admin_notifications.json")
+
+    def _eg4p_load_user_notifications():
+        try:
+            if not _EG4P_NOTIFICATIONS_FILE.exists():
+                return []
+            data = _eg4p_json.loads(_EG4P_NOTIFICATIONS_FILE.read_text(encoding="utf-8") or "[]")
+            if not isinstance(data, list):
+                return []
+
+            visible = []
+            for item in data:
+                if not isinstance(item, dict):
+                    continue
+                target = str(item.get("target", "all")).lower()
+                if target == "admin":
+                    continue
+                visible.append(item)
+
+            return list(reversed(visible[-50:]))
+        except Exception as _load_err:
+            print("ERATGUARD STAGE4P USER NOTIFICATIONS LOAD ERROR:", _load_err)
+            return []
+
+    def _eg4p_user_notification_stats(items):
+        return {
+            "total": len(items),
+            "high": sum(1 for x in items if str(x.get("priority", "")).lower() == "high"),
+            "critical": sum(1 for x in items if str(x.get("priority", "")).lower() == "critical"),
+        }
+
+    def _eg_stage4p_user_notifications_feed():
+        try:
+            if str(getattr(_eg4p_request, "method", "GET")).upper() != "GET":
+                return None
+
+            _path = str(getattr(_eg4p_request, "path", "") or "").rstrip("/")
+            if _path != "/u/notifications":
+                return None
+
+            items = _eg4p_load_user_notifications()
+
+            return _eg4p_render_template(
+                "user_notifications_admin_feed.html",
+                notifications=items,
+                notification_stats=_eg4p_user_notification_stats(items),
+                brand="EratGuard PRO",
+            )
+        except Exception as _eg4p_route_err:
+            print("ERATGUARD STAGE4P USER NOTIFICATIONS ROUTE ERROR:", _eg4p_route_err)
+            return None
+
+    try:
+        _eg4p_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg4p_funcs[:] = [
+            f for f in _eg4p_funcs
+            if getattr(f, "__name__", "") != "_eg_stage4p_user_notifications_feed"
+        ]
+        _eg4p_funcs.insert(0, _eg_stage4p_user_notifications_feed)
+    except Exception as _eg4p_insert_err:
+        print("ERATGUARD STAGE4P USER NOTIFICATIONS INSERT ERROR:", _eg4p_insert_err)
+
+except Exception as _eg4p_boot_error:
+    print("ERATGUARD STAGE4P USER NOTIFICATIONS FEED ERROR:", _eg4p_boot_error)
+# ===== ERATGUARD STAGE4P USER NOTIFICATIONS FEED END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
