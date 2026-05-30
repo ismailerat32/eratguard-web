@@ -10739,6 +10739,53 @@ except Exception as _eg_stage4l_license_boot_error:
 # ===== ERATGUARD STAGE4L LICENSE ROUTE HOTFIX END =====
 
 
+
+
+# ===== ERATGUARD STAGE4N PREPEND NOTIFICATIONS ROUTE START =====
+# /admin/notifications için eski Stage 4L placeholder guard'ını ezer.
+# Sadece GET isteklerini yakalar; POST form akışı daha sonra gerçek kayıt mantığına bağlanacak.
+try:
+    from flask import request as _eg4n_request
+    from flask import render_template as _eg4n_render_template
+
+    def _eg_stage4n_prepend_notifications_route():
+        try:
+            if str(getattr(_eg4n_request, "method", "GET")).upper() != "GET":
+                return None
+
+            _path = str(getattr(_eg4n_request, "path", "") or "").rstrip("/")
+            if _path != "/admin/notifications":
+                return None
+
+            return _eg4n_render_template(
+                "admin_notifications.html",
+                notifications=[],
+                notification_stats={
+                    "total": 0,
+                    "today": 0,
+                    "critical": 0,
+                },
+                brand="EratGuard PRO",
+            )
+        except Exception as _eg4n_err:
+            print("ERATGUARD STAGE4N NOTIFICATIONS ROUTE ERROR:", _eg4n_err)
+            return None
+
+    try:
+        _eg4n_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg4n_funcs[:] = [
+            f for f in _eg4n_funcs
+            if getattr(f, "__name__", "") != "_eg_stage4n_prepend_notifications_route"
+        ]
+        _eg4n_funcs.insert(0, _eg_stage4n_prepend_notifications_route)
+    except Exception as _eg4n_insert_err:
+        print("ERATGUARD STAGE4N NOTIFICATIONS INSERT ERROR:", _eg4n_insert_err)
+
+except Exception as _eg4n_boot_error:
+    print("ERATGUARD STAGE4N PREPEND NOTIFICATIONS ROUTE ERROR:", _eg4n_boot_error)
+# ===== ERATGUARD STAGE4N PREPEND NOTIFICATIONS ROUTE END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
