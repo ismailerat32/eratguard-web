@@ -1900,4 +1900,113 @@ loadLicenses();
 })();
 </script>
 </body>
-</html>
+</htm
+<style id="stage4z-remove-komut-apk-topbar-v1">
+/* ===== STAGE 4Z: REMOVE KOMUT BUTTON FROM APK TOPBAR =====
+   APK/WebView üst barda Komut butonunu tamamen gizler.
+*/
+
+@media(max-width:760px){
+  .cmd-btn,
+  .command-btn,
+  .command-palette-btn,
+  .shortcut-btn,
+  [data-action="command"],
+  [data-action="cmd"],
+  [data-action*="command"],
+  [class*="command"],
+  button[title*="Komut"],
+  button[aria-label*="Komut"],
+  a[title*="Komut"],
+  a[aria-label*="Komut"]{
+    display:none !important;
+    visibility:hidden !important;
+    width:0 !important;
+    min-width:0 !important;
+    max-width:0 !important;
+    padding:0 !important;
+    margin:0 !important;
+    border:0 !important;
+    overflow:hidden !important;
+    pointer-events:none !important;
+  }
+
+  /* Komut gidince sağ taraf rahatlasın */
+  .top-actions,
+  .tb-actions,
+  .header-actions{
+    max-width:180px !important;
+    gap:8px !important;
+  }
+}
+</style>
+
+<script id="stage4z-remove-komut-apk-topbar-v1">
+(function(){
+  function isMobile(){
+    return window.matchMedia && window.matchMedia("(max-width: 760px)").matches;
+  }
+
+  function hideNode(el){
+    try{
+      el.setAttribute("data-eg-stage4z-komut-hidden", "1");
+      el.style.display = "none";
+      el.style.visibility = "hidden";
+      el.style.width = "0";
+      el.style.minWidth = "0";
+      el.style.maxWidth = "0";
+      el.style.padding = "0";
+      el.style.margin = "0";
+      el.style.border = "0";
+      el.style.overflow = "hidden";
+      el.style.pointerEvents = "none";
+    }catch(e){}
+  }
+
+  function removeKomut(){
+    if(!isMobile()) return;
+
+    var selectors = [
+      ".cmd-btn",
+      ".command-btn",
+      ".command-palette-btn",
+      ".shortcut-btn",
+      "[data-action='command']",
+      "[data-action='cmd']",
+      "[data-action*='command']",
+      "[data-action*='cmd']",
+      "[class*='command']",
+      "[class*='cmd']",
+      "button",
+      "a",
+      "[role='button']"
+    ];
+
+    selectors.forEach(function(sel){
+      document.querySelectorAll(sel).forEach(function(el){
+        try{
+          var txt = (el.textContent || "").trim().toLowerCase();
+          var title = (el.getAttribute("title") || "").toLowerCase();
+          var aria = (el.getAttribute("aria-label") || "").toLowerCase();
+
+          if(txt === "komut" || txt.indexOf("komut") !== -1 || title.indexOf("komut") !== -1 || aria.indexOf("komut") !== -1){
+            hideNode(el);
+          }
+        }catch(e){}
+      });
+    });
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", removeKomut);
+  }else{
+    removeKomut();
+  }
+
+  setTimeout(removeKomut, 250);
+  setTimeout(removeKomut, 1000);
+  setTimeout(removeKomut, 2000);
+})();
+</script>
+
+l>
