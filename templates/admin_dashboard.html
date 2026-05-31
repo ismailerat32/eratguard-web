@@ -465,6 +465,194 @@ a{text-decoration:none;color:inherit}
   .modules{grid-template-columns:1fr}
 }
 </style>
+
+<style id="stage4t-mobile-no-overflow-lock-v1">
+/* ===== STAGE 4T HOTFIX 1: APK MOBILE NO OVERFLOW LOCK =====
+   APK/WebView içinde yatay taşmayı ve sol kırpılmayı engeller.
+*/
+
+html,
+body{
+  width:100% !important;
+  max-width:100% !important;
+  overflow-x:hidden !important;
+}
+
+.app,
+.main,
+.content,
+.hero,
+.section,
+.modules,
+.stats,
+.two,
+.rows,
+.row,
+.module,
+.stat,
+.status-card{
+  max-width:100% !important;
+}
+
+*{
+  min-width:0 !important;
+}
+
+/* Üst yatay menü kontrollü kalsın; sayfayı genişletmesin */
+.sidebar,
+.nav{
+  width:100% !important;
+  max-width:100vw !important;
+  overflow-x:auto !important;
+}
+
+.nav{
+  scrollbar-width:none;
+}
+
+.nav::-webkit-scrollbar{
+  display:none;
+}
+
+/* APK/mobile kesin tek kolon */
+@media(max-width:760px){
+  .app{
+    display:block !important;
+    width:100% !important;
+    max-width:100vw !important;
+    overflow-x:hidden !important;
+  }
+
+  .main{
+    width:100% !important;
+    max-width:100vw !important;
+    overflow-x:hidden !important;
+  }
+
+  .content{
+    width:100% !important;
+    max-width:100vw !important;
+    padding:12px !important;
+    overflow-x:hidden !important;
+  }
+
+  .topbar{
+    width:100% !important;
+    max-width:100vw !important;
+    overflow:hidden !important;
+  }
+
+  .hero,
+  .section{
+    width:100% !important;
+    max-width:100% !important;
+    margin-left:0 !important;
+    margin-right:0 !important;
+  }
+
+  .hero{
+    padding:16px !important;
+  }
+
+  .hero h1{
+    font-size:34px !important;
+    line-height:1.04 !important;
+    word-break:normal !important;
+  }
+
+  .hero p{
+    max-width:100% !important;
+    overflow-wrap:anywhere !important;
+  }
+
+  .hero:after{
+    display:none !important;
+  }
+
+  .hero-status,
+  .stats,
+  .modules,
+  .two{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    width:100% !important;
+    max-width:100% !important;
+  }
+
+  .stat,
+  .module,
+  .status-card{
+    width:100% !important;
+    max-width:100% !important;
+  }
+
+  .module{
+    min-height:auto !important;
+    padding:16px !important;
+  }
+
+  .module h3{
+    font-size:22px !important;
+  }
+
+  .module p{
+    font-size:14px !important;
+  }
+
+  .row{
+    width:100% !important;
+    max-width:100% !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    overflow:hidden !important;
+  }
+
+  .row b{
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+
+  .badge{
+    flex:0 0 auto !important;
+  }
+
+  .footer{
+    width:100% !important;
+    max-width:100vw !important;
+    padding-left:12px !important;
+    padding-right:12px !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+}
+
+/* Çok dar ekranlar */
+@media(max-width:430px){
+  .nav a{
+    padding:10px 12px !important;
+    font-size:13px !important;
+  }
+
+  .section h2{
+    font-size:30px !important;
+  }
+
+  .stat strong{
+    font-size:32px !important;
+  }
+
+  .mi{
+    width:54px !important;
+    height:54px !important;
+  }
+}
+</style>
+
 </head>
 
 <body>
