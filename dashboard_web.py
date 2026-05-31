@@ -11846,6 +11846,140 @@ except Exception as _eg4u_boot_err:
 # ===== ERATGUARD STAGE4U CLAUDE PANEL PREVIEW END =====
 
 
+
+
+# ===== ERATGUARD STAGE5A HARD ADMIN AUTH LOCK START =====
+# Amaç:
+# - /admin/login route'unun yanlışlıkla dashboard göstermesini engeller.
+# - /admin, /admin/dashboard ve /admin/* yollarını admin session olmadan kapatır.
+# - Yetkisiz kullanıcıyı gerçek /admin/login sayfasına yönlendirir.
+try:
+    from flask import request as _eg5a_request
+    from flask import session as _eg5a_session
+    from flask import redirect as _eg5a_redirect
+    from flask import render_template as _eg5a_render_template
+    from flask import make_response as _eg5a_make_response
+    import html as _eg5a_html
+
+    def _eg5a_is_admin_session():
+        try:
+            username = str(_eg5a_session.get("username") or "").strip().lower()
+            role = str(_eg5a_session.get("role") or "").strip().lower()
+
+            if bool(_eg5a_session.get("is_admin")):
+                return True
+
+            if role == "admin":
+                return True
+
+            if username == "admin":
+                return True
+
+            return False
+        except Exception as _err:
+            print("ERATGUARD STAGE5A SESSION CHECK ERROR:", _err)
+            return False
+
+    def _eg5a_real_admin_login_page():
+        try:
+            # Varsa gerçek admin_login.html kullan.
+            return _eg5a_render_template(
+                "admin_login.html",
+                brand="EratGuard PRO",
+                error="",
+                next=str(_eg5a_request.args.get("next") or "/admin/dashboard"),
+            )
+        except Exception as _err:
+            print("ERATGUARD STAGE5A ADMIN LOGIN TEMPLATE ERROR:", _err)
+
+            next_url = _eg5a_html.escape(str(_eg5a_request.args.get("next") or "/admin/dashboard"))
+            return """<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EratGuard Admin Login</title>
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#050810;color:#e8f4ff;font-family:Arial,sans-serif}
+.card{width:min(420px,92vw);border:1px solid rgba(0,200,240,.22);border-radius:24px;background:#0a1020;padding:26px;box-shadow:0 24px 70px rgba(0,0,0,.42)}
+h1{margin:0 0 8px;font-size:30px}
+p{color:#91a8c2}
+label{display:block;margin-top:14px;color:#91a8c2;font-weight:800}
+input{width:100%;box-sizing:border-box;margin-top:7px;padding:13px;border-radius:13px;border:1px solid #203555;background:#050810;color:#e8f4ff}
+button{width:100%;margin-top:18px;padding:14px;border:0;border-radius:14px;background:#00c8f0;color:#031018;font-weight:1000}
+</style>
+</head>
+<body>
+<form class="card" method="post" action="/admin/login">
+<h1>EratGuard Admin</h1>
+<p>Admin erişimi için giriş yap.</p>
+<input type="hidden" name="next" value=\"""" + next_url + """\">
+<label>Kullanıcı adı</label>
+<input name="username" autocomplete="username" required>
+<label>Şifre</label>
+<input name="password" type="password" autocomplete="current-password" required>
+<button type="submit">Giriş Yap</button>
+</form>
+</body>
+</html>"""
+
+    def _eg5a_admin_auth_gate():
+        try:
+            path = str(getattr(_eg5a_request, "path", "") or "")
+            clean = path.rstrip("/") or "/"
+
+            if not (clean == "/admin" or clean.startswith("/admin/")):
+                return None
+
+            # Statik dosyalara dokunma.
+            if (
+                clean.startswith("/static")
+                or clean.startswith("/admin/static")
+                or clean.endswith((".css", ".js", ".png", ".jpg", ".jpeg", ".svg", ".ico", ".webp", ".woff", ".woff2"))
+            ):
+                return None
+
+            # Login sayfasını dashboard override'dan kurtar.
+            if clean == "/admin/login":
+                if str(_eg5a_request.method).upper() == "GET":
+                    resp = _eg5a_make_response(_eg5a_real_admin_login_page())
+                    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+                    return resp
+
+                # POST login akışını mevcut backend'e bırak.
+                return None
+
+            # Logout mevcut backend'e kalabilir.
+            if clean == "/admin/logout":
+                return None
+
+            # Admin session varsa geç.
+            if _eg5a_is_admin_session():
+                return None
+
+            # Yetkisiz admin erişimini login'e at.
+            return _eg5a_redirect("/admin/login?next=" + path)
+
+        except Exception as _err:
+            print("ERATGUARD STAGE5A ADMIN AUTH GATE ERROR:", _err)
+            return None
+
+    try:
+        _eg5a_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg5a_funcs[:] = [
+            f for f in _eg5a_funcs
+            if getattr(f, "__name__", "") != "_eg5a_admin_auth_gate"
+        ]
+        _eg5a_funcs.insert(0, _eg5a_admin_auth_gate)
+        print("ERATGUARD STAGE5A HARD ADMIN AUTH LOCK ACTIVE")
+    except Exception as _err:
+        print("ERATGUARD STAGE5A INSERT ERROR:", _err)
+
+except Exception as _boot_err:
+    print("ERATGUARD STAGE5A HARD ADMIN AUTH LOCK BOOT ERROR:", _boot_err)
+# ===== ERATGUARD STAGE5A HARD ADMIN AUTH LOCK END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
