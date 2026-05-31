@@ -11764,6 +11764,88 @@ except Exception as _boot_err:
 # ===== ERATGUARD STAGE4R HOTFIX CREATE MANAGEMENT ROUTE END =====
 
 
+
+
+# ===== ERATGUARD STAGE4U CLAUDE PANEL PREVIEW START =====
+# Claude admin panelini ana dashboard'a almadan önce güvenli preview route.
+try:
+    from flask import render_template as _eg4u_render_template
+
+    def _eg_stage4u_claude_panel_preview():
+        try:
+            stats = {
+                "users": 0,
+                "licenses": 0,
+                "payments": 0,
+                "blocked": 0,
+                "threats": 0,
+                "logs": 0,
+                "notifications": 0,
+            }
+
+            if "_eg_real_admin_dashboard_stats" in globals():
+                try:
+                    live_stats = _eg_real_admin_dashboard_stats()
+                    if isinstance(live_stats, dict):
+                        stats.update(live_stats)
+                except Exception as _eg4u_stats_err:
+                    print("ERATGUARD STAGE4U STATS ERROR:", _eg4u_stats_err)
+
+            def _eg4u_to_int(value, default=0):
+                try:
+                    if value is None:
+                        return default
+                    raw = str(value).strip()
+                    if raw == "":
+                        return default
+                    raw = raw.replace(",", "").replace(".", "")
+                    return int(float(raw))
+                except Exception:
+                    return default
+
+            for _eg4u_key in ("users", "licenses", "payments", "blocked", "threats", "logs", "notifications"):
+                stats[_eg4u_key] = _eg4u_to_int(stats.get(_eg4u_key), 0)
+
+            return _eg4u_render_template(
+                "admin_dashboard_claude.html",
+                admin_stats=stats,
+                brand="EratGuard PRO",
+                current_user="admin",
+                username="admin",
+                page_title="Dashboard",
+            )
+        except Exception as _eg4u_err:
+            import traceback as _eg4u_traceback
+            _eg4u_detail = _eg4u_traceback.format_exc()
+            print("ERATGUARD STAGE4U CLAUDE PREVIEW RENDER ERROR:", _eg4u_detail)
+            return (
+                "<!doctype html><html lang='tr'><head><meta charset='UTF-8'>"
+                "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+                "<title>EratGuard Claude Panel Preview</title></head><body>"
+                "<h1>EratGuard Claude Panel Preview</h1>"
+                f"<p>Preview yüklenemedi: {_eg4u_err}</p>"
+                "<pre style='white-space:pre-wrap;background:#111;color:#eee;padding:12px;border-radius:12px;'>"
+                f"{_eg4u_detail}"
+                "</pre>"
+                "<p><a href='/admin/dashboard'>Admin Dashboard</a></p>"
+                "</body></html>"
+            ), 500
+
+    try:
+        app.add_url_rule(
+            "/admin/dashboard-claude-preview",
+            "eg_stage4u_claude_panel_preview",
+            _eg_stage4u_claude_panel_preview,
+            methods=["GET"],
+        )
+    except Exception as _eg4u_route_err:
+        print("ERATGUARD STAGE4U CLAUDE PANEL ROUTE ERROR:", _eg4u_route_err)
+
+except Exception as _eg4u_boot_err:
+    print("ERATGUARD STAGE4U CLAUDE PANEL PREVIEW ERROR:", _eg4u_boot_err)
+# ===== ERATGUARD STAGE4U CLAUDE PANEL PREVIEW END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
