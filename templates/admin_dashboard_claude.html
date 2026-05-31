@@ -892,6 +892,130 @@ img, svg, canvas, table{
 }
 </style>
 
+
+<style id="stage4x-keep-eratguard-only-topbar-v1">
+/* ===== STAGE 4X: KEEP ERATGUARD ONLY IN APK TOPBAR =====
+   Sol üstte EratGuard kalsın, Dashboard/breadcrumb yazısı gizlensin.
+*/
+
+@media(max-width:760px){
+  .topbar,
+  .top-bar,
+  .header,
+  .app-header,
+  .cmdbar,
+  .command-bar{
+    width:100% !important;
+    max-width:100vw !important;
+    overflow:hidden !important;
+  }
+
+  .tb-left,
+  .breadcrumb,
+  .top-brand,
+  .brand-mini{
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    max-width:175px !important;
+    overflow:hidden !important;
+    display:flex !important;
+    align-items:center !important;
+    gap:0 !important;
+    white-space:nowrap !important;
+  }
+
+  /* EratGuard yazısı kalsın */
+  .tb-left span:first-child,
+  .breadcrumb span:first-child,
+  .top-brand span:first-child,
+  .brand-mini span:first-child{
+    display:inline-block !important;
+    max-width:155px !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+    color:#dcecff !important;
+    font-weight:900 !important;
+  }
+
+  /* Dashboard / current page yazısını gizle */
+  #tb-page-name,
+  .current,
+  .tb-title,
+  .tb-left .sep,
+  .breadcrumb .sep,
+  .tb-left span:not(:first-child),
+  .breadcrumb span:not(:first-child),
+  .top-brand span:not(:first-child),
+  .brand-mini span:not(:first-child){
+    display:none !important;
+  }
+
+  /* Sağ taraf kontrollü kalsın, taşma yapmasın */
+  .top-actions,
+  .tb-actions,
+  .header-actions{
+    flex:0 0 auto !important;
+    margin-left:auto !important;
+    max-width:260px !important;
+    overflow:hidden !important;
+  }
+
+  .cmd-btn,
+  .command-btn{
+    max-width:82px !important;
+  }
+
+  .time-chip,
+  .status-chip,
+  .live-chip,
+  .clock-chip,
+  .pill{
+    max-width:96px !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    white-space:nowrap !important;
+  }
+}
+
+@media(max-width:430px){
+  .tb-left,
+  .breadcrumb,
+  .top-brand,
+  .brand-mini{
+    max-width:118px !important;
+  }
+
+  .tb-left span:first-child,
+  .breadcrumb span:first-child,
+  .top-brand span:first-child,
+  .brand-mini span:first-child{
+    max-width:112px !important;
+  }
+
+  .top-actions,
+  .tb-actions,
+  .header-actions{
+    max-width:230px !important;
+  }
+
+  .cmd-btn,
+  .command-btn{
+    max-width:72px !important;
+    font-size:11px !important;
+  }
+
+  .time-chip,
+  .status-chip,
+  .live-chip,
+  .clock-chip,
+  .pill{
+    max-width:82px !important;
+    font-size:11px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
