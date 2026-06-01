@@ -5,26 +5,26 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>EratGuard PRO Command Tree</title>
 
-<style id="stage6b-command-tree-admin-v1">
+<style id="stage6c-premium-visual-command-tree-v1">
 :root{
   --bg:#050810;
-  --bg2:#07101d;
-  --panel:#0a1020;
-  --panel2:#0f1b31;
-  --panel3:#101f38;
-  --line:#17243d;
-  --line2:#244064;
-  --text:#e8f4ff;
-  --muted:#8aa6c4;
-  --dim:#526c89;
-  --cyan:#00c8f0;
-  --green:#8dff3f;
-  --red:#ff4d5e;
-  --yellow:#ffd166;
+  --panel:#08111f;
+  --panel2:#0c182b;
+  --panel3:#101f36;
+  --line:#1b2b49;
+  --line2:#2a4973;
+  --text:#eaf5ff;
+  --muted:#9db3ce;
+  --dim:#5d738f;
+  --cyan:#00d9ff;
+  --blue:#1778ff;
+  --green:#42ff79;
+  --yellow:#ffd21f;
+  --orange:#ff9d22;
   --purple:#9b6dff;
-  --shadow:0 24px 80px rgba(0,0,0,.42);
+  --red:#ff3f72;
+  --shadow:0 28px 90px rgba(0,0,0,.48);
 }
-
 *{box-sizing:border-box}
 html,body{width:100%;max-width:100%;overflow-x:hidden}
 body{
@@ -33,10 +33,10 @@ body{
   color:var(--text);
   font-family:Arial,Helvetica,sans-serif;
   background:
-    radial-gradient(circle at top left,rgba(0,200,240,.13),transparent 32%),
-    radial-gradient(circle at top right,rgba(155,109,255,.10),transparent 34%),
-    radial-gradient(circle at bottom left,rgba(141,255,63,.06),transparent 30%),
-    linear-gradient(180deg,var(--bg),#03050a);
+    radial-gradient(circle at 8% 0%,rgba(0,217,255,.13),transparent 30%),
+    radial-gradient(circle at 92% 8%,rgba(155,109,255,.12),transparent 32%),
+    radial-gradient(circle at 35% 100%,rgba(66,255,121,.06),transparent 34%),
+    linear-gradient(180deg,#050810,#03060d 72%,#02040a);
 }
 a{text-decoration:none;color:inherit}
 button,input{font:inherit}
@@ -45,54 +45,41 @@ button,input{font:inherit}
   position:sticky;
   top:0;
   z-index:50;
-  border-bottom:1px solid rgba(255,255,255,.07);
-  background:rgba(5,8,16,.88);
-  backdrop-filter:blur(14px);
+  background:rgba(5,8,16,.90);
+  border-bottom:1px solid rgba(255,255,255,.08);
+  backdrop-filter:blur(16px);
 }
 .topbar-inner{
-  width:min(1280px,100%);
+  width:min(1360px,100%);
   margin:0 auto;
-  padding:12px 16px;
+  padding:14px 18px;
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:14px;
 }
 .logo{
-  width:46px;
-  height:46px;
-  border-radius:16px;
-  display:grid;
-  place-items:center;
+  width:56px;height:56px;border-radius:16px;
+  display:grid;place-items:center;
+  color:#06111c;
   font-weight:1000;
-  color:#031018;
+  font-size:24px;
   background:linear-gradient(135deg,var(--cyan),var(--purple));
-  box-shadow:0 0 28px rgba(0,200,240,.22);
-  flex:0 0 46px;
+  box-shadow:0 0 34px rgba(0,217,255,.25);
 }
-.brand{min-width:0}
-.brand b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand span{display:block;margin-top:3px;color:var(--cyan);font-size:11px;font-weight:1000;letter-spacing:2px}
-.top-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
-.status-pill{
-  border:1px solid rgba(141,255,63,.22);
-  color:#dfffca;
-  background:rgba(141,255,63,.075);
-  border-radius:999px;
-  padding:8px 10px;
-  font-size:12px;
-  font-weight:900;
-}
+.brand b{display:block;font-size:24px}
+.brand span{display:block;margin-top:3px;color:var(--cyan);font-size:11px;font-weight:1000;letter-spacing:3px}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
 .btn{
   border:1px solid var(--line2);
   background:rgba(255,255,255,.035);
   color:var(--text);
-  border-radius:14px;
-  padding:10px 12px;
-  font-weight:900;
+  border-radius:15px;
+  padding:12px 15px;
+  font-weight:1000;
   display:inline-flex;
+  gap:8px;
   align-items:center;
   justify-content:center;
-  gap:8px;
   cursor:pointer;
 }
 .btn.primary{
@@ -100,42 +87,107 @@ button,input{font:inherit}
   color:#031018;
   background:linear-gradient(135deg,var(--cyan),var(--green));
 }
-.btn.danger{
-  border-color:rgba(255,77,94,.32);
-  color:#ffd7dc;
+.btn.green{
+  border-color:rgba(66,255,121,.35);
+  color:#dfffe8;
+  background:rgba(66,255,121,.08);
+}
+.btn.purple{
+  border-color:rgba(155,109,255,.35);
+  color:#eadfff;
+  background:rgba(155,109,255,.08);
 }
 
 .shell{
-  width:min(1280px,100%);
+  width:min(1360px,100%);
   margin:0 auto;
-  padding:16px 16px 100px;
+  padding:18px 18px 110px;
 }
-
 .hero{
+  position:relative;
+  overflow:hidden;
   border:1px solid var(--line2);
-  border-radius:30px;
-  padding:24px;
+  border-radius:28px;
+  padding:28px;
+  min-height:310px;
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:20px;
   background:
-    radial-gradient(circle at top right,rgba(0,200,240,.16),transparent 34%),
-    radial-gradient(circle at bottom left,rgba(141,255,63,.08),transparent 32%),
-    linear-gradient(180deg,rgba(15,27,49,.98),rgba(7,13,24,.98));
+    radial-gradient(circle at top right,rgba(0,217,255,.16),transparent 34%),
+    radial-gradient(circle at bottom left,rgba(66,255,121,.08),transparent 32%),
+    linear-gradient(180deg,rgba(12,24,43,.98),rgba(6,13,24,.98));
   box-shadow:var(--shadow);
 }
-.kicker{color:var(--cyan);font-size:12px;font-weight:1000;letter-spacing:3px}
-.hero h1{margin:8px 0 0;font-size:clamp(34px,6vw,60px);line-height:1}
-.hero p{margin:12px 0 0;max-width:850px;color:var(--muted);line-height:1.48}
-.hero-tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
-.tag{
-  border:1px solid rgba(0,200,240,.18);
-  background:rgba(0,200,240,.07);
-  color:#c8f7ff;
-  border-radius:999px;
-  padding:7px 10px;
-  font-size:12px;
-  font-weight:900;
+.kicker{
+  color:var(--cyan);
+  font-size:13px;
+  font-weight:1000;
+  letter-spacing:6px;
 }
-.tag.green{border-color:rgba(141,255,63,.24);background:rgba(141,255,63,.075);color:#dfffca}
-.tag.purple{border-color:rgba(155,109,255,.24);background:rgba(155,109,255,.075);color:#eadfff}
+.hero h1{
+  margin:16px 0 0;
+  font-size:clamp(42px,6vw,72px);
+  line-height:1;
+}
+.hero p{
+  margin:18px 0 0;
+  max-width:670px;
+  color:var(--muted);
+  font-size:20px;
+  line-height:1.45;
+}
+.hero-tags{margin-top:22px;display:flex;gap:10px;flex-wrap:wrap}
+.tag{
+  border:1px solid rgba(0,217,255,.24);
+  background:rgba(0,217,255,.08);
+  color:#ccf8ff;
+  border-radius:999px;
+  padding:10px 14px;
+  font-size:13px;
+  font-weight:1000;
+}
+.tag.green{border-color:rgba(66,255,121,.28);background:rgba(66,255,121,.08);color:#dfffe8}
+.tag.purple{border-color:rgba(155,109,255,.28);background:rgba(155,109,255,.08);color:#eadfff}
+
+.hero-art{
+  position:relative;
+  min-height:260px;
+  display:grid;
+  place-items:center;
+}
+.tree-art{
+  position:relative;
+  width:min(380px,100%);
+  height:260px;
+}
+.tree-line{
+  position:absolute;
+  background:linear-gradient(180deg,var(--cyan),var(--blue));
+  box-shadow:0 0 18px rgba(0,217,255,.55);
+}
+.tree-line.main{left:50%;top:48px;width:3px;height:120px}
+.tree-line.l1{left:31%;top:95px;width:38%;height:3px}
+.tree-line.l2{left:25%;top:150px;width:50%;height:3px}
+.tree-line.v1{left:25%;top:95px;width:3px;height:58px;background:linear-gradient(180deg,var(--green),var(--cyan))}
+.tree-line.v2{left:75%;top:95px;width:3px;height:58px;background:linear-gradient(180deg,var(--green),var(--cyan))}
+.tree-node{
+  position:absolute;
+  width:58px;height:58px;border-radius:18px;
+  display:grid;place-items:center;
+  border:1px solid rgba(0,217,255,.35);
+  background:rgba(5,14,28,.78);
+  box-shadow:0 0 28px rgba(0,217,255,.18);
+  font-size:25px;
+}
+.tree-node.root{left:50%;top:0;transform:translateX(-50%);width:70px;height:70px;border-color:rgba(0,217,255,.55);background:rgba(12,34,62,.82)}
+.tree-node.n1{left:18%;top:75px;color:var(--cyan)}
+.tree-node.n2{right:18%;top:75px;color:var(--green)}
+.tree-node.n3{left:8%;top:132px;color:var(--orange)}
+.tree-node.n4{right:8%;top:132px;color:var(--purple)}
+.tree-node.n5{left:28%;bottom:0;color:var(--blue)}
+.tree-node.n6{left:50%;bottom:0;transform:translateX(-50%);color:var(--yellow)}
+.tree-node.n7{right:28%;bottom:0;color:var(--cyan)}
 
 .metrics{
   margin-top:16px;
@@ -144,242 +196,310 @@ button,input{font:inherit}
   gap:12px;
 }
 .metric{
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:22px;
-  background:rgba(10,16,32,.84);
-  padding:17px;
-}
-.metric .label{color:var(--muted);font-size:12px;font-weight:900}
-.metric .value{margin-top:10px;font-size:36px;line-height:1;font-weight:1000}
-.metric .sub{margin-top:9px;color:var(--dim);font-size:12px;line-height:1.35}
-
-.workspace{
-  margin-top:16px;
   display:grid;
-  grid-template-columns:380px 1fr;
-  gap:16px;
-  align-items:start;
-}
-.tree-panel,
-.detail-panel{
+  grid-template-columns:auto 1fr;
+  gap:14px;
+  align-items:center;
   border:1px solid var(--line);
-  border-radius:26px;
-  background:rgba(10,16,32,.88);
-  box-shadow:0 16px 48px rgba(0,0,0,.24);
+  border-radius:19px;
+  background:rgba(8,17,31,.88);
+  padding:18px;
+  box-shadow:0 16px 44px rgba(0,0,0,.24);
+}
+.metric-icon{
+  width:56px;height:56px;border-radius:17px;
+  display:grid;place-items:center;
+  font-size:28px;
+  background:rgba(0,217,255,.08);
+  border:1px solid rgba(0,217,255,.18);
+}
+.metric b{display:block;font-size:34px;line-height:1;margin-top:4px}
+.metric span{display:block;color:var(--muted);font-size:12px;font-weight:1000}
+.metric small{display:block;margin-top:8px;color:var(--dim);font-size:13px}
+
+.card{
+  margin-top:16px;
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:rgba(8,17,31,.90);
+  box-shadow:0 16px 48px rgba(0,0,0,.25);
   overflow:hidden;
 }
-.panel-head{
-  padding:18px;
+.card-head{
+  padding:20px;
+  display:flex;
+  align-items:center;
+  gap:14px;
   border-bottom:1px solid rgba(255,255,255,.07);
-  background:rgba(255,255,255,.025);
 }
-.panel-head h2{margin:0;font-size:24px}
-.panel-head p{margin:7px 0 0;color:var(--muted);line-height:1.4;font-size:13px}
-
-.search-wrap{padding:14px 18px 0}
+.card-head-icon{
+  width:54px;height:54px;border-radius:18px;
+  display:grid;place-items:center;
+  font-size:28px;
+  background:rgba(23,120,255,.10);
+  border:1px solid rgba(23,120,255,.25);
+}
+.card-head h2{margin:0;font-size:32px}
+.card-head p{margin:6px 0 0;color:var(--muted);font-size:15px}
+.search-wrap{padding:16px 20px 0}
 .search{
   width:100%;
   border:1px solid var(--line2);
-  border-radius:16px;
+  border-radius:18px;
   background:#050810;
   color:var(--text);
-  padding:12px 13px;
   outline:none;
+  padding:16px 18px;
+  font-size:16px;
 }
-
-.tree{
-  padding:14px;
-  display:grid;
-  gap:8px;
+.tree-body{
+  position:relative;
+  padding:16px 20px 24px 44px;
 }
-.node{
-  border:1px solid rgba(255,255,255,.07);
+.tree-body:before{
+  content:"";
+  position:absolute;
+  left:26px;
+  top:22px;
+  bottom:36px;
+  width:2px;
+  background:linear-gradient(180deg,rgba(0,217,255,.8),rgba(155,109,255,.25));
+}
+.branch{
+  position:relative;
+  border:1px solid rgba(255,255,255,.08);
   border-radius:18px;
   background:rgba(255,255,255,.025);
-  overflow:hidden;
+  margin-bottom:10px;
 }
-.node-main{
+.branch:before{
+  content:"";
+  position:absolute;
+  left:-24px;
+  top:30px;
+  width:24px;
+  height:2px;
+  background:rgba(0,217,255,.65);
+}
+.branch-main{
   width:100%;
   border:0;
   background:transparent;
   color:var(--text);
   padding:13px;
-  display:flex;
+  display:grid;
+  grid-template-columns:auto 1fr auto auto;
+  gap:12px;
   align-items:center;
-  gap:10px;
   text-align:left;
   cursor:pointer;
 }
-.node-main:hover{background:rgba(0,200,240,.05)}
-.node-icon{
-  width:34px;
-  height:34px;
-  border-radius:13px;
-  display:grid;
-  place-items:center;
-  background:rgba(0,200,240,.09);
-  border:1px solid rgba(0,200,240,.12);
-  flex:0 0 34px;
+.branch-icon{
+  width:42px;height:42px;border-radius:14px;
+  display:grid;place-items:center;
+  font-size:22px;
+  background:rgba(0,217,255,.08);
+  border:1px solid rgba(0,217,255,.18);
 }
-.node-title{font-weight:1000}
-.node-sub{margin-top:3px;color:var(--muted);font-size:12px}
-.node-arrow{margin-left:auto;color:var(--dim);font-weight:1000}
-.children{
-  display:none;
-  padding:0 10px 10px 48px;
+.branch-title{
+  display:flex;
+  align-items:baseline;
+  flex-wrap:wrap;
+  gap:8px;
 }
-.node.open .children{display:grid;gap:7px}
-.child{
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:14px;
-  background:rgba(5,8,16,.42);
-  padding:10px;
+.branch-title b{font-size:21px}
+.branch-title span{color:var(--muted);font-size:14px}
+.count-pill{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:999px;
+  color:var(--muted);
+  padding:6px 10px;
+  font-size:12px;
+  white-space:nowrap;
+}
+.arrow{color:var(--muted);font-size:22px;font-weight:1000}
+.children{display:none;padding:0 14px 14px 64px}
+.branch.open .children{display:grid;gap:10px}
+.user-row{
+  position:relative;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:17px;
+  background:rgba(5,8,16,.46);
+  padding:13px;
+  display:flex;
+  align-items:center;
+  gap:14px;
   cursor:pointer;
 }
-.child:hover{border-color:rgba(0,200,240,.25)}
-.child b{display:block;font-size:13px}
-.child span{display:block;margin-top:4px;color:var(--muted);font-size:12px}
-.child.active{
-  border-color:rgba(141,255,63,.35);
-  background:rgba(141,255,63,.07);
+.user-row:before{
+  content:"";
+  position:absolute;
+  left:-42px;
+  top:50%;
+  width:40px;
+  height:2px;
+  background:rgba(0,217,255,.35);
+}
+.avatar{
+  width:58px;height:58px;border-radius:20px;
+  display:grid;place-items:center;
+  font-size:28px;
+  background:rgba(23,120,255,.12);
+  border:1px solid rgba(23,120,255,.28);
+}
+.user-row b{display:block;font-size:19px}
+.user-row span{display:block;margin-top:4px;color:var(--muted);font-size:13px}
+.dot{
+  width:13px;height:13px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 16px rgba(66,255,121,.65);
+  margin-left:auto;
 }
 
-.detail-body{padding:18px}
-.detail-card{
+.detail-grid{
+  padding:20px;
+  display:grid;
+  grid-template-columns:.82fr 1.18fr;
+  gap:14px;
+}
+.profile{
   border:1px solid rgba(255,255,255,.08);
-  border-radius:24px;
-  padding:18px;
+  border-radius:20px;
   background:
-    radial-gradient(circle at top right,rgba(0,200,240,.08),transparent 38%),
+    radial-gradient(circle at top right,rgba(0,217,255,.09),transparent 35%),
     rgba(255,255,255,.025);
+  padding:20px;
 }
-.detail-title{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:12px;
-}
-.detail-title h2{margin:0;font-size:30px;line-height:1.05}
-.detail-title p{margin:8px 0 0;color:var(--muted);line-height:1.42}
-.badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+.profile-top{display:flex;align-items:center;gap:18px}
+.profile h3{margin:0;font-size:32px}
+.profile p{margin:8px 0 0;color:var(--muted);font-size:16px}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .badge{
-  display:inline-flex;
-  border:1px solid rgba(0,200,240,.18);
-  background:rgba(0,200,240,.07);
-  color:#c8f7ff;
+  border:1px solid rgba(0,217,255,.24);
+  background:rgba(0,217,255,.08);
+  color:#ccf8ff;
   border-radius:999px;
-  padding:6px 9px;
-  font-size:11px;
+  padding:7px 10px;
+  font-size:12px;
   font-weight:1000;
 }
-.badge.ok{border-color:rgba(141,255,63,.28);background:rgba(141,255,63,.08);color:#dfffca}
-.badge.warn{border-color:rgba(255,209,102,.30);background:rgba(255,209,102,.08);color:#fff1c2}
-.badge.danger{border-color:rgba(255,77,94,.32);background:rgba(255,77,94,.08);color:#ffd7dc}
+.badge.ok{border-color:rgba(66,255,121,.28);background:rgba(66,255,121,.08);color:#dfffe8}
+.badge.purple{border-color:rgba(155,109,255,.30);background:rgba(155,109,255,.08);color:#eadfff}
 
 .info-grid{
-  margin-top:16px;
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:10px;
-}
-.info{
-  border:1px solid rgba(255,255,255,.07);
-  border-radius:17px;
-  background:rgba(5,8,16,.36);
-  padding:13px;
-}
-.info span{display:block;color:var(--muted);font-size:11px;font-weight:900}
-.info b{display:block;margin-top:7px;font-size:15px;word-break:break-word}
-
-.branch-grid{
-  margin-top:16px;
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:10px;
 }
-.branch{
-  border:1px solid var(--line);
-  border-radius:18px;
+.info{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
   background:rgba(255,255,255,.025);
   padding:14px;
 }
-.branch b{display:block}
-.branch span{display:block;margin-top:6px;color:var(--muted);font-size:12px;line-height:1.35}
+.info span{display:block;color:var(--muted);font-size:12px;font-weight:1000}
+.info b{display:block;margin-top:8px;font-size:16px;word-break:break-word}
 
-.actions-row{
-  margin-top:16px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:9px;
+.module-grid{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:10px;
 }
-
-.table-wrap{
-  margin-top:16px;
-  overflow:auto;
-  border:1px solid rgba(255,255,255,.07);
-  border-radius:18px;
+.module{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  background:rgba(255,255,255,.025);
+  padding:14px;
+  text-align:center;
 }
-table{width:100%;border-collapse:collapse;min-width:560px}
-th,td{padding:12px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left;font-size:13px}
-th{color:var(--muted);font-size:11px;letter-spacing:.7px;text-transform:uppercase;background:rgba(255,255,255,.025)}
-td{color:var(--text)}
-
+.module i{display:block;font-style:normal;font-size:26px}
+.module b{display:block;margin-top:8px}
+.module span{display:block;margin-top:6px;color:var(--muted);font-size:12px;line-height:1.35}
+.action-row{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
 .empty{
-  margin-top:16px;
   border:1px dashed rgba(255,255,255,.13);
-  border-radius:20px;
-  padding:24px;
+  border-radius:18px;
+  padding:22px;
   color:var(--muted);
   text-align:center;
-  background:rgba(255,255,255,.022);
-  line-height:1.45;
+  background:rgba(255,255,255,.02);
 }
 
-.mobile-tabs{
-  display:none;
+.bottom-nav{
   position:fixed;
-  left:10px;
-  right:10px;
-  bottom:10px;
+  left:18px;
+  right:18px;
+  bottom:14px;
   z-index:60;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:22px;
-  background:rgba(5,8,16,.92);
-  backdrop-filter:blur(14px);
-  padding:8px;
-  box-shadow:0 14px 44px rgba(0,0,0,.36);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:18px;
+  background:rgba(5,8,16,.94);
+  backdrop-filter:blur(16px);
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  max-width:1324px;
+  margin:0 auto;
+  box-shadow:0 16px 54px rgba(0,0,0,.45);
+  overflow:hidden;
 }
-.mobile-tabs a{
-  flex:1;
-  text-align:center;
+.bottom-nav a{
+  padding:16px 8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
   color:var(--muted);
-  font-size:11px;
-  font-weight:900;
-  padding:8px 4px;
-  border-radius:15px;
+  font-weight:1000;
+  border-right:1px solid rgba(255,255,255,.06);
 }
-.mobile-tabs a.active{
+.bottom-nav a:last-child{border-right:0}
+.bottom-nav a.active{
   color:#031018;
   background:linear-gradient(135deg,var(--cyan),var(--green));
 }
 
-@media(max-width:1040px){
-  .workspace{grid-template-columns:1fr}
+@media(max-width:1060px){
+  .hero{grid-template-columns:1fr}
+  .hero-art{display:none}
   .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .detail-grid{grid-template-columns:1fr}
+  .module-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:680px){
-  .topbar-inner{padding:10px 12px}
+  .topbar-inner{padding:12px 20px}
   .brand span{display:none}
-  .status-pill{display:none}
+  .brand b{font-size:22px}
   .top-actions .btn:not(.primary){display:none}
-  .shell{padding:12px 12px 92px}
-  .hero{padding:18px;border-radius:24px}
-  .hero h1{font-size:36px}
+  .logo{width:64px;height:64px;border-radius:20px}
+  .shell{padding:14px 20px 118px}
+  .hero{border-radius:26px;padding:24px}
+  .hero h1{font-size:42px}
+  .hero p{font-size:18px}
   .metrics{grid-template-columns:1fr}
-  .tree-panel,.detail-panel{border-radius:24px}
+  .metric{grid-template-columns:1fr}
+  .card-head h2{font-size:30px}
+  .tree-body{padding-left:34px}
+  .tree-body:before{left:18px}
+  .branch-main{grid-template-columns:auto 1fr auto;gap:10px}
+  .count-pill{display:none}
+  .branch-title{display:block}
+  .branch-title b{display:block;font-size:22px}
+  .branch-title span{display:block;margin-top:4px;font-size:14px}
+  .children{padding-left:54px}
+  .user-row:before{left:-35px;width:34px}
+  .detail-grid{padding:16px}
+  .profile-top{align-items:flex-start}
   .info-grid{grid-template-columns:1fr}
-  .branch-grid{grid-template-columns:1fr}
-  .mobile-tabs{display:flex}
+  .module-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .action-row{grid-template-columns:1fr}
+  .bottom-nav{left:18px;right:18px;bottom:12px;border-radius:24px}
+  .bottom-nav a{font-size:13px;flex-direction:column;padding:12px 4px;gap:3px}
 }
 </style>
 </head>
@@ -393,401 +513,267 @@ td{color:var(--text)}
       <span>COMMAND TREE</span>
     </div>
     <div class="top-actions">
-      <span class="status-pill">Admin Lock Active</span>
-      <a class="btn" href="/admin/notifications">Bildirimler</a>
-      <a class="btn primary" href="/admin/logout">Çıkış</a>
+      <a class="btn" href="/admin/notifications">🔔 Bildirim</a>
+      <a class="btn primary" href="/admin/logout">↪ Çıkış</a>
     </div>
   </div>
 </header>
 
 <main class="shell">
   <section class="hero">
-    <div class="kicker">ERATGUARD PRO COMMAND TREE</div>
-    <h1>Yönetim Ağacı</h1>
-    <p>Kullanıcı, lisans, ödeme, cihaz, güvenlik ve bildirim ilişkilerini tek ağaç üzerinden yönet. Fake veri yok; gerçek kayıt varsa gösterilir, yoksa boş durum görünür.</p>
-    <div class="hero-tags">
-      <span class="tag green">Real Data Only</span>
-      <span class="tag">APK/WebView Ready</span>
-      <span class="tag purple">Premium Command UI</span>
+    <div>
+      <div class="kicker">ERATGUARD PRO COMMAND TREE</div>
+      <h1>Yönetim Ağacı</h1>
+      <p>Kullanıcı, lisans, ödeme, cihaz, güvenlik ve bildirim ilişkilerini tek ağaç üzerinden yönet.</p>
+      <div class="hero-tags">
+        <span class="tag green">🛡 Real Data Only</span>
+        <span class="tag">🌐 APK/WebView Ready</span>
+        <span class="tag purple">◇ Premium Command UI</span>
+      </div>
+    </div>
+
+    <div class="hero-art">
+      <div class="tree-art">
+        <div class="tree-line main"></div>
+        <div class="tree-line l1"></div>
+        <div class="tree-line l2"></div>
+        <div class="tree-line v1"></div>
+        <div class="tree-line v2"></div>
+        <div class="tree-node root">🛡</div>
+        <div class="tree-node n1">👥</div>
+        <div class="tree-node n2">💳</div>
+        <div class="tree-node n3">₺</div>
+        <div class="tree-node n4">🛡</div>
+        <div class="tree-node n5">📱</div>
+        <div class="tree-node n6">🔔</div>
+        <div class="tree-node n7">⚙️</div>
+      </div>
     </div>
   </section>
 
   <section class="metrics">
     <article class="metric">
-      <div class="label">KULLANICI</div>
-      <div class="value">{{ admin_stats.users|default(0)|int }}</div>
-      <div class="sub">Sistemdeki gerçek kullanıcı</div>
+      <div class="metric-icon">👥</div>
+      <div><span>KULLANICI</span><b id="m-users">{{ admin_stats.users|default(0)|int }}</b><small>Aktif kullanıcı</small></div>
     </article>
     <article class="metric">
-      <div class="label">LİSANS</div>
-      <div class="value">{{ admin_stats.licenses|default(0)|int }}</div>
-      <div class="sub">Kayıtlı lisans/veri</div>
+      <div class="metric-icon">💳</div>
+      <div><span>LİSANS</span><b id="m-licenses">{{ admin_stats.licenses|default(0)|int }}</b><small>Kayıtlı lisans</small></div>
     </article>
     <article class="metric">
-      <div class="label">BEKLEYEN ÖDEME</div>
-      <div class="value">{{ admin_stats.payments|default(0)|int }}</div>
-      <div class="sub">Onay bekleyen talep</div>
+      <div class="metric-icon">₺</div>
+      <div><span>BEKLEYEN ÖDEME</span><b id="m-payments">{{ admin_stats.payments|default(0)|int }}</b><small>Onay bekleyen</small></div>
     </article>
     <article class="metric">
-      <div class="label">GÜVENLİK LOGU</div>
-      <div class="value">{{ admin_stats.spam_logs|default(admin_stats.blocked|default(0))|int }}</div>
-      <div class="sub">Gerçek güvenlik kaydı</div>
+      <div class="metric-icon">🛡</div>
+      <div><span>GÜVENLİK LOGU</span><b id="m-logs">{{ admin_stats.spam_logs|default(admin_stats.blocked|default(0))|int }}</b><small>Son 7 günde</small></div>
     </article>
   </section>
 
-  <section class="workspace">
-    <aside class="tree-panel">
-      <div class="panel-head">
+  <section class="card">
+    <div class="card-head">
+      <div class="card-head-icon">🛡</div>
+      <div>
         <h2>EratGuard Root</h2>
-        <p>Sistem dallarını aç, kullanıcıya in, detayları yönet.</p>
+        <p>Sistemi tek ağaçtan yönet, tüm dalları kontrol et.</p>
       </div>
+    </div>
 
-      <div class="search-wrap">
-        <input class="search" id="tree-search" placeholder="Kullanıcı, lisans, ödeme ara...">
-      </div>
+    <div class="search-wrap">
+      <input class="search" id="tree-search" placeholder="🔍 Kullanıcı, lisans, ödeme ara...">
+    </div>
 
-      <div class="tree" id="tree-root">
-        <div class="empty">Ağaç verisi yükleniyor...</div>
-      </div>
-    </aside>
+    <div class="tree-body" id="tree-root">
+      <div class="empty">Ağaç verisi yükleniyor...</div>
+    </div>
+  </section>
 
-    <section class="detail-panel">
-      <div class="panel-head">
+  <section class="card">
+    <div class="card-head">
+      <div class="card-head-icon">👤</div>
+      <div>
         <h2>Detay Paneli</h2>
-        <p>Seçili dalın profili, lisansı, cihazları, ödemeleri ve logları.</p>
+        <p>Seçili kullanıcıya ait detaylar ve işlemler.</p>
       </div>
+    </div>
 
-      <div class="detail-body" id="detail-root">
-        <div class="detail-card">
-          <div class="detail-title">
-            <div>
-              <h2>EratGuard Root</h2>
-              <p>Soldaki ağaçtan bir kullanıcı veya sistem dalı seç.</p>
-              <div class="badges">
-                <span class="badge ok">Root Ready</span>
-                <span class="badge">Real Data Only</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="branch-grid">
-            <div class="branch"><b>👥 Kullanıcılar</b><span>Profil, lisans, cihaz ve kullanıcı güvenliği.</span></div>
-            <div class="branch"><b>💳 Lisanslar</b><span>Lisans durumu, sahiplik ve süre yönetimi.</span></div>
-            <div class="branch"><b>₺ Ödemeler</b><span>Bekleyen ödeme ve lisans talepleri.</span></div>
-            <div class="branch"><b>🛡 Güvenlik</b><span>Spam, risk, karantina ve log kayıtları.</span></div>
-            <div class="branch"><b>📱 APK / Cihazlar</b><span>Cihaz bağlantıları ve APK durumu.</span></div>
-            <div class="branch"><b>🔔 Bildirimler</b><span>Kullanıcı duyuruları ve uyarılar.</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
+    <div class="detail-grid" id="detail-root">
+      <div class="empty">Soldaki ağaçtan bir kullanıcı seç.</div>
+    </div>
   </section>
 </main>
 
-<nav class="mobile-tabs">
-  <a class="active" href="/admin/dashboard">Panel</a>
-  <a href="/admin/users">Users</a>
-  <a href="/admin/licenses">License</a>
-  <a href="/admin/security">Sec</a>
-  <a href="/admin/settings">Ayar</a>
+<nav class="bottom-nav">
+  <a class="active" href="/admin/dashboard">▦<span>Panel</span></a>
+  <a href="/admin/users">👥<span>Kullanıcılar</span></a>
+  <a href="/admin/licenses">💳<span>Lisans</span></a>
+  <a href="/admin/security">🛡<span>Güvenlik</span></a>
+  <a href="/admin/settings">⚙️<span>Ayarlar</span></a>
 </nav>
 
-<script id="stage6b-command-tree-admin-v1">
+<script id="stage6c-premium-visual-command-tree-v1">
 (function(){
-  var STATE = {
-    users: [],
-    licenses: [],
-    payments: [],
-    logs: [],
-    query: ""
-  };
+  var STATE = {users:[],licenses:[],payments:[],logs:[],query:""};
 
-  function safe(v){ return v === null || v === undefined ? "" : String(v); }
+  function safe(v){return v===null||v===undefined?"":String(v)}
+  function esc(v){return safe(v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})}
+  function api(path){return fetch(path,{credentials:"include",cache:"no-store"}).then(function(r){return r.json()}).catch(function(){return {ok:false}})}
 
-  function esc(v){
-    return safe(v).replace(/[&<>"']/g,function(c){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+  function cleanUsers(users){
+    if(!Array.isArray(users)) return [];
+    return users.filter(function(u){
+      var name = safe(u.username || u.user || "").toLowerCase();
+      var email = safe(u.email || "").toLowerCase();
+      return name === "admin" || email === "ismail.erat32@gmail.com";
     });
   }
 
-  function api(path){
-    return fetch(path, {credentials:"include", cache:"no-store"})
-      .then(function(r){ return r.json(); })
-      .catch(function(){ return {ok:false}; });
-  }
-
-  function statusBadge(value){
-    var v = safe(value || "").toLowerCase();
-    var cls = v.indexOf("active") >= 0 || v.indexOf("admin") >= 0 || v === "true" ? "ok" : "";
-    if(v.indexOf("pending") >= 0 || v.indexOf("waiting") >= 0) cls = "warn";
-    if(v.indexOf("blocked") >= 0 || v.indexOf("risk") >= 0) cls = "danger";
-    return "<span class='badge "+cls+"'>"+esc(value || "-")+"</span>";
-  }
-
-  function node(id, icon, title, sub, childrenHtml, open){
-    return ""+
-      "<div class='node "+(open?"open":"")+"' data-node='"+esc(id)+"'>"+
-        "<button class='node-main' type='button' data-toggle='"+esc(id)+"'>"+
-          "<span class='node-icon'>"+icon+"</span>"+
-          "<span><span class='node-title'>"+esc(title)+"</span><span class='node-sub'>"+esc(sub)+"</span></span>"+
-          "<span class='node-arrow'>"+(open?"⌄":"›")+"</span>"+
-        "</button>"+
-        "<div class='children'>"+childrenHtml+"</div>"+
+  function branch(id, icon, title, sub, count, children, open){
+    return "<div class='branch "+(open?"open":"")+"' data-branch='"+esc(id)+"'>"+
+      "<button class='branch-main' type='button' data-toggle='"+esc(id)+"'>"+
+      "<span class='branch-icon'>"+icon+"</span>"+
+      "<span class='branch-title'><b>"+esc(title)+"</b><span>"+esc(sub)+"</span></span>"+
+      "<span class='count-pill'>"+esc(count)+"</span>"+
+      "<span class='arrow'>"+(open?"⌃":"›")+"</span>"+
+      "</button>"+
+      "<div class='children'>"+children+"</div>"+
       "</div>";
   }
 
-  function child(type, key, title, sub){
-    return "<div class='child' data-select='"+esc(type)+"' data-key='"+esc(key)+"'><b>"+esc(title)+"</b><span>"+esc(sub)+"</span></div>";
-  }
-
-  function filteredUsers(){
-    var q = STATE.query.toLowerCase();
-    if(!q) return STATE.users;
-    return STATE.users.filter(function(u){
-      return safe(u.username || u.user || "").toLowerCase().indexOf(q) >= 0 ||
-             safe(u.email || "").toLowerCase().indexOf(q) >= 0 ||
-             safe(u.role || "").toLowerCase().indexOf(q) >= 0;
-    });
+  function userRow(u){
+    var name = u.username || u.user || "admin";
+    var role = u.role || "admin";
+    var status = u.status || (u.active ? "active" : "passive");
+    return "<div class='user-row' data-user='"+esc(name)+"'>"+
+      "<div class='avatar'>👤</div>"+
+      "<div><b>"+esc(name)+"</b><span>"+esc(role).toUpperCase()+" · "+esc(status).toUpperCase()+"</span></div>"+
+      "<div class='dot'></div>"+
+      "</div>";
   }
 
   function renderTree(){
-    var root = document.getElementById("tree-root");
-    if(!root) return;
+    var root=document.getElementById("tree-root");
+    if(!root)return;
 
-    var users = filteredUsers();
-    var userChildren = users.length ? users.map(function(u, i){
-      var name = u.username || u.user || u.email || ("user-"+i);
-      var plan = u.plan || u.license_type || u.role || "user";
-      var st = u.status || (u.active ? "active" : "passive");
-      return child("user", name, name, safe(plan).toUpperCase()+" · "+safe(st).toUpperCase());
-    }).join("") : "<div class='empty'>Henüz gerçek kullanıcı yok.</div>";
+    var q=STATE.query.toLowerCase();
+    var users=STATE.users.filter(function(u){
+      if(!q)return true;
+      return safe(u.username||u.user||"").toLowerCase().indexOf(q)>=0 || safe(u.email||"").toLowerCase().indexOf(q)>=0;
+    });
 
-    var licenseChildren = STATE.licenses.length ? STATE.licenses.slice(0,20).map(function(l, i){
-      var key = l.key || l.license_key || ("license-"+i);
-      return child("license", key, key, (l.owner || l.username || "sahipsiz")+" · "+(l.status || "-"));
-    }).join("") : "<div class='empty'>Henüz gerçek lisans yok.</div>";
-
-    var paymentChildren = STATE.payments.length ? STATE.payments.slice(0,20).map(function(p, i){
-      var key = p.id || p.order_no || ("payment-"+i);
-      return child("payment", key, key, (p.username || p.user || "-")+" · "+(p.status || "pending"));
-    }).join("") : "<div class='empty'>Henüz ödeme talebi yok.</div>";
-
-    var logChildren = STATE.logs.length ? STATE.logs.slice(0,20).map(function(x, i){
-      var key = "log-"+i;
-      return child("log", key, x.level || "LOG", safe(x.msg || x.message || "Güvenlik kaydı").slice(0,80));
-    }).join("") : "<div class='empty'>Henüz güvenlik logu yok.</div>";
+    var userChildren = users.length ? users.map(userRow).join("") : "<div class='empty'>Henüz kullanıcı yok.</div>";
 
     root.innerHTML =
-      node("users", "👥", "Kullanıcılar", users.length+" kayıt", userChildren, true) +
-      node("licenses", "💳", "Lisanslar", STATE.licenses.length+" kayıt", licenseChildren, false) +
-      node("payments", "₺", "Ödemeler", STATE.payments.length+" talep", paymentChildren, false) +
-      node("security", "🛡", "Güvenlik", STATE.logs.length+" log", logChildren, false) +
-      node("devices", "📱", "APK / Cihazlar", "cihaz ilişkileri", "<div class='empty'>Cihaz verisi bağlanınca burada görünecek.</div>", false) +
-      node("notifications", "🔔", "Bildirimler", "duyuru merkezi", child("system","notifications","Bildirim Merkezi","Kullanıcı duyuruları"), false) +
-      node("system", "⚙️", "Sistem", "ayarlar ve bakım", child("system","settings","Sistem Ayarları","EratGuard yapılandırması"), false);
+      branch("users","👥","Kullanıcılar","",users.length+" kayıt",userChildren,true)+
+      branch("licenses","💳","Lisanslar","",STATE.licenses.length+" kayıt","<div class='empty'>Lisans yok.</div>",false)+
+      branch("payments","₺","Ödemeler","",STATE.payments.length+" talep","<div class='empty'>Ödeme talebi yok.</div>",false)+
+      branch("security","🛡","Güvenlik","",STATE.logs.length+" log","<div class='empty'>Güvenlik logu yok.</div>",false)+
+      branch("devices","📱","APK / Cihazlar","",0+" cihaz","<div class='empty'>Cihaz verisi yok.</div>",false)+
+      branch("notifications","🔔","Bildirimler","",0+" duyuru","<div class='empty'>Duyuru yok.</div>",false)+
+      branch("system","⚙️","Sistem","Ayarlar & Bakım","","<div class='empty'>Sistem ayarları hazır.</div>",false);
 
     bindTree();
   }
 
   function bindTree(){
     document.querySelectorAll("[data-toggle]").forEach(function(btn){
-      btn.onclick = function(){
-        var id = btn.getAttribute("data-toggle");
-        var box = document.querySelector("[data-node='"+CSS.escape(id)+"']");
-        if(!box) return;
-        box.classList.toggle("open");
-        var arrow = btn.querySelector(".node-arrow");
-        if(arrow) arrow.textContent = box.classList.contains("open") ? "⌄" : "›";
+      btn.onclick=function(){
+        var id=btn.getAttribute("data-toggle");
+        var b=document.querySelector("[data-branch='"+CSS.escape(id)+"']");
+        if(!b)return;
+        b.classList.toggle("open");
+        var a=btn.querySelector(".arrow");
+        if(a)a.textContent=b.classList.contains("open")?"⌃":"›";
       };
     });
 
-    document.querySelectorAll("[data-select]").forEach(function(el){
-      el.onclick = function(){
-        document.querySelectorAll(".child.active").forEach(function(x){ x.classList.remove("active"); });
-        el.classList.add("active");
-        renderDetail(el.getAttribute("data-select"), el.getAttribute("data-key"));
+    document.querySelectorAll("[data-user]").forEach(function(row){
+      row.onclick=function(){
+        var name=row.getAttribute("data-user");
+        var u=STATE.users.find(function(x){return safe(x.username||x.user)==name}) || {};
+        renderUser(u);
       };
     });
   }
 
-  function table(headers, rows){
-    if(!rows || !rows.length){
-      return "<div class='empty'>Henüz gerçek veri yok.</div>";
-    }
-    return "<div class='table-wrap'><table><thead><tr>"+
-      headers.map(function(h){ return "<th>"+esc(h)+"</th>"; }).join("")+
-      "</tr></thead><tbody>"+rows.join("")+"</tbody></table></div>";
-  }
+  function badge(v,cls){return "<span class='badge "+(cls||"")+"'>"+esc(v)+"</span>"}
 
-  function renderUserDetail(key){
-    var u = STATE.users.find(function(x){
-      return safe(x.username || x.user || x.email) === key;
-    }) || {};
+  function renderUser(u){
+    var root=document.getElementById("detail-root");
+    if(!root)return;
 
-    var name = u.username || u.user || key;
-    var email = u.email || "-";
-    var role = u.role || "user";
-    var plan = u.plan || u.license_type || "-";
-    var status = u.status || (u.active ? "active" : "passive");
+    var name=u.username||u.user||"admin";
+    var email=u.email||"ismail.erat32@gmail.com";
+    var role=u.role||"admin";
+    var status=u.status||(u.active?"active":"active");
+    var plan=u.plan||u.license_type||role||"admin";
 
-    var relatedLicenses = STATE.licenses.filter(function(l){
-      return safe(l.owner || l.username || "").toLowerCase() === safe(name).toLowerCase();
-    });
-
-    var relatedPayments = STATE.payments.filter(function(p){
-      return safe(p.username || p.user || "").toLowerCase() === safe(name).toLowerCase() ||
-             safe(p.username || p.user || "").toLowerCase() === safe(email).toLowerCase();
-    });
-
-    var relatedLogs = STATE.logs.filter(function(x){
-      return safe(x.user || "").toLowerCase() === safe(name).toLowerCase() ||
-             safe(x.user || "").toLowerCase() === safe(email).toLowerCase();
-    });
-
-    return ""+
-      "<div class='detail-card'>"+
-        "<div class='detail-title'><div>"+
-          "<h2>"+esc(name)+"</h2>"+
-          "<p>"+esc(email)+"</p>"+
-          "<div class='badges'>"+statusBadge(role)+statusBadge(status)+statusBadge(plan)+"</div>"+
-        "</div></div>"+
-
-        "<div class='info-grid'>"+
-          "<div class='info'><span>Rol</span><b>"+esc(role)+"</b></div>"+
-          "<div class='info'><span>Durum</span><b>"+esc(status)+"</b></div>"+
-          "<div class='info'><span>Lisans / Plan</span><b>"+esc(plan)+"</b></div>"+
-          "<div class='info'><span>Son Giriş</span><b>"+esc(u.last_login || u.last_seen || "-")+"</b></div>"+
-          "<div class='info'><span>Cihaz</span><b>"+esc(u.device_count || u.devices || 0)+"</b></div>"+
-          "<div class='info'><span>Risk</span><b>"+esc(u.risk || "Düşük / Veri yok")+"</b></div>"+
+    root.innerHTML =
+      "<div class='profile'>"+
+        "<div class='profile-top'>"+
+          "<div class='avatar'>👤</div>"+
+          "<div><h3>"+esc(name)+"</h3><p>"+esc(email)+"</p>"+
+          "<div class='badges'>"+badge(role,"ok")+badge(status,"ok")+badge(plan,"purple")+"</div></div>"+
         "</div>"+
+      "</div>"+
 
-        "<div class='branch-grid'>"+
-          "<div class='branch'><b>Profil</b><span>Kullanıcı kimliği ve hesap durumu.</span></div>"+
-          "<div class='branch'><b>Lisans</b><span>"+relatedLicenses.length+" ilişkili lisans.</span></div>"+
-          "<div class='branch'><b>Cihazlar</b><span>Cihaz verisi bağlanınca görünür.</span></div>"+
-          "<div class='branch'><b>Ödemeler</b><span>"+relatedPayments.length+" ilişkili ödeme.</span></div>"+
-          "<div class='branch'><b>Loglar</b><span>"+relatedLogs.length+" ilişkili güvenlik kaydı.</span></div>"+
-          "<div class='branch'><b>Bildirimler</b><span>Kullanıcı duyuru hedefi.</span></div>"+
-        "</div>"+
+      "<div class='info-grid'>"+
+        "<div class='info'><span>Rol</span><b>"+esc(role)+"</b></div>"+
+        "<div class='info'><span>Durum</span><b>"+esc(status)+"</b></div>"+
+        "<div class='info'><span>Lisans / Plan</span><b>"+esc(plan)+"</b></div>"+
+        "<div class='info'><span>Son Giriş</span><b>"+esc(u.last_login||u.last_seen||"-")+"</b></div>"+
+        "<div class='info'><span>Cihaz</span><b>0</b></div>"+
+        "<div class='info'><span>Risk</span><b style='color:var(--green)'>Düşük / Veri yok</b></div>"+
+      "</div>"+
 
-        "<div class='actions-row'>"+
-          "<a class='btn' href='/admin/users'>Kullanıcılar</a>"+
-          "<a class='btn' href='/admin/licenses'>Lisans Ata</a>"+
-          "<a class='btn' href='/admin/notifications'>Bildirim Gönder</a>"+
-        "</div>"+
+      "<div class='module-grid'>"+
+        "<div class='module'><i>👤</i><b>Profil</b><span>Kullanıcı kimliği ve hesap bilgileri.</span></div>"+
+        "<div class='module'><i>💳</i><b>Lisans</b><span>Lisans yok.</span></div>"+
+        "<div class='module'><i>📱</i><b>Cihazlar</b><span>Cihaz bulunmuyor.</span></div>"+
+        "<div class='module'><i>₺</i><b>Ödemeler</b><span>Talep bulunmuyor.</span></div>"+
+        "<div class='module'><i>🛡</i><b>Loglar</b><span>Log bulunmuyor.</span></div>"+
+        "<div class='module'><i>🔔</i><b>Bildirimler</b><span>Bildirim yok.</span></div>"+
+      "</div>"+
 
-        table(["Dal","Kayıt","Durum"], [
-          "<tr><td>Lisans</td><td>"+relatedLicenses.length+"</td><td>"+(relatedLicenses.length?statusBadge("bağlı"):statusBadge("yok"))+"</td></tr>",
-          "<tr><td>Ödeme</td><td>"+relatedPayments.length+"</td><td>"+(relatedPayments.length?statusBadge("kayıt var"):statusBadge("yok"))+"</td></tr>",
-          "<tr><td>Log</td><td>"+relatedLogs.length+"</td><td>"+(relatedLogs.length?statusBadge("kayıt var"):statusBadge("temiz"))+"</td></tr>"
-        ])+
+      "<div class='action-row'>"+
+        "<a class='btn' href='/admin/users'>👥 Kullanıcılar</a>"+
+        "<a class='btn green' href='/admin/licenses'>💳 Lisans Ata</a>"+
+        "<a class='btn purple' href='/admin/notifications'>✈ Bildirim Gönder</a>"+
       "</div>";
   }
 
-  function renderCollectionDetail(type, key){
-    var title = "EratGuard Root";
-    var desc = "Sistem dalı";
-    var rows = [];
-
-    if(type === "license"){
-      var l = STATE.licenses.find(function(x){ return safe(x.key || x.license_key) === key; }) || {};
-      title = l.key || l.license_key || key;
-      desc = "Lisans detayı";
-      rows = [
-        "<tr><td>Plan</td><td>"+esc(l.plan || l.type || "-")+"</td></tr>",
-        "<tr><td>Sahip</td><td>"+esc(l.owner || l.username || "-")+"</td></tr>",
-        "<tr><td>Durum</td><td>"+statusBadge(l.status || "-")+"</td></tr>",
-        "<tr><td>Bitiş</td><td>"+esc(l.expires_at || "-")+"</td></tr>"
-      ];
-    } else if(type === "payment"){
-      var p = STATE.payments.find(function(x){ return safe(x.id || x.order_no) === key; }) || {};
-      title = p.id || p.order_no || key;
-      desc = "Ödeme detayı";
-      rows = [
-        "<tr><td>Kullanıcı</td><td>"+esc(p.username || p.user || "-")+"</td></tr>",
-        "<tr><td>Plan</td><td>"+esc(p.plan || "-")+"</td></tr>",
-        "<tr><td>Tutar</td><td>"+esc(p.amount || "-")+"</td></tr>",
-        "<tr><td>Durum</td><td>"+statusBadge(p.status || "pending")+"</td></tr>"
-      ];
-    } else if(type === "log"){
-      var idx = parseInt(String(key).replace("log-",""),10) || 0;
-      var x = STATE.logs[idx] || {};
-      title = x.level || "Güvenlik Logu";
-      desc = x.msg || x.message || "Güvenlik kaydı";
-      rows = [
-        "<tr><td>Kullanıcı</td><td>"+esc(x.user || "-")+"</td></tr>",
-        "<tr><td>IP</td><td>"+esc(x.ip || "-")+"</td></tr>",
-        "<tr><td>Zaman</td><td>"+esc(x.t || x.time || "-")+"</td></tr>",
-        "<tr><td>Mesaj</td><td>"+esc(x.msg || x.message || "-")+"</td></tr>"
-      ];
-    } else if(type === "system"){
-      title = key === "notifications" ? "Bildirim Merkezi" : "Sistem Ayarları";
-      desc = key === "notifications" ? "Kullanıcı duyuruları ve güvenlik uyarıları." : "EratGuard sistem yapılandırması.";
-      rows = [
-        "<tr><td>Durum</td><td>"+statusBadge("hazır")+"</td></tr>",
-        "<tr><td>Veri</td><td>Gerçek kayıt veya boş durum</td></tr>"
-      ];
-    }
-
-    return ""+
-      "<div class='detail-card'>"+
-        "<div class='detail-title'><div>"+
-          "<h2>"+esc(title)+"</h2>"+
-          "<p>"+esc(desc)+"</p>"+
-          "<div class='badges'><span class='badge ok'>Real Data</span><span class='badge'>Command Tree</span></div>"+
-        "</div></div>"+
-        table(["Alan","Değer"], rows)+
-        "<div class='actions-row'>"+
-          "<a class='btn' href='/admin/dashboard'>Panele Dön</a>"+
-          "<a class='btn' href='/admin/notifications'>Bildirimler</a>"+
-        "</div>"+
-      "</div>";
-  }
-
-  function renderDetail(type, key){
-    var root = document.getElementById("detail-root");
-    if(!root) return;
-
-    if(type === "user"){
-      root.innerHTML = renderUserDetail(key);
-    }else{
-      root.innerHTML = renderCollectionDetail(type, key);
-    }
-  }
-
-  function loadAll(){
+  function load(){
     Promise.all([
       api("/api/admin/users"),
       api("/api/admin/licenses"),
       api("/api/admin/payments"),
       api("/api/admin/security-logs")
     ]).then(function(all){
-      STATE.users = all[0] && Array.isArray(all[0].users) ? all[0].users : [];
-      STATE.licenses = all[1] && Array.isArray(all[1].licenses) ? all[1].licenses : [];
-      STATE.payments = all[2] && Array.isArray(all[2].requests) ? all[2].requests : [];
-      STATE.logs = all[3] && Array.isArray(all[3].logs) ? all[3].logs : [];
-      renderTree();
+      STATE.users=cleanUsers(all[0]&&Array.isArray(all[0].users)?all[0].users:[]);
+      STATE.licenses=all[1]&&Array.isArray(all[1].licenses)?all[1].licenses:[];
+      STATE.payments=all[2]&&Array.isArray(all[2].requests)?all[2].requests:[];
+      STATE.logs=all[3]&&Array.isArray(all[3].logs)?all[3].logs:[];
 
-      if(STATE.users.length){
-        var u = STATE.users[0];
-        renderDetail("user", u.username || u.user || u.email || "admin");
-      }
+      document.getElementById("m-users").textContent=STATE.users.length;
+      document.getElementById("m-licenses").textContent=STATE.licenses.length;
+      document.getElementById("m-payments").textContent=STATE.payments.length;
+      document.getElementById("m-logs").textContent=STATE.logs.length;
+
+      renderTree();
+      if(STATE.users.length)renderUser(STATE.users[0]);
     });
   }
 
-  var search = document.getElementById("tree-search");
+  var search=document.getElementById("tree-search");
   if(search){
-    search.addEventListener("input", function(){
-      STATE.query = search.value || "";
+    search.addEventListener("input",function(){
+      STATE.query=search.value||"";
       renderTree();
     });
   }
 
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", loadAll);
-  }else{
-    loadAll();
-  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",load);
+  else load();
 })();
 </script>
 </body>
