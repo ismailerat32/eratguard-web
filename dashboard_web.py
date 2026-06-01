@@ -12387,6 +12387,113 @@ except Exception as _boot_err:
 # ===== ERATGUARD STAGE5C HOTFIX FORCE API ROUTER END =====
 
 
+
+
+# ===== ERATGUARD STAGE6B COMMAND TREE ADMIN ROUTE START =====
+try:
+    from flask import request as _eg6b_request
+    from flask import session as _eg6b_session
+    from flask import redirect as _eg6b_redirect
+    from flask import render_template as _eg6b_render_template
+    import re as _eg6b_re
+
+    def _eg6b_is_admin_session():
+        try:
+            username = str(_eg6b_session.get("username") or "").strip().lower()
+            role = str(_eg6b_session.get("role") or "").strip().lower()
+            return bool(_eg6b_session.get("is_admin")) or role == "admin" or username == "admin"
+        except Exception:
+            return False
+
+    def _eg6b_to_int(v, default=0):
+        try:
+            if v is None:
+                return default
+            raw = str(v).strip()
+            if raw == "":
+                return default
+            found = _eg6b_re.findall(r"-?\d+", raw.replace(",", ""))
+            if not found:
+                return default
+            return int(found[0])
+        except Exception:
+            return default
+
+    def _eg6b_clean_stats():
+        stats = {
+            "users": 0,
+            "licenses": 0,
+            "payments": 0,
+            "blocked": 0,
+            "spam_logs": 0,
+            "notifications": 0,
+        }
+
+        try:
+            fn = globals().get("_eg_real_admin_dashboard_stats")
+            if callable(fn):
+                data = fn()
+                if isinstance(data, dict):
+                    stats.update(data)
+        except Exception as _err:
+            print("ERATGUARD STAGE6B REAL STATS ERROR:", _err)
+
+        try:
+            fn = globals().get("_eg_default_admin_stats")
+            if callable(fn):
+                data = fn()
+                if isinstance(data, dict):
+                    for k, v in data.items():
+                        if k not in stats or _eg6b_to_int(stats.get(k), 0) == 0:
+                            stats[k] = v
+        except Exception as _err:
+            print("ERATGUARD STAGE6B DEFAULT STATS ERROR:", _err)
+
+        for k in ("users", "licenses", "payments", "blocked", "spam_logs", "notifications"):
+            stats[k] = _eg6b_to_int(stats.get(k), 0)
+
+        return stats
+
+    def _eg6b_command_tree_admin_gate():
+        try:
+            path = str(getattr(_eg6b_request, "path", "") or "").rstrip("/") or "/"
+
+            if path not in ("/admin", "/admin/dashboard"):
+                return None
+
+            if not _eg6b_is_admin_session():
+                return _eg6b_redirect("/admin/login?next=" + path)
+
+            if path == "/admin":
+                return _eg6b_redirect("/admin/dashboard")
+
+            return _eg6b_render_template(
+                "admin_dashboard.html",
+                admin_stats=_eg6b_clean_stats(),
+                brand="EratGuard PRO",
+                current_user=str(_eg6b_session.get("username") or "admin"),
+                username=str(_eg6b_session.get("username") or "admin"),
+                page_title="Command Tree",
+            )
+        except Exception as _err:
+            print("ERATGUARD STAGE6B COMMAND TREE ROUTE ERROR:", _err)
+            return None
+
+    try:
+        _eg6b_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg6b_funcs[:] = [
+            f for f in _eg6b_funcs
+            if getattr(f, "__name__", "") != "_eg6b_command_tree_admin_gate"
+        ]
+        _eg6b_funcs.insert(0, _eg6b_command_tree_admin_gate)
+        print("ERATGUARD STAGE6B COMMAND TREE ADMIN ROUTE ACTIVE")
+    except Exception as _err:
+        print("ERATGUARD STAGE6B ROUTE INSERT ERROR:", _err)
+
+except Exception as _boot_err:
+    print("ERATGUARD STAGE6B COMMAND TREE ADMIN ROUTE BOOT ERROR:", _boot_err)
+# ===== ERATGUARD STAGE6B COMMAND TREE ADMIN ROUTE END =====
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
