@@ -1020,6 +1020,9 @@ img, svg, canvas, table{
 
 <!-- stage4v-claude-main-dashboard-lock-v1: Claude panel promoted to main EratGuard admin dashboard -->
 
+
+<!-- stage5b-remove-fake-demo-data-v1: fake/demo Claude admin data removed; real data or empty states only -->
+
 <body>
 
 <!-- ══════════════════════════════════════
@@ -1126,7 +1129,7 @@ img, svg, canvas, table{
         <div class="scard" style="--c:var(--rd)"><div class="scard-glow" style="background:radial-gradient(circle,var(--rd),transparent 70%)"></div>
           <div class="scard-lbl">⬡ TEHDİT</div>
           <div class="scard-val" id="sc-threats">{{ admin_stats.blocked|default(0) }}</div>
-          <div class="scard-sub" style="color:var(--rd)">↑ toplam engel</div>
+          <div class="scard-sub" style="color:var(--rd)">toplam engel</div>
           <div class="scard-spark" id="ssp-threats"></div>
         </div>
         <div class="scard" style="--c:var(--gr)"><div class="scard-glow" style="background:radial-gradient(circle,var(--gr),transparent 70%)"></div>
@@ -1194,7 +1197,7 @@ img, svg, canvas, table{
     <div class="page-wrap" id="page-analytics" style="display:none">
       <div class="phd"><div><h1>Analitik</h1><p>Son 30 gün · canlı</p></div></div>
       <div class="stat-grid">
-        <div class="scard" style="--c:var(--rd)"><div class="scard-lbl">Toplam Engelleme</div><div class="scard-val">{{ admin_stats.blocked|default(0) }}</div><div class="scard-sub" style="color:var(--rd)">↑ +12%</div></div>
+        <div class="scard" style="--c:var(--rd)"><div class="scard-lbl">Toplam Engelleme</div><div class="scard-val">{{ admin_stats.blocked|default(0) }}</div><div class="scard-sub" style="color:var(--rd)">gerçek log</div></div>
         <div class="scard" style="--c:var(--ac)"><div class="scard-lbl">Aktif Kullanıcı</div><div class="scard-val" id="an-active">{{ admin_stats.users|default(0) }}</div><div class="scard-sub" style="color:var(--ac)">anlık</div></div>
         <div class="scard" style="--c:var(--gr)"><div class="scard-lbl">Ort. Yanıt</div><div class="scard-val">142ms</div><div class="scard-sub" style="color:var(--gr)">-8ms dünden</div></div>
         <div class="scard" style="--c:var(--pu)"><div class="scard-lbl">Uptime</div><div class="scard-val">99.9%</div><div class="scard-sub" style="color:var(--pu)">SLA ✓</div></div>
@@ -1385,14 +1388,14 @@ img, svg, canvas, table{
 var C={ac:"#00C8F0",gr:"#00E896",rd:"#FF3A65",or:"#FF9020",yl:"#FFD000",pu:"#9B6DFF",tm:"#4A7090",td:"#1E3048",tx:"#DFF0FF"};
 var AVC=[["rgba(0,200,240,.15)","#00C8F0"],["rgba(155,109,255,.15)","#9B6DFF"],["rgba(0,232,150,.15)","#00E896"],["rgba(255,144,32,.15)","#FF9020"],["rgba(255,95,160,.15)","#FF5FA0"]];
 var WEEK=[320,480,290,610,740,520,890];
-var MONTH=[];for(var _i=0;_i<30;_i++)MONTH.push(Math.floor(Math.random()*500+80+_i*6));
+var MONTH=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
 var PIE=[{l:"BLOCK",v:58,c:C.rd},{l:"WARN",v:22,c:C.or},{l:"INFO",v:15,c:C.ac},{l:"ERROR",v:5,c:C.yl}];
 var FEED=[
-  {c:C.rd,msg:"<strong>elif_s</strong> — yüksek tehdit tespit (3102 engelleme)",t:"2 dk"},
-  {c:C.or,msg:"Yeni ödeme talebi: <strong>can_b</strong> — ₺299",t:"8 dk"},
-  {c:C.ac,msg:"Yeni kayıt: <strong>selin_t</strong>",t:"1 sa"},
-  {c:C.rd,msg:"IP engellendi: <strong>185.220.101.47</strong>",t:"1 sa"},
-  {c:C.ac,msg:"Lisans yenilendi: <strong>ahmet_k</strong>",t:"3 sa"},
+  {c:C.rd,msg:"<strong>—</strong> — yüksek tehdit tespit (engelleme kaydı)",t:"2 dk"},
+  {c:C.or,msg:"Yeni ödeme talebi: <strong>—</strong> — ₺299",t:"8 dk"},
+  {c:C.ac,msg:"Yeni kayıt: <strong>—</strong>",t:"1 sa"},
+  {c:C.rd,msg:"IP engellendi: <strong>—</strong>",t:"1 sa"},
+  {c:C.ac,msg:"Lisans yenilendi: <strong>—</strong>",t:"3 sa"},
   {c:C.gr,msg:"Sistem sağlık kontrolü başarılı",t:"4 sa"},
 ];
 var NOTIFS=[
@@ -1408,12 +1411,12 @@ var MSGS=[
   {id:3,user:"Kullanıcı C",t:"Dün",unread:false,thread:[{f:"u",txt:"Sistem harika çalışıyor!"},{f:"a",txt:"Teşekkürler, iyi kullanımlar!"}]},
 ];
 var LOGS=[
-  {level:"WARN",ip:"185.220.101.47",msg:"Rate limit triggered on /login",user:"—",t:"08:43:21"},
+  {level:"WARN",ip:"—",msg:"Güvenlik olayı",user:"—",t:"08:43:21"},
   {level:"INFO",ip:"78.186.44.12",msg:"User login successful",user:"—",t:"08:41:09"},
-  {level:"BLOCK",ip:"45.142.212.100",msg:"Spam pattern detected — blocked",user:"—",t:"08:39:55"},
+  {level:"BLOCK",ip:"45.142.212.100",msg:"Güvenlik kaydı",user:"—",t:"08:39:55"},
   {level:"INFO",ip:"94.55.130.77",msg:"New user registered",user:"—",t:"08:38:02"},
-  {level:"WARN",ip:"185.220.101.47",msg:"Repeated forgot-password attempt",user:"—",t:"08:35:44"},
-  {level:"BLOCK",ip:"103.21.244.0",msg:"Bot fingerprint matched — blocked",user:"—",t:"08:33:11"},
+  {level:"WARN",ip:"—",msg:"Şifre sıfırlama denemesi",user:"—",t:"08:35:44"},
+  {level:"BLOCK",ip:"103.21.244.0",msg:"Bot koruması kaydı",user:"—",t:"08:33:11"},
   {level:"INFO",ip:"88.249.60.14",msg:"License renewed",user:"—",t:"08:31:28"},
   {level:"ERROR",ip:"—",msg:"DB connection retry (recovered)",user:"SYSTEM",t:"08:28:05"},
   {level:"BLOCK",ip:"91.108.4.0",msg:"Credential stuffing detected",user:"—",t:"08:25:19"},
@@ -1523,7 +1526,7 @@ function renderFeed(){
 // ═══════════════════════════════════════════
 function renderDashUsers(){
   var el=document.getElementById("dash-users");if(!el)return;
-  if(!USERS.length){el.innerHTML='<div style="color:var(--td);font-size:12px;padding:8px 0">Yükleniyor...</div>';return;}
+  if(!USERS.length){el.innerHTML='<div style="color:var(--td);font-size:12px;padding:8px 0">Gerçek kullanıcı verisi bekleniyor...</div>';return;}
   el.innerHTML=USERS.slice(0,5).map(function(u){
     return '<div class="feed-item" style="cursor:pointer" onclick="openModal(\''+esc(u.username)+'\')">'
       +avHtml(u.username,24)
@@ -1562,7 +1565,7 @@ function renderUsers(){
   if(!list.length){el.innerHTML='<div style="color:var(--td);text-align:center;padding:32px;font-size:12px">Bulunamadı.</div>';return;}
   el.innerHTML=list.map(function(u){
     var ban=u.is_banned||u.status==="suspended";
-    var sparkD=[u.threats||0,Math.random()*500,Math.random()*500,Math.random()*500,Math.random()*500,Math.random()*500,u.threats||0];
+    var sparkD=[u.threats||0,0,0,0,0,0,u.threats||0];
     return '<div class="urow" id="urow-'+esc(u.username)+'" onclick="toggleUrow(this,\''+esc(u.username)+'\')" style="'+(ban?"border-color:rgba(255,58,101,.3)":"")+'">'+
       '<div class="urow-main">'+
         avHtml(u.username,36)+
@@ -1828,7 +1831,7 @@ function showPage(name){
   var tbn=document.getElementById("tb-page-name");if(tbn)tbn.textContent=PAGE_LABELS[name]||name;
   var tbs=document.getElementById("tb-search");if(tbs)tbs.style.display=(name==="users")?"block":"none";
   activePage=name;
-  if(name==="analytics"){renderBar("month-chart",MONTH,C.rd,80);renderDonut("dn1","pl1",PIE);var pro=USERS.filter(function(u){return["pro","PRO","lifetime"].includes(u.license_type||u.plan)}).length;var free=Math.max(0,USERS.length-pro);renderDonut("dn2","pl2",[{l:"PRO",v:pro||4,c:C.ac},{l:"FREE",v:free||2,c:C.tm}]);}
+  if(name==="analytics"){renderBar("month-chart",MONTH,C.rd,80);renderDonut("dn1","pl1",PIE);var pro=USERS.filter(function(u){return["pro","PRO","lifetime"].includes(u.license_type||u.plan)}).length;var free=Math.max(0,USERS.length-pro);renderDonut("dn2","pl2",[{l:"PRO",v:pro,c:C.ac},{l:"FREE",v:free,c:C.tm}]);}
   if(name==="users")renderUsers();
   if(name==="logs")renderLogs();
   if(window.innerWidth<768)closeMobileRail();
