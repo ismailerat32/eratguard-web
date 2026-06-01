@@ -1023,6 +1023,10 @@ img, svg, canvas, table{
 
 <!-- stage5b-remove-fake-demo-data-v1: fake/demo Claude admin data removed; real data or empty states only -->
 
+
+<!-- stage5e-remove-fake-topbar-drawers-marker-v1 -->
+
+<!-- stage5e-remove-fake-topbar-drawers-marker-v2 -->
 <body>
 
 <!-- ══════════════════════════════════════
@@ -1096,8 +1100,8 @@ img, svg, canvas, table{
         <span>⌘ Komut</span>
         <kbd>K</kbd>
       </button>
-      <button class="tb-icobtn" id="msg-btn" title="Mesajlar">✉<span class="tb-dot" id="msg-dot">2</span></button>
-      <button class="tb-icobtn" id="notif-btn" title="Bildirimler">◎<span class="tb-dot" id="notif-dot">2</span></button>
+      <button class="tb-icobtn" id="msg-btn" title="Mesajlar">✉<span class="tb-dot" id="msg-dot"></span></button>
+      <button class="tb-icobtn" id="notif-btn" title="Bildirimler">◎<span class="tb-dot" id="notif-dot"></span></button>
       <div class="tb-clock">
         <span class="tb-status-dot"></span>
         <span id="clk">--:--:--</span>
@@ -1359,7 +1363,7 @@ img, svg, canvas, table{
       <div style="font-size:15px;font-weight:700;font-family:var(--fhd)">Yeni Kullanıcı</div>
       <button class="mbox-close" onclick="document.getElementById('add-modal').classList.remove('open')">✕</button>
     </div>
-    <div class="fg"><label class="fl">Kullanıcı Adı</label><input class="fi" type="text" id="f-un" placeholder="kullanici_adi"></div>
+    <div class="fg"><label class="fl">dı</label><input class="fi" type="text" id="f-un" placeholder="kullanici_adi"></div>
     <div class="fg"><label class="fl">E-posta</label><input class="fi" type="email" id="f-em" placeholder="email@example.com"></div>
     <div class="fg"><label class="fl">Şifre</label><input class="fi" type="password" id="f-pw" placeholder="••••••••"></div>
     <div class="fg2">
@@ -1399,17 +1403,13 @@ var FEED=[
   {c:C.gr,msg:"Sistem sağlık kontrolü başarılı",t:"4 sa"},
 ];
 var NOTIFS=[
-  {type:"warn",icon:"⚠",msg:"Yüksek tehdit tespit edildi — admin paneli kontrol edin.",t:"2 dk önce",read:false,c:C.or},
-  {type:"pay",icon:"▣",msg:"Yeni ödeme talebi onay bekliyor.",t:"8 dk önce",read:false,c:C.yl},
-  {type:"info",icon:"◈",msg:"Yeni kullanıcı kaydı oluşturuldu.",t:"1 sa önce",read:true,c:C.ac},
-  {type:"block",icon:"⊘",msg:"IP engellendi: rate limit aşıldı.",t:"1 sa önce",read:true,c:C.rd},
-  {type:"info",icon:"◈",msg:"Lisans yenileme tamamlandı.",t:"3 sa önce",read:true,c:C.ac},
+  {type:"warn",icon:"⚠",msg:" — admin paneli kontrol edin.",t:"2 dk önce",read:false,c:C.or},
+  {type:"pay",icon:"▣",msg:".",t:"8 dk önce",read:false,c:C.yl},
+  {type:"info",icon:"◈",msg:".",t:"1 sa önce",read:true,c:C.ac},
+  {type:"block",icon:"⊘",msg:".",t:"1 sa önce",read:true,c:C.rd},
+  {type:"info",icon:"◈",msg:".",t:"3 sa önce",read:true,c:C.ac},
 ];
-var MSGS=[
-  {id:1,user:"Kullanıcı A",t:"09:12",unread:true,thread:[{f:"u",txt:"Dashboard tehdit sayısı hakkında sorum var."}]},
-  {id:2,user:"Kullanıcı B",t:"08:55",unread:true,thread:[{f:"u",txt:"PRO üyelik ödemesi yaptım, onay bekliyor."}]},
-  {id:3,user:"Kullanıcı C",t:"Dün",unread:false,thread:[{f:"u",txt:"Sistem harika çalışıyor!"},{f:"a",txt:"Teşekkürler, iyi kullanımlar!"}]},
-];
+var MSGS=[];
 var LOGS=[
   {level:"WARN",ip:"—",msg:"Güvenlik olayı",user:"—",t:"08:43:21"},
   {level:"INFO",ip:"78.186.44.12",msg:"User login successful",user:"—",t:"08:41:09"},
@@ -1907,6 +1907,102 @@ loadLicenses();
 </script>
 </body>
 </htm
+<script id="stage5e-remove-fake-topbar-drawers-v2">
+/* ===== STAGE 5E HOTFIX V2: TOPBAR DRAWERS REAL-DATA ONLY =====
+   Fake/demo metin içermez.
+   Mesajlar/Bildirimler drawer alanlarında gerçek veri yoksa boş durum gösterir.
+*/
+(function(){
+  function hideSmallBadges(){
+    document.querySelectorAll(".badge, .rbadge, .notif-badge, .msg-badge, [class*='badge']").forEach(function(el){
+      try{
+        var txt = (el.textContent || "").trim();
+        if(txt === "2" || txt === "3"){
+          el.textContent = "";
+          el.style.display = "none";
+          el.setAttribute("data-eg-stage5e-v2-hidden-badge", "1");
+        }
+      }catch(e){}
+    });
+  }
+
+  function findDrawerByTitle(titleText){
+    var boxes = Array.prototype.slice.call(document.querySelectorAll("aside, section, div"));
+    for(var i=0;i<boxes.length;i++){
+      var box = boxes[i];
+      try{
+        var heading = box.querySelector("h1,h2,h3");
+        if(heading && (heading.textContent || "").trim().indexOf(titleText) !== -1){
+          return box;
+        }
+      }catch(e){}
+    }
+    return null;
+  }
+
+  function setEmptyDrawer(titleText, emptyText){
+    var box = findDrawerByTitle(titleText);
+    if(!box) return;
+
+    if(box.getAttribute("data-eg-stage5e-v2-cleaned") === "1") return;
+    box.setAttribute("data-eg-stage5e-v2-cleaned", "1");
+
+    var heading = box.querySelector("h1,h2,h3");
+    var closeBtn = box.querySelector("button, .close, [class*='close']");
+
+    Array.prototype.slice.call(box.children).forEach(function(child){
+      try{
+        if(child === heading || child.contains(heading)) return;
+        if(closeBtn && (child === closeBtn || child.contains(closeBtn))) return;
+        child.remove();
+      }catch(e){}
+    });
+
+    var empty = document.createElement("div");
+    empty.setAttribute("data-eg-stage5e-v2-empty", "1");
+    empty.style.cssText = [
+      "margin:22px 0",
+      "padding:18px",
+      "border:1px dashed rgba(255,255,255,.14)",
+      "border-radius:20px",
+      "color:#8aa6c4",
+      "background:rgba(255,255,255,.025)",
+      "font-size:14px",
+      "line-height:1.45"
+    ].join(";");
+
+    empty.textContent = emptyText;
+    box.appendChild(empty);
+  }
+
+  function clean(){
+    try{
+      if(Array.isArray(window.MESSAGES)) window.MESSAGES = [];
+      if(Array.isArray(window.MSGS)) window.MSGS = [];
+      if(Array.isArray(window.NOTIFICATIONS)) window.NOTIFICATIONS = [];
+      if(Array.isArray(window.ALERTS)) window.ALERTS = [];
+    }catch(e){}
+
+    hideSmallBadges();
+    setEmptyDrawer("Mesajlar", "Henüz gerçek mesaj kaydı yok.");
+    setEmptyDrawer("Bildirimler", "Henüz gerçek bildirim kaydı yok.");
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", clean);
+  }else{
+    clean();
+  }
+
+  setTimeout(clean, 250);
+  setTimeout(clean, 1000);
+  setTimeout(clean, 2500);
+
+  window.egStage5eCleanTopbarDrawersV2 = clean;
+})();
+</script>
+
+
 <script id="stage5c-real-data-binding-v1">
 /* ===== STAGE 5C: REAL DATA BINDING FOR CLAUDE ADMIN PANEL =====
    Sahte veri üretmez. Admin API'lerinden gelen gerçek JSON verilerini panele bağlar.
