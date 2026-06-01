@@ -1029,6 +1029,8 @@ img, svg, canvas, table{
 <!-- stage5e-remove-fake-topbar-drawers-marker-v2 -->
 
 <!-- stage5e-hard-empty-topbar-drawers-marker-v3 -->
+
+<!-- stage5f-real-data-only-admin-polish-marker-v1 -->
 <body>
 
 <!-- ══════════════════════════════════════
@@ -1414,15 +1416,15 @@ var NOTIFS=[
 var MSGS=[];
 var LOGS=[
   {level:"WARN",ip:"—",msg:"Güvenlik olayı",user:"—",t:"08:43:21"},
-  {level:"INFO",ip:"78.186.44.12",msg:"User login successful",user:"—",t:"08:41:09"},
+  {level:"INFO",ip:"78.186.44.12",msg:"",user:"—",t:"08:41:09"},
   {level:"BLOCK",ip:"45.142.212.100",msg:"Güvenlik kaydı",user:"—",t:"08:39:55"},
-  {level:"INFO",ip:"94.55.130.77",msg:"New user registered",user:"—",t:"08:38:02"},
+  {level:"INFO",ip:"94.55.130.77",msg:"",user:"—",t:"08:38:02"},
   {level:"WARN",ip:"—",msg:"Şifre sıfırlama denemesi",user:"—",t:"08:35:44"},
   {level:"BLOCK",ip:"103.21.244.0",msg:"Bot koruması kaydı",user:"—",t:"08:33:11"},
-  {level:"INFO",ip:"88.249.60.14",msg:"License renewed",user:"—",t:"08:31:28"},
-  {level:"ERROR",ip:"—",msg:"DB connection retry (recovered)",user:"SYSTEM",t:"08:28:05"},
-  {level:"BLOCK",ip:"91.108.4.0",msg:"Credential stuffing detected",user:"—",t:"08:25:19"},
-  {level:"INFO",ip:"62.204.35.1",msg:"Password reset completed",user:"—",t:"08:22:44"},
+  {level:"INFO",ip:"88.249.60.14",msg:"",user:"—",t:"08:31:28"},
+  {level:"ERROR",ip:"—",msg:"",user:"SYSTEM",t:"08:28:05"},
+  {level:"BLOCK",ip:"91.108.4.0",msg:"",user:"—",t:"08:25:19"},
+  {level:"INFO",ip:"62.204.35.1",msg:"",user:"—",t:"08:22:44"},
 ];
 var USERS=[],LICENSES=[],PAYMENTS=[];
 var activePage="dashboard",logFilter="ALL",activeMsgId=null;
@@ -1909,6 +1911,343 @@ loadLicenses();
 </script>
 </body>
 </htm
+<style id="stage5f-real-data-only-admin-polish-v1">
+/* ===== STAGE 5F: REAL DATA ONLY ADMIN POLISH =====
+   - Topbar mesaj/bildirim ikonlarını ve sahte badge'leri gizler.
+   - Canlı Aktivite fake skeleton satırlarını temizler.
+   - Analytics fallback/demo grafik alanlarını boş veri durumuna alır.
+   - Mobilde fixed alt bar çakışmasını azaltır.
+*/
+
+/* Üst bardaki mesaj/bildirim ikonları gerçek sistem bağlanana kadar kapalı */
+@media(max-width:760px){
+  .top-actions .icon-btn,
+  .top-actions .badge-btn,
+  .tb-actions .icon-btn,
+  .tb-actions .badge-btn,
+  .header-actions .icon-btn,
+  .header-actions .badge-btn,
+  button[aria-label*="Mesaj"],
+  button[aria-label*="Bildirim"],
+  button[title*="Mesaj"],
+  button[title*="Bildirim"],
+  [data-action*="message"],
+  [data-action*="notification"],
+  [data-action*="notif"],
+  [class*="message-btn"],
+  [class*="notification-btn"],
+  [class*="notif-btn"],
+  [class*="msg-btn"]{
+    display:none !important;
+    visibility:hidden !important;
+    width:0 !important;
+    min-width:0 !important;
+    max-width:0 !important;
+    height:0 !important;
+    min-height:0 !important;
+    max-height:0 !important;
+    padding:0 !important;
+    margin:0 !important;
+    border:0 !important;
+    overflow:hidden !important;
+    pointer-events:none !important;
+  }
+
+  .badge,
+  .rbadge,
+  .notif-badge,
+  .msg-badge,
+  [class*="badge"],
+  [class*="count"]{
+    display:none !important;
+  }
+}
+
+/* İçerik alt sabit durum barına binmesin */
+body{
+  padding-bottom:86px !important;
+}
+
+.main,
+.content,
+.dashboard,
+.admin-content,
+.page,
+.page-wrap,
+.ss-premium-dashboard{
+  padding-bottom:96px !important;
+}
+
+/* Fake/boş aktivite satırları gizlenebilsin */
+[data-eg-stage5f-hidden]{
+  display:none !important;
+  visibility:hidden !important;
+  width:0 !important;
+  height:0 !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  max-width:0 !important;
+  max-height:0 !important;
+  padding:0 !important;
+  margin:0 !important;
+  border:0 !important;
+  overflow:hidden !important;
+  pointer-events:none !important;
+}
+
+[data-eg-stage5f-empty]{
+  margin:14px 0 !important;
+  padding:18px !important;
+  border:1px dashed rgba(255,255,255,.14) !important;
+  border-radius:20px !important;
+  color:#8aa6c4 !important;
+  background:rgba(255,255,255,.025) !important;
+  font-size:14px !important;
+  line-height:1.45 !important;
+}
+
+/* Analytics demo chart kalıntıları boş veri görünümünde fazla parlak durmasın */
+[data-eg-stage5f-zero-chart]{
+  opacity:.35 !important;
+  filter:saturate(.5) !important;
+}
+</style>
+
+<script id="stage5f-real-data-only-admin-polish-v1">
+/* ===== STAGE 5F: REAL DATA ONLY ADMIN POLISH =====
+   Fake/demo veri üretmez. Kalan demo UI iskeletlerini gerçek veri yoksa boş duruma çeker.
+*/
+(function(){
+  function qsa(sel, root){
+    return Array.prototype.slice.call((root || document).querySelectorAll(sel));
+  }
+
+  function txt(el){
+    return String((el && el.textContent) || "").trim();
+  }
+
+  function low(el){
+    return txt(el).toLowerCase();
+  }
+
+  function hide(el){
+    try{
+      el.setAttribute("data-eg-stage5f-hidden", "1");
+      el.style.display = "none";
+      el.style.visibility = "hidden";
+    }catch(e){}
+  }
+
+  function makeEmpty(text){
+    var div = document.createElement("div");
+    div.setAttribute("data-eg-stage5f-empty", "1");
+    div.textContent = text;
+    return div;
+  }
+
+  function removeTopbarMessageNotificationButtons(){
+    qsa("button,a,div,span").forEach(function(el){
+      try{
+        var t = low(el);
+        var cls = String(el.className || "").toLowerCase();
+        var id = String(el.id || "").toLowerCase();
+        var title = String(el.getAttribute("title") || "").toLowerCase();
+        var aria = String(el.getAttribute("aria-label") || "").toLowerCase();
+        var action = String(el.getAttribute("data-action") || "").toLowerCase();
+
+        var looksTopbar = !!el.closest(".topbar,.top-bar,.header,.app-header,.tb-actions,.top-actions,.header-actions");
+        if(!looksTopbar) return;
+
+        var isMsgNotif =
+          t === "2" ||
+          t === "3" ||
+          cls.indexOf("badge") >= 0 ||
+          cls.indexOf("message") >= 0 ||
+          cls.indexOf("notif") >= 0 ||
+          cls.indexOf("notification") >= 0 ||
+          cls.indexOf("msg") >= 0 ||
+          id.indexOf("message") >= 0 ||
+          id.indexOf("notif") >= 0 ||
+          title.indexOf("mesaj") >= 0 ||
+          title.indexOf("bildirim") >= 0 ||
+          aria.indexOf("mesaj") >= 0 ||
+          aria.indexOf("bildirim") >= 0 ||
+          action.indexOf("message") >= 0 ||
+          action.indexOf("notif") >= 0 ||
+          action.indexOf("notification") >= 0;
+
+        if(isMsgNotif) hide(el);
+      }catch(e){}
+    });
+  }
+
+  function hardEmptyDrawers(){
+    ["Mesajlar", "Bildirimler"].forEach(function(title){
+      qsa("h1,h2,h3,.drawer-title,.panel-title,[class*='title']").forEach(function(h){
+        try{
+          if(txt(h).indexOf(title) === -1) return;
+
+          var panel = h;
+          for(var i=0;i<8 && panel;i++){
+            var cls = String(panel.className || "").toLowerCase();
+            var id = String(panel.id || "").toLowerCase();
+            if(
+              panel.tagName === "ASIDE" ||
+              cls.indexOf("drawer") >= 0 ||
+              cls.indexOf("panel") >= 0 ||
+              cls.indexOf("sheet") >= 0 ||
+              cls.indexOf("modal") >= 0 ||
+              id.indexOf("drawer") >= 0 ||
+              id.indexOf("panel") >= 0
+            ){
+              break;
+            }
+            panel = panel.parentElement;
+          }
+
+          if(!panel) panel = h.parentElement;
+          if(!panel) return;
+
+          qsa("[data-eg-stage5f-empty]", panel).forEach(function(x){ x.remove(); });
+
+          qsa(":scope > *", panel).forEach(function(child){
+            try{
+              if(child === h || child.contains(h)) return;
+              var c = String(child.className || "").toLowerCase();
+              if(c.indexOf("close") >= 0 || c.indexOf("head") >= 0 || c.indexOf("header") >= 0) return;
+              hide(child);
+            }catch(e){}
+          });
+
+          panel.appendChild(makeEmpty(title === "Mesajlar" ? "Henüz gerçek mesaj kaydı yok." : "Henüz gerçek bildirim kaydı yok."));
+        }catch(e){}
+      });
+    });
+  }
+
+  function cleanActivityPanel(){
+    qsa("section,div,article").forEach(function(panel){
+      try{
+        var text = txt(panel);
+        if(text.indexOf("CANLI AKTİVİTE") === -1 && text.indexOf("Canlı Aktivite") === -1) return;
+        if(panel.getAttribute("data-eg-stage5f-activity-cleaned") === "1") return;
+
+        var rows = qsa(":scope > *", panel).filter(function(child){
+          var ctext = txt(child);
+          if(ctext.indexOf("CANLI AKTİVİTE") >= 0 || ctext.indexOf("Canlı Aktivite") >= 0) return false;
+          return ctext.length > 0;
+        });
+
+        rows.forEach(function(row){
+          var rt = txt(row);
+          var fakeLike =
+            rt.indexOf("₺299") >= 0 ||
+            rt.indexOf("yüksek tehdit") >= 0 ||
+            rt.indexOf("Yeni ödeme talebi") >= 0 ||
+            rt.indexOf("Yeni kayıt") >= 0 ||
+            rt.indexOf("IP engellendi") >= 0 ||
+            rt.indexOf("Lisans yenilendi") >= 0 ||
+            rt === "—" ||
+            rt.indexOf("— —") >= 0;
+
+          if(fakeLike) hide(row);
+        });
+
+        var visibleRows = qsa(":scope > *", panel).filter(function(child){
+          return child.getAttribute("data-eg-stage5f-hidden") !== "1" && txt(child).length > 0;
+        });
+
+        if(visibleRows.length <= 1){
+          panel.appendChild(makeEmpty("Henüz gerçek aktivite kaydı yok."));
+        }
+
+        panel.setAttribute("data-eg-stage5f-activity-cleaned", "1");
+      }catch(e){}
+    });
+  }
+
+  function cleanAnalyticsDemoCharts(){
+    qsa("section,div,article").forEach(function(panel){
+      try{
+        var t = txt(panel);
+        var titleMatch =
+          t.indexOf("30 GÜNLÜK TEHDİT AKIŞI") >= 0 ||
+          t.indexOf("LOG DAĞILIMI") >= 0 ||
+          t.indexOf("PLAN DAĞILIMI") >= 0 ||
+          t.indexOf("Log Dağılımı") >= 0 ||
+          t.indexOf("Plan Dağılımı") >= 0;
+
+        if(!titleMatch) return;
+
+        var pageText = txt(document.body);
+        var totalBlockedZero = pageText.indexOf("TOPLAM ENGELLEME") >= 0 && pageText.indexOf("gerçek log") >= 0;
+
+        if(totalBlockedZero){
+          panel.setAttribute("data-eg-stage5f-zero-chart", "1");
+
+          var hasEmpty = panel.querySelector("[data-eg-stage5f-empty]");
+          if(!hasEmpty){
+            panel.appendChild(makeEmpty("Gerçek log verisi oluşunca grafik burada görünecek."));
+          }
+        }
+      }catch(e){}
+    });
+  }
+
+  function fixDuplicateAdminBadges(){
+    qsa("article,div,li").forEach(function(row){
+      try{
+        var t = txt(row);
+        if(t.indexOf("admin") === -1) return;
+
+        var badges = qsa(".badge,[class*='badge'],span", row).filter(function(b){
+          return txt(b).toUpperCase() === "ADMIN";
+        });
+
+        if(badges.length > 1){
+          for(var i=1;i<badges.length;i++) hide(badges[i]);
+        }
+      }catch(e){}
+    });
+  }
+
+  function clean(){
+    try{
+      if(Array.isArray(window.ACTIVITY)) window.ACTIVITY = [];
+      if(Array.isArray(window.MESSAGES)) window.MESSAGES = [];
+      if(Array.isArray(window.MSGS)) window.MSGS = [];
+      if(Array.isArray(window.NOTIFICATIONS)) window.NOTIFICATIONS = [];
+      if(Array.isArray(window.ALERTS)) window.ALERTS = [];
+    }catch(e){}
+
+    removeTopbarMessageNotificationButtons();
+    hardEmptyDrawers();
+    cleanActivityPanel();
+    cleanAnalyticsDemoCharts();
+    fixDuplicateAdminBadges();
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", clean);
+  }else{
+    clean();
+  }
+
+  document.addEventListener("click", function(){
+    setTimeout(clean, 80);
+    setTimeout(clean, 260);
+    setTimeout(clean, 700);
+  }, true);
+
+  setTimeout(clean, 250);
+  setTimeout(clean, 1000);
+  setTimeout(clean, 2500);
+
+  window.egStage5fRealDataOnlyAdminPolish = clean;
+})();
+</script>
+
+
 <style id="stage5e-hard-empty-topbar-drawers-v3">
 /* ===== STAGE 5E V3: HARD EMPTY TOPBAR DRAWERS =====
    Mesajlar/Bildirimler drawer içinde demo kalıntı kartlarını gizler.
