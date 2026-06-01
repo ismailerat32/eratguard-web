@@ -1024,6 +1024,8 @@ img, svg, canvas, table{
 <!-- stage5e-remove-fake-topbar-drawers-marker-v1 -->
 
 <!-- stage5e-remove-fake-topbar-drawers-marker-v2 -->
+
+<!-- stage5e-hard-empty-topbar-drawers-marker-v3 -->
 <body>
 
 <!-- ══════════════════════════════════════
@@ -1904,72 +1906,158 @@ loadLicenses();
 </script>
 </body>
 </htm
-<script id="stage5e-remove-fake-topbar-drawers-v2">
-/* ===== STAGE 5E HOTFIX V2: TOPBAR DRAWERS REAL-DATA ONLY =====
+<style id="stage5e-hard-empty-topbar-drawers-v3">
+/* ===== STAGE 5E V3: HARD EMPTY TOPBAR DRAWERS =====
+   Mesajlar/Bildirimler drawer içinde demo kalıntı kartlarını gizler.
+*/
+[data-eg-stage5e-v3-empty]{
+  margin:22px 0 !important;
+  padding:18px !important;
+  border:1px dashed rgba(255,255,255,.14) !important;
+  border-radius:20px !important;
+  color:#8aa6c4 !important;
+  background:rgba(255,255,255,.025) !important;
+  font-size:14px !important;
+  line-height:1.45 !important;
+}
+
+[data-eg-stage5e-v3-hidden]{
+  display:none !important;
+  visibility:hidden !important;
+  width:0 !important;
+  height:0 !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  max-width:0 !important;
+  max-height:0 !important;
+  padding:0 !important;
+  margin:0 !important;
+  border:0 !important;
+  overflow:hidden !important;
+  pointer-events:none !important;
+}
+
+[data-eg-stage5e-v3-hidden-badge]{
+  display:none !important;
+}
+</style>
+
+<script id="stage5e-hard-empty-topbar-drawers-v3">
+/* ===== STAGE 5E V3: HARD EMPTY TOPBAR DRAWERS =====
+   Başlığa göre Mesajlar/Bildirimler drawer gövdesini komple boş duruma çeker.
    Fake/demo metin içermez.
-   Mesajlar/Bildirimler drawer alanlarında gerçek veri yoksa boş durum gösterir.
 */
 (function(){
-  function hideSmallBadges(){
-    document.querySelectorAll(".badge, .rbadge, .notif-badge, .msg-badge, [class*='badge']").forEach(function(el){
+  function qsa(sel, root){
+    return Array.prototype.slice.call((root || document).querySelectorAll(sel));
+  }
+
+  function norm(v){
+    return String(v || "").trim().toLowerCase();
+  }
+
+  function hideBadges(){
+    qsa(".badge, .rbadge, .notif-badge, .msg-badge, [class*='badge'], [class*='count']").forEach(function(el){
       try{
-        var txt = (el.textContent || "").trim();
-        if(txt === "2" || txt === "3"){
+        var t = norm(el.textContent);
+        if(t === "2" || t === "3" || t === "5"){
           el.textContent = "";
+          el.setAttribute("data-eg-stage5e-v3-hidden-badge", "1");
           el.style.display = "none";
-          el.setAttribute("data-eg-stage5e-v2-hidden-badge", "1");
         }
       }catch(e){}
     });
   }
 
-  function findDrawerByTitle(titleText){
-    var boxes = Array.prototype.slice.call(document.querySelectorAll("aside, section, div"));
-    for(var i=0;i<boxes.length;i++){
-      var box = boxes[i];
+  function closestPanelFromHeading(heading){
+    var node = heading;
+    for(var i=0; i<8 && node; i++){
       try{
-        var heading = box.querySelector("h1,h2,h3");
-        if(heading && (heading.textContent || "").trim().indexOf(titleText) !== -1){
-          return box;
+        var cls = String(node.className || "").toLowerCase();
+        var id = String(node.id || "").toLowerCase();
+
+        if(
+          node.tagName === "ASIDE" ||
+          cls.indexOf("drawer") >= 0 ||
+          cls.indexOf("panel") >= 0 ||
+          cls.indexOf("modal") >= 0 ||
+          cls.indexOf("sheet") >= 0 ||
+          cls.indexOf("tray") >= 0 ||
+          cls.indexOf("sidebar") >= 0 ||
+          id.indexOf("drawer") >= 0 ||
+          id.indexOf("panel") >= 0
+        ){
+          return node;
         }
       }catch(e){}
+      node = node.parentElement;
     }
-    return null;
+
+    return heading.parentElement;
   }
 
-  function setEmptyDrawer(titleText, emptyText){
-    var box = findDrawerByTitle(titleText);
-    if(!box) return;
-
-    if(box.getAttribute("data-eg-stage5e-v2-cleaned") === "1") return;
-    box.setAttribute("data-eg-stage5e-v2-cleaned", "1");
-
-    var heading = box.querySelector("h1,h2,h3");
-    var closeBtn = box.querySelector("button, .close, [class*='close']");
-
-    Array.prototype.slice.call(box.children).forEach(function(child){
+  function getUsefulChildren(panel, heading){
+    return qsa(":scope > *", panel).filter(function(child){
       try{
-        if(child === heading || child.contains(heading)) return;
-        if(closeBtn && (child === closeBtn || child.contains(closeBtn))) return;
-        child.remove();
-      }catch(e){}
+        if(child === heading || child.contains(heading)) return false;
+
+        var tag = String(child.tagName || "").toLowerCase();
+        var cls = String(child.className || "").toLowerCase();
+
+        if(tag === "script" || tag === "style") return false;
+        if(cls.indexOf("close") >= 0) return false;
+        if(child.querySelector && child.querySelector("[class*='close'], button[aria-label*='Close'], button[aria-label*='Kapat']")) {
+          // İçinde sadece kapatma butonu olan header parçalarını korumaya çalışma,
+          // ama ana liste kartlarını kaldır.
+        }
+
+        return true;
+      }catch(e){
+        return false;
+      }
+    });
+  }
+
+  function hardEmpty(titleText, emptyText){
+    var headings = qsa("h1,h2,h3,.drawer-title,.panel-title,[class*='title']").filter(function(h){
+      return norm(h.textContent).indexOf(norm(titleText)) >= 0;
     });
 
-    var empty = document.createElement("div");
-    empty.setAttribute("data-eg-stage5e-v2-empty", "1");
-    empty.style.cssText = [
-      "margin:22px 0",
-      "padding:18px",
-      "border:1px dashed rgba(255,255,255,.14)",
-      "border-radius:20px",
-      "color:#8aa6c4",
-      "background:rgba(255,255,255,.025)",
-      "font-size:14px",
-      "line-height:1.45"
-    ].join(";");
+    headings.forEach(function(heading){
+      try{
+        var panel = closestPanelFromHeading(heading);
+        if(!panel) return;
 
-    empty.textContent = emptyText;
-    box.appendChild(empty);
+        panel.setAttribute("data-eg-stage5e-v3-panel", titleText);
+
+        qsa("[data-eg-stage5e-v3-empty]", panel).forEach(function(x){ x.remove(); });
+
+        getUsefulChildren(panel, heading).forEach(function(child){
+          try{
+            var childText = norm(child.textContent);
+            var childClass = norm(child.className);
+
+            if(childText.indexOf(norm(titleText)) >= 0 && child.querySelector("h1,h2,h3")) return;
+
+            if(
+              childClass.indexOf("close") >= 0 ||
+              childClass.indexOf("header") >= 0 ||
+              childClass.indexOf("head") >= 0
+            ){
+              return;
+            }
+
+            child.setAttribute("data-eg-stage5e-v3-hidden", "1");
+            child.style.display = "none";
+          }catch(e){}
+        });
+
+        var empty = document.createElement("div");
+        empty.setAttribute("data-eg-stage5e-v3-empty", "1");
+        empty.textContent = emptyText;
+        panel.appendChild(empty);
+      }catch(e){}
+    });
   }
 
   function clean(){
@@ -1978,11 +2066,12 @@ loadLicenses();
       if(Array.isArray(window.MSGS)) window.MSGS = [];
       if(Array.isArray(window.NOTIFICATIONS)) window.NOTIFICATIONS = [];
       if(Array.isArray(window.ALERTS)) window.ALERTS = [];
+      if(Array.isArray(window.ACTIVITY)) window.ACTIVITY = [];
     }catch(e){}
 
-    hideSmallBadges();
-    setEmptyDrawer("Mesajlar", "Henüz gerçek mesaj kaydı yok.");
-    setEmptyDrawer("Bildirimler", "Henüz gerçek bildirim kaydı yok.");
+    hideBadges();
+    hardEmpty("Mesajlar", "Henüz gerçek mesaj kaydı yok.");
+    hardEmpty("Bildirimler", "Henüz gerçek bildirim kaydı yok.");
   }
 
   if(document.readyState === "loading"){
@@ -1991,11 +2080,16 @@ loadLicenses();
     clean();
   }
 
+  document.addEventListener("click", function(){
+    setTimeout(clean, 80);
+    setTimeout(clean, 260);
+  }, true);
+
   setTimeout(clean, 250);
   setTimeout(clean, 1000);
   setTimeout(clean, 2500);
 
-  window.egStage5eCleanTopbarDrawersV2 = clean;
+  window.egStage5eHardEmptyTopbarDrawersV3 = clean;
 })();
 </script>
 
