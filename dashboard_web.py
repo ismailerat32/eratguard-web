@@ -12287,6 +12287,106 @@ except Exception as _boot_err:
 # ===== ERATGUARD STAGE5C REAL ADMIN DATA API END =====
 
 
+
+
+# ===== ERATGUARD STAGE5C HOTFIX FORCE API ROUTER START =====
+# Amaç:
+# - Canlı ortamda 404 dönen /api/admin/stats/users/licenses/payments yollarını
+#   before_request seviyesinde kesin yakalar.
+# - Admin session yoksa 403 döndürür.
+# - Sahte veri üretmez; Stage 5C gerçek JSON fonksiyonlarını kullanır.
+try:
+    from flask import request as _eg5c_hot_request
+    from flask import jsonify as _eg5c_hot_jsonify
+    from flask import session as _eg5c_hot_session
+
+    def _eg5c_hot_is_admin():
+        try:
+            username = str(_eg5c_hot_session.get("username") or "").strip().lower()
+            role = str(_eg5c_hot_session.get("role") or "").strip().lower()
+            return bool(_eg5c_hot_session.get("is_admin")) or role == "admin" or username == "admin"
+        except Exception:
+            return False
+
+    def _eg5c_hot_forbidden():
+        return _eg5c_hot_jsonify({"ok": False, "error": "admin_login_required"}), 403
+
+    def _eg5c_hot_force_api_router():
+        try:
+            path = str(getattr(_eg5c_hot_request, "path", "") or "").rstrip("/")
+
+            route_map = {
+                "/api/admin/stats": "_eg5c_stats",
+                "/api/admin/users": "_eg5c_user_items",
+                "/api/admin/licenses": "_eg5c_license_items",
+                "/api/admin/payments": "_eg5c_payment_items",
+                "/api/admin/payment-requests": "_eg5c_payment_items",
+                "/api/admin/security-logs": "_eg5c_security_log_items",
+                "/api/admin/activity": "_eg5c_activity_items",
+                "/api/admin/dashboard-series": "_eg5c_dashboard_series",
+            }
+
+            if path not in route_map:
+                return None
+
+            if not _eg5c_hot_is_admin():
+                return _eg5c_hot_forbidden()
+
+            fn_name = route_map[path]
+            fn = globals().get(fn_name)
+
+            if not callable(fn):
+                return _eg5c_hot_jsonify({
+                    "ok": False,
+                    "error": "stage5c_function_missing",
+                    "function": fn_name,
+                }), 500
+
+            data = fn()
+
+            if path == "/api/admin/stats":
+                return _eg5c_hot_jsonify(data)
+
+            if path == "/api/admin/users":
+                return _eg5c_hot_jsonify({"ok": True, "users": data})
+
+            if path == "/api/admin/licenses":
+                return _eg5c_hot_jsonify({"ok": True, "licenses": data})
+
+            if path in ("/api/admin/payments", "/api/admin/payment-requests"):
+                return _eg5c_hot_jsonify({"ok": True, "requests": data})
+
+            if path == "/api/admin/security-logs":
+                return _eg5c_hot_jsonify({"ok": True, "logs": data})
+
+            if path == "/api/admin/activity":
+                return _eg5c_hot_jsonify({"ok": True, "activity": data})
+
+            if path == "/api/admin/dashboard-series":
+                return _eg5c_hot_jsonify(data)
+
+            return None
+
+        except Exception as _err:
+            print("ERATGUARD STAGE5C HOTFIX API ROUTER ERROR:", _err)
+            return _eg5c_hot_jsonify({"ok": False, "error": str(_err)}), 500
+
+    try:
+        _eg5c_hot_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg5c_hot_funcs[:] = [
+            f for f in _eg5c_hot_funcs
+            if getattr(f, "__name__", "") != "_eg5c_hot_force_api_router"
+        ]
+        _eg5c_hot_funcs.insert(0, _eg5c_hot_force_api_router)
+        print("ERATGUARD STAGE5C HOTFIX FORCE API ROUTER ACTIVE")
+    except Exception as _err:
+        print("ERATGUARD STAGE5C HOTFIX ROUTER INSERT ERROR:", _err)
+
+except Exception as _boot_err:
+    print("ERATGUARD STAGE5C HOTFIX FORCE API ROUTER BOOT ERROR:", _boot_err)
+# ===== ERATGUARD STAGE5C HOTFIX FORCE API ROUTER END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
