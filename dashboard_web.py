@@ -11980,6 +11980,313 @@ except Exception as _boot_err:
 # ===== ERATGUARD STAGE5A HARD ADMIN AUTH LOCK END =====
 
 
+
+
+# ===== ERATGUARD STAGE5C REAL ADMIN DATA API START =====
+# Amaç:
+# - Claude admin panelindeki boş/demo alanları gerçek JSON kaynaklarına bağlar.
+# - Sahte veri üretmez; veri yoksa 0 / [] döndürür.
+try:
+    from flask import jsonify as _eg5c_jsonify
+    from flask import session as _eg5c_session
+    from flask import request as _eg5c_request
+    from pathlib import Path as _eg5c_Path
+    import json as _eg5c_json
+    from datetime import datetime as _eg5c_datetime
+
+    def _eg5c_is_admin():
+        try:
+            username = str(_eg5c_session.get("username") or "").strip().lower()
+            role = str(_eg5c_session.get("role") or "").strip().lower()
+            return bool(_eg5c_session.get("is_admin")) or role == "admin" or username == "admin"
+        except Exception:
+            return False
+
+    def _eg5c_forbidden():
+        return _eg5c_jsonify({"ok": False, "error": "admin_login_required"}), 403
+
+    def _eg5c_load_json(default, *paths):
+        for raw in paths:
+            try:
+                path = _eg5c_Path(raw)
+                if not path.exists():
+                    continue
+                txt = path.read_text(encoding="utf-8", errors="ignore").strip()
+                if not txt:
+                    continue
+                return _eg5c_json.loads(txt)
+            except Exception as _err:
+                print("ERATGUARD STAGE5C LOAD JSON ERROR:", raw, _err)
+        return default
+
+    def _eg5c_as_list(data):
+        if isinstance(data, list):
+            return data
+        if isinstance(data, dict):
+            return list(data.values())
+        return []
+
+    def _eg5c_as_dict(data):
+        return data if isinstance(data, dict) else {}
+
+    def _eg5c_safe_str(v, limit=180):
+        try:
+            return str(v if v is not None else "").strip()[:limit]
+        except Exception:
+            return ""
+
+    def _eg5c_user_items():
+        users = _eg5c_as_dict(_eg5c_load_json({}, "data/users.json", "users.json"))
+        items = []
+
+        for username, u in users.items():
+            if not isinstance(u, dict):
+                continue
+
+            name = _eg5c_safe_str(username or u.get("username") or u.get("email") or "user", 80)
+            role = _eg5c_safe_str(u.get("role") or ("admin" if name.lower() == "admin" else "user"), 30)
+            plan = _eg5c_safe_str(u.get("license_type") or u.get("license_mode") or u.get("plan") or "free", 40)
+            email = _eg5c_safe_str(u.get("email") or "", 120)
+            active = bool(u.get("active", True))
+            last_login = _eg5c_safe_str(u.get("last_login") or u.get("last_seen") or "", 60)
+
+            items.append({
+                "username": name,
+                "email": email,
+                "role": role,
+                "plan": plan,
+                "license_type": plan,
+                "active": active,
+                "status": "active" if active else "passive",
+                "last_login": last_login,
+                "threats": 0,
+            })
+
+        items.sort(key=lambda x: (x.get("role") != "admin", x.get("username", "")))
+        return items
+
+    def _eg5c_license_items():
+        raw = _eg5c_load_json({}, "data/generated_licenses.json", "data/licenses.json", "generated_licenses.json", "licenses.json")
+        items = []
+
+        if isinstance(raw, dict):
+            iterable = raw.items()
+        elif isinstance(raw, list):
+            iterable = [(str(i), v) for i, v in enumerate(raw)]
+        else:
+            iterable = []
+
+        for key, item in iterable:
+            if isinstance(item, dict):
+                license_key = _eg5c_safe_str(item.get("key") or item.get("license_key") or key, 120)
+                status = _eg5c_safe_str(item.get("status") or ("used" if item.get("used") else "available"), 40)
+                plan = _eg5c_safe_str(item.get("license_type") or item.get("type") or item.get("plan") or "standard", 40)
+                owner = _eg5c_safe_str(item.get("username") or item.get("used_by") or item.get("owner") or "", 80)
+                expires = _eg5c_safe_str(item.get("expires_at") or item.get("expiry") or item.get("license_expiry") or "", 40)
+                created_at = _eg5c_safe_str(item.get("created_at") or item.get("created") or "", 40)
+            else:
+                license_key = _eg5c_safe_str(key, 120)
+                status = "unknown"
+                plan = "standard"
+                owner = ""
+                expires = ""
+                created_at = ""
+
+            items.append({
+                "key": license_key,
+                "license_key": license_key,
+                "status": status,
+                "type": plan,
+                "plan": plan,
+                "owner": owner,
+                "username": owner,
+                "expires_at": expires,
+                "created_at": created_at,
+            })
+
+        return items
+
+    def _eg5c_payment_items():
+        raw = _eg5c_load_json([], "data/payment_requests.json", "payment_requests.json", "data/upgrade_requests.json")
+        rows = _eg5c_as_list(raw)
+        items = []
+
+        for item in rows:
+            if not isinstance(item, dict):
+                continue
+
+            status = _eg5c_safe_str(item.get("status") or item.get("state") or "pending", 40)
+            username = _eg5c_safe_str(item.get("username") or item.get("user") or item.get("email") or "", 100)
+            amount = item.get("amount") or item.get("price") or item.get("total") or ""
+            plan = _eg5c_safe_str(item.get("plan") or item.get("license_type") or item.get("package") or "", 60)
+            created_at = _eg5c_safe_str(item.get("created_at") or item.get("date") or item.get("time") or "", 60)
+            order_no = _eg5c_safe_str(item.get("order_no") or item.get("id") or item.get("request_id") or "", 80)
+
+            items.append({
+                "id": order_no,
+                "order_no": order_no,
+                "username": username,
+                "user": username,
+                "amount": amount,
+                "plan": plan,
+                "status": status,
+                "created_at": created_at,
+                "date": created_at,
+            })
+
+        return items
+
+    def _eg5c_security_log_items():
+        raw = _eg5c_load_json([], "data/spam_logs.json", "data/logs.json", "spam_logs.json", "logs.json")
+        rows = _eg5c_as_list(raw)
+        items = []
+
+        for item in rows[-80:]:
+            if not isinstance(item, dict):
+                continue
+
+            status = _eg5c_safe_str(item.get("status") or item.get("level") or item.get("label") or "INFO", 30).upper()
+            msg = _eg5c_safe_str(item.get("message") or item.get("msg") or item.get("body") or item.get("text") or "Güvenlik kaydı", 220)
+            user = _eg5c_safe_str(item.get("username") or item.get("user") or item.get("sender") or "—", 80)
+            ip = _eg5c_safe_str(item.get("ip") or item.get("source_ip") or "—", 80)
+            t = _eg5c_safe_str(item.get("created_at") or item.get("time") or item.get("date") or "", 80)
+
+            level = "BLOCK" if status in ("SPAM", "BLOCKED", "BLOCK", "RISK") else status
+
+            items.append({
+                "level": level,
+                "ip": ip,
+                "msg": msg,
+                "message": msg,
+                "user": user,
+                "t": t,
+                "time": t,
+            })
+
+        return list(reversed(items[-50:]))
+
+    def _eg5c_activity_items():
+        activity = []
+        actions = _eg5c_as_list(_eg5c_load_json([], "data/admin_actions.json"))
+        payments = _eg5c_payment_items()
+        logs = _eg5c_security_log_items()
+        users = _eg5c_user_items()
+
+        for item in actions[-20:]:
+            if isinstance(item, dict):
+                actor = _eg5c_safe_str(item.get("actor") or item.get("username") or "admin", 80)
+                action = _eg5c_safe_str(item.get("action") or item.get("event") or "Admin işlemi", 160)
+                t = _eg5c_safe_str(item.get("created_at") or item.get("time") or "", 60)
+                activity.append({"type": "admin", "msg": f"<strong>{actor}</strong> — {action}", "t": t})
+
+        for p in payments[-10:]:
+            if str(p.get("status", "")).lower() in ("pending", "payment_waiting", "waiting", "new"):
+                who = _eg5c_safe_str(p.get("username") or p.get("user") or "kullanıcı", 80)
+                activity.append({"type": "payment", "msg": f"Ödeme talebi: <strong>{who}</strong>", "t": _eg5c_safe_str(p.get("created_at") or p.get("date") or "", 60)})
+
+        for log in logs[:10]:
+            msg = _eg5c_safe_str(log.get("msg") or "Güvenlik kaydı", 160)
+            activity.append({"type": "security", "msg": msg, "t": _eg5c_safe_str(log.get("t") or "", 60)})
+
+        # Veri yoksa boş bırak. Sahte kayıt üretme.
+        return activity[:30]
+
+    def _eg5c_dashboard_series():
+        logs = _eg5c_security_log_items()
+        # Son 7 gün için basit gerçek log sayımı; tarih parse edilemeyenleri bugüne sayma, boş bırak.
+        days = [0, 0, 0, 0, 0, 0, 0]
+        try:
+            today = _eg5c_datetime.now().date()
+            for item in logs:
+                raw = str(item.get("t") or item.get("time") or "")[:10]
+                try:
+                    d = _eg5c_datetime.strptime(raw, "%Y-%m-%d").date()
+                    delta = (today - d).days
+                    if 0 <= delta <= 6:
+                        days[6 - delta] += 1
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+        return {
+            "ok": True,
+            "week": days,
+            "month": [0] * 30,
+        }
+
+    def _eg5c_stats():
+        users = _eg5c_user_items()
+        licenses = _eg5c_license_items()
+        payments = _eg5c_payment_items()
+        logs = _eg5c_security_log_items()
+        pending = sum(1 for p in payments if str(p.get("status", "")).lower() in ("pending", "payment_waiting", "waiting", "new"))
+
+        return {
+            "ok": True,
+            "users": len(users),
+            "licenses": len(licenses),
+            "payments": pending,
+            "payment_total": len(payments),
+            "blocked": len(logs),
+            "spam_logs": len(logs),
+            "activity": len(_eg5c_activity_items()),
+        }
+
+    def _eg5c_route_json(payload_fn):
+        if not _eg5c_is_admin():
+            return _eg5c_forbidden()
+        try:
+            return _eg5c_jsonify(payload_fn())
+        except Exception as _err:
+            print("ERATGUARD STAGE5C API ERROR:", _err)
+            return _eg5c_jsonify({"ok": False, "error": str(_err)}), 500
+
+    def _eg5c_api_users():
+        return _eg5c_route_json(lambda: {"ok": True, "users": _eg5c_user_items()})
+
+    def _eg5c_api_licenses():
+        return _eg5c_route_json(lambda: {"ok": True, "licenses": _eg5c_license_items()})
+
+    def _eg5c_api_payments():
+        return _eg5c_route_json(lambda: {"ok": True, "requests": _eg5c_payment_items()})
+
+    def _eg5c_api_security_logs():
+        return _eg5c_route_json(lambda: {"ok": True, "logs": _eg5c_security_log_items()})
+
+    def _eg5c_api_activity():
+        return _eg5c_route_json(lambda: {"ok": True, "activity": _eg5c_activity_items()})
+
+    def _eg5c_api_dashboard_series():
+        return _eg5c_route_json(_eg5c_dashboard_series)
+
+    def _eg5c_api_stats():
+        return _eg5c_route_json(_eg5c_stats)
+
+    for _rule, _endpoint, _func in [
+        ("/api/admin/users", "eg5c_api_users", _eg5c_api_users),
+        ("/api/admin/licenses", "eg5c_api_licenses", _eg5c_api_licenses),
+        ("/api/admin/payments", "eg5c_api_payments", _eg5c_api_payments),
+        ("/api/admin/payment-requests", "eg5c_api_payment_requests", _eg5c_api_payments),
+        ("/api/admin/security-logs", "eg5c_api_security_logs", _eg5c_api_security_logs),
+        ("/api/admin/activity", "eg5c_api_activity", _eg5c_api_activity),
+        ("/api/admin/dashboard-series", "eg5c_api_dashboard_series", _eg5c_api_dashboard_series),
+        ("/api/admin/stats", "eg5c_api_stats", _eg5c_api_stats),
+    ]:
+        try:
+            app.add_url_rule(_rule, _endpoint, _func, methods=["GET"])
+        except Exception as _err:
+            # Eğer route zaten varsa endpoint'i override etmeye çalış.
+            try:
+                app.view_functions[_endpoint] = _func
+            except Exception:
+                print("ERATGUARD STAGE5C ROUTE ADD ERROR:", _rule, _err)
+
+except Exception as _boot_err:
+    print("ERATGUARD STAGE5C REAL ADMIN DATA API BOOT ERROR:", _boot_err)
+# ===== ERATGUARD STAGE5C REAL ADMIN DATA API END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)

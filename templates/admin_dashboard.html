@@ -1907,6 +1907,161 @@ loadLicenses();
 </script>
 </body>
 </htm
+<script id="stage5c-real-data-binding-v1">
+/* ===== STAGE 5C: REAL DATA BINDING FOR CLAUDE ADMIN PANEL =====
+   Sahte veri üretmez. Admin API'lerinden gelen gerçek JSON verilerini panele bağlar.
+*/
+(function(){
+  function safeText(v){ return (v === null || v === undefined) ? "" : String(v); }
+
+  function setText(id, value){
+    var el = document.getElementById(id);
+    if(el) el.textContent = safeText(value);
+  }
+
+  function api(path){
+    return fetch(path, {credentials:"include", cache:"no-store"})
+      .then(function(r){ return r.json(); })
+      .catch(function(){ return {ok:false}; });
+  }
+
+  function renderActivity(items){
+    var el = document.getElementById("activity-list") || document.querySelector("[data-eg-activity-list]");
+    if(!el) return;
+
+    if(!Array.isArray(items) || !items.length){
+      el.innerHTML = '<div style="color:var(--td);font-size:12px;padding:10px 0">Henüz gerçek aktivite kaydı yok.</div>';
+      return;
+    }
+
+    el.innerHTML = items.slice(0,8).map(function(x){
+      var msg = safeText(x.msg || x.message || "Aktivite");
+      var t = safeText(x.t || x.time || "");
+      return '<div class="activity-row"><span>'+msg+'</span><small>'+t+'</small></div>';
+    }).join("");
+  }
+
+  function renderSecurityLogs(items){
+    if(typeof SECLOGS !== "undefined" && Array.isArray(items)){
+      SECLOGS = items;
+      if(typeof renderLogs === "function") renderLogs();
+    }
+  }
+
+  function renderSeries(data){
+    if(data && Array.isArray(data.week)){
+      if(typeof WEEK !== "undefined") WEEK = data.week;
+      try{
+        if(typeof renderSparks === "function") renderSparks();
+        if(typeof renderBar === "function") renderBar("week-chart", data.week, C.rd, 10);
+      }catch(e){}
+    }
+
+    if(data && Array.isArray(data.month)){
+      if(typeof MONTH !== "undefined") MONTH = data.month;
+    }
+  }
+
+  function loadRealStats(){
+    return api("/api/admin/stats").then(function(r){
+      if(!r || r.ok === false) return;
+
+      setText("sc-users", r.users || 0);
+      setText("sc-threats", r.blocked || r.spam_logs || 0);
+      setText("sc-lic", r.licenses || 0);
+      setText("sc-pay", r.payments || 0);
+      setText("an-active", r.users || 0);
+
+      var sub = document.getElementById("sc-pay-sub");
+      if(sub) sub.textContent = (r.payments || 0) + " onay bekliyor";
+    });
+  }
+
+  function loadRealUsers(){
+    return api("/api/admin/users").then(function(r){
+      if(!r || r.ok === false) return;
+      if(Array.isArray(r.users)){
+        if(typeof USERS !== "undefined") USERS = r.users;
+        try{
+          if(typeof renderDashUsers === "function") renderDashUsers();
+          if(typeof renderThreatBars === "function") renderThreatBars();
+          if(typeof renderUsers === "function") renderUsers();
+        }catch(e){}
+        setText("sc-users", r.users.length);
+        setText("an-active", r.users.length);
+      }
+    });
+  }
+
+  function loadRealLicenses(){
+    return api("/api/admin/licenses").then(function(r){
+      if(!r || r.ok === false) return;
+      if(Array.isArray(r.licenses)){
+        if(typeof LICENSES !== "undefined") LICENSES = r.licenses;
+        try{ if(typeof renderLicenses === "function") renderLicenses(); }catch(e){}
+        setText("sc-lic", r.licenses.length);
+      }
+    });
+  }
+
+  function loadRealPayments(){
+    return api("/api/admin/payments").then(function(r){
+      if(!r || r.ok === false) return;
+      var items = Array.isArray(r.requests) ? r.requests : [];
+      if(typeof PAYMENTS !== "undefined") PAYMENTS = items;
+      try{ if(typeof renderPayments === "function") renderPayments(); }catch(e){}
+      var pending = items.filter(function(p){
+        var st = safeText(p.status).toLowerCase();
+        return ["pending","payment_waiting","waiting","new"].indexOf(st) >= 0;
+      }).length;
+      setText("sc-pay", pending);
+      var sub = document.getElementById("sc-pay-sub");
+      if(sub) sub.textContent = pending + " onay bekliyor";
+    });
+  }
+
+  function loadRealLogs(){
+    return api("/api/admin/security-logs").then(function(r){
+      if(!r || r.ok === false) return;
+      renderSecurityLogs(Array.isArray(r.logs) ? r.logs : []);
+    });
+  }
+
+  function loadRealActivity(){
+    return api("/api/admin/activity").then(function(r){
+      if(!r || r.ok === false) return;
+      renderActivity(Array.isArray(r.activity) ? r.activity : []);
+    });
+  }
+
+  function loadRealSeries(){
+    return api("/api/admin/dashboard-series").then(function(r){
+      if(!r || r.ok === false) return;
+      renderSeries(r);
+    });
+  }
+
+  function boot(){
+    loadRealStats();
+    loadRealUsers();
+    loadRealLicenses();
+    loadRealPayments();
+    loadRealLogs();
+    loadRealActivity();
+    loadRealSeries();
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
+
+  window.egStage5cReloadRealData = boot;
+})();
+</script>
+
+
 <style id="stage4z-remove-komut-apk-topbar-v1">
 /* ===== STAGE 4Z: REMOVE KOMUT BUTTON FROM APK TOPBAR =====
    APK/WebView üst barda Komut butonunu tamamen gizler.
