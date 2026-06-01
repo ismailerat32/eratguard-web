@@ -1,4 +1,4 @@
-package com.spamshield.pro;
+package com.spamshield.admin;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -13,17 +13,24 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ImageView;
+import android.animation.ValueAnimator;
+import android.animation.ObjectAnimator;
+import android.graphics.drawable.ClipDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.widget.ProgressBar;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceError;
 
 public class MainActivity extends Activity {
     private WebView webView;
     private FrameLayout root;
-    private LinearLayout splashView;
+    private FrameLayout splashView;
 
-    private static final String APP_URL = "https://app.eratguard.com/app-start";
+    private static final String APP_URL = "https://app.eratguard.com/admin/dashboard";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,49 +49,60 @@ public class MainActivity extends Activity {
         }, 2200);
     }
 
-    private void showSplash() {
-        splashView = new LinearLayout(this);
-        splashView.setOrientation(LinearLayout.VERTICAL);
-        splashView.setGravity(Gravity.CENTER);
-        splashView.setPadding(42, 42, 42, 42);
 
-        GradientDrawable bg = new GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{Color.rgb(2, 28, 17), Color.rgb(1, 10, 7)}
+    private TextView splashTip;
+    private ProgressBar splashProgress;
+
+    private TextView makeText(String text, int sp, int color, boolean bold) {
+        TextView v = new TextView(this);
+        v.setText(text);
+        v.setTextSize(sp);
+        v.setTextColor(color);
+        v.setGravity(Gravity.CENTER);
+        if (bold) v.setTypeface(Typeface.DEFAULT_BOLD);
+        return v;
+    }
+
+    private TextView makeSplashCard(String icon, String text) {
+        TextView card = makeText(icon + "\n" + text, 13, Color.WHITE, true);
+        card.setGravity(Gravity.CENTER);
+        card.setPadding(12, 14, 12, 14);
+
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(Color.argb(92, 4, 32, 18));
+        bg.setStroke(1, Color.argb(95, 140, 255, 90));
+        bg.setCornerRadius(22);
+
+        card.setBackground(bg);
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1
         );
-        splashView.setBackground(bg);
+        lp.setMargins(6, 0, 6, 0);
+        card.setLayoutParams(lp);
+        return card;
+    }
 
-        TextView shield = new TextView(this);
-        shield.setText("🛡️");
-        shield.setTextSize(64);
-        shield.setGravity(Gravity.CENTER);
 
-        TextView title = new TextView(this);
-        title.setText("EratGuard PRO");
-        title.setTextColor(Color.WHITE);
-        title.setTextSize(32);
-        title.setTypeface(Typeface.DEFAULT_BOLD);
-        title.setGravity(Gravity.CENTER);
-        title.setPadding(0, 20, 0, 8);
 
-        TextView sub = new TextView(this);
-        sub.setText("AI Spam Koruma Sistemi");
-        sub.setTextColor(Color.rgb(32, 240, 138));
-        sub.setTextSize(17);
-        sub.setTypeface(Typeface.DEFAULT_BOLD);
-        sub.setGravity(Gravity.CENTER);
-        sub.setPadding(0, 0, 0, 18);
 
-        TextView mini = new TextView(this);
-        mini.setText("Güvenlik başlatılıyor...");
-        mini.setTextColor(Color.argb(170, 255, 255, 255));
-        mini.setTextSize(13);
-        mini.setGravity(Gravity.CENTER);
+    private void showSplash() {
+        splashView = new FrameLayout(this);
+        splashView.setBackgroundColor(Color.rgb(1, 8, 5));
 
-        splashView.addView(shield);
-        splashView.addView(title);
-        splashView.addView(sub);
-        splashView.addView(mini);
+        ImageView art = new ImageView(this);
+        art.setImageResource(R.drawable.splash_art);
+        art.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+        splashView.addView(
+                art,
+                new FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                )
+        );
 
         root.addView(
                 splashView,
@@ -94,6 +112,10 @@ public class MainActivity extends Activity {
                 )
         );
     }
+
+
+
+
 
     private void showWebView() {
         webView = new WebView(this);
@@ -119,6 +141,8 @@ public class MainActivity extends Activity {
         }
 
         webView.setWebViewClient(new WebViewClient() {
+            private boolean firstRealPageShown = false;
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
@@ -129,11 +153,30 @@ public class MainActivity extends Activity {
 
                 return true;
             }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+
+                if (!firstRealPageShown && url != null && url.startsWith("https://app.eratguard.com")) {
+                    firstRealPageShown = true;
+                    if (splashView != null) {
+                        root.removeView(splashView);
+                        splashView = null;
+                    }
+                }
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                // Splash ekranda kalır; kullanıcı Render/Chrome hata sayfası görmez.
+            }
         });
 
-        root.removeAllViews();
         root.addView(
                 webView,
+                0,
                 new FrameLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.MATCH_PARENT

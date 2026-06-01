@@ -45,8 +45,8 @@ public class MainActivity extends Activity {
     private boolean firstRealPageShown = false;
     private Handler mainHandler;
 
-    private static final String APP_URL = "https://spamshield-peld.onrender.com/app-start";
-    private static final String MAIN_HOST = "https://spamshield-peld.onrender.com";
+    private static final String APP_URL = "https://app.eratguard.com/app-start";
+    private static final String MAIN_HOST = "https://app.eratguard.com";
 
 
     private void requestProtectionPermissions() {
@@ -303,7 +303,7 @@ public class MainActivity extends Activity {
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
 
-                if (url.startsWith("https://spamshield-peld.onrender.com") || url.startsWith("https://eratshield.com")) {
+                if (url.startsWith("https://app.eratguard.com")) {
                     return false;
                 }
 
