@@ -1,109 +1,147 @@
 <!doctype html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>EratGuard — Bildirim İzni</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;overflow:hidden;background:#020e07;font-family:'DM Sans',sans-serif;color:#fff}
-.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(0,255,100,.1) 0%,transparent 55%),#020e07}
-.corner{position:fixed;width:16px;height:16px;z-index:3}
-.corner.tl{top:12px;left:12px;border-top:1.5px solid rgba(0,255,136,.25);border-left:1.5px solid rgba(0,255,136,.25)}
-.corner.tr{top:12px;right:12px;border-top:1.5px solid rgba(0,255,136,.25);border-right:1.5px solid rgba(0,255,136,.25)}
-.corner.bl{bottom:12px;left:12px;border-bottom:1.5px solid rgba(0,255,136,.25);border-left:1.5px solid rgba(0,255,136,.25)}
-.corner.br{bottom:12px;right:12px;border-bottom:1.5px solid rgba(0,255,136,.25);border-right:1.5px solid rgba(0,255,136,.25)}
-.page{position:relative;z-index:10;width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:64px 28px 48px}
-.top{display:flex;flex-direction:column;align-items:center;gap:24px;animation:fadeD .7s cubic-bezier(.16,1,.3,1) both}
-.bell-wrap{position:relative;width:140px;height:140px;display:flex;align-items:center;justify-content:center}
-.bell-ring{position:absolute;border-radius:50%;border:1px solid rgba(0,255,136,.12)}
-.br1{width:140px;height:140px}
-.br2{width:180px;height:180px;border-color:rgba(0,255,136,.07)}
-.bell-box{width:100px;height:100px;border-radius:28px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(0,255,136,.2);background:linear-gradient(145deg,#001a0d,#003018);box-shadow:0 0 0 8px rgba(0,255,136,.05),0 0 35px rgba(0,255,136,.15);position:relative;z-index:2;font-size:48px;line-height:1}
-.bell-badge{position:absolute;top:-4px;right:-4px;width:24px;height:24px;border-radius:50%;background:#ff4d6d;border:2px solid #020e07;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:'Space Grotesk',sans-serif;color:#fff;z-index:3}
-.brand-name{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;text-align:center}
-.brand-name span{color:#00ff88}
-.brand-sub{font-size:11px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-top:3px;text-align:center}
-.middle{display:flex;flex-direction:column;align-items:center;gap:20px;width:100%;animation:fadeU .7s cubic-bezier(.16,1,.3,1) .15s both}
-.title{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.2;text-align:center;color:#fff}
-.title span{color:#00ff88}
-.desc{font-size:14px;color:rgba(255,255,255,.45);line-height:1.6;text-align:center;max-width:280px;font-weight:300}
-.benefits{width:100%;display:flex;flex-direction:column;gap:10px}
-.benefit{display:flex;align-items:center;gap:14px;background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.1);border-radius:14px;padding:14px 16px}
-.benefit-icon{width:38px;height:38px;border-radius:11px;background:rgba(0,255,136,.08);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.benefit-text{flex:1}
-.benefit-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:2px}
-.benefit-desc{font-size:11px;color:rgba(255,255,255,.4);line-height:1.3}
-.bottom{width:100%;display:flex;flex-direction:column;gap:10px;animation:fadeU .7s cubic-bezier(.16,1,.3,1) .3s both}
-.btn-allow{width:100%;background:linear-gradient(135deg,#00c860,#00e676);color:#001a08;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:800;border:none;border-radius:16px;padding:17px;cursor:pointer;box-shadow:0 6px 20px rgba(0,200,96,.2);transition:transform .15s;letter-spacing:.2px}
-.btn-allow:active{transform:scale(.98)}
-.btn-skip{width:100%;background:transparent;color:rgba(255,255,255,.3);font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:500;border:none;padding:12px;cursor:pointer;transition:color .2s}
-.btn-skip:hover{color:rgba(255,255,255,.6)}
-.privacy-note{text-align:center;font-size:10px;color:rgba(255,255,255,.18);letter-spacing:.5px;line-height:1.5}
-@keyframes fadeD{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeU{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO · Bildirim İzni</title>
+
+<style id="stage5d2-modern-notification-permission-v1">
+:root{
+  --bg:#050810;
+  --panel:#0a1020;
+  --line:#17243d;
+  --line2:#244064;
+  --text:#e8f4ff;
+  --muted:#8aa6c4;
+  --cyan:#00c8f0;
+  --green:#8dff3f;
+  --purple:#9b6dff;
+  --shadow:0 24px 80px rgba(0,0,0,.42);
+}
+*{box-sizing:border-box}
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+body{
+  margin:0;
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:16px;
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  background:
+    modern-panel-gradient(circle at top left,rgba(0,200,240,.13),transparent 32%),
+    modern-panel-gradient(circle at bottom right,rgba(141,255,63,.10),transparent 36%),
+    linear-gradient(180deg,var(--bg),#03050a);
+}
+.card{
+  width:min(560px,100%);
+  border:1px solid var(--line2);
+  border-radius:30px;
+  background:
+    modern-panel-gradient(circle at top right,rgba(0,200,240,.13),transparent 34%),
+    linear-gradient(180deg,rgba(15,27,49,.98),rgba(7,13,24,.98));
+  box-shadow:var(--shadow);
+  padding:28px;
+  text-align:center;
+}
+.logo{
+  width:74px;
+  height:74px;
+  margin:0 auto 16px;
+  border-radius:24px;
+  display:grid;
+  place-items:center;
+  font-size:34px;
+  font-weight:1000;
+  color:#041018;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  box-shadow:0 0 32px rgba(0,200,240,.22);
+}
+.kicker{color:var(--cyan);font-size:12px;font-weight:1000;letter-spacing:3px}
+h1{margin:8px 0 0;font-size:clamp(34px,7vw,54px);line-height:1}
+p{margin:14px auto 0;max-width:440px;color:var(--muted);line-height:1.5}
+.actions{
+  margin-top:22px;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+.btn{
+  border:1px solid var(--line2);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  border-radius:16px;
+  padding:13px 16px;
+  font-weight:1000;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:150px;
+}
+.btn.primary{
+  border:0;
+  color:#031018;
+  background:linear-gradient(135deg,var(--cyan),var(--green));
+}
+.note{
+  margin-top:18px;
+  color:#526c89;
+  font-size:12px;
+  line-height:1.45;
+}
+@media(max-width:520px){
+  .card{padding:22px;border-radius:26px}
+  .actions{display:grid}
+  .btn{width:100%}
+}
 </style>
 </head>
+
 <body>
-<div class="bg"></div>
-<div class="corner tl"></div>
-<div class="corner tr"></div>
-<div class="corner bl"></div>
-<div class="corner br"></div>
-<div class="page">
-  <div class="top">
-    <div class="bell-wrap">
-      <div class="bell-ring br1"></div>
-      <div class="bell-ring br2"></div>
-      <div class="bell-box" style="position:relative">
-        🔔
-        <div class="bell-badge">3</div>
-      </div>
-    </div>
-    <div>
-      <div class="brand-name">Erat<span>Guard</span></div>
-      <div class="brand-sub">Bildirim Merkezi</div>
-    </div>
+<section class="card">
+  <div class="logo">E</div>
+  <div class="kicker">ERATGUARD PRO</div>
+  <h1>Bildirimleri Aç</h1>
+  <p>Güvenlik uyarıları, lisans bilgilendirmeleri ve önemli sistem duyurularını zamanında almak için tarayıcı bildirimlerine izin ver.</p>
+
+  <div class="actions">
+    <button class="btn primary" type="button" onclick="enablePermission()">İzin Ver →</button>
+    <button class="btn" type="button" onclick="skipPermission()">Şimdilik Geç</button>
   </div>
-  <div class="middle">
-    <div class="title">Anında haberdar<br><span>olmak ister misin?</span></div>
-    <div class="desc">Spam tespit edildiğinde, tehdit engellendiğinde seni anında bilgilendirelim.</div>
-    <div class="benefits">
-      <div class="benefit">
-        <div class="benefit-icon">⚡</div>
-        <div class="benefit-text"><div class="benefit-title">Anlık Spam Uyarısı</div><div class="benefit-desc">Tehlikeli mesaj geldiğinde hemen bildir</div></div>
-      </div>
-      <div class="benefit">
-        <div class="benefit-icon">🛡️</div>
-        <div class="benefit-text"><div class="benefit-title">Engelleme Bildirimi</div><div class="benefit-desc">Kim engellendiğini ve neden bildir</div></div>
-      </div>
-      <div class="benefit">
-        <div class="benefit-icon">📊</div>
-        <div class="benefit-text"><div class="benefit-title">Haftalık Güvenlik Raporu</div><div class="benefit-desc">Sisteminizin durumunu özetle bildir</div></div>
-      </div>
-    </div>
-  </div>
-  <div class="bottom">
-    <button class="btn-allow" onclick="requestPermission()">Bildirimlere İzin Ver</button>
-    <button class="btn-skip" onclick="skipPermission()">Şimdi değil</button>
-    <div class="privacy-note">Bildirimler yalnızca güvenlik uyarıları için kullanılır.<br>İstediğiniz zaman ayarlardan kapatabilirsiniz.</div>
-  </div>
-</div>
-<script>
-function requestPermission(){
-  if('Notification' in window){
-    Notification.requestPermission().then(function(result){
-      if(result==='granted'){
-        new Notification('EratGuard PRO',{body:'Bildirimler aktif! Koruma başladı.'});
-      }
-      window.location.href='/radial';
-    });
-  } else {
-    window.location.href='/radial';
+
+  <div class="note">İzin tercihini daha sonra Bildirim Ayarları ekranından değiştirebilirsin.</div>
+</section>
+
+<script id="stage5d2-modern-notification-permission-js-v1">
+function goNext(){
+  window.location.href = "/u/notifications";
+}
+
+function enablePermission(){
+  try{
+    if("Notification" in window){
+      Notification.requestPermission().then(function(result){
+        try{
+          if(result === "granted"){
+            new Notification("EratGuard PRO", {body:"Bildirimler aktif. Koruma uyarıları hazır."});
+          }
+        }catch(e){}
+        goNext();
+      }).catch(function(){ goNext(); });
+    }else{
+      goNext();
+    }
+  }catch(e){
+    goNext();
   }
 }
-function skipPermission(){window.location.href='/radial'}
+
+function skipPermission(){
+  goNext();
+}
 </script>
 </body>
 </html>
