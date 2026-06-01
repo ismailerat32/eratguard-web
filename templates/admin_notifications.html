@@ -1,391 +1,329 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EratGuard ADMIN Bildirim Merkezi</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO Admin · Bildirim Merkezi</title>
 
-<style>
+<style id="stage5d1-modern-admin-notifications-v1">
 :root{
-  --eg-bg:#05070d;
-  --eg-card:#081421;
-  --eg-card2:#0b1f2f;
-  --eg-border:rgba(141,255,63,.24);
-  --eg-blue:rgba(80,145,255,.24);
-  --eg-text:#f7fff4;
-  --eg-muted:#a6b8c8;
-  --eg-green:#8dff3f;
-  --eg-yellow:#fbbf24;
-  --eg-red:#ff4d5e;
+  --bg:#050810;
+  --bg2:#07101d;
+  --panel:#0a1020;
+  --panel2:#0f1b31;
+  --line:#17243d;
+  --line2:#244064;
+  --text:#e8f4ff;
+  --muted:#8aa6c4;
+  --dim:#526c89;
+  --cyan:#00c8f0;
+  --green:#8dff3f;
+  --red:#ff4d5e;
+  --yellow:#ffd166;
+  --purple:#9b6dff;
+  --shadow:0 24px 80px rgba(0,0,0,.40);
 }
 *{box-sizing:border-box}
+html,body{width:100%;max-width:100%;overflow-x:hidden}
 body{
   margin:0;
+  min-height:100vh;
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
   background:
-    radial-gradient(circle at top left, rgba(141,255,63,.08), transparent 32%),
-    radial-gradient(circle at bottom right, rgba(38,132,255,.08), transparent 34%),
-    var(--eg-bg);
-  color:var(--eg-text);
-  font-family:Arial, sans-serif;
+    radial-gradient(circle at top left,rgba(0,200,240,.11),transparent 32%),
+    radial-gradient(circle at top right,rgba(141,255,63,.08),transparent 34%),
+    linear-gradient(180deg,var(--bg),#03050a);
 }
-.wrap{
-  width:100%;
-  max-width:1180px;
+a{text-decoration:none;color:inherit}
+.page{
+  width:min(1220px,100%);
   margin:0 auto;
   padding:18px;
 }
-.hero{
-  border:1px solid var(--eg-border);
-  border-radius:24px;
-  padding:20px;
-  background:
-    radial-gradient(circle at top left, rgba(141,255,63,.12), transparent 36%),
-    linear-gradient(180deg, rgba(8,20,33,.98), rgba(5,8,16,.98));
-  box-shadow:0 20px 52px rgba(0,0,0,.34);
-  margin-bottom:16px;
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:10;
+  backdrop-filter:blur(14px);
+  background:rgba(5,8,16,.78);
+  border-bottom:1px solid rgba(255,255,255,.06);
 }
-.kicker{
-  color:var(--eg-green);
-  font-size:12px;
-  font-weight:1000;
-  letter-spacing:2px;
-  margin-bottom:8px;
-}
-.hero h1{
-  margin:0;
-  font-size:clamp(26px, 6vw, 40px);
-  line-height:1.05;
-}
-.hero p{
-  margin:8px 0 0;
-  color:var(--eg-muted);
-}
-.back-link{
-  display:inline-flex;
-  margin-top:14px;
-  color:#d9ffc7;
-  text-decoration:none;
-  font-weight:900;
-  padding:10px 13px;
-  border-radius:999px;
-  border:1px solid var(--eg-border);
-  background:rgba(141,255,63,.10);
-}
-.grid{
-  display:grid;
-  grid-template-columns:1fr .85fr;
-  gap:14px;
-}
-.card{
-  background:
-    linear-gradient(180deg, rgba(11,31,47,.96), rgba(5,12,21,.98));
-  border:1px solid var(--eg-blue);
-  padding:16px;
-  border-radius:18px;
-  box-shadow:0 12px 30px rgba(0,0,0,.23);
-}
-.card h2{
-  margin:0 0 10px;
-  font-size:20px;
-}
-.card p{
-  color:var(--eg-muted);
-  line-height:1.45;
-}
-.form{
-  display:grid;
-  gap:12px;
-}
-.input,
-.select,
-.textarea{
-  width:100%;
-  padding:13px 14px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.12);
-  outline:none;
-  color:var(--eg-text);
-  background:#050b14;
-  font-size:15px;
-}
-.textarea{
-  min-height:130px;
-  resize:vertical;
-}
-.btn{
-  border:0;
-  padding:13px 15px;
-  border-radius:14px;
-  color:#071008;
-  background:var(--eg-green);
-  font-weight:1000;
-  font-size:15px;
-  cursor:pointer;
-}
-.btn-row{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.ghost{
-  display:inline-flex;
-  text-decoration:none;
-  color:#d9ffc7;
-  padding:12px 14px;
-  border-radius:14px;
-  border:1px solid var(--eg-border);
-  background:rgba(141,255,63,.10);
-  font-weight:900;
-}
-.notice-list{
-  display:grid;
-  gap:10px;
-}
-.notice{
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:16px;
-  padding:13px;
-  background:rgba(5,11,20,.58);
-}
-.notice-top{
+.topbar-inner{
+  width:min(1220px,100%);
+  margin:0 auto;
+  padding:12px 18px;
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  margin-bottom:8px;
+  gap:12px;
 }
-.notice b{
-  font-size:15px;
-}
-.badge{
-  padding:6px 9px;
-  border-radius:999px;
-  font-size:11px;
+.logo{
+  width:44px;height:44px;border-radius:15px;
+  display:grid;place-items:center;
   font-weight:1000;
-  white-space:nowrap;
+  color:#041018;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  box-shadow:0 0 28px rgba(0,200,240,.18);
 }
-.badge.normal{
-  color:#dbeafe;
-  background:rgba(80,145,255,.14);
-  border:1px solid rgba(80,145,255,.25);
-}
-.badge.high{
-  color:#fff1c2;
-  background:rgba(251,191,36,.14);
-  border:1px solid rgba(251,191,36,.25);
-}
-.badge.critical{
-  color:#ffd4d8;
-  background:rgba(255,77,94,.14);
-  border:1px solid rgba(255,77,94,.25);
-}
-.eg-notice-actions{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-top:12px;
-}
-.eg-notice-actions form{
-  margin:0;
-}
-.eg-mini-btn{
-  border:1px solid rgba(255,255,255,.12);
-  padding:8px 10px;
-  border-radius:999px;
-  font-weight:1000;
-  font-size:12px;
-  cursor:pointer;
-  color:#f7fff4;
-  background:rgba(255,255,255,.06);
-}
-.eg-mini-btn.archive{
-  color:#fff1c2;
-  border-color:rgba(251,191,36,.28);
-  background:rgba(251,191,36,.10);
-}
-.eg-mini-btn.restore{
-  color:#d9ffc7;
-  border-color:rgba(141,255,63,.28);
-  background:rgba(141,255,63,.10);
-}
-.eg-mini-btn.delete{
-  color:#ffd4d8;
-  border-color:rgba(255,77,94,.28);
-  background:rgba(255,77,94,.10);
-}
-.eg-status{
-  display:inline-flex;
-  margin-left:8px;
-  padding:5px 8px;
-  border-radius:999px;
-  font-size:10px;
-  font-weight:1000;
-  color:#a6b8c8;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.05);
-}
-.eg-status.archived{
-  color:#fff1c2;
-  border-color:rgba(251,191,36,.25);
-  background:rgba(251,191,36,.10);
-}
-.notice small{
-  display:block;
-  margin-top:7px;
-  color:var(--eg-muted);
-}
-.eg-alert{
-  border-radius:16px;
-  padding:13px 14px;
-  margin:0 0 14px;
+.brand{min-width:0}
+.brand b{display:block;font-size:16px}
+.brand span{display:block;margin-top:3px;color:var(--cyan);font-size:11px;font-weight:900;letter-spacing:2px}
+.top-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.btn{
+  border:1px solid var(--line2);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  border-radius:14px;
+  padding:11px 13px;
   font-weight:900;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
 }
-.eg-alert-success{
-  color:#d9ffc7;
-  border:1px solid rgba(141,255,63,.28);
-  background:rgba(141,255,63,.10);
+.btn.primary{
+  border:0;
+  color:#031018;
+  background:linear-gradient(135deg,var(--cyan),var(--green));
 }
-.eg-alert-error{
-  color:#ffd4d8;
-  border:1px solid rgba(255,77,94,.28);
-  background:rgba(255,77,94,.10);
+.btn.danger{border-color:rgba(255,77,94,.32);color:#ffd7dc}
+.btn.ghost{color:var(--muted)}
+.hero{
+  margin-top:18px;
+  border:1px solid var(--line2);
+  border-radius:28px;
+  padding:24px;
+  background:
+    radial-gradient(circle at top right,rgba(0,200,240,.14),transparent 34%),
+    radial-gradient(circle at bottom left,rgba(141,255,63,.10),transparent 32%),
+    linear-gradient(180deg,rgba(15,27,49,.98),rgba(7,13,24,.98));
+  box-shadow:var(--shadow);
 }
-.status-row{
+.kicker{color:var(--cyan);font-size:12px;font-weight:1000;letter-spacing:3px}
+.hero h1{margin:8px 0 0;font-size:clamp(34px,6vw,58px);line-height:1}
+.hero p{max-width:760px;margin:12px 0 0;color:var(--muted);line-height:1.45}
+.stats{
+  margin-top:14px;
   display:grid;
-  grid-template-columns:repeat(3, minmax(0,1fr));
-  gap:10px;
-  margin-bottom:14px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
 }
 .stat{
-  border:1px solid rgba(141,255,63,.18);
-  border-radius:16px;
-  padding:13px;
-  background:rgba(141,255,63,.07);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  background:rgba(5,8,16,.56);
+  padding:16px;
 }
-.stat b{
-  display:block;
-  font-size:24px;
+.stat b{display:block;font-size:32px;line-height:1}
+.stat span{display:block;margin-top:7px;color:var(--muted);font-size:12px;font-weight:900}
+.grid{
+  margin-top:16px;
+  display:grid;
+  grid-template-columns:.82fr 1.18fr;
+  gap:16px;
 }
-.stat span{
-  color:var(--eg-muted);
+.card{
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:rgba(10,16,32,.88);
+  padding:18px;
+  box-shadow:0 14px 44px rgba(0,0,0,.24);
+}
+.card h2{margin:0;font-size:26px;line-height:1.1}
+.card > p{margin:8px 0 16px;color:var(--muted);line-height:1.4}
+.form{display:grid;gap:11px}
+.input,.select,.textarea{
+  width:100%;
+  border:1px solid var(--line2);
+  border-radius:15px;
+  background:#050810;
+  color:var(--text);
+  padding:13px 14px;
+  outline:none;
+  font:inherit;
+}
+.textarea{min-height:138px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.note{
+  color:var(--dim);
   font-size:12px;
+  line-height:1.45;
 }
-@media(max-width:820px){
+.feed{display:grid;gap:11px}
+.notice{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  padding:15px;
+  background:
+    radial-gradient(circle at top right,rgba(0,200,240,.07),transparent 35%),
+    rgba(255,255,255,.025);
+}
+.notice-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.notice h3{margin:0;font-size:18px}
+.notice p{margin:9px 0 0;color:var(--muted);line-height:1.45;white-space:pre-wrap}
+.meta{
+  margin-top:11px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+}
+.badge{
+  border:1px solid rgba(0,200,240,.18);
+  background:rgba(0,200,240,.07);
+  color:#c8f7ff;
+  border-radius:999px;
+  padding:6px 9px;
+  font-size:11px;
+  font-weight:1000;
+}
+.badge.critical{border-color:rgba(255,77,94,.32);background:rgba(255,77,94,.09);color:#ffd7dc}
+.badge.high{border-color:rgba(255,209,102,.30);background:rgba(255,209,102,.09);color:#fff0c2}
+.badge.archived{border-color:rgba(138,166,196,.20);background:rgba(138,166,196,.08);color:#c8d5e3}
+.actions{
+  margin-top:12px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.actions form{display:inline}
+.empty{
+  border:1px dashed rgba(255,255,255,.13);
+  border-radius:20px;
+  padding:28px;
+  text-align:center;
+  color:var(--muted);
+}
+@media(max-width:860px){
   .grid{grid-template-columns:1fr}
-  .status-row{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr}
 }
-@media(max-width:620px){
-  .wrap{padding:12px}
-  .hero{padding:16px;border-radius:22px}
-  .btn-row{display:grid}
+@media(max-width:560px){
+  .page{padding:12px}
+  .topbar-inner{padding:10px 12px}
+  .brand span{display:none}
+  .btn{padding:10px 11px;font-size:13px}
+  .hero{padding:18px;border-radius:24px}
+  .hero h1{font-size:36px}
+  .form-row{grid-template-columns:1fr}
 }
 </style>
 </head>
 
 <body>
-<div class="wrap">
-  <section class="hero">
-    <div class="kicker">ERATGUARD ADMIN</div>
-    <h1>🔔 Bildirim Merkezi</h1>
-    <p>Admin uyarıları, kullanıcı bilgilendirmeleri ve kritik sistem mesajları buradan yönetilir.</p>
-    <a class="back-link" href="/admin/dashboard">← Admin Dashboard</a>
-  </section>
-
-  {% if success %}
-  <div class="eg-alert eg-alert-success">✅ {{ success }}</div>
-  {% endif %}
-
-  {% if error %}
-  <div class="eg-alert eg-alert-error">⚠️ {{ error }}</div>
-  {% endif %}
-
-  <div class="status-row">
-    <div class="stat"><b>{{ notification_stats.total|default(0) }}</b><span>Toplam bildirim</span></div>
-    <div class="stat"><b>{{ notification_stats.today|default(0) }}</b><span>Bugünkü bildirim</span></div>
-    <div class="stat"><b>{{ notification_stats.critical|default(0) }}</b><span>Kritik uyarı</span></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="logo">E</div>
+    <div class="brand">
+      <b>EratGuard</b>
+      <span>ADMIN NOTIFICATIONS</span>
+    </div>
+    <div class="top-actions">
+      <a class="btn ghost" href="/admin/dashboard">← Panel</a>
+    </div>
   </div>
+</header>
+
+<main class="page">
+  <section class="hero">
+    <div class="kicker">ERATGUARD PRO ADMIN</div>
+    <h1>Bildirim Merkezi</h1>
+    <p>Kullanıcılara duyuru, güvenlik uyarısı ve lisans bilgilendirmesi gönder. Bu ekran artık ana Claude admin panel tasarımıyla uyumludur.</p>
+
+    <div class="stats">
+      <div class="stat"><b>{{ notification_stats.total|default(0) }}</b><span>Toplam bildirim</span></div>
+      <div class="stat"><b>{{ notification_stats.today|default(0) }}</b><span>Bugünkü bildirim</span></div>
+      <div class="stat"><b>{{ notification_stats.critical|default(0) }}</b><span>Kritik uyarı</span></div>
+    </div>
+  </section>
 
   <div class="grid">
     <section class="card">
-      <h2>Yeni Bildirim Oluştur</h2>
-      <p>Kullanıcılara veya tüm sisteme gönderilecek admin bildirimini hazırla.</p>
+      <h2>Yeni Bildirim</h2>
+      <p>Mesaj oluştur, hedef kitleyi seç ve yayınla.</p>
 
       <form class="form" method="POST" action="/admin/notifications">
-        <input class="input" name="title" placeholder="Başlık: Örn. Kritik güvenlik güncellemesi" required>
+        <input type="hidden" name="action" value="create">
 
-        <select class="select" name="priority">
-          <option value="normal">Normal</option>
-          <option value="high">Yüksek</option>
-          <option value="critical">Kritik</option>
-        </select>
+        <input class="input" name="title" placeholder="Başlık: Kritik güvenlik güncellemesi" required>
 
-        <select class="select" name="target">
-          <option value="all">Tüm kullanıcılar</option>
-          <option value="premium">Premium kullanıcılar</option>
-          <option value="admin">Admin içi not</option>
-        </select>
+        <div class="form-row">
+          <select class="select" name="priority">
+            <option value="normal">Normal</option>
+            <option value="high">Yüksek</option>
+            <option value="critical">Kritik</option>
+            <option value="low">Düşük</option>
+          </select>
+
+          <select class="select" name="target">
+            <option value="all">Tüm kullanıcılar</option>
+            <option value="premium">Premium / PRO</option>
+            <option value="free">Free kullanıcılar</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
 
         <textarea class="textarea" name="message" placeholder="Bildirim mesajını yaz..." required></textarea>
 
-        <div class="btn-row">
-          <button class="btn" type="submit">Bildirim Hazırla</button>
-          <a class="ghost" href="/admin/dashboard">Dashboard’a Dön</a>
-        </div>
+        <button class="btn primary" type="submit">Bildirim Yayınla →</button>
+        <div class="note">Not: Sahte/demo bildirim üretilmez. Kayıtlar gerçek JSON bildirim akışına yazılır.</div>
       </form>
     </section>
 
     <section class="card">
-      <h2>Son Bildirimler</h2>
-      <div class="notice-list">
+      <h2>Yayınlanan Bildirimler</h2>
+      <p>Aktif, arşivlenmiş veya silinecek bildirimleri yönet.</p>
+
+      <div class="feed">
         {% for n in notifications %}
-        <div class="notice">
-          <div class="notice-top">
-            <b>{{ n.get("title", "Bildirim") }}</b>
-            <span class="badge {{ n.get('priority', 'normal') }}">{{ n.get("priority", "normal")|upper }}</span>
+        {% set pr = (n.get("priority", "normal")|string).lower() %}
+        <article class="notice">
+          <div class="notice-head">
+            <div>
+              <h3>{{ n.get("title", "Başlıksız bildirim") }}</h3>
+              <div class="meta">
+                <span class="badge {% if pr == 'critical' %}critical{% elif pr == 'high' %}high{% endif %}">{{ n.get("priority", "normal") }}</span>
+                <span class="badge">{{ n.get("target", "all") }}</span>
+                {% if n.get("archived") %}<span class="badge archived">Arşiv</span>{% endif %}
+                <span class="badge">{{ n.get("created_at", n.get("date", "")) }}</span>
+              </div>
+            </div>
           </div>
 
           <p>{{ n.get("message", "-") }}</p>
 
-          <small>
-            {{ n.get("created_at", "Yeni") }} · Hedef: {{ n.get("target", "all") }}
-            <span class="eg-status {{ n.get('status', 'created') }}">{{ n.get("status", "created")|upper }}</span>
-          </small>
-
-          <div class="eg-notice-actions">
-            {% if n.get("status", "created") == "archived" %}
+          <div class="actions">
+            {% if n.get("archived") %}
             <form method="POST" action="/admin/notifications">
               <input type="hidden" name="action" value="restore">
               <input type="hidden" name="notification_id" value="{{ n.get('id', '') }}">
-              <button class="eg-mini-btn restore" type="submit">Geri Al</button>
+              <button class="btn" type="submit">Geri Al</button>
             </form>
             {% else %}
             <form method="POST" action="/admin/notifications">
               <input type="hidden" name="action" value="archive">
               <input type="hidden" name="notification_id" value="{{ n.get('id', '') }}">
-              <button class="eg-mini-btn archive" type="submit">Arşivle</button>
+              <button class="btn" type="submit">Arşivle</button>
             </form>
             {% endif %}
 
             <form method="POST" action="/admin/notifications" onsubmit="return confirm('Bu bildirimi silmek istiyor musunuz?');">
               <input type="hidden" name="action" value="delete">
               <input type="hidden" name="notification_id" value="{{ n.get('id', '') }}">
-              <button class="eg-mini-btn delete" type="submit">Sil</button>
+              <button class="btn danger" type="submit">Sil</button>
             </form>
           </div>
-        </div>
+        </article>
         {% else %}
-        <div class="notice">
-          <div class="notice-top">
-            <b>Bildirim merkezi aktif</b>
-            <span class="badge normal">NORMAL</span>
-          </div>
-          <p>Henüz kayıtlı bildirim yok. Bu modül EratGuard admin paneline gerçek sayfa olarak bağlandı.</p>
-          <small>Stage 4N · Sistem hazır</small>
-        </div>
+        <div class="empty">Henüz bildirim yok. İlk bildirimi soldaki formdan yayınlayabilirsin.</div>
         {% endfor %}
       </div>
     </section>
   </div>
-</div>
+</main>
 </body>
 </html>
