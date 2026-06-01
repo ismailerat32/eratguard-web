@@ -12494,6 +12494,57 @@ except Exception as _boot_err:
     print("ERATGUARD STAGE6B COMMAND TREE ADMIN ROUTE BOOT ERROR:", _boot_err)
 # ===== ERATGUARD STAGE6B COMMAND TREE ADMIN ROUTE END =====
 
+
+
+# ===== ERATGUARD STAGE6D OLD ADMIN ACCESS BRIDGE START =====
+# Amaç:
+# - Eski /ss-admin-access ve /ss-admin-app-start yollarını yeni EratGuard admin akışına bağlar.
+# - Eski APK/WebView path'i canlı domainde kullanılırsa boşa düşmez.
+# - Eski SpamShield isimli panel üretmez.
+try:
+    from flask import request as _eg6d_request
+    from flask import redirect as _eg6d_redirect
+    from flask import session as _eg6d_session
+    from flask import url_for as _eg6d_url_for
+
+    def _eg6d_is_admin_session():
+        try:
+            username = str(_eg6d_session.get("username") or "").strip().lower()
+            role = str(_eg6d_session.get("role") or "").strip().lower()
+            return bool(_eg6d_session.get("is_admin")) or role == "admin" or username == "admin"
+        except Exception:
+            return False
+
+    def _eg6d_old_admin_access_bridge():
+        try:
+            path = str(getattr(_eg6d_request, "path", "") or "").rstrip("/")
+
+            if path not in ("/ss-admin-access", "/ss-admin-app-start", "/admin-access"):
+                return None
+
+            if _eg6d_is_admin_session():
+                return _eg6d_redirect("/admin/dashboard")
+
+            return _eg6d_redirect("/admin/login?next=/admin/dashboard")
+        except Exception:
+            return None
+
+    try:
+        _eg6d_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg6d_funcs[:] = [
+            f for f in _eg6d_funcs
+            if getattr(f, "__name__", "") != "_eg6d_old_admin_access_bridge"
+        ]
+        _eg6d_funcs.insert(0, _eg6d_old_admin_access_bridge)
+        print("ERATGUARD STAGE6D OLD ADMIN ACCESS BRIDGE ACTIVE")
+    except Exception as _err:
+        print("ERATGUARD STAGE6D BRIDGE INSERT ERROR:", _err)
+
+except Exception as _boot_err:
+    print("ERATGUARD STAGE6D OLD ADMIN ACCESS BRIDGE BOOT ERROR:", _boot_err)
+# ===== ERATGUARD STAGE6D OLD ADMIN ACCESS BRIDGE END =====
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
