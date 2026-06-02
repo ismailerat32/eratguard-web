@@ -13032,3 +13032,480 @@ try:
 except Exception as _boot_err:
     print("ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE BOOT ERROR:", _boot_err)
 # ===== ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE END =====
+
+# ===== ERATGUARD STAGE6K15 ULTRA SLIM ADMIN FIT MODE START =====
+try:
+    from flask import request as _eg6k15_request
+
+    _EG6K15_ULTRA_SLIM_CSS = r'''
+<style id="eratguard-admin-ultra-slim-fit-6k15">
+@media (max-width:760px){
+
+  html,body{
+    overflow-x:hidden!important;
+  }
+
+  body{
+    font-size:13px!important;
+    padding-bottom:104px!important;
+  }
+
+  /* Genel dış boşluğu azalt */
+  main,
+  .eg-admin-shell,
+  .eg-command-shell,
+  .admin-shell,
+  .dashboard-shell,
+  .wrap,
+  .container{
+    padding-left:12px!important;
+    padding-right:12px!important;
+  }
+
+  /* Üst header daha kısa */
+  .admin-header,
+  .topbar,
+  .header{
+    min-height:68px!important;
+    padding:10px 16px!important;
+  }
+
+  .admin-header h1,
+  .topbar h1,
+  .header h1{
+    font-size:28px!important;
+  }
+
+  .logout,
+  .logout-btn,
+  .btn-logout,
+  a[href*="logout"]{
+    min-height:46px!important;
+    padding:9px 16px!important;
+    border-radius:16px!important;
+    font-size:16px!important;
+  }
+
+  /* Hero kartı incelt */
+  .hero,
+  .eg-hero,
+  .command-hero,
+  .admin-hero,
+  [class*="hero"]{
+    padding:24px 20px!important;
+    margin-bottom:12px!important;
+    border-radius:24px!important;
+    min-height:auto!important;
+  }
+
+  .kicker,
+  .eyebrow{
+    font-size:13px!important;
+    letter-spacing:.36em!important;
+    line-height:1.25!important;
+    margin-bottom:12px!important;
+  }
+
+  h1,
+  .title,
+  .hero-title,
+  .command-title{
+    font-size:34px!important;
+    line-height:1.02!important;
+    letter-spacing:-.05em!important;
+    margin:0 0 12px!important;
+  }
+
+  .hero p,
+  .eg-hero p,
+  .command-hero p,
+  .admin-hero p,
+  .subtitle,
+  .desc{
+    font-size:16px!important;
+    line-height:1.36!important;
+    margin-bottom:14px!important;
+  }
+
+  .badge,
+  .chip,
+  .pill{
+    padding:7px 11px!important;
+    font-size:12px!important;
+    line-height:1.15!important;
+    margin:4px 0!important;
+    min-height:auto!important;
+  }
+
+  /* Metrik kartları kompakt */
+  .stats-grid,
+  .metric-grid,
+  .eg-stats,
+  .admin-stats{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:10px!important;
+    margin-bottom:12px!important;
+  }
+
+  .stat-card,
+  .metric-card,
+  [class*="stat"],
+  [class*="metric"]{
+    padding:14px!important;
+    min-height:116px!important;
+    border-radius:20px!important;
+    margin-bottom:0!important;
+  }
+
+  .stat-card .icon,
+  .metric-card .icon,
+  .stat-card i,
+  .metric-card i{
+    width:50px!important;
+    height:50px!important;
+    min-width:50px!important;
+    border-radius:16px!important;
+    font-size:25px!important;
+    margin-bottom:10px!important;
+  }
+
+  .stat-card span,
+  .metric-card span{
+    font-size:11px!important;
+    line-height:1.15!important;
+  }
+
+  .stat-card b,
+  .metric-card b,
+  .stat-card .value,
+  .metric-value,
+  .big-number{
+    font-size:34px!important;
+    line-height:.95!important;
+  }
+
+  .stat-card small,
+  .metric-card small{
+    font-size:12px!important;
+    line-height:1.2!important;
+  }
+
+  /* Root / tree kartı sıkılaştır */
+  .card,
+  .panel,
+  .eg-card,
+  .tree-card,
+  .command-card,
+  .admin-card,
+  [class*="card"],
+  [class*="panel"]{
+    padding:14px!important;
+    border-radius:20px!important;
+    margin-bottom:12px!important;
+    min-height:auto!important;
+  }
+
+  h2,
+  .section-title,
+  .tree-title{
+    font-size:26px!important;
+    line-height:1.05!important;
+    margin-bottom:10px!important;
+  }
+
+  h3,
+  .card-title,
+  .node-title{
+    font-size:20px!important;
+    line-height:1.08!important;
+  }
+
+  p,
+  .muted,
+  .card-desc{
+    font-size:14px!important;
+    line-height:1.32!important;
+  }
+
+  .search,
+  .search-box,
+  input[type="search"]{
+    height:48px!important;
+    border-radius:17px!important;
+    font-size:15px!important;
+    padding:0 14px!important;
+    margin-bottom:12px!important;
+  }
+
+  /* Tree node satırları */
+  .tree,
+  .command-tree,
+  .node-list,
+  .users-list{
+    gap:9px!important;
+  }
+
+  .node,
+  .tree-node,
+  .user-row,
+  .license-row,
+  .payment-row,
+  [class*="node"],
+  [class*="row"]{
+    padding:10px 12px!important;
+    border-radius:16px!important;
+    min-height:auto!important;
+  }
+
+  .node-icon,
+  .card-icon,
+  .user-avatar,
+  .avatar{
+    width:46px!important;
+    height:46px!important;
+    min-width:46px!important;
+    border-radius:15px!important;
+    font-size:24px!important;
+  }
+
+  .user-row b,
+  .node b,
+  .tree-node b{
+    font-size:20px!important;
+    line-height:1.05!important;
+  }
+
+  .user-row span,
+  .node span,
+  .tree-node span{
+    font-size:13px!important;
+    line-height:1.2!important;
+  }
+
+  /* Detay panelini kısalt */
+  .detail-panel,
+  .selected-detail,
+  .detail-card,
+  [class*="detail"]{
+    padding:14px!important;
+    border-radius:20px!important;
+    margin-bottom:12px!important;
+  }
+
+  .detail-panel h2,
+  .selected-detail h2,
+  .detail-card h2{
+    font-size:30px!important;
+    line-height:1.05!important;
+  }
+
+  .detail-panel .avatar,
+  .selected-detail .avatar,
+  .detail-card .avatar{
+    width:56px!important;
+    height:56px!important;
+    min-width:56px!important;
+  }
+
+  .info,
+  .field,
+  .data-row,
+  .detail-row{
+    padding:12px!important;
+    border-radius:15px!important;
+    margin-bottom:9px!important;
+  }
+
+  .info span,
+  .field span,
+  .data-row span,
+  .detail-row span{
+    font-size:12px!important;
+  }
+
+  .info b,
+  .field b,
+  .data-row b,
+  .detail-row b{
+    font-size:17px!important;
+  }
+
+  /* Modül kutuları 2 kolon ama daha kısa */
+  .detail-grid,
+  .action-grid,
+  .module-grid{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:10px!important;
+  }
+
+  .action-card,
+  .quick-action,
+  .module-card,
+  .module{
+    padding:13px!important;
+    border-radius:17px!important;
+    min-height:96px!important;
+  }
+
+  .action-card i,
+  .quick-action i,
+  .module-card i,
+  .module i{
+    font-size:25px!important;
+    margin-bottom:5px!important;
+  }
+
+  .action-card h3,
+  .quick-action h3,
+  .module-card h3,
+  .module b{
+    font-size:18px!important;
+    margin-bottom:4px!important;
+  }
+
+  .action-card p,
+  .quick-action p,
+  .module-card p,
+  .module span{
+    font-size:12px!important;
+    line-height:1.25!important;
+  }
+
+  .btn,
+  button,
+  .action-button,
+  .quick-btn{
+    min-height:48px!important;
+    padding:10px 14px!important;
+    border-radius:16px!important;
+    font-size:16px!important;
+    margin-bottom:8px!important;
+  }
+
+  /* Alt menü daha fit */
+  .bottom-nav,
+  .tabbar,
+  .mobile-nav,
+  .admin-bottom-nav{
+    left:10px!important;
+    right:10px!important;
+    bottom:9px!important;
+    height:64px!important;
+    border-radius:21px!important;
+    overflow:hidden!important;
+  }
+
+  .bottom-nav a,
+  .tabbar a,
+  .mobile-nav a,
+  .admin-bottom-nav a,
+  .nav-item{
+    min-height:64px!important;
+    padding:6px 4px!important;
+    font-size:12px!important;
+    line-height:1.05!important;
+  }
+
+  .bottom-nav .icon,
+  .tabbar .icon,
+  .mobile-nav .icon,
+  .nav-icon{
+    font-size:18px!important;
+    margin-bottom:2px!important;
+  }
+
+  /* Alt menü içerik üstüne binmesin */
+  body:after{
+    content:"";
+    display:block;
+    height:92px;
+  }
+}
+
+@media (max-width:420px){
+  h1,
+  .title,
+  .hero-title,
+  .command-title{
+    font-size:31px!important;
+  }
+
+  h2,
+  .section-title,
+  .tree-title{
+    font-size:24px!important;
+  }
+
+  .hero,
+  .eg-hero,
+  .command-hero,
+  .admin-hero,
+  [class*="hero"]{
+    padding:22px 18px!important;
+  }
+
+  .stat-card,
+  .metric-card,
+  [class*="stat"],
+  [class*="metric"]{
+    min-height:106px!important;
+  }
+
+  .stat-card b,
+  .metric-card b,
+  .stat-card .value,
+  .metric-value,
+  .big-number{
+    font-size:31px!important;
+  }
+
+  .node-icon,
+  .card-icon,
+  .user-avatar,
+  .avatar{
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+  }
+}
+</style>
+'''
+
+    @app.after_request
+    def _eg6k15_ultra_slim_fit_inject(resp):
+        try:
+            path = str(getattr(_eg6k15_request, "path", "") or "")
+            ctype = str(resp.headers.get("Content-Type", "") or "")
+
+            if path not in ("/admin", "/admin/", "/admin/dashboard"):
+                return resp
+
+            if "text/html" not in ctype.lower():
+                return resp
+
+            body = resp.get_data(as_text=True)
+
+            if "eratguard-admin-ultra-slim-fit-6k15" in body:
+                return resp
+
+            if "</head>" in body:
+                body = body.replace("</head>", _EG6K15_ULTRA_SLIM_CSS + "\n</head>", 1)
+            elif "</body>" in body:
+                body = body.replace("</body>", _EG6K15_ULTRA_SLIM_CSS + "\n</body>", 1)
+            else:
+                body += _EG6K15_ULTRA_SLIM_CSS
+
+            resp.set_data(body)
+            resp.headers["Content-Length"] = str(len(resp.get_data()))
+            resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            return resp
+        except Exception as _eg6k15_err:
+            print("ERATGUARD STAGE6K15 ULTRA SLIM INJECT ERROR:", _eg6k15_err)
+            return resp
+
+    print("ERATGUARD STAGE6K15 ULTRA SLIM ADMIN FIT MODE ACTIVE")
+except Exception as _eg6k15_boot_err:
+    print("ERATGUARD STAGE6K15 ULTRA SLIM ADMIN FIT MODE BOOT ERROR:", _eg6k15_boot_err)
+# ===== ERATGUARD STAGE6K15 ULTRA SLIM ADMIN FIT MODE END =====
