@@ -11886,8 +11886,18 @@ try:
             if role == "admin":
                 return True
 
-            if username == "admin":
+            if username == "admin" or username.startswith("eg_admin_"):
                 return True
+
+            # APK/WebView ve mobil tarayıcı için kalıcı admin cookie kabulü.
+            try:
+                mobile_cookie = str(_eg5a_request.cookies.get("ss_admin_mobile") or "").strip()
+                token_func = globals().get("_ss_admin_cookie_token_final")
+                expected = str(token_func() if callable(token_func) else "").strip()
+                if mobile_cookie and expected and mobile_cookie == expected:
+                    return True
+            except Exception as _cookie_err:
+                print("ERATGUARD STAGE5A ADMIN COOKIE CHECK WARN:", _cookie_err)
 
             return False
         except Exception as _err:
