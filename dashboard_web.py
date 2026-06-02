@@ -12869,3 +12869,53 @@ try:
 except Exception as _eg6k_boot_err:
     print("ERATGUARD STAGE6K FORCE SLIM ADMIN UI INJECT BOOT ERROR:", _eg6k_boot_err)
 # ===== ERATGUARD STAGE6K FORCE SLIM ADMIN UI INJECT END =====
+
+# ===== ERATGUARD STAGE6K ADMIN COOKIE SESSION HYDRATE START =====
+# Amaç:
+# - /ss-admin-access başarılı girişte ss_admin_mobile cookie üretir.
+# - Bazı WebView/curl akışlarında Flask session gate'e yetişmeyebilir.
+# - Bu erken before_request, cookie doğruysa session'ı yeniden admin olarak hydrate eder.
+try:
+    from flask import request as _eg6k8_request
+    from flask import session as _eg6k8_session
+
+    def _eg6k8_hydrate_admin_session_from_cookie():
+        try:
+            path = str(getattr(_eg6k8_request, "path", "") or "")
+
+            if not (path == "/admin" or path == "/admin/" or path.startswith("/admin/")):
+                return None
+
+            mobile_cookie = str(_eg6k8_request.cookies.get("ss_admin_mobile") or "").strip()
+            if not mobile_cookie:
+                return None
+
+            token_func = globals().get("_ss_admin_cookie_token_final")
+            expected = str(token_func() if callable(token_func) else "").strip()
+
+            if expected and mobile_cookie == expected:
+                _eg6k8_session["logged_in"] = True
+                _eg6k8_session["username"] = str(_eg6k8_session.get("username") or "eg_admin_mobile")
+                _eg6k8_session["role"] = "admin"
+                _eg6k8_session["is_admin"] = True
+                return None
+
+            return None
+        except Exception as _eg6k8_err:
+            print("ERATGUARD STAGE6K COOKIE SESSION HYDRATE ERROR:", _eg6k8_err)
+            return None
+
+    try:
+        _eg6k8_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg6k8_funcs[:] = [
+            f for f in _eg6k8_funcs
+            if getattr(f, "__name__", "") != "_eg6k8_hydrate_admin_session_from_cookie"
+        ]
+        _eg6k8_funcs.insert(0, _eg6k8_hydrate_admin_session_from_cookie)
+        print("ERATGUARD STAGE6K ADMIN COOKIE SESSION HYDRATE ACTIVE")
+    except Exception as _eg6k8_insert_err:
+        print("ERATGUARD STAGE6K COOKIE SESSION HYDRATE INSERT ERROR:", _eg6k8_insert_err)
+
+except Exception as _eg6k8_boot_err:
+    print("ERATGUARD STAGE6K ADMIN COOKIE SESSION HYDRATE BOOT ERROR:", _eg6k8_boot_err)
+# ===== ERATGUARD STAGE6K ADMIN COOKIE SESSION HYDRATE END =====
