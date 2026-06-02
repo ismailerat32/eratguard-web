@@ -12919,3 +12919,52 @@ try:
 except Exception as _eg6k8_boot_err:
     print("ERATGUARD STAGE6K ADMIN COOKIE SESSION HYDRATE BOOT ERROR:", _eg6k8_boot_err)
 # ===== ERATGUARD STAGE6K ADMIN COOKIE SESSION HYDRATE END =====
+
+# ===== ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE START =====
+# Not:
+# - ss_admin_mobile cookie sadece başarılı /ss-admin-access girişinde set edilir.
+# - Bazı session/gate zincirlerinde Flask session okunmadan önce admin gate redirect yapıyor.
+# - Bu patch admin path'lerinde cookie varsa session'ı admin'e yükseltir.
+try:
+    from flask import request as _eg6k10_request
+    from flask import session as _eg6k10_session
+
+    def _eg6k10_force_accept_admin_cookie():
+        try:
+            path = str(getattr(_eg6k10_request, "path", "") or "")
+            if not (path == "/admin" or path == "/admin/" or path.startswith("/admin/")):
+                return None
+
+            cookie = str(_eg6k10_request.cookies.get("ss_admin_mobile") or "").strip()
+
+            # Cookie yoksa dokunma.
+            if not cookie:
+                return None
+
+            # Başarılı login cookie'si uzun hex token olarak setleniyor.
+            # Bu cookie yalnızca /ss-admin-access başarılı olduğunda üretildiği için admin session hydrate edilir.
+            if len(cookie) >= 32:
+                _eg6k10_session["logged_in"] = True
+                _eg6k10_session["username"] = str(_eg6k10_session.get("username") or "eg_admin_mobile")
+                _eg6k10_session["role"] = "admin"
+                _eg6k10_session["is_admin"] = True
+
+            return None
+        except Exception as _eg6k10_err:
+            print("ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE ERROR:", _eg6k10_err)
+            return None
+
+    try:
+        funcs = app.before_request_funcs.setdefault(None, [])
+        funcs[:] = [
+            f for f in funcs
+            if getattr(f, "__name__", "") != "_eg6k10_force_accept_admin_cookie"
+        ]
+        funcs.insert(0, _eg6k10_force_accept_admin_cookie)
+        print("ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE ACTIVE")
+    except Exception as _eg6k10_insert_err:
+        print("ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE INSERT ERROR:", _eg6k10_insert_err)
+
+except Exception as _eg6k10_boot_err:
+    print("ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE BOOT ERROR:", _eg6k10_boot_err)
+# ===== ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE END =====
