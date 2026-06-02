@@ -3218,14 +3218,21 @@ def ss_live_admin_access():
 
         env_admin_passwords = [
             os.environ.get("ERATGUARD_ADMIN_PASSWORD", ""),
-            os.environ.get("ERATGUARD_ADMIN_PASSWORD", ""),
             os.environ.get("ADMIN_PASSWORD", ""),
+            os.environ.get("SPAMSHIELD_ADMIN_PASSWORD", ""),
         ]
         env_admin_passwords = [x for x in env_admin_passwords if x]
 
-        is_admin_name = username.lower() == "admin" or str(user.get("role", "")).lower() == "admin" or user.get("is_admin") is True
+        env_admin_usernames = [
+            os.environ.get("ERATGUARD_ADMIN_USERNAME", ""),
+            os.environ.get("ADMIN_USERNAME", ""),
+            "admin",
+        ]
+        env_admin_usernames = [str(x).strip().lower() for x in env_admin_usernames if str(x).strip()]
+
+        is_admin_name = username.lower() in env_admin_usernames or str(user.get("role", "")).lower() == "admin" or user.get("is_admin") is True
         fallback_admin_sha256 = "11b2d8d98c0a8ed79080d388420deb3b3168e5631667cad074d09ee0e26c86fb"
-        ok_env = username.lower() == "admin" and password in env_admin_passwords
+        ok_env = username.lower() in env_admin_usernames and password in env_admin_passwords
         ok_fallback = username.lower() == "admin" and hashlib.sha256(password.encode()).hexdigest() == fallback_admin_sha256
         ok_user = is_admin_name and _check_password(password, user.get("password") or user.get("password_hash") or "")
 
@@ -3234,7 +3241,7 @@ def ss_live_admin_access():
             session["username"] = username or "admin"
             session["role"] = "admin"
             session["is_admin"] = True
-            return redirect("/admin")
+            return redirect("/admin/dashboard")
 
         try:
             return render_template("admin_login.html", error="Admin girişi başarısız.")
@@ -3294,7 +3301,7 @@ def ss_live_admin_app_start():
     if session.get("logged_in") and (
         session.get("is_admin") or session.get("role") == "admin" or session.get("username") == "admin"
     ):
-        return redirect("/admin")
+        return redirect("/admin/dashboard")
     return redirect("/ss-admin-access")
 
 @app.route("/admin")
@@ -4580,10 +4587,17 @@ def _ss_admin_access_cookie_override():
 
         env_admin_passwords = [
             os.environ.get("ERATGUARD_ADMIN_PASSWORD", ""),
-            os.environ.get("ERATGUARD_ADMIN_PASSWORD", ""),
             os.environ.get("ADMIN_PASSWORD", ""),
+            os.environ.get("SPAMSHIELD_ADMIN_PASSWORD", ""),
         ]
         env_admin_passwords = [x for x in env_admin_passwords if x]
+
+        env_admin_usernames = [
+            os.environ.get("ERATGUARD_ADMIN_USERNAME", ""),
+            os.environ.get("ADMIN_USERNAME", ""),
+            "admin",
+        ]
+        env_admin_usernames = [str(x).strip().lower() for x in env_admin_usernames if str(x).strip()]
         fallback_admin_sha256 = "11b2d8d98c0a8ed79080d388420deb3b3168e5631667cad074d09ee0e26c86fb"
 
         is_admin_name = (
@@ -4592,7 +4606,7 @@ def _ss_admin_access_cookie_override():
             or user.get("is_admin") is True
         )
 
-        ok_env = username.lower() == "admin" and password in env_admin_passwords
+        ok_env = username.lower() in env_admin_usernames and password in env_admin_passwords
         ok_fallback = username.lower() == "admin" and hashlib.sha256(password.encode()).hexdigest() == fallback_admin_sha256
         ok_user = is_admin_name and _check_password(password, user.get("password") or user.get("password_hash") or "")
 
@@ -4602,7 +4616,7 @@ def _ss_admin_access_cookie_override():
             session["role"] = "admin"
             session["is_admin"] = True
 
-            resp = redirect("/admin")
+            resp = redirect("/admin/dashboard")
             resp.set_cookie(
                 "ss_admin_mobile",
                 _ss_admin_cookie_token_final(),
@@ -12500,7 +12514,7 @@ except Exception as _boot_err:
 # Amaç:
 # - Eski /ss-admin-access ve /ss-admin-app-start yollarını yeni EratGuard admin akışına bağlar.
 # - Eski APK/WebView path'i canlı domainde kullanılırsa boşa düşmez.
-# - Eski SpamShield isimli panel üretmez.
+# - Eski EratGuard isimli panel üretmez.
 try:
     from flask import request as _eg6d_request
     from flask import redirect as _eg6d_redirect
@@ -12520,6 +12534,10 @@ try:
             path = str(getattr(_eg6d_request, "path", "") or "").rstrip("/")
 
             if path not in ("/ss-admin-access", "/ss-admin-app-start", "/admin-access"):
+                return None
+
+            # Login form POST'u gerçek /ss-admin-access auth route'una bırak.
+            if path == "/ss-admin-access" and str(getattr(_eg6d_request, "method", "")).upper() == "POST":
                 return None
 
             if _eg6d_is_admin_session():
