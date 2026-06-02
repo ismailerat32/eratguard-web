@@ -10,6 +10,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
 import android.view.ViewGroup;
+import android.view.View;
+import android.graphics.drawable.Drawable;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -88,13 +90,15 @@ public class MainActivity extends Activity {
 
 
 
+
     private void showSplash() {
         splashView = new FrameLayout(this);
         splashView.setBackgroundColor(Color.rgb(1, 8, 5));
 
         ImageView art = new ImageView(this);
-        art.setImageResource(R.drawable.splash_art);
+        art.setImageResource(R.drawable.eratguard_splash_target);
         art.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        art.setAdjustViewBounds(false);
 
         splashView.addView(
                 art,
@@ -104,6 +108,62 @@ public class MainActivity extends Activity {
                 )
         );
 
+        LinearLayout realLoaderBox = new LinearLayout(this);
+        realLoaderBox.setOrientation(LinearLayout.VERTICAL);
+        realLoaderBox.setGravity(Gravity.CENTER);
+        realLoaderBox.setPadding(22, 14, 22, 14);
+
+        GradientDrawable loaderBg = new GradientDrawable();
+        loaderBg.setColor(Color.argb(224, 1, 12, 6));
+        loaderBg.setStroke(1, Color.argb(150, 135, 255, 86));
+        loaderBg.setCornerRadius(22);
+        realLoaderBox.setBackground(loaderBg);
+
+        TextView loadingText = makeText("Güvenli bağlantı kuruluyor...", 15, Color.argb(238, 245, 255, 245), true);
+        loadingText.setPadding(0, 0, 0, 8);
+
+        splashProgress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        splashProgress.setMax(100);
+        splashProgress.setProgress(0);
+        splashProgress.setIndeterminate(false);
+
+        GradientDrawable progressBg = new GradientDrawable();
+        progressBg.setColor(Color.argb(165, 10, 38, 20));
+        progressBg.setStroke(1, Color.argb(95, 130, 255, 80));
+        progressBg.setCornerRadius(18);
+
+        GradientDrawable progressFill = new GradientDrawable();
+        progressFill.setColor(Color.rgb(135, 255, 70));
+        progressFill.setCornerRadius(18);
+
+        ClipDrawable progressClip = new ClipDrawable(progressFill, Gravity.LEFT, ClipDrawable.HORIZONTAL);
+        LayerDrawable progressLayers = new LayerDrawable(new Drawable[]{progressBg, progressClip});
+        progressLayers.setId(0, android.R.id.background);
+        progressLayers.setId(1, android.R.id.progress);
+        splashProgress.setProgressDrawable(progressLayers);
+
+        LinearLayout.LayoutParams barLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                16
+        );
+        barLp.setMargins(0, 4, 0, 8);
+        splashProgress.setLayoutParams(barLp);
+
+        splashTip = makeText("0%", 22, Color.rgb(145, 255, 88), true);
+
+        realLoaderBox.addView(loadingText);
+        realLoaderBox.addView(splashProgress);
+        realLoaderBox.addView(splashTip);
+
+        FrameLayout.LayoutParams loaderLp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        loaderLp.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+        loaderLp.setMargins(42, 0, 42, 116);
+
+        splashView.addView(realLoaderBox, loaderLp);
+
         root.addView(
                 splashView,
                 new FrameLayout.LayoutParams(
@@ -111,10 +171,16 @@ public class MainActivity extends Activity {
                         ViewGroup.LayoutParams.MATCH_PARENT
                 )
         );
+
+        ValueAnimator animator = ValueAnimator.ofInt(0, 96);
+        animator.setDuration(1800);
+        animator.addUpdateListener(animation -> {
+            int value = (int) animation.getAnimatedValue();
+            if (splashProgress != null) splashProgress.setProgress(value);
+            if (splashTip != null) splashTip.setText(value + "%");
+        });
+        animator.start();
     }
-
-
-
 
 
     private void showWebView() {
@@ -131,6 +197,15 @@ public class MainActivity extends Activity {
         settings.setDisplayZoomControls(false);
         settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+
+        try {
+            webView.clearCache(true);
+            webView.clearHistory();
+            android.webkit.CookieManager.getInstance().removeAllCookies(null);
+            android.webkit.CookieManager.getInstance().flush();
+            android.webkit.WebStorage.getInstance().deleteAllData();
+        } catch (Exception ignored) {}
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
@@ -160,9 +235,18 @@ public class MainActivity extends Activity {
 
                 if (!firstRealPageShown && url != null && url.startsWith("https://app.eratguard.com")) {
                     firstRealPageShown = true;
+                    if (splashProgress != null) splashProgress.setProgress(100);
+                    if (splashTip != null) splashTip.setText("100%");
                     if (splashView != null) {
-                        root.removeView(splashView);
-                        splashView = null;
+                        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (splashView != null) {
+                                    root.removeView(splashView);
+                                    splashView = null;
+                                }
+                            }
+                        }, 260);
                     }
                 }
             }
@@ -183,7 +267,7 @@ public class MainActivity extends Activity {
                 )
         );
 
-        webView.loadUrl(APP_URL);
+        webView.loadUrl(APP_URL + "?apk_v=6g_realurl_" + System.currentTimeMillis());
     }
 
     @Override

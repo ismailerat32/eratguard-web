@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#020806">
-  <title>EratGuard Admin Access</title>
+  <title>EratGuard PRO Admin</title>
 
   <style>
     :root{
@@ -893,6 +893,102 @@
   }
 </style>
 
+
+<style id="eratguard-premium-login-live-6g">
+html,body{
+  min-height:100%;
+  background:
+    radial-gradient(circle at 50% 9%, rgba(143,255,89,.25), transparent 32%),
+    radial-gradient(circle at 50% 100%, rgba(143,255,89,.20), transparent 38%),
+    linear-gradient(180deg,#000704,#011008 52%,#000603)!important;
+  color:#f4fff3!important;
+}
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background-image:
+    linear-gradient(rgba(143,255,89,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(143,255,89,.055) 1px,transparent 1px);
+  background-size:44px 44px;
+  opacity:.9;
+  z-index:0;
+}
+body:after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 22% 20%, rgba(143,255,89,.20) 0 1px, transparent 2px),
+    radial-gradient(circle at 82% 34%, rgba(143,255,89,.16) 0 1px, transparent 2px),
+    radial-gradient(circle at 50% 82%, rgba(143,255,89,.18) 0 1px, transparent 2px);
+  opacity:.75;
+  z-index:0;
+}
+body,input,button{
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+}
+.login-card,.admin-card,.auth-card,.card,form{
+  position:relative!important;
+  z-index:1!important;
+  background:linear-gradient(180deg,rgba(5,31,17,.94),rgba(1,12,7,.97))!important;
+  border:1.5px solid rgba(143,255,89,.48)!important;
+  border-radius:30px!important;
+  box-shadow:
+    0 0 0 1px rgba(143,255,89,.06) inset,
+    0 0 46px rgba(90,255,70,.18),
+    0 28px 90px rgba(0,0,0,.80)!important;
+}
+h1,h2,.login-title,.title,.brand-name{
+  color:#f4fff3!important;
+  letter-spacing:-.045em!important;
+  text-shadow:0 0 24px rgba(143,255,89,.18)!important;
+}
+h1 span,h2 span,.green,.accent{
+  color:#8fff59!important;
+}
+.login-sub,.sub,.subtitle,p,.note,.foot,.footer{
+  color:rgba(235,255,235,.70)!important;
+}
+.hidden-badge{
+  background:rgba(7,39,21,.78)!important;
+  border:1px solid rgba(143,255,89,.50)!important;
+  color:#8fff59!important;
+  border-radius:999px!important;
+  box-shadow:0 0 22px rgba(143,255,89,.14)!important;
+}
+input{
+  background:rgba(0,8,5,.74)!important;
+  border:1px solid rgba(143,255,89,.32)!important;
+  border-radius:18px!important;
+  color:#f4fff3!important;
+  min-height:58px!important;
+  box-shadow:0 0 0 1px rgba(143,255,89,.025) inset!important;
+}
+input::placeholder{
+  color:rgba(235,255,235,.50)!important;
+}
+input:focus{
+  border-color:rgba(143,255,89,.92)!important;
+  box-shadow:0 0 0 3px rgba(143,255,89,.13),0 0 26px rgba(143,255,89,.15)!important;
+  outline:none!important;
+}
+button,.btn,.login-btn,[type="submit"]{
+  background:linear-gradient(180deg,#a7ff67 0%,#54e62f 100%)!important;
+  color:#031006!important;
+  border:0!important;
+  border-radius:18px!important;
+  min-height:62px!important;
+  font-weight:900!important;
+  box-shadow:0 0 34px rgba(120,255,70,.46),0 14px 32px rgba(0,0,0,.38)!important;
+}
+a{
+  color:#8fff59!important;
+}
+</style>
+
 </head>
 
 <body>
@@ -969,9 +1065,9 @@
         </div>
 
         <h1 class="login-title">EratGuard <span>Admin Access</span></h1>
-        <div class="login-sub">Yalnızca yetkili yönetici girişi</div>
+        <div class="login-sub">Yetkili yönetici erişim merkezi</div>
 
-        <div class="hidden-badge">🔒 Hidden Admin Portal</div>
+        <div class="hidden-badge">🔒 Secure Admin Portal</div>
 
         {% if error %}
           <div class="error show">{{ error }}</div>
@@ -982,27 +1078,27 @@
         <form class="form" method="POST" action="/ss-admin-access" autocomplete="off">
           <label class="field">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-5 4.5-8 8-8s6.5 3 8 8"/></svg>
-            <input name="username" placeholder="Admin Kullanıcı Adı" required>
+            <input name="username" placeholder="Yönetici Kullanıcı Adı" required>
           </label>
 
           <label class="field">
             <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-            <input name="password" type="password" placeholder="Özel Şifre" required>
+            <input name="password" type="password" placeholder="Yönetici Şifresi" required>
           </label>
 
           <label class="field">
             <svg viewBox="0 0 24 24"><path d="M12 3 20 7v5c0 5-3 8-8 10-5-2-8-5-8-10V7l8-4Z"/><path d="m8 12 3 3 6-7"/></svg>
-            <input name="admin_code" placeholder="2FA / Güvenlik Kodu" inputmode="numeric">
+            <input name="admin_code" placeholder="2FA Güvenlik Kodu" inputmode="numeric">
             <span class="right">30</span>
           </label>
 
           <button class="login-btn" type="submit">
-            <span>🔒 Güvenli Giriş</span>
+            <span>🔒 Admin Paneline Giriş</span>
             <span>→</span>
           </button>
         
         <div style="margin-top:14px;text-align:center;">
-          <a href="/admin/forgot-mail-diagnostic" style="color:#8cff5a;text-decoration:none;font-weight:800;">Admin şifremi unuttum</a>
+          <a href="/admin/forgot-mail-diagnostic" style="color:#8cff5a;text-decoration:none;font-weight:800;">Yönetici şifremi unuttum</a>
           <span style="opacity:.45;margin:0 8px;">|</span>
           <a href="/forgot-password" style="color:#8cff5a;text-decoration:none;">Kullanıcı şifremi unuttum</a>
         </div>
@@ -1056,6 +1152,36 @@
     tick();
     setInterval(tick, 1000);
   </script>
+
+<script id="eratguard-premium-login-live-text-6g">
+document.addEventListener("DOMContentLoaded", function(){
+  document.title = "EratGuard PRO Admin Control Center";
+  const pairs = [
+    ["EratGuard Admin Access","EratGuard PRO"],
+    ["Yalnızca yetkili yönetici girişi","Admin Control Center"],
+    ["Hidden Admin Portal","Yetkili Yönetici Erişimi"],
+    ["Admin Kullanıcı Adı","Yönetici Kullanıcı Adı"],
+    ["Özel Şifre","Yönetici Şifresi"],
+    ["2FA / Güvenlik Kodu","2FA Güvenlik Kodu"],
+    ["Standart kullanıcılar bu ekranı göremez","Yetkisiz erişimler kayıt altına alınır"],
+    ["Admin şifremi unuttum","Yönetici şifremi unuttum"]
+  ];
+  document.querySelectorAll("body *").forEach(function(el){
+    if(el.children.length) return;
+    let t = el.textContent || "";
+    pairs.forEach(function(pair){
+      if(t.includes(pair[0])) el.textContent = t.replace(pair[0], pair[1]);
+    });
+  });
+  document.querySelectorAll("input").forEach(function(inp){
+    let ph = inp.placeholder || "";
+    if(ph.includes("Admin Kullanıcı Adı")) inp.placeholder = "Yönetici Kullanıcı Adı";
+    if(ph.includes("Özel Şifre")) inp.placeholder = "Yönetici Şifresi";
+    if(ph.includes("2FA")) inp.placeholder = "2FA Güvenlik Kodu";
+  });
+});
+</script>
+
 </body>
 </html>
 <style id="admin-login-mobile-compact-final">
