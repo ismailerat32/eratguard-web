@@ -12601,3 +12601,35 @@ try:
 except Exception as _eg6j_debug_err:
     print("ERATGUARD STAGE6J SAFE DEBUG BOOT ERROR:", _eg6j_debug_err)
 # ===== ERATGUARD STAGE6J SAFE ADMIN AUTH DEBUG END =====
+
+# ===== ERATGUARD STAGE6J SAFE ADMIN AUTH DEBUG START =====
+try:
+    from flask import jsonify as _eg6j_jsonify
+    import os as _eg6j_os
+
+    @app.route("/__eg_admin_auth_debug_6j")
+    def _eg6j_admin_auth_debug():
+        def _present(name):
+            return bool(str(_eg6j_os.environ.get(name, "")).strip())
+
+        env_usernames = [
+            _eg6j_os.environ.get("ERATGUARD_ADMIN_USERNAME", ""),
+            _eg6j_os.environ.get("ADMIN_USERNAME", ""),
+            "admin",
+        ]
+        env_usernames_clean = [str(x).strip().lower() for x in env_usernames if str(x).strip()]
+
+        return _eg6j_jsonify({
+            "auth_fix_active": True,
+            "entrypoint": "dashboard_web.py",
+            "expected_custom_username": "eg_admin_tgwaxziy08",
+            "custom_username_in_env_list": "eg_admin_tgwaxziy08" in env_usernames_clean,
+            "has_ERATGUARD_ADMIN_USERNAME": _present("ERATGUARD_ADMIN_USERNAME"),
+            "has_ADMIN_USERNAME": _present("ADMIN_USERNAME"),
+            "has_ERATGUARD_ADMIN_PASSWORD": _present("ERATGUARD_ADMIN_PASSWORD"),
+            "has_ADMIN_PASSWORD": _present("ADMIN_PASSWORD"),
+            "username_count": len(env_usernames_clean)
+        })
+except Exception as _eg6j_debug_err:
+    print("ERATGUARD STAGE6J SAFE DEBUG BOOT ERROR:", _eg6j_debug_err)
+# ===== ERATGUARD STAGE6J SAFE ADMIN AUTH DEBUG END =====
