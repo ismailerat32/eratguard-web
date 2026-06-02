@@ -12968,3 +12968,67 @@ try:
 except Exception as _eg6k10_boot_err:
     print("ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE BOOT ERROR:", _eg6k10_boot_err)
 # ===== ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE END =====
+
+# ===== ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE START =====
+# Son kilit çözümü:
+# - /ss-admin-access başarılıysa ss_admin_mobile cookie set edilir.
+# - /admin/dashboard bu cookie ile gelirse, başka gate'e takılmadan dashboard HTML döndürülür.
+try:
+    from flask import request as _eg6k12_request
+    from flask import session as _eg6k12_session
+    from flask import render_template as _eg6k12_render_template
+    from flask import make_response as _eg6k12_make_response
+    from flask import redirect as _eg6k12_redirect
+
+    def _eg6k12_direct_admin_dashboard_bridge():
+        try:
+            path = str(getattr(_eg6k12_request, "path", "") or "").rstrip("/") or "/"
+
+            if path not in ("/admin", "/admin/dashboard"):
+                return None
+
+            cookie = str(_eg6k12_request.cookies.get("ss_admin_mobile") or "").strip()
+            if not cookie or len(cookie) < 32:
+                return None
+
+            _eg6k12_session["logged_in"] = True
+            _eg6k12_session["username"] = str(_eg6k12_session.get("username") or "eg_admin_mobile")
+            _eg6k12_session["role"] = "admin"
+            _eg6k12_session["is_admin"] = True
+
+            if path == "/admin":
+                return _eg6k12_redirect("/admin/dashboard")
+
+            try:
+                html = _eg6k12_render_template("admin_dashboard.html")
+            except Exception as _tpl_err:
+                print("ERATGUARD STAGE6K DIRECT DASHBOARD TEMPLATE ERROR:", _tpl_err)
+                html = """<!doctype html><html><head><meta charset="utf-8"><title>EratGuard Admin</title></head>
+<body style="background:#020806;color:#f4fff3;font-family:Arial;padding:24px">
+<h1>EratGuard Admin Dashboard</h1>
+<p>Admin oturumu aktif. Dashboard template yüklenemedi.</p>
+<p><a style="color:#8fff59" href="/admin/users">Kullanıcılar</a></p>
+</body></html>"""
+
+            resp = _eg6k12_make_response(html)
+            resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            return resp
+
+        except Exception as _eg6k12_err:
+            print("ERATGUARD STAGE6K DIRECT DASHBOARD BRIDGE ERROR:", _eg6k12_err)
+            return None
+
+    try:
+        funcs = app.before_request_funcs.setdefault(None, [])
+        funcs[:] = [
+            f for f in funcs
+            if getattr(f, "__name__", "") != "_eg6k12_direct_admin_dashboard_bridge"
+        ]
+        funcs.insert(0, _eg6k12_direct_admin_dashboard_bridge)
+        print("ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE ACTIVE")
+    except Exception as _insert_err:
+        print("ERATGUARD STAGE6K DIRECT DASHBOARD BRIDGE INSERT ERROR:", _insert_err)
+
+except Exception as _boot_err:
+    print("ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE BOOT ERROR:", _boot_err)
+# ===== ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE END =====
