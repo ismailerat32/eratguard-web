@@ -12633,3 +12633,229 @@ try:
 except Exception as _eg6j_debug_err:
     print("ERATGUARD STAGE6J SAFE DEBUG BOOT ERROR:", _eg6j_debug_err)
 # ===== ERATGUARD STAGE6J SAFE ADMIN AUTH DEBUG END =====
+
+# ===== ERATGUARD STAGE6K FORCE SLIM ADMIN UI INJECT START =====
+try:
+    from flask import request as _eg6k_request
+    from flask import make_response as _eg6k_make_response
+
+    _EG6K_SLIM_ADMIN_CSS = r'''
+<style id="eratguard-admin-command-tree-slim-6k-force">
+@media (max-width:760px){
+  html,body{overflow-x:hidden!important}
+  body{font-size:14px!important;padding-bottom:92px!important}
+
+  main,
+  .eg-admin-shell,
+  .eg-command-shell,
+  .admin-shell,
+  .dashboard-shell{
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
+
+  section,
+  .hero,
+  .eg-hero,
+  .command-hero,
+  .admin-hero{
+    margin-bottom:14px!important;
+  }
+
+  .card,
+  .panel,
+  .eg-card,
+  .tree-card,
+  .stat-card,
+  .detail-card,
+  .command-card,
+  .admin-card,
+  [class*="card"],
+  [class*="panel"]{
+    border-radius:22px!important;
+    padding:16px!important;
+    margin-bottom:14px!important;
+    min-height:auto!important;
+  }
+
+  h1,
+  .title,
+  .hero-title,
+  .command-title{
+    font-size:38px!important;
+    line-height:1.02!important;
+    letter-spacing:-.045em!important;
+    margin-bottom:10px!important;
+  }
+
+  h2,
+  .section-title,
+  .tree-title{
+    font-size:28px!important;
+    line-height:1.08!important;
+  }
+
+  h3,
+  .card-title,
+  .node-title{
+    font-size:21px!important;
+    line-height:1.12!important;
+  }
+
+  p,
+  .subtitle,
+  .muted,
+  .desc,
+  .card-desc{
+    font-size:15px!important;
+    line-height:1.38!important;
+  }
+
+  .badge,
+  .chip,
+  .pill{
+    padding:7px 11px!important;
+    font-size:12px!important;
+    border-radius:999px!important;
+    margin:4px 0!important;
+  }
+
+  .stat-card,
+  .metric-card{
+    padding:16px!important;
+    min-height:130px!important;
+  }
+
+  .stat-card .value,
+  .metric-value,
+  .big-number{
+    font-size:38px!important;
+    line-height:1!important;
+  }
+
+  .node,
+  .tree-node,
+  .user-row,
+  .license-row,
+  .payment-row{
+    padding:12px!important;
+    border-radius:18px!important;
+    min-height:auto!important;
+  }
+
+  .node-icon,
+  .card-icon,
+  .user-avatar,
+  .avatar{
+    width:52px!important;
+    height:52px!important;
+    min-width:52px!important;
+    border-radius:17px!important;
+    font-size:27px!important;
+  }
+
+  .detail-panel,
+  .selected-detail,
+  .detail-card{
+    padding:16px!important;
+  }
+
+  .detail-grid,
+  .action-grid{
+    gap:10px!important;
+  }
+
+  .action-card,
+  .quick-action,
+  .module-card{
+    padding:14px!important;
+    border-radius:18px!important;
+    min-height:105px!important;
+  }
+
+  .bottom-nav,
+  .tabbar,
+  .mobile-nav,
+  .admin-bottom-nav{
+    left:12px!important;
+    right:12px!important;
+    bottom:10px!important;
+    height:68px!important;
+    border-radius:22px!important;
+    overflow:hidden!important;
+  }
+
+  .bottom-nav a,
+  .tabbar a,
+  .mobile-nav a,
+  .admin-bottom-nav a,
+  .nav-item{
+    min-height:68px!important;
+    padding:7px 5px!important;
+    font-size:13px!important;
+  }
+
+  .search,
+  .search-box,
+  input[type="search"]{
+    height:52px!important;
+    border-radius:18px!important;
+    font-size:16px!important;
+    padding:0 16px!important;
+  }
+
+  .admin-header,
+  .topbar,
+  .header{
+    min-height:72px!important;
+    padding:12px 16px!important;
+  }
+
+  .logout,
+  .logout-btn,
+  .btn-logout{
+    min-height:50px!important;
+    padding:10px 18px!important;
+    border-radius:17px!important;
+    font-size:17px!important;
+  }
+}
+</style>
+'''
+
+    @app.after_request
+    def _eg6k_force_slim_admin_ui(resp):
+        try:
+            path = str(getattr(_eg6k_request, "path", "") or "")
+            ctype = str(resp.headers.get("Content-Type", "") or "")
+
+            if path not in ("/admin", "/admin/", "/admin/dashboard"):
+                return resp
+
+            if "text/html" not in ctype.lower():
+                return resp
+
+            body = resp.get_data(as_text=True)
+
+            if "eratguard-admin-command-tree-slim-6k-force" in body:
+                return resp
+
+            if "</head>" in body:
+                body = body.replace("</head>", _EG6K_SLIM_ADMIN_CSS + "\n</head>", 1)
+            elif "</body>" in body:
+                body = body.replace("</body>", _EG6K_SLIM_ADMIN_CSS + "\n</body>", 1)
+            else:
+                body += _EG6K_SLIM_ADMIN_CSS
+
+            resp.set_data(body)
+            resp.headers["Content-Length"] = str(len(resp.get_data()))
+            resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            return resp
+        except Exception as _eg6k_err:
+            print("ERATGUARD STAGE6K FORCE SLIM INJECT ERROR:", _eg6k_err)
+            return resp
+
+    print("ERATGUARD STAGE6K FORCE SLIM ADMIN UI INJECT ACTIVE")
+except Exception as _eg6k_boot_err:
+    print("ERATGUARD STAGE6K FORCE SLIM ADMIN UI INJECT BOOT ERROR:", _eg6k_boot_err)
+# ===== ERATGUARD STAGE6K FORCE SLIM ADMIN UI INJECT END =====
