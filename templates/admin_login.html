@@ -3,20 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>EratGuard PRO — Admin Control Center</title>
+<title>EratGuard PRO — Admin Access</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#010805;
-  --rd:#8FFF59;--rd2:rgba(143,255,89,.15);
-  --or:#55E52F;
-  --ac:#00E896;
-  --pu:#7CFF63;
-  --gr:#8FFF59;
-  --tx:#F4FFF3;--tm:#8BBE7A;--td:#2A4B25;
-  --s1:#031006;--b1:#092010;--b2:#14351A;
+  --bg:#03060C;
+  --rd:#FF3A65;--rd2:rgba(255,58,101,.15);
+  --or:#FF9020;
+  --ac:#00C8F0;
+  --pu:#9B6DFF;
+  --gr:#00E896;
+  --tx:#FFE8EE;--tm:#8A5060;--td:#3A1828;
+  --s1:#0A0610;--b1:#1A0A14;--b2:#2A1020;
 }
 html,body{height:100%;overflow:hidden}
 body{
@@ -33,7 +33,7 @@ body{
 /* Hexagon grid */
 .bg-hex{
   position:absolute;inset:0;opacity:.4;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52' viewBox='0 0 60 52'%3E%3Cpolygon points='30,2 58,17 58,35 30,50 2,35 2,17' fill='none' stroke='rgba(143,255,89,0.08)' stroke-width='1'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52' viewBox='0 0 60 52'%3E%3Cpolygon points='30,2 58,17 58,35 30,50 2,35 2,17' fill='none' stroke='rgba(255,58,101,0.08)' stroke-width='1'/%3E%3C/svg%3E");
   background-size:60px 52px;
   mask-image:radial-gradient(ellipse 90% 90% at 50% 50%,black 20%,transparent 100%);
 }
@@ -42,20 +42,20 @@ body{
 .bg-orb-main{
   position:absolute;top:-30%;left:50%;transform:translateX(-50%);
   width:900px;height:600px;
-  background:radial-gradient(ellipse,rgba(143,255,89,.08) 0%,transparent 65%);
+  background:radial-gradient(ellipse,rgba(255,58,101,.08) 0%,transparent 65%);
   animation:orbMain 6s ease-in-out infinite;
 }
 /* Side orbs */
 .bg-orb-left{
   position:absolute;top:20%;left:-15%;
   width:500px;height:500px;
-  background:radial-gradient(ellipse,rgba(124,255,99,.07) 0%,transparent 65%);
+  background:radial-gradient(ellipse,rgba(155,109,255,.07) 0%,transparent 65%);
   animation:orbSide 9s ease-in-out infinite;
 }
 .bg-orb-right{
   position:absolute;bottom:-10%;right:-10%;
   width:450px;height:450px;
-  background:radial-gradient(ellipse,rgba(85,229,47,.06) 0%,transparent 65%);
+  background:radial-gradient(ellipse,rgba(255,144,32,.06) 0%,transparent 65%);
   animation:orbSide 11s ease-in-out infinite reverse;
 }
 /* Vignette */
@@ -96,14 +96,14 @@ body{
 /* ── CARD ── */
 .card{
   background:linear-gradient(160deg,rgba(10,6,16,.97),rgba(3,6,12,.99));
-  border:1px solid rgba(143,255,89,.2);
+  border:1px solid rgba(255,58,101,.2);
   border-radius:24px;padding:40px 36px;
   position:relative;overflow:hidden;
   box-shadow:
-    0 0 0 1px rgba(143,255,89,.05),
+    0 0 0 1px rgba(255,58,101,.05),
     0 32px 80px rgba(3,6,12,.9),
-    0 0 80px rgba(143,255,89,.06),
-    inset 0 1px 0 rgba(143,255,89,.1);
+    0 0 80px rgba(255,58,101,.06),
+    inset 0 1px 0 rgba(255,58,101,.1);
   animation:cardIn .6s cubic-bezier(.34,1.56,.64,1) both;
 }
 @keyframes cardIn{from{opacity:0;transform:translateY(28px) scale(.96)}to{opacity:1;transform:none}}
@@ -118,10 +118,10 @@ body{
 
 /* Corner brackets */
 .c-tl,.c-tr,.c-bl,.c-br{position:absolute;width:16px;height:16px}
-.c-tl{top:14px;left:14px;border-top:1.5px solid rgba(143,255,89,.5);border-left:1.5px solid rgba(143,255,89,.5)}
-.c-tr{top:14px;right:14px;border-top:1.5px solid rgba(143,255,89,.5);border-right:1.5px solid rgba(143,255,89,.5)}
-.c-bl{bottom:14px;left:14px;border-bottom:1.5px solid rgba(143,255,89,.5);border-left:1.5px solid rgba(143,255,89,.5)}
-.c-br{bottom:14px;right:14px;border-bottom:1.5px solid rgba(143,255,89,.5);border-right:1.5px solid rgba(143,255,89,.5)}
+.c-tl{top:14px;left:14px;border-top:1.5px solid rgba(255,58,101,.5);border-left:1.5px solid rgba(255,58,101,.5)}
+.c-tr{top:14px;right:14px;border-top:1.5px solid rgba(255,58,101,.5);border-right:1.5px solid rgba(255,58,101,.5)}
+.c-bl{bottom:14px;left:14px;border-bottom:1.5px solid rgba(255,58,101,.5);border-left:1.5px solid rgba(255,58,101,.5)}
+.c-br{bottom:14px;right:14px;border-bottom:1.5px solid rgba(255,58,101,.5);border-right:1.5px solid rgba(255,58,101,.5)}
 
 /* ── SHIELD ICON ── */
 .shield-wrap{
@@ -131,39 +131,39 @@ body{
 }
 .shield{
   width:72px;height:72px;border-radius:20px;
-  background:linear-gradient(135deg,rgba(143,255,89,.2),rgba(124,255,99,.15));
-  border:1px solid rgba(143,255,89,.4);
+  background:linear-gradient(135deg,rgba(255,58,101,.2),rgba(155,109,255,.15));
+  border:1px solid rgba(255,58,101,.4);
   display:flex;align-items:center;justify-content:center;
   margin-bottom:16px;position:relative;
   box-shadow:
-    0 0 0 1px rgba(143,255,89,.15),
-    0 0 30px rgba(143,255,89,.25),
-    0 0 60px rgba(143,255,89,.08),
+    0 0 0 1px rgba(255,58,101,.15),
+    0 0 30px rgba(255,58,101,.25),
+    0 0 60px rgba(255,58,101,.08),
     0 8px 32px rgba(0,0,0,.6);
   animation:shieldPulse 3s ease-in-out infinite;
 }
 .shield-inner{
   font-size:32px;line-height:1;
-  filter:drop-shadow(0 0 8px rgba(143,255,89,.8));
+  filter:drop-shadow(0 0 8px rgba(255,58,101,.8));
 }
 /* Ring around shield */
 .shield::before{
   content:'';position:absolute;inset:-8px;border-radius:28px;
-  border:1px solid rgba(143,255,89,.15);
+  border:1px solid rgba(255,58,101,.15);
   animation:ringPulse 2s ease-in-out infinite;
 }
 .shield::after{
   content:'';position:absolute;inset:-16px;border-radius:34px;
-  border:1px solid rgba(143,255,89,.07);
+  border:1px solid rgba(255,58,101,.07);
   animation:ringPulse 2s .5s ease-in-out infinite;
 }
-@keyframes shieldPulse{0%,100%{box-shadow:0 0 0 1px rgba(143,255,89,.15),0 0 30px rgba(143,255,89,.25),0 0 60px rgba(143,255,89,.08),0 8px 32px rgba(0,0,0,.6)}50%{box-shadow:0 0 0 1px rgba(143,255,89,.3),0 0 40px rgba(143,255,89,.4),0 0 80px rgba(143,255,89,.15),0 8px 32px rgba(0,0,0,.6)}}
+@keyframes shieldPulse{0%,100%{box-shadow:0 0 0 1px rgba(255,58,101,.15),0 0 30px rgba(255,58,101,.25),0 0 60px rgba(255,58,101,.08),0 8px 32px rgba(0,0,0,.6)}50%{box-shadow:0 0 0 1px rgba(255,58,101,.3),0 0 40px rgba(255,58,101,.4),0 0 80px rgba(255,58,101,.15),0 8px 32px rgba(0,0,0,.6)}}
 @keyframes ringPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.05)}}
 
 .shield-title{
   font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
   letter-spacing:-.01em;margin-bottom:4px;
-  background:linear-gradient(135deg,#FFE8EE,rgba(143,255,89,.9));
+  background:linear-gradient(135deg,#FFE8EE,rgba(255,58,101,.9));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
 }
 .shield-sub{
@@ -174,8 +174,8 @@ body{
 
 /* ── WARNING BANNER ── */
 .warn-banner{
-  background:rgba(143,255,89,.08);
-  border:1px solid rgba(143,255,89,.25);
+  background:rgba(255,58,101,.08);
+  border:1px solid rgba(255,58,101,.25);
   border-radius:10px;padding:10px 14px;
   display:flex;align-items:center;gap:10px;
   margin-bottom:24px;
@@ -210,9 +210,9 @@ body{
 }
 .field-input::placeholder{color:var(--td)}
 .field-input:focus{
-  border-color:rgba(143,255,89,.5);
-  background:rgba(143,255,89,.04);
-  box-shadow:0 0 0 3px rgba(143,255,89,.08),0 0 20px rgba(143,255,89,.06);
+  border-color:rgba(255,58,101,.5);
+  background:rgba(255,58,101,.04);
+  box-shadow:0 0 0 3px rgba(255,58,101,.08),0 0 20px rgba(255,58,101,.06);
 }
 .field-input:focus + .field-icon{color:var(--rd)}
 .eye-btn{
@@ -231,7 +231,7 @@ body{
   font-family:'Syne',sans-serif;letter-spacing:.04em;
   cursor:pointer;position:relative;overflow:hidden;
   transition:all .2s;
-  box-shadow:0 4px 24px rgba(143,255,89,.35);
+  box-shadow:0 4px 24px rgba(255,58,101,.35);
   margin-top:4px;margin-bottom:0;
 }
 .login-btn::before{
@@ -239,7 +239,7 @@ body{
   background:linear-gradient(135deg,rgba(255,255,255,.1),transparent);
   opacity:0;transition:opacity .2s;
 }
-.login-btn:hover{transform:translateY(-1px);box-shadow:0 8px 36px rgba(143,255,89,.5)}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 8px 36px rgba(255,58,101,.5)}
 .login-btn:hover::before{opacity:1}
 .login-btn:active{transform:translateY(0)}
 .login-btn::after{
@@ -258,7 +258,7 @@ body{
   animation:fadeUp .5s .4s cubic-bezier(.4,0,.2,1) both;
 }
 .back-link:hover{color:rgba(255,232,238,.5)}
-.back-link span{color:rgba(143,255,89,.6)}
+.back-link span{color:rgba(255,58,101,.6)}
 
 /* ── FOOTER ── */
 .card-foot{
@@ -318,7 +318,7 @@ body{
   <div class="bg-pts" id="bg-pts"></div>
 </div>
 
-<div class="ver-tag">ERATGUARD ADMIN · v1.0.0</div>
+<div class="ver-tag">ADMIN · v1.0.0-beta</div>
 
 <div class="wrap">
   <div class="card">
@@ -334,25 +334,17 @@ body{
       <div class="shield">
         <div class="shield-inner">🛡️</div>
       </div>
-      <div class="shield-title">EratGuard PRO</div>
-      <div class="shield-sub">Admin Control Center · Yetkili Yönetici Erişimi</div>
+      <div class="shield-title">Admin Access</div>
+      <div class="shield-sub">EratGuard PRO · Yönetici Girişi</div>
     </div>
 
     <!-- WARNING BANNER -->
     <div class="warn-banner">
       <span class="warn-icon">⚠</span>
       <div class="warn-text">
-        <strong>Yetkili Yönetici Erişimi.</strong> Bu alan yalnızca yetkili yöneticiler içindir. Tüm giriş denemeleri kayıt altına alınır.
+        <strong>Yetkisiz erişim yasaktır.</strong> Bu alan yalnızca yetkili yöneticiler içindir. Tüm giriş denemeleri loglanır.
       </div>
     </div>
-
-
-    {% if error %}
-    <div class="warn-banner" style="margin-top:-10px;background:rgba(143,255,89,.06);">
-      <span class="warn-icon">ⓘ</span>
-      <div class="warn-text"><strong>Giriş uyarısı:</strong> {{ error }}</div>
-    </div>
-    {% endif %}
 
     <!-- FORM -->
     <div class="form">
@@ -360,13 +352,13 @@ body{
         <!-- {{ form.hidden_tag() if form else '' }} -->
 
         <div class="field">
-          <label class="field-label">Yönetici Kullanıcı Adı</label>
+          <label class="field-label">Yönetici Adı</label>
           <div class="field-wrap">
             <input
               class="field-input"
               type="text"
               name="username"
-              placeholder="Yönetici Kullanıcı Adı"
+              placeholder="admin"
               autocomplete="username"
               required
               id="un-input"
@@ -392,23 +384,6 @@ body{
           </div>
         </div>
 
-
-        <div class="field">
-          <label class="field-label">2FA Güvenlik Kodu</label>
-          <div class="field-wrap">
-            <input
-              class="field-input"
-              type="text"
-              name="admin_code"
-              placeholder="2FA güvenlik kodu"
-              inputmode="numeric"
-              autocomplete="one-time-code"
-              id="code-input"
-            >
-            <span class="field-icon">◇</span>
-          </div>
-        </div>
-
         <button type="submit" class="login-btn" id="login-btn">
           🔐 Güvenli Giriş
         </button>
@@ -423,12 +398,12 @@ body{
     <div class="card-foot">
       <div class="foot-status">
         <span class="status-dot"></span>
-        <span class="foot-txt">YETKİLİ ERİŞİM · GÜVENLİ KANAL</span>
+        <span class="foot-txt">SINIRLI ERİŞİM · GÜVENLİ KANAL</span>
       </div>
       <div class="foot-badges">
-        <div class="fbadge"><span class="fbadge-dot" style="background:var(--rd)"></span>Koruma Aktif</div>
-        <div class="fbadge"><span class="fbadge-dot" style="background:var(--or)"></span>Kayıt Altında</div>
-        <div class="fbadge"><span class="fbadge-dot" style="background:var(--pu)"></span>CSRF Koruması</div>
+        <div class="fbadge"><span class="fbadge-dot" style="background:var(--rd)"></span>Rate Limited</div>
+        <div class="fbadge"><span class="fbadge-dot" style="background:var(--or)"></span>Loglanıyor</div>
+        <div class="fbadge"><span class="fbadge-dot" style="background:var(--pu)"></span>CSRF Korumalı</div>
       </div>
     </div>
 
@@ -450,7 +425,7 @@ document.getElementById("admin-form").addEventListener("submit",function(){
   var fill=document.getElementById("attempt-fill");
   if(fill)fill.style.width=(attempts/5*100)+"%";
   var btn=document.getElementById("login-btn");
-  if(btn){btn.textContent="Güvenli bağlantı doğrulanıyor...";btn.style.opacity=".8";}
+  if(btn){btn.textContent="Doğrulanıyor...";btn.style.opacity=".8";}
 });
 
 // Field icon focus sync
@@ -468,7 +443,7 @@ document.querySelectorAll(".field-input").forEach(function(inp){
 // Particles
 (function(){
   var wrap=document.getElementById("bg-pts");
-  var colors=["#8FFF59","#7CFF63","#55E52F","rgba(143,255,89,.5)"];
+  var colors=["#FF3A65","#9B6DFF","#FF9020","rgba(255,58,101,.5)"];
   for(var i=0;i<24;i++){
     var d=document.createElement("div");
     d.className="pt";
