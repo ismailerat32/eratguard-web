@@ -3324,7 +3324,7 @@ def ss_live_admin_dashboard():
     ):
         return redirect("/ss-admin-access")
     try:
-        return render_template("admin_dashboard.html")
+        return render_template("admin_dashboard.html", admin_stats=_eg_default_admin_stats(), users=load_users(), recent_logins=_eg_recent_audit_logs(5), recent_actions=_eg_recent_audit_logs(5))
     except Exception as e:
         return f"<h2>EratGuard ADMIN</h2><p>Dashboard yüklenemedi: {e}</p>", 500
 
