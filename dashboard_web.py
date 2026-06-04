@@ -13000,7 +13000,7 @@ try:
                 return _eg6k12_redirect("/admin/dashboard")
 
             try:
-                html = _eg6k12_render_template("admin_dashboard.html")
+                html = _eg6k12_render_template("admin_dashboard.html", admin_stats=_eg_default_admin_stats(), users=load_users(), recent_logins=_eg_recent_audit_logs(5), recent_actions=_eg_recent_audit_logs(5))
             except Exception as _tpl_err:
                 print("ERATGUARD STAGE6K DIRECT DASHBOARD TEMPLATE ERROR:", _tpl_err)
                 html = """<!doctype html><html><head><meta charset="utf-8"><title>EratGuard Admin</title></head>
