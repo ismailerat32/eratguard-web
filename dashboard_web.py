@@ -28211,3 +28211,234 @@ try:
 except Exception as _eg_f12p_v9_e:
     print("ERATGUARD FAN-12P V9 TAP TOGGLE FIX ERROR:", _eg_f12p_v9_e)
 # ===== ERATGUARD FAN-12P V9 TAP TOGGLE FIX END =====
+
+# ===== ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX START =====
+# Ekrandaki MENÜ metni vardı ama gerçek button bulunmadı.
+# V10 görünmez katman kullanmaz; gerçek, görünen, tıklanabilir MENÜ butonu ekler.
+
+try:
+    from flask import request as _eg_f12p_v10_request
+
+    def _eg_fan12p_v10_real_button_response(response):
+        try:
+            path = (_eg_f12p_v10_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "FAN-12P" not in html or "eg-user-fan3-panel" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX" not in html:
+                inject = """
+<style id="eg-fan12p-v10-real-menu-button-css">
+/* ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX */
+
+/* Gerçek tıklanabilir MENÜ butonu */
+#eg-fan12p-real-menu-btn{
+  position:fixed!important;
+  right:18px!important;
+  top:50%!important;
+  width:94px!important;
+  height:94px!important;
+  border-radius:999px!important;
+  border:1px solid rgba(86,169,255,.85)!important;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(132,205,255,.95), rgba(12,83,165,.92) 44%, rgba(3,21,56,.98) 76%)!important;
+  box-shadow:
+    0 0 0 2px rgba(46,255,141,.22),
+    0 0 22px rgba(63,160,255,.75),
+    0 0 34px rgba(35,255,137,.28)!important;
+  color:#fff!important;
+  z-index:2147483000!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:2px!important;
+  cursor:pointer!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent!important;
+  user-select:none!important;
+  padding:0!important;
+}
+
+#eg-fan12p-real-menu-btn .eg-v10-e{
+  width:48px!important;
+  height:48px!important;
+  border-radius:999px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-weight:900!important;
+  font-size:28px!important;
+  color:rgba(210,240,255,.9)!important;
+  border:2px solid rgba(154,219,255,.78)!important;
+  background:rgba(255,255,255,.08)!important;
+  line-height:1!important;
+}
+
+#eg-fan12p-real-menu-btn .eg-v10-label{
+  font-size:11px!important;
+  font-weight:900!important;
+  letter-spacing:.10em!important;
+  color:#eaf6ff!important;
+  line-height:1!important;
+}
+
+/* Açık durumda buton hedef imza görselindeki gibi merkezde */
+body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
+  left:50%!important;
+  top:67%!important;
+  right:auto!important;
+  transform:translate(-50%,-50%)!important;
+  z-index:2147483600!important;
+}
+
+/* Paneli body class ile açıyoruz; root class'a bağlı kalmıyoruz */
+body.eg-fan12p-v10-open .eg-user-fan3-panel{
+  position:fixed!important;
+  left:50%!important;
+  top:67%!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:0!important;
+  height:0!important;
+  min-width:0!important;
+  min-height:0!important;
+  max-width:none!important;
+  max-height:none!important;
+  overflow:visible!important;
+  contain:none!important;
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transform:translate(-50%,-50%)!important;
+  z-index:2147482500!important;
+}
+
+/* Kapalıyken itemlar görünmesin */
+body:not(.eg-fan12p-v10-open) .eg-user-fan3-panel .eg-user-fan3-item{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* Açıkken ortak yaprak ölçüsü */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  width:112px!important;
+  min-width:112px!important;
+  max-width:112px!important;
+  height:52px!important;
+  min-height:52px!important;
+  max-height:52px!important;
+  padding:5px 7px!important;
+  border-radius:21px!important;
+  box-sizing:border-box!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  z-index:2147482600!important;
+  transform-origin:center center!important;
+}
+
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
+  font-size:10px!important;
+  line-height:1.05!important;
+}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
+  font-size:7.2px!important;
+  line-height:1!important;
+}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item em{
+  font-size:10px!important;
+}
+
+/* Papatya koordinatları */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-126px) rotate(90deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(63px,-109px) rotate(60deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(109px,-63px) rotate(30deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(126px,0px) rotate(0deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(109px,63px) rotate(-30deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(63px,109px) rotate(-60deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,126px) rotate(-90deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-63px,109px) rotate(60deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-109px,63px) rotate(30deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-126px,0px) rotate(0deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-109px,-63px) rotate(-30deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-63px,-109px) rotate(-60deg)!important}
+</style>
+
+<script id="eg-fan12p-v10-real-menu-button-js">
+/* ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX */
+(function(){
+  if(window.__EG_FAN12P_V10_REAL_BUTTON_READY__) return;
+  window.__EG_FAN12P_V10_REAL_BUTTON_READY__ = true;
+
+  function makeButton(){
+    var btn = document.getElementById("eg-fan12p-real-menu-btn");
+    if(!btn){
+      btn = document.createElement("button");
+      btn.id = "eg-fan12p-real-menu-btn";
+      btn.type = "button";
+      btn.setAttribute("aria-label", "FAN-12P Menü");
+      btn.innerHTML = '<span class="eg-v10-e">E</span><span class="eg-v10-label">MENÜ</span>';
+      document.body.appendChild(btn);
+    }
+
+    if(!btn.__EG_FAN12P_V10_BOUND__){
+      btn.__EG_FAN12P_V10_BOUND__ = true;
+
+      function toggle(ev){
+        if(ev){
+          ev.preventDefault();
+          ev.stopPropagation();
+          if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+        }
+        document.body.classList.toggle("eg-fan12p-v10-open");
+      }
+
+      btn.addEventListener("click", toggle, true);
+      btn.addEventListener("touchstart", toggle, {capture:true, passive:false});
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", makeButton);
+  setInterval(makeButton, 800);
+})();
+</script>
+"""
+                html = html.replace("</body>", inject + "\n</body>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v10_inner_e:
+            print("ERATGUARD FAN-12P V10 REAL MENU BUTTON INNER ERROR:", _eg_f12p_v10_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v10_real_button_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v10_real_button_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v10_real_button_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX ACTIVE")
+
+except Exception as _eg_f12p_v10_e:
+    print("ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX ERROR:", _eg_f12p_v10_e)
+# ===== ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX END =====
