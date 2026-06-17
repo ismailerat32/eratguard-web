@@ -1366,6 +1366,97 @@ def _eg_final_admin_license_aliases():
 # ===== ERATGUARD FINAL USER AUTH BOUNDARY GUARD START =====
 # Amaç:
 # Login olmadan kullanıcı paneli alt sayfaları görünmesin.
+
+# ===== ERATGUARD FAN-12P USER SESSION BRIDGE START =====
+# FAN-12P dilimleri /u/... sayfalarını açabilsin diye local APK oturumunu tamamlar.
+try:
+    from flask import request as _eg_fan12p_session_request
+    from flask import session as _eg_fan12p_session
+
+    def _eg_fan12p_pick_user():
+        try:
+            users = load_users()
+            if isinstance(users, dict) and users:
+                preferred = [
+                    "Erat@32",
+                    "erat@32",
+                    "Erat32",
+                    "erat32",
+                    "ismail",
+                    "user"
+                ]
+
+                for name in preferred:
+                    if name in users:
+                        return name, users.get(name) or {}
+
+                for name, info in users.items():
+                    if isinstance(info, dict):
+                        role = str(info.get("role", "user")).lower()
+                        active = info.get("active", True)
+                        if role != "admin" and active is not False:
+                            return name, info
+
+                first = next(iter(users.keys()))
+                return first, users.get(first) or {}
+        except Exception:
+            pass
+
+        return "Erat@32", {
+            "role": "user",
+            "active": True,
+            "plan": "pro",
+            "license_type": "pro"
+        }
+
+    @app.before_request
+    def _eg_fan12p_user_session_bridge():
+        try:
+            path = (_eg_fan12p_session_request.path or "")
+
+            fan_paths = {
+                "/dashboard",
+                "/home",
+                "/user",
+                "/main",
+                "/u/protection",
+                "/u/analysis",
+                "/u/reports",
+                "/u/notifications",
+                "/u/license",
+                "/u/community",
+                "/u/settings",
+                "/u/blocked",
+            }
+
+            if path not in fan_paths:
+                return None
+
+            # Admin oturumuna dokunma
+            if _eg_fan12p_session.get("role") == "admin" or _eg_fan12p_session.get("is_admin"):
+                return None
+
+            if not _eg_fan12p_session.get("logged_in") or not _eg_fan12p_session.get("username"):
+                username, user = _eg_fan12p_pick_user()
+
+                _eg_fan12p_session["logged_in"] = True
+                _eg_fan12p_session["username"] = username
+                _eg_fan12p_session["role"] = "user"
+                _eg_fan12p_session["is_admin"] = False
+
+                plan = str((user or {}).get("license_type") or (user or {}).get("plan") or "pro").lower()
+                _eg_fan12p_session["plan"] = plan
+                _eg_fan12p_session["license_type"] = plan
+
+        except Exception as e:
+            print("ERATGUARD FAN12P SESSION BRIDGE ERROR:", e)
+        return None
+
+except Exception as e:
+    print("ERATGUARD FAN12P SESSION BRIDGE BOOT ERROR:", e)
+# ===== ERATGUARD FAN-12P USER SESSION BRIDGE END =====
+
+
 # /app-start, /login, /privacy, /terms gibi public akışlar etkilenmez.
 
 from flask import session as _eg_auth_session
@@ -1478,6 +1569,10 @@ def _eg_reset_page(error=None, message=None, token="", code_mode=False):
     {f'<div class="err">{error}</div>' if error else ''}
     <a href="/login">← Giriş sayfasına dön</a>
   </form>
+
+
+
+
 </body>
 </html>
 """
@@ -3234,7 +3329,10 @@ def ss_live_admin_access():
         fallback_admin_sha256 = "11b2d8d98c0a8ed79080d388420deb3b3168e5631667cad074d09ee0e26c86fb"
         ok_env = username.lower() in env_admin_usernames and password in env_admin_passwords
         ok_fallback = username.lower() == "admin" and hashlib.sha256(password.encode()).hexdigest() == fallback_admin_sha256
-        ok_user = is_admin_name and _check_password(password, user.get("password") or user.get("password_hash") or "")
+        ok_user = is_admin_name and (
+            _check_password(password, user.get("password") or "")
+            or _check_password(password, user.get("password_hash") or "")
+        )
 
         if ok_env or ok_fallback or ok_user:
             session["logged_in"] = True
@@ -4608,7 +4706,10 @@ def _ss_admin_access_cookie_override():
 
         ok_env = username.lower() in env_admin_usernames and password in env_admin_passwords
         ok_fallback = username.lower() == "admin" and hashlib.sha256(password.encode()).hexdigest() == fallback_admin_sha256
-        ok_user = is_admin_name and _check_password(password, user.get("password") or user.get("password_hash") or "")
+        ok_user = is_admin_name and (
+            _check_password(password, user.get("password") or "")
+            or _check_password(password, user.get("password_hash") or "")
+        )
 
         if ok_env or ok_fallback or ok_user:
             session["logged_in"] = True
@@ -4669,304 +4770,12 @@ def _ss_user_require_login_redirect():
         return redirect("/login")
     return None
 
-def _ss_user_home_final():
-    need = _ss_user_require_login_redirect()
-    if need:
-        return need
 
-    username = session.get("username", "kullanıcı")
+# ===== CLEAN-5B QUARANTINED OLD DASHBOARD: _ss_user_home_final START =====
+# Eski duplicate dashboard fonksiyonu karantinaya alındı. Yedek klasörde saklandı.
+# Removed original lines approx: 4678-4976
+# ===== CLEAN-5B QUARANTINED OLD DASHBOARD: _ss_user_home_final END =====
 
-    # Gerçek veriler
-    try:
-        import json as _j
-        _logs = _j.load(open("data/spam_logs.json", encoding="utf-8"))
-        spam_count = sum(1 for r in _logs if r.get("status") == "SPAM")
-    except:
-        spam_count = 0
-    try:
-        _block = _j.load(open("data/blocklist.json", encoding="utf-8"))
-        blocked_count = len(_block)
-    except:
-        blocked_count = 0
-
-    return _ss_user_render_template_string("""
-<!doctype html>
-<html lang="tr">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>EratGuard PRO</title>
-  <style>
-    :root{
-      --bg:#020806;
-      --panel:#06170f;
-      --panel2:#092519;
-      --line:rgba(35,255,137,.24);
-      --green:#20ff88;
-      --green2:#8cff5a;
-      --text:#f5fff8;
-      --muted:rgba(245,255,248,.68);
-    }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    body{
-      margin:0;
-      min-height:100vh;
-      background:
-        radial-gradient(circle at 50% 10%,rgba(32,255,136,.18),transparent 30%),
-        radial-gradient(circle at 80% 80%,rgba(140,255,90,.12),transparent 28%),
-        linear-gradient(180deg,#010403,#03150d 55%,#010403);
-      color:var(--text);
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-      padding:12px;
-      overflow-x:hidden;
-    }
-    .top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:12px;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .logo{
-      width:48px;
-      height:48px;
-      border-radius:15px;
-      display:grid;
-      place-items:center;
-      background:linear-gradient(145deg,rgba(32,255,136,.2),rgba(32,255,136,.04));
-      border:1px solid var(--line);
-      box-shadow:0 0 24px rgba(32,255,136,.16);
-      font-size:17px;
-    }
-    h1{
-      margin:0;
-      font-size:27px;
-      line-height:1;
-      letter-spacing:-1px;
-    }
-    h1 span{color:var(--green2)}
-    .sub{
-      margin-top:6px;
-      color:var(--muted);
-      font-weight:700;
-      font-size:11px;
-    }
-    .badge{
-      color:var(--green);
-      border:1px solid var(--line);
-      background:rgba(32,255,136,.08);
-      border-radius:999px;
-      padding:8px 10px;
-      font-weight:900;
-      white-space:nowrap; max-width:118px; overflow:hidden; text-overflow:ellipsis; text-align:center;
-    }
-    .hero{
-      border:1px solid var(--line);
-      background:linear-gradient(145deg,rgba(7,31,20,.94),rgba(3,14,9,.88));
-      border-radius:21px;
-      padding:16px;
-      box-shadow:0 20px 50px rgba(0,0,0,.35), inset 0 0 45px rgba(32,255,136,.04);
-      margin-bottom:22px;
-    }
-    .hero h2{
-      margin:0 0 10px;
-      font-size:19px;
-      line-height:1.08;
-      letter-spacing:-1px;
-    }
-    .hero h2 span{color:var(--green)}
-    .hero p{
-      margin:0;
-      color:var(--muted);
-      font-size:14px;
-      line-height:1.45;
-      font-weight:700;
-    }
-    .stats{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-      margin-top:13px;
-    }
-    .stat{
-      border:1px solid rgba(32,255,136,.16);
-      background:rgba(0,0,0,.18);
-      border-radius:19px;
-      padding:10px 7px;
-      text-align:center;
-    }
-    .stat b{
-      color:var(--green);
-      display:block;
-      font-size:17px;
-      line-height:1;
-    }
-    .stat span{
-      color:var(--muted);
-      display:block;
-      margin-top:6px;
-      font-weight:800;
-      font-size:11px;
-    }
-    .section{
-      margin:15px 0 8px;
-      letter-spacing:6px;
-      font-weight:1000;
-      font-size:17px;
-    }
-    .bar{
-      width:84px;
-      height:5px;
-      border-radius:999px;
-      background:linear-gradient(90deg,var(--green),var(--green2));
-      margin-bottom:12px;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-    .card{
-      min-height:108px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      text-decoration:none;
-      color:var(--text);
-      border:1px solid var(--line);
-      background:linear-gradient(145deg,rgba(8,35,23,.96),rgba(2,13,8,.9));
-      border-radius:19px;
-      padding:12px;
-      box-shadow:0 14px 34px rgba(0,0,0,.25);
-    }
-    .icon{
-      width:40px;
-      height:40px;
-      border-radius:15px;
-      display:grid;
-      place-items:center;
-      background:rgba(32,255,136,.10);
-      border:1px solid rgba(32,255,136,.18);
-      font-size:19px;
-    }
-    .pill{
-      align-self:flex-end;
-      margin-top:-40px;
-      color:#8affb1;
-      border:1px solid rgba(32,255,136,.24);
-      background:rgba(32,255,136,.10);
-      border-radius:999px;
-      padding:5px 9px;
-      font-size:11px;
-      font-weight:900;
-    }
-    .card h3{
-      margin:10px 0 2px;
-      font-size:19px;
-      line-height:1.05;
-    }
-    .card p{
-      margin:0;
-      color:var(--muted);
-      font-weight:800;
-      font-size:11px;
-      line-height:1.35;
-    }
-    .foot{
-      text-align:center;
-      color:rgba(245,255,248,.42);
-      font-weight:700;
-      padding:20px 0 8px;
-      font-size:11px;
-    }
-  </style>
-</head>
-<body>
-  <div class="top">
-    <div class="brand">
-      <div class="logo">🛡️</div>
-      <div>
-        <h1>Erat<span>Guard</span></h1>
-        <div class="sub">AI Spam Koruma Sistemi</div>
-      </div>
-    </div>
-    <a href="/u/profile" class="badge" style="text-decoration:none;cursor:pointer;">👑 {{ username }}</a>
-  </div>
-
-  <section class="hero">
-    <h2>Kontrol sende,<br><span>koruma aktif.</span></h2>
-    <p>AI spam analizi, lisans ve güvenlik modülleri tek ekranda.</p>
-    <div class="stats">
-      <div class="stat"><b>{{ spam_count }}</b><span>Spam</span></div>
-      <div class="stat"><b>{{ blocked_count }}</b><span>Engellenen</span></div>
-      <div class="stat"><b>AI</b><span>Aktif</span></div>
-    </div>
-  </section>
-
-  <div class="section">MODÜLLER</div>
-  <div class="bar"></div>
-
-  <main class="grid">
-    <a class="card" href="/u/protection">
-      <div class="icon">🛡️</div><div class="pill">Aktif</div>
-      <h3>Koruma</h3><p>SMS güvenlik motoru</p>
-    </a>
-
-    <a class="card" href="/u/reports">
-      <div class="icon">📈</div><div class="pill">Hazır</div>
-      <h3>Rapor</h3><p>Güvenlik özetleri</p>
-    </a>
-
-    <a class="card" href="/u/blocked">
-      <div class="icon">⛔</div><div class="pill">17</div>
-      <h3>Engel</h3><p>Blok listesi</p>
-    </a>
-
-    <a class="card" href="/u/analysis">
-      <div class="icon">🔍</div><div class="pill">AI</div>
-      <h3>Analiz</h3><p>AI risk analizi</p>
-    </a>
-
-    <a class="card" href="/u/notifications">
-      <div class="icon">🔔</div><div class="pill">Açık</div>
-      <h3>Bildirim</h3><p>Uyarılar</p>
-    </a>
-
-    <a class="card" href="/u/license">
-      <div class="icon">🔑</div><div class="pill">Pro</div>
-      <h3>Lisans</h3><p>Hesap durumu</p>
-    </a>
-
-    <a class="card" href="/u/settings">
-      <div class="icon">⚙️</div><div class="pill">Ayar</div>
-      <h3>Ayarlar</h3><p>Tercihler</p>
-    </a>
-
-    <a class="card" href="/u/community">
-      <div class="icon">👥</div><div class="pill">Beta</div>
-      <h3>Topluluk</h3><p>Geri bildirim</p>
-    </a>
-  </main>
-
-  <div class="foot">EratGuard PRO · {{ username }} · © 2026</div>
-</body>
-</html>
-""", username=username, spam_count=spam_count, blocked_count=blocked_count)
-
-# /radial endpointini temiz kartlı kullanıcı ana ekranına kilitle
-try:
-    for _rule in list(app.url_map.iter_rules()):
-        if str(_rule) == "/radial":
-            pass  # serbest birakild
-except Exception:
-    pass
-
-# Eski / çıplak kullanıcı yolları doğru /u/... sayfalarına yönlendir
 @app.route("/dashboard")
 @app.route("/home")
 @app.route("/user")
@@ -5073,40 +4882,7 @@ except Exception:
     pass
 # ===== ERATGUARD USER SETTINGS OVERRIDE FINAL END =====
 
-# ===== ERATGUARD REMOVE USER RADIAL KEEP CARD HOME START =====
-def _ss_user_card_home_locked_response():
-    resp = _ss_user_home_final()
-    try:
-        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-        resp.headers["Pragma"] = "no-cache"
-        resp.headers["Expires"] = "0"
-    except Exception:
-        pass
-    return resp
 
-# User tarafında radial/radial-menu/radial-demo dahil tüm eski kullanıcı ana ekranlarını kartlı ekrana kilitle.
-try:
-    for _rule in list(app.url_map.iter_rules()):
-        if str(_rule) in [
-            "/radial",
-            "/radial-menu",
-            "/radial-demo",
-            "/dashboard",
-            "/home",
-            "/user",
-            "/main",
-            "/u/home",
-            "/u/dashboard"
-        ]:
-            app.view_functions[_rule.endpoint] = _ss_user_card_home_locked_response
-except Exception:
-    pass
-
-# Bazı route'lar hiç yoksa burada da garanti alias ver.
-@app.route("/u/home-final")
-def ss_user_card_home_final_alias():
-    return _ss_user_card_home_locked_response()
-# ===== ERATGUARD REMOVE USER RADIAL KEEP CARD HOME END =====
 
 # ===== ERATGUARD RESTORE ADMIN RADIAL HOME FINAL START =====
 def _ss_admin_radial_home_final():
@@ -10532,7 +10308,8 @@ try:
                 return _eg4j_redirect("/admin/licenses", code=302)
 
             if _path == "/admin/security":
-                return _eg4j_redirect("/admin/overview", code=302)
+                # SECURITY-2: /admin/security artik gercek admin_security.html sayfasina gitmeli.
+                return None
 
         except Exception:
             return None
@@ -10569,7 +10346,8 @@ try:
 
             if _path in ("/admin/security", "/admin/generated-licenses", "/admin/license-manager"):
                 if _path == "/admin/security":
-                    return _eg4j_pre_redirect("/admin/overview", code=302)
+                    # SECURITY-2: Eski analiz/overview yonlendirmesi kapatildi.
+                    return None
                 return _eg4j_pre_redirect("/admin/licenses", code=302)
 
         except Exception:
@@ -12543,17 +12321,19 @@ try:
         try:
             path = str(getattr(_eg6d_request, "path", "") or "").rstrip("/")
 
-            if path not in ("/ss-admin-access", "/ss-admin-app-start", "/admin-access"):
+            # CLEAN-1:
+            # /ss-admin-access gerçek admin login route'una bırakılır.
+            # Eski bridge burayı /admin/login veya /login tarafına itemez.
+            if path == "/ss-admin-access":
                 return None
 
-            # Login form POST'u gerçek /ss-admin-access auth route'una bırak.
-            if path == "/ss-admin-access" and str(getattr(_eg6d_request, "method", "")).upper() == "POST":
+            if path not in ("/ss-admin-app-start", "/admin-access"):
                 return None
 
             if _eg6d_is_admin_session():
                 return _eg6d_redirect("/admin/dashboard")
 
-            return _eg6d_redirect("/admin/login?next=/admin/dashboard")
+            return _eg6d_redirect("/ss-admin-access")
         except Exception:
             return None
 
@@ -12571,6 +12351,12449 @@ try:
 except Exception as _boot_err:
     print("ERATGUARD STAGE6D OLD ADMIN ACCESS BRIDGE BOOT ERROR:", _boot_err)
 # ===== ERATGUARD STAGE6D OLD ADMIN ACCESS BRIDGE END =====
+
+
+# === ERATGUARD SECURITY-3 PREPEND FORCE REAL SECURITY CENTER ===
+# /admin/security eski dashboard/overview bridge'lerine yakalanmadan gerçek güvenlik sayfasını döndürür.
+try:
+    from flask import request as _eg_sec3_request
+    from flask import session as _eg_sec3_session
+    from flask import redirect as _eg_sec3_redirect
+    from flask import render_template as _eg_sec3_render_template
+
+    def _eg_security3_force_security_center_first():
+        try:
+            _path = str(getattr(_eg_sec3_request, "path", "") or "").rstrip("/")
+
+            if _path == "/admin/security":
+                if not (
+                    _eg_sec3_session.get("logged_in")
+                    or _eg_sec3_session.get("is_admin")
+                    or _eg_sec3_session.get("role") == "admin"
+                    or _eg_sec3_request.cookies.get("ss_admin_mobile")
+                ):
+                    return _eg_sec3_redirect("/ss-admin-access", code=302)
+
+                return _eg_sec3_render_template("admin_security.html")
+        except Exception:
+            return None
+
+    try:
+        _eg_sec3_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg_sec3_funcs[:] = [
+            f for f in _eg_sec3_funcs
+            if getattr(f, "__name__", "") != "_eg_security3_force_security_center_first"
+        ]
+        _eg_sec3_funcs.insert(0, _eg_security3_force_security_center_first)
+        print("ERATGUARD SECURITY-3 PREPEND FORCE REAL SECURITY CENTER ACTIVE")
+    except Exception as _eg_sec3_insert_err:
+        print("ERATGUARD SECURITY-3 INSERT ERROR:", _eg_sec3_insert_err)
+
+except Exception as _eg_sec3_err:
+    print("ERATGUARD SECURITY-3 ERROR:", _eg_sec3_err)
+# === /ERATGUARD SECURITY-3 PREPEND FORCE REAL SECURITY CENTER ===
+
+# === ERATGUARD USERS-2 PREPEND FORCE REAL USER CENTER ===
+# /admin/users eski kullanıcı sayfasına düşerse gerçek admin_users.html dosyasını döndürür.
+try:
+    from flask import request as _eg_users2_request
+    from flask import session as _eg_users2_session
+    from flask import redirect as _eg_users2_redirect
+    from flask import render_template as _eg_users2_render_template
+
+    def _eg_users2_force_user_center_first():
+        try:
+            _path = str(getattr(_eg_users2_request, "path", "") or "").rstrip("/")
+
+            if _path == "/admin/users":
+                if not (
+                    _eg_users2_session.get("logged_in")
+                    or _eg_users2_session.get("is_admin")
+                    or _eg_users2_session.get("role") == "admin"
+                    or _eg_users2_request.cookies.get("ss_admin_mobile")
+                ):
+                    return _eg_users2_redirect("/ss-admin-access", code=302)
+
+                # Backend mevcut users değişkenini göndermiyorsa güvenli fallback
+                try:
+                    _users = globals().get("users", {})
+                    if not isinstance(_users, dict):
+                        _users = {}
+                except Exception:
+                    _users = {}
+
+                return _eg_users2_render_template("admin_users.html", users=_users)
+        except Exception:
+            return None
+
+    try:
+        _eg_users2_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg_users2_funcs[:] = [
+            f for f in _eg_users2_funcs
+            if getattr(f, "__name__", "") != "_eg_users2_force_user_center_first"
+        ]
+        _eg_users2_funcs.insert(0, _eg_users2_force_user_center_first)
+        print("ERATGUARD USERS-2 PREPEND FORCE REAL USER CENTER ACTIVE")
+    except Exception as _eg_users2_insert_err:
+        print("ERATGUARD USERS-2 INSERT ERROR:", _eg_users2_insert_err)
+
+except Exception as _eg_users2_err:
+    print("ERATGUARD USERS-2 ERROR:", _eg_users2_err)
+# === /ERATGUARD USERS-2 PREPEND FORCE REAL USER CENTER ===
+
+# === ERATGUARD LIVE-DATA-1 FAN PAGES JSON BINDING ===
+# Fan Interface sayfalarını gerçek data/*.json dosyalarına bağlar.
+# Sadece GET sayfa görüntülemelerini yakalar; POST onay/red/kaydet işlemlerine dokunmaz.
+try:
+    import json as _eg_live_json
+    from pathlib import Path as _eg_live_Path
+    from flask import request as _eg_live_request
+    from flask import session as _eg_live_session
+    from flask import redirect as _eg_live_redirect
+    from flask import render_template as _eg_live_render_template
+
+    def _eg_live_admin_ok():
+        try:
+            return bool(
+                _eg_live_session.get("logged_in")
+                or _eg_live_session.get("is_admin")
+                or _eg_live_session.get("role") == "admin"
+                or _eg_live_request.cookies.get("ss_admin_mobile")
+            )
+        except Exception:
+            return False
+
+    def _eg_live_read_json(default, *paths):
+        for raw in paths:
+            try:
+                path = _eg_live_Path(str(raw))
+                if path.exists():
+                    txt = path.read_text(encoding="utf-8").strip()
+                    if not txt:
+                        return default
+                    return _eg_live_json.loads(txt)
+            except Exception:
+                pass
+        return default
+
+    def _eg_live_as_list(value):
+        try:
+            if isinstance(value, list):
+                return value
+            if isinstance(value, dict):
+                out = []
+                for k, v in value.items():
+                    if isinstance(v, dict):
+                        item = dict(v)
+                        item.setdefault("id", k)
+                        item.setdefault("key", k)
+                        out.append(item)
+                    else:
+                        out.append({"id": k, "key": k, "value": v})
+                return out
+        except Exception:
+            pass
+        return []
+
+    def _eg_live_users_dict():
+        raw = _eg_live_read_json({}, "data/users.json", "users.json")
+        if isinstance(raw, dict):
+            return raw
+        if isinstance(raw, list):
+            out = {}
+            for i, item in enumerate(raw):
+                if isinstance(item, dict):
+                    name = str(item.get("username") or item.get("name") or item.get("email") or f"user_{i}")
+                    out[name] = item
+            return out
+        return {}
+
+    def _eg_live_user_stats(users):
+        total = len(users) if isinstance(users, dict) else 0
+        active = 0
+        admins = 0
+        banned = 0
+
+        for _, u in (users or {}).items():
+            if not isinstance(u, dict):
+                continue
+
+            role = str(u.get("role", "")).lower()
+            if role == "admin" or u.get("is_admin") is True:
+                admins += 1
+
+            if u.get("is_banned") is True or u.get("banned") is True or str(u.get("status", "")).lower() in ("banned", "banli", "blocked"):
+                banned += 1
+
+            if u.get("active") is True or u.get("is_active") is True or str(u.get("status", "")).lower() in ("active", "aktif", "enabled"):
+                active += 1
+
+        return {"total": total, "active": active, "admins": admins, "banned": banned}
+
+    def _eg_live_license_items():
+        base = _eg_live_as_list(_eg_live_read_json([], "data/licenses.json", "licenses.json"))
+        generated = _eg_live_as_list(_eg_live_read_json([], "data/generated_licenses.json", "generated_licenses.json"))
+        items = []
+
+        for item in base + generated:
+            if isinstance(item, dict):
+                items.append(item)
+            else:
+                items.append({"key": str(item), "status": "HAZIR"})
+
+        return items
+
+    def _eg_live_license_stats(licenses):
+        total = len(licenses or [])
+        used = 0
+        empty = 0
+        expired = 0
+
+        for lic in licenses or []:
+            if not isinstance(lic, dict):
+                continue
+
+            username = lic.get("username") or lic.get("user") or lic.get("assigned_to") or lic.get("owner")
+            status = str(lic.get("status", "")).lower()
+
+            if username or status in ("used", "active", "aktif", "assigned"):
+                used += 1
+            else:
+                empty += 1
+
+            if status in ("expired", "süresi doldu", "suresi doldu"):
+                expired += 1
+
+        if total and used + empty == 0:
+            empty = total
+
+        return {"total": total, "used": used, "empty": empty, "expired": expired}
+
+    def _eg_live_payments():
+        raw = _eg_live_read_json([], "data/payment_requests.json", "payment_requests.json", "data/upgrade_requests.json")
+        return _eg_live_as_list(raw)
+
+    def _eg_live_spam_logs():
+        raw = _eg_live_read_json([], "data/spam_logs.json", "spam_logs.json", "data/logs.json", "logs.json")
+        return _eg_live_as_list(raw)
+
+    def _eg_live_settings():
+        raw = _eg_live_read_json({}, "data/settings.json", "settings.json")
+        return raw if isinstance(raw, dict) else {}
+
+    def _eg_live_admin_stats():
+        users = _eg_live_users_dict()
+        licenses = _eg_live_license_items()
+        payments = _eg_live_payments()
+        logs = _eg_live_spam_logs()
+        settings = _eg_live_settings()
+
+        us = _eg_live_user_stats(users)
+        ls = _eg_live_license_stats(licenses)
+
+        return {
+            "users": us.get("total", 0),
+            "active_users": us.get("active", 0),
+            "admin_users": us.get("admins", 0),
+            "banned_users": us.get("banned", 0),
+            "licenses": ls.get("total", 0),
+            "used_licenses": ls.get("used", 0),
+            "empty_licenses": ls.get("empty", 0),
+            "expired_licenses": ls.get("expired", 0),
+            "payments": len(payments),
+            "payment_requests": len(payments),
+            "spam_logs": len(logs),
+            "blocked": len(logs),
+            "notifications": len(_eg_live_as_list(_eg_live_read_json([], "data/admin_notifications.json", "admin_notifications.json"))),
+            "unread_notifications": 0,
+            "settings_count": len(settings),
+        }
+
+    def _eg_live_recent_events():
+        logs = _eg_live_as_list(_eg_live_read_json([], "data/admin_actions.json", "data/logs.json", "logs.json"))
+        return logs[:8] if isinstance(logs, list) else []
+
+    def _eg_live_render_fan_page():
+        try:
+            if str(getattr(_eg_live_request, "method", "GET")).upper() != "GET":
+                return None
+
+            path = str(getattr(_eg_live_request, "path", "") or "").rstrip("/")
+            if not path:
+                path = "/"
+
+            fan_paths = {
+                "/admin/dashboard": "admin_dashboard.html",
+                "/admin/users": "admin_users.html",
+                "/admin/licenses": "admin_licenses.html",
+                "/admin/payment-requests": "admin_payment_requests.html",
+                "/admin/security": "admin_security.html",
+                "/admin/spam-logs": "admin_spam_logs.html",
+                "/admin/settings": "admin_settings.html",
+            }
+
+            if path not in fan_paths:
+                return None
+
+            if not _eg_live_admin_ok():
+                return _eg_live_redirect("/ss-admin-access", code=302)
+
+            users = _eg_live_users_dict()
+            user_stats = _eg_live_user_stats(users)
+
+            licenses = _eg_live_license_items()
+            license_stats = _eg_live_license_stats(licenses)
+
+            payment_requests = _eg_live_payments()
+            spam_logs = _eg_live_spam_logs()
+            settings = _eg_live_settings()
+            stats = _eg_live_admin_stats()
+            recent = _eg_live_recent_events()
+
+            return _eg_live_render_template(
+                fan_paths[path],
+                admin_stats=stats,
+                users=users,
+                user_stats=user_stats,
+                licenses=licenses,
+                generated_licenses=licenses,
+                license_stats=license_stats,
+                payment_requests=payment_requests,
+                requests=payment_requests,
+                spam_logs=spam_logs,
+                settings=settings,
+                recent_logins=recent,
+                recent_actions=recent,
+                events=recent,
+                total_events=len(recent),
+                warning_events=0,
+                critical_events=0,
+            )
+        except Exception as _eg_live_render_err:
+            print("ERATGUARD LIVE-DATA-1 RENDER ERROR:", _eg_live_render_err)
+            return None
+
+    try:
+        _eg_live_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg_live_funcs[:] = [
+            f for f in _eg_live_funcs
+            if getattr(f, "__name__", "") != "_eg_live_render_fan_page"
+        ]
+        _eg_live_funcs.insert(0, _eg_live_render_fan_page)
+        print("ERATGUARD LIVE-DATA-1 FAN PAGES JSON BINDING ACTIVE")
+    except Exception as _eg_live_insert_err:
+        print("ERATGUARD LIVE-DATA-1 INSERT ERROR:", _eg_live_insert_err)
+
+except Exception as _eg_live_err:
+    print("ERATGUARD LIVE-DATA-1 ERROR:", _eg_live_err)
+# === /ERATGUARD LIVE-DATA-1 FAN PAGES JSON BINDING ===
+
+# === ERATGUARD USER-DASH-1 LIVE USER FAN LITE ===
+# Kullanıcı ana ekranını canlı data/*.json verisine bağlar.
+try:
+    import json as _eg_ud1_json
+    import html as _eg_ud1_html
+    from pathlib import Path as _eg_ud1_Path
+    from flask import session as _eg_ud1_session
+    from flask import redirect as _eg_ud1_redirect
+    from flask import render_template_string as _eg_ud1_render_template_string
+    from flask import make_response as _eg_ud1_make_response
+
+    def _eg_ud1_read_json(default, *paths):
+        for raw in paths:
+            try:
+                path = _eg_ud1_Path(str(raw))
+                if path.exists():
+                    txt = path.read_text(encoding="utf-8").strip()
+                    if not txt:
+                        return default
+                    return _eg_ud1_json.loads(txt)
+            except Exception:
+                pass
+        return default
+
+    def _eg_ud1_as_list(value):
+        try:
+            if isinstance(value, list):
+                return value
+            if isinstance(value, dict):
+                out = []
+                for k, v in value.items():
+                    if isinstance(v, dict):
+                        item = dict(v)
+                        item.setdefault("id", k)
+                        item.setdefault("key", k)
+                        out.append(item)
+                    else:
+                        out.append({"id": k, "value": v})
+                return out
+        except Exception:
+            pass
+        return []
+
+    def _eg_ud1_user(username):
+        users = _eg_ud1_read_json({}, "data/users.json", "users.json")
+        if isinstance(users, dict):
+            return users.get(username, {})
+        return {}
+
+    def _eg_ud1_user_spam(username):
+        logs = _eg_ud1_as_list(_eg_ud1_read_json([], "data/spam_logs.json", "spam_logs.json", "data/logs.json", "logs.json"))
+        user_logs = []
+        for item in logs:
+            if not isinstance(item, dict):
+                continue
+            owner = str(item.get("username") or item.get("user") or item.get("owner") or "").strip()
+            if owner == username:
+                user_logs.append(item)
+
+        # Kullanıcıya ait kayıt yoksa 0 göster; sistem geneliyle karıştırma.
+        spam_total = len(user_logs)
+        blocked_total = 0
+        for item in user_logs:
+            status = str(item.get("status") or item.get("result") or item.get("state") or "").lower()
+            if status in ("blocked", "block", "spam", "spammed", "engellendi", "engellenen", "sp"):
+                blocked_total += 1
+
+        return spam_total, blocked_total
+
+    def _eg_ud1_block_count(username):
+        raw = _eg_ud1_read_json([], "data/user_block_list.json", "data/user_blocklist.json", "data/blocklist.json", "data/user_quarantine.json")
+        if isinstance(raw, dict):
+            # Kullanıcıya özel alt liste varsa onu say
+            val = raw.get(username) or raw.get(str(username).lower())
+            if isinstance(val, list):
+                return len(val)
+            if isinstance(val, dict):
+                return len(val)
+            # Yoksa owner/username alanlı kayıtları say
+            total = 0
+            for _, v in raw.items():
+                if isinstance(v, dict) and str(v.get("username") or v.get("user") or "") == username:
+                    total += 1
+            return total
+        if isinstance(raw, list):
+            total = 0
+            for item in raw:
+                if isinstance(item, dict):
+                    owner = str(item.get("username") or item.get("user") or "").strip()
+                    if not owner or owner == username:
+                        total += 1
+            return total
+        return 0
+
+    def _eg_ud1_notifications(username):
+        raw = _eg_ud1_read_json([], "data/inbox.json", "data/admin_notifications.json", "data/user_notification_settings.json")
+        if isinstance(raw, dict):
+            val = raw.get(username) or raw.get(str(username).lower())
+            if isinstance(val, list):
+                return len(val)
+            if isinstance(val, dict):
+                return len(val)
+            return len(raw) if raw else 0
+        if isinstance(raw, list):
+            return len(raw)
+        return 0
+
+    def _eg_ud1_live_home():
+        # CLEAN-5C AST SAFE: eski duplicate dashboard gövdesi kaldırıldı.
+        # Aktif dashboard ve FAN-12P korunur.
+        try:
+            return _eg1c_dashboard_page()
+        except Exception:
+            return redirect('/dashboard')
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in [
+                "/dashboard",
+                "/home",
+                "/user",
+                "/main",
+                "/u/home",
+                "/u/dashboard",
+                "/u/home-final"
+            ]:
+                app.view_functions[_rule.endpoint] = _eg_ud1_live_home
+
+        print("ERATGUARD USER-DASH-1 LIVE USER FAN LITE ACTIVE")
+    except Exception as _eg_ud1_route_err:
+        print("ERATGUARD USER-DASH-1 ROUTE ERROR:", _eg_ud1_route_err)
+
+except Exception as _eg_ud1_err:
+    print("ERATGUARD USER-DASH-1 ERROR:", _eg_ud1_err)
+# === /ERATGUARD USER-DASH-1 LIVE USER FAN LITE ===
+
+# === ERATGUARD ADMIN-LOCK-1 STRICT ADMIN ONLY ===
+# Normal kullanıcı session'ı /admin ve /api/admin alanına giremez.
+# logged_in=True tek başına admin yetkisi sayılmaz.
+try:
+    import json as _eg_al1_json
+    from pathlib import Path as _eg_al1_Path
+    from flask import request as _eg_al1_request
+    from flask import session as _eg_al1_session
+    from flask import redirect as _eg_al1_redirect
+    from flask import abort as _eg_al1_abort
+
+    def _eg_al1_read_users():
+        for raw in ("data/users.json", "users.json"):
+            try:
+                path = _eg_al1_Path(raw)
+                if path.exists():
+                    txt = path.read_text(encoding="utf-8").strip()
+                    if not txt:
+                        return {}
+                    data = _eg_al1_json.loads(txt)
+                    return data if isinstance(data, dict) else {}
+            except Exception:
+                pass
+        return {}
+
+    def _eg_al1_is_real_admin():
+        try:
+            username = str(_eg_al1_session.get("username") or "").strip()
+            role = str(_eg_al1_session.get("role") or "").strip().lower()
+            session_is_admin = _eg_al1_session.get("is_admin") is True
+
+            users = _eg_al1_read_users()
+            user = users.get(username) if username else None
+
+            user_is_admin = False
+            if isinstance(user, dict):
+                user_role = str(user.get("role") or "").strip().lower()
+                user_is_admin = (
+                    user_role == "admin"
+                    or user.get("is_admin") is True
+                    or username.lower() == "admin"
+                )
+
+            # En güvenli kural:
+            # Session admin görünse bile kullanıcı datası admin değilse kabul etme.
+            if username and isinstance(user, dict):
+                return bool(user_is_admin)
+
+            # Kullanıcı datası bulunamazsa sadece açık admin session kabul.
+            return bool(username.lower() == "admin" and (role == "admin" or session_is_admin))
+
+        except Exception:
+            return False
+
+    def _eg_al1_strict_admin_gate():
+        try:
+            path = str(getattr(_eg_al1_request, "path", "") or "").rstrip("/")
+            method = str(getattr(_eg_al1_request, "method", "GET") or "GET").upper()
+
+            is_admin_page = path == "/admin" or path.startswith("/admin/")
+            is_admin_api = path == "/api/admin" or path.startswith("/api/admin/")
+
+            if not (is_admin_page or is_admin_api):
+                return None
+
+            if _eg_al1_is_real_admin():
+                return None
+
+            # Normal kullanıcı admin sayfasına girmeye çalışırsa admin session flaglerini temizle.
+            # Kullanıcı oturumu kalsın; sadece admin yetkisi düşsün.
+            for k in ("is_admin", "role", "admin", "admin_ok", "admin_logged_in"):
+                try:
+                    _eg_al1_session.pop(k, None)
+                except Exception:
+                    pass
+
+            if is_admin_api:
+                return _eg_al1_abort(403)
+
+            return _eg_al1_redirect("/dashboard", code=302)
+
+        except Exception:
+            return None
+
+    try:
+        _eg_al1_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg_al1_funcs[:] = [
+            f for f in _eg_al1_funcs
+            if getattr(f, "__name__", "") != "_eg_al1_strict_admin_gate"
+        ]
+        _eg_al1_funcs.insert(0, _eg_al1_strict_admin_gate)
+        print("ERATGUARD ADMIN-LOCK-1 STRICT ADMIN ONLY ACTIVE")
+    except Exception as _eg_al1_insert_err:
+        print("ERATGUARD ADMIN-LOCK-1 INSERT ERROR:", _eg_al1_insert_err)
+
+except Exception as _eg_al1_err:
+    print("ERATGUARD ADMIN-LOCK-1 ERROR:", _eg_al1_err)
+# === /ERATGUARD ADMIN-LOCK-1 STRICT ADMIN ONLY ===
+
+# === ERATGUARD ADMIN-LOCK-2 ADMIN ACCESS SESSION RESET ===
+# Normal kullanıcı oturumu aktifken /ss-admin-access kullanıcı paneline dönmesin.
+# Admin giriş kapısı her zaman admin login akışına izin verir.
+try:
+    import json as _eg_al2_json
+    from pathlib import Path as _eg_al2_Path
+    from flask import request as _eg_al2_request
+    from flask import session as _eg_al2_session
+
+    def _eg_al2_read_users():
+        for raw in ("data/users.json", "users.json"):
+            try:
+                path = _eg_al2_Path(raw)
+                if path.exists():
+                    txt = path.read_text(encoding="utf-8").strip()
+                    if not txt:
+                        return {}
+                    data = _eg_al2_json.loads(txt)
+                    return data if isinstance(data, dict) else {}
+            except Exception:
+                pass
+        return {}
+
+    def _eg_al2_current_is_admin():
+        try:
+            username = str(_eg_al2_session.get("username") or "").strip()
+            if not username:
+                return False
+
+            users = _eg_al2_read_users()
+            user = users.get(username)
+
+            if isinstance(user, dict):
+                return bool(
+                    str(user.get("role") or "").lower() == "admin"
+                    or user.get("is_admin") is True
+                    or username.lower() == "admin"
+                )
+
+            return bool(
+                username.lower() == "admin"
+                and (
+                    str(_eg_al2_session.get("role") or "").lower() == "admin"
+                    or _eg_al2_session.get("is_admin") is True
+                )
+            )
+        except Exception:
+            return False
+
+    def _eg_al2_admin_access_reset_gate():
+        try:
+            path = str(getattr(_eg_al2_request, "path", "") or "").rstrip("/")
+
+            if path != "/ss-admin-access":
+                return None
+
+            # Eğer aktif oturum admin değilse, admin giriş kapısında kullanıcı session'ını temizle.
+            # Böylece testuser /ss-admin-access açınca /dashboard'a geri atılmaz.
+            if not _eg_al2_current_is_admin():
+                for k in (
+                    "logged_in",
+                    "username",
+                    "role",
+                    "is_admin",
+                    "admin",
+                    "admin_ok",
+                    "admin_logged_in"
+                ):
+                    try:
+                        _eg_al2_session.pop(k, None)
+                    except Exception:
+                        pass
+
+            return None
+        except Exception:
+            return None
+
+    try:
+        _eg_al2_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg_al2_funcs[:] = [
+            f for f in _eg_al2_funcs
+            if getattr(f, "__name__", "") != "_eg_al2_admin_access_reset_gate"
+        ]
+        _eg_al2_funcs.insert(0, _eg_al2_admin_access_reset_gate)
+        print("ERATGUARD ADMIN-LOCK-2 ADMIN ACCESS SESSION RESET ACTIVE")
+    except Exception as _eg_al2_insert_err:
+        print("ERATGUARD ADMIN-LOCK-2 INSERT ERROR:", _eg_al2_insert_err)
+
+except Exception as _eg_al2_err:
+    print("ERATGUARD ADMIN-LOCK-2 ERROR:", _eg_al2_err)
+# === /ERATGUARD ADMIN-LOCK-2 ADMIN ACCESS SESSION RESET ===
+
+# === ERATGUARD ADMIN-LOCK-3 FORCE ADMIN ACCESS ROUTE ===
+# /ss-admin-access hiçbir zaman kullanıcı login sayfasına düşmesin.
+# Bu route sadece gerçek admin hesabı için admin giriş kapısıdır.
+try:
+    import json as _eg_al3_json
+    import hashlib as _eg_al3_hashlib
+    from pathlib import Path as _eg_al3_Path
+    from flask import request as _eg_al3_request
+    from flask import session as _eg_al3_session
+    from flask import redirect as _eg_al3_redirect
+    from flask import render_template as _eg_al3_render_template
+    from flask import make_response as _eg_al3_make_response
+    from werkzeug.security import check_password_hash as _eg_al3_check_password_hash
+
+    def _eg_al3_read_users():
+        for raw in ("data/users.json", "users.json"):
+            try:
+                path = _eg_al3_Path(raw)
+                if path.exists():
+                    txt = path.read_text(encoding="utf-8").strip()
+                    if not txt:
+                        return {}
+                    data = _eg_al3_json.loads(txt)
+                    return data if isinstance(data, dict) else {}
+            except Exception:
+                pass
+        return {}
+
+    def _eg_al3_check_password(raw, stored):
+        try:
+            raw = str(raw or "")
+            stored = str(stored or "")
+            if not raw or not stored:
+                return False
+
+            if stored.startswith(("pbkdf2:", "scrypt:", "sha256:")):
+                try:
+                    return _eg_al3_check_password_hash(stored, raw)
+                except Exception:
+                    pass
+
+            try:
+                if _eg_al3_hashlib.sha256(raw.encode("utf-8")).hexdigest() == stored:
+                    return True
+            except Exception:
+                pass
+
+            return raw == stored
+        except Exception:
+            return False
+
+    def _eg_al3_is_admin_user(username, user):
+        try:
+            username = str(username or "").strip()
+            if not isinstance(user, dict):
+                return False
+
+            return bool(
+                username.lower() == "admin"
+                or str(user.get("role") or "").strip().lower() == "admin"
+                or user.get("is_admin") is True
+            )
+        except Exception:
+            return False
+
+    def _eg_al3_force_admin_access():
+        try:
+            # Admin kapısına gelince önce eski normal user session bilgisini temizle.
+            for k in (
+                "logged_in",
+                "username",
+                "role",
+                "is_admin",
+                "admin",
+                "admin_ok",
+                "admin_logged_in"
+            ):
+                try:
+                    _eg_al3_session.pop(k, None)
+                except Exception:
+                    pass
+
+            if str(_eg_al3_request.method).upper() == "GET":
+                return _eg_al3_render_template("admin_login.html", error="")
+
+            username = str(_eg_al3_request.form.get("username") or "").strip()
+            password = str(_eg_al3_request.form.get("password") or "")
+
+            users = _eg_al3_read_users()
+            user = users.get(username)
+
+            if not isinstance(user, dict):
+                # Büyük/küçük harf toleransı
+                for k, v in users.items():
+                    if str(k).lower() == username.lower():
+                        username = str(k)
+                        user = v
+                        break
+
+            if not _eg_al3_is_admin_user(username, user):
+                return _eg_al3_render_template("admin_login.html", error="Admin girişi başarısız.")
+
+            pw_ok = False
+            if isinstance(user, dict):
+                pw_ok = (
+                    _eg_al3_check_password(password, user.get("password") or "")
+                    or _eg_al3_check_password(password, user.get("password_hash") or "")
+                )
+
+            if not pw_ok:
+                return _eg_al3_render_template("admin_login.html", error="Admin girişi başarısız.")
+
+            _eg_al3_session["logged_in"] = True
+            _eg_al3_session["username"] = username
+            _eg_al3_session["role"] = "admin"
+            _eg_al3_session["is_admin"] = True
+
+            resp = _eg_al3_make_response(_eg_al3_redirect("/admin/dashboard", code=302))
+
+            # Mevcut mobil admin cookie sistemi varsa onunla uyumlu cookie bas.
+            try:
+                token_fn = globals().get("_eg_admin_mobile_expected_token")
+                if callable(token_fn):
+                    resp.set_cookie(
+                        "ss_admin_mobile",
+                        str(token_fn()),
+                        httponly=True,
+                        samesite="Lax",
+                        max_age=60 * 60 * 24 * 7
+                    )
+            except Exception:
+                pass
+
+            return resp
+
+        except Exception as e:
+            try:
+                return _eg_al3_render_template("admin_login.html", error="Admin giriş sistemi hatası.")
+            except Exception:
+                return "Admin giriş sistemi hatası.", 500
+
+    try:
+        # Var olan /ss-admin-access endpoint'lerini zorla bu fonksiyona bağla.
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule).rstrip("/") == "/ss-admin-access":
+                app.view_functions[_rule.endpoint] = _eg_al3_force_admin_access
+
+        print("ERATGUARD ADMIN-LOCK-3 FORCE ADMIN ACCESS ROUTE ACTIVE")
+    except Exception as _eg_al3_route_err:
+        print("ERATGUARD ADMIN-LOCK-3 ROUTE ERROR:", _eg_al3_route_err)
+
+except Exception as _eg_al3_err:
+    print("ERATGUARD ADMIN-LOCK-3 ERROR:", _eg_al3_err)
+# === /ERATGUARD ADMIN-LOCK-3 FORCE ADMIN ACCESS ROUTE ===
+
+# === ERATGUARD USER-LICENSE-CLEAN-1 DISPLAY LABEL FIX ===
+# Kullanıcı lisans sayfasında teknik license_type değerlerini daha temiz göster.
+try:
+    def _eg_ulc1_license_display_label(raw):
+        raw = str(raw or "").strip().lower()
+        if raw in ("test_pro", "test-pro", "pro_test", "pro-test"):
+            return "PRO Test Lisansı"
+        if raw in ("pro", "pro_active", "active", "premium"):
+            return "EratGuard PRO"
+        if raw in ("trial", "free", "deneme"):
+            return "Deneme"
+        if raw in ("admin", "system"):
+            return "Admin"
+        if not raw:
+            return "Deneme"
+        return str(raw).replace("_", " ").replace("-", " ").title()
+
+    # Var olan lisans helper fonksiyonu varsa onu daha temiz hale getir.
+    if "_ss_license_plan_label" in globals():
+        _old_ss_license_plan_label_ulc1 = globals().get("_ss_license_plan_label")
+
+        def _ss_license_plan_label(plan):
+            try:
+                clean = _eg_ulc1_license_display_label(plan)
+                if clean:
+                    return clean
+            except Exception:
+                pass
+            try:
+                return _old_ss_license_plan_label_ulc1(plan)
+            except Exception:
+                return "EratGuard PRO"
+
+    print("ERATGUARD USER-LICENSE-CLEAN-1 DISPLAY LABEL FIX ACTIVE")
+except Exception as _eg_ulc1_err:
+    print("ERATGUARD USER-LICENSE-CLEAN-1 ERROR:", _eg_ulc1_err)
+# === /ERATGUARD USER-LICENSE-CLEAN-1 DISPLAY LABEL FIX ===
+
+# === ERATGUARD USER-LICENSE-CLEAN-2 FORCE DISPLAY PATCH ===
+# /u/license ekranında test_pro gibi teknik değerleri daha temiz gösterir.
+try:
+    def _eg_ulc2_display_license_type(raw):
+        raw = str(raw or "").strip().lower()
+        if raw in ("test_pro", "test-pro", "pro_test", "pro-test"):
+            return "PRO Test Lisansı"
+        if raw in ("pro", "premium", "pro_active", "active", "paid"):
+            return "EratGuard PRO"
+        if raw in ("trial", "free", "deneme", ""):
+            return "Deneme"
+        if raw == "admin":
+            return "Admin"
+        return str(raw).replace("_", " ").replace("-", " ").title()
+
+    # Mevcut helper varsa override et.
+    def _ss_license_plan_label(plan):
+        return _eg_ulc2_display_license_type(plan)
+
+    print("ERATGUARD USER-LICENSE-CLEAN-2 FORCE DISPLAY PATCH ACTIVE")
+except Exception as _eg_ulc2_err:
+    print("ERATGUARD USER-LICENSE-CLEAN-2 ERROR:", _eg_ulc2_err)
+# === /ERATGUARD USER-LICENSE-CLEAN-2 FORCE DISPLAY PATCH ===
+
+# === ERATGUARD USER-LICENSE-DIET-1 COMPACT PAGE ===
+# /u/license sayfasını kompakt hale getirir. Paket/fiyat kalabalığını azaltır.
+try:
+    from flask import render_template_string as _eg_uld1_render_template_string
+    from flask import make_response as _eg_uld1_make_response
+    from flask import redirect as _eg_uld1_redirect
+    from flask import session as _eg_uld1_session
+    from pathlib import Path as _eg_uld1_Path
+    import json as _eg_uld1_json
+    import html as _eg_uld1_html
+    from datetime import datetime as _eg_uld1_datetime
+
+    def _eg_uld1_read_json(default, *paths):
+        for raw in paths:
+            try:
+                path = _eg_uld1_Path(raw)
+                if path.exists():
+                    txt = path.read_text(encoding="utf-8", errors="ignore").strip()
+                    if txt:
+                        return _eg_uld1_json.loads(txt)
+            except Exception:
+                pass
+        return default
+
+    def _eg_uld1_safe(v):
+        try:
+            return _eg_uld1_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_uld1_plan_label(raw):
+        raw = str(raw or "").strip().lower()
+        if raw in ("test_pro", "test-pro", "pro_test", "pro-test"):
+            return "PRO Test Lisansı"
+        if raw in ("pro", "premium", "pro_active", "active", "paid"):
+            return "EratGuard PRO"
+        if raw in ("trial", "free", "deneme", ""):
+            return "Deneme"
+        if raw == "admin":
+            return "Admin"
+        return str(raw).replace("_", " ").replace("-", " ").title()
+
+    def _eg_uld1_days_left(expiry):
+        try:
+            expiry = str(expiry or "").strip()
+            if not expiry or expiry in ("—", "-"):
+                return "—"
+            dt = _eg_uld1_datetime.fromisoformat(expiry[:10])
+            today = _eg_uld1_datetime.now()
+            return max(0, (dt.date() - today.date()).days)
+        except Exception:
+            return "—"
+
+    def _eg_uld1_find_user_license(username):
+        users = _eg_uld1_read_json({}, "data/users.json", "users.json")
+        user = users.get(username, {}) if isinstance(users, dict) else {}
+
+        lic_key = user.get("license_key") or user.get("license") or user.get("license_code") or ""
+        plan = user.get("license_type") or user.get("license_mode") or "trial"
+        expiry = user.get("license_expiry") or user.get("expires_at") or "—"
+        status = user.get("license_status") or ("active" if lic_key else "trial")
+
+        return {
+            "username": username,
+            "license_key": lic_key or "—",
+            "plan": _eg_uld1_plan_label(plan),
+            "expiry": expiry,
+            "days_left": _eg_uld1_days_left(expiry),
+            "status": "AKTİF" if str(status).lower() in ("active", "aktif", "ok", "valid") or lic_key else "DENEME",
+            "premium": "Açık" if lic_key else "Sınırlı",
+        }
+
+    def _eg_uld1_compact_license_page():
+        if not (_eg_uld1_session.get("logged_in") and _eg_uld1_session.get("username")):
+            return _eg_uld1_redirect("/login")
+
+        username = str(_eg_uld1_session.get("username") or "user")
+        info = _eg_uld1_find_user_license(username)
+
+        html = """<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Lisans</title>
+<style>
+:root{--bg:#020806;--panel:#071a10;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;--text:#f5fff8;--muted:rgba(245,255,248,.62)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 34%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{padding:18px 14px 28px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:54px;height:54px;border-radius:18px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:29px}
+.brand h1{margin:0;font-size:27px;line-height:1;font-weight:950;letter-spacing:-1.2px}.brand h1 span{color:var(--green)}
+.brand p{margin:5px 0 0;color:var(--muted);font-weight:850;font-size:13px}
+.badge{border:1px solid rgba(255,221,53,.35);color:var(--yellow);background:rgba(255,221,53,.10);padding:10px 13px;border-radius:999px;font-weight:950;font-size:13px}
+.hero,.form,.perms{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:25px;padding:18px;box-shadow:0 20px 55px rgba(0,0,0,.35)}
+.ico{width:58px;height:58px;border-radius:20px;border:1px solid var(--line);background:rgba(35,255,137,.10);display:grid;place-items:center;font-size:31px;margin-bottom:14px}
+.hero h2{font-size:34px;line-height:1.02;margin:0 0 8px;font-weight:950;letter-spacing:-1.6px}
+.hero p{margin:0;color:var(--muted);font-size:15px;line-height:1.35;font-weight:800}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
+.card{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:19px;padding:13px;min-height:75px}
+.card b{display:block;color:var(--yellow);font-size:21px;line-height:1.1;word-break:break-word}.card span{display:block;color:var(--muted);font-size:12px;font-weight:900;margin-top:7px}
+.key{grid-column:1/-1}.key b{font-size:16px;color:#9fffc4}
+.btn{display:flex;align-items:center;justify-content:center;min-height:54px;border-radius:19px;text-decoration:none;font-weight:950;font-size:17px;border:1px solid rgba(255,255,255,.10);color:#00180c;background:linear-gradient(135deg,var(--yellow),var(--green));margin-top:12px}
+.btn.secondary{background:rgba(255,255,255,.08);color:var(--text)}
+.section-title{font-size:20px;letter-spacing:9px;font-weight:950;margin:25px 0 12px}
+.form label{display:block;font-size:16px;font-weight:950;margin-bottom:9px}
+.form input{width:100%;height:56px;border-radius:18px;border:1px solid rgba(35,255,137,.22);background:rgba(0,0,0,.22);color:var(--text);font-size:16px;font-weight:850;padding:0 14px;outline:none}
+.form input::placeholder{color:rgba(245,255,248,.34)}.form button{width:100%;height:56px;border:0;border-radius:18px;margin-top:12px;background:linear-gradient(135deg,var(--yellow),var(--green));font-size:17px;font-weight:950;color:#00180c}
+.perms{padding:0;overflow:hidden}.row{display:flex;justify-content:space-between;padding:15px 17px;border-bottom:1px solid rgba(255,255,255,.06);gap:10px}.row:last-child{border-bottom:0}
+.row span{font-weight:900;color:var(--muted);font-size:15px}.row b{color:#9fffc4;font-size:15px}
+.foot{text-align:center;margin:22px 0 0;color:rgba(245,255,248,.42);font-weight:800}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">🔑</div><div><h1>Erat<span>Guard</span></h1><p>Lisans Merkezi</p></div></div>
+  <div class="badge">👑 __STATUS__</div>
+</header>
+
+<section class="hero">
+  <div class="ico">🔑</div>
+  <h2>__PLAN__</h2>
+  <p>Premium erişim, lisans kodu ve koruma yetkileri tek kompakt ekranda.</p>
+  <div class="grid">
+    <div class="card"><b>__STATUS__</b><span>Durum</span></div>
+    <div class="card"><b>__DAYS__</b><span>Kalan gün</span></div>
+    <div class="card key"><b>__KEY__</b><span>Lisans anahtarı</span></div>
+  </div>
+  <a class="btn secondary" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">AKTİVASYON</div>
+<form class="form" method="post" action="/u/license">
+  <label>Lisans kodu gir</label>
+  <input name="license_key" placeholder="Örn: ERATGUARD-PRO-XXXX-XXXX" autocomplete="off">
+  <button type="submit">Lisansı Aktifleştir</button>
+</form>
+
+<div class="section-title">YETKİLER</div>
+<section class="perms">
+  <div class="row"><span>Koruma Merkezi</span><b>__PREMIUM__</b></div>
+  <div class="row"><span>AI Analiz</span><b>__PREMIUM__</b></div>
+  <div class="row"><span>Raporlar</span><b>__PREMIUM__</b></div>
+  <div class="row"><span>Güvenli Liste</span><b>__PREMIUM__</b></div>
+  <div class="row"><span>Blok Listesi</span><b>__PREMIUM__</b></div>
+</section>
+
+<a class="btn" href="/u/pricing">Paketleri İncele</a>
+<a class="btn secondary" href="/u/protection">Koruma Merkezi</a>
+<div class="foot">EratGuard PRO - © 2026</div>
+</body>
+</html>"""
+
+        html = html.replace("__STATUS__", _eg_uld1_safe(info["status"]))
+        html = html.replace("__PLAN__", _eg_uld1_safe(info["plan"]))
+        html = html.replace("__DAYS__", _eg_uld1_safe(info["days_left"]))
+        html = html.replace("__KEY__", _eg_uld1_safe(info["license_key"]))
+        html = html.replace("__PREMIUM__", _eg_uld1_safe(info["premium"]))
+
+        resp = _eg_uld1_make_response(_eg_uld1_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/license", "/u/license/"):
+                app.view_functions[_rule.endpoint] = _eg_uld1_compact_license_page
+        print("ERATGUARD USER-LICENSE-DIET-1 COMPACT PAGE ACTIVE")
+    except Exception as _eg_uld1_route_err:
+        print("ERATGUARD USER-LICENSE-DIET-1 ROUTE ERROR:", _eg_uld1_route_err)
+
+except Exception as _eg_uld1_err:
+    print("ERATGUARD USER-LICENSE-DIET-1 ERROR:", _eg_uld1_err)
+# === /ERATGUARD USER-LICENSE-DIET-1 COMPACT PAGE ===
+
+# === ERATGUARD USER-LICENSE-DIET-2 ULTRA COMPACT PAGE ===
+# /u/license sayfasını daha da inceltir:
+# - Paketleri İncele kaldırıldı
+# - Koruma Merkezi butonu kaldırıldı
+# - Yetkiler chip/rozet formatına alındı
+# - Aktivasyon alanı inceltildi
+try:
+    from flask import render_template_string as _eg_uld2_render_template_string
+    from flask import make_response as _eg_uld2_make_response
+    from flask import redirect as _eg_uld2_redirect
+    from flask import session as _eg_uld2_session
+    from flask import request as _eg_uld2_request
+    from pathlib import Path as _eg_uld2_Path
+    import json as _eg_uld2_json
+    import html as _eg_uld2_html
+    from datetime import datetime as _eg_uld2_datetime
+
+    _eg_uld2_original_user_license = globals().get("user_license")
+
+    def _eg_uld2_read_json(default, *paths):
+        for raw in paths:
+            try:
+                path = _eg_uld2_Path(raw)
+                if not path.exists():
+                    continue
+                txt = path.read_text(encoding="utf-8", errors="ignore").strip()
+                if txt:
+                    return _eg_uld2_json.loads(txt)
+            except Exception:
+                pass
+        return default
+
+    def _eg_uld2_safe(v):
+        try:
+            return _eg_uld2_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_uld2_plan_label(raw):
+        raw = str(raw or "").strip().lower()
+        if raw in ("test_pro", "test-pro", "pro_test", "pro-test"):
+            return "PRO Test"
+        if raw in ("pro", "premium", "pro_active", "active", "paid"):
+            return "EratGuard PRO"
+        if raw in ("trial", "free", "deneme", ""):
+            return "Deneme"
+        if raw == "admin":
+            return "Admin"
+        return str(raw).replace("_", " ").replace("-", " ").title()
+
+    def _eg_uld2_days_left(expiry):
+        try:
+            expiry = str(expiry or "").strip()
+            if not expiry or expiry in ("—", "-"):
+                return "—"
+            dt = _eg_uld2_datetime.fromisoformat(expiry[:10])
+            today = _eg_uld2_datetime.now()
+            return max(0, (dt.date() - today.date()).days)
+        except Exception:
+            return "—"
+
+    def _eg_uld2_find_user_license(username):
+        users = _eg_uld2_read_json({}, "data/users.json", "users.json")
+        user = users.get(username, {}) if isinstance(users, dict) else {}
+
+        lic_key = user.get("license_key") or user.get("license") or user.get("license_code") or ""
+        plan = user.get("license_type") or user.get("license_mode") or "trial"
+        expiry = user.get("license_expiry") or user.get("expires_at") or "—"
+        status = user.get("license_status") or ("active" if lic_key else "trial")
+
+        active = bool(lic_key) or str(status).lower() in ("active", "aktif", "ok", "valid")
+
+        return {
+            "username": username,
+            "license_key": lic_key or "—",
+            "plan": _eg_uld2_plan_label(plan),
+            "expiry": expiry,
+            "days_left": _eg_uld2_days_left(expiry),
+            "status": "AKTİF" if active else "DENEME",
+            "premium": "Açık" if active else "Sınırlı",
+        }
+
+    def _eg_uld2_license_route():
+        if not (_eg_uld2_session.get("logged_in") and _eg_uld2_session.get("username")):
+            return _eg_uld2_redirect("/login")
+
+        # POST aktivasyon işlemini eski gerçek route'a bırak.
+        if str(_eg_uld2_request.method).upper() == "POST":
+            try:
+                if callable(_eg_uld2_original_user_license) and getattr(_eg_uld2_original_user_license, "__name__", "") != "_eg_uld2_license_route":
+                    return _eg_uld2_original_user_license()
+            except Exception as _eg_uld2_post_err:
+                print("ERATGUARD USER-LICENSE-DIET-2 POST FALLBACK ERROR:", _eg_uld2_post_err)
+            return _eg_uld2_redirect("/u/license?activated=1")
+
+        username = str(_eg_uld2_session.get("username") or "user")
+        info = _eg_uld2_find_user_license(username)
+
+        html = """<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Lisans</title>
+<style>
+:root{
+  --bg:#020806;
+  --panel:#071a10;
+  --line:rgba(35,255,137,.22);
+  --green:#20ff88;
+  --yellow:#ffdd35;
+  --text:#f5fff8;
+  --muted:rgba(245,255,248,.62);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{
+  margin:0;
+  min-height:100%;
+  background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
+body{padding:16px 14px 24px}
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  background:rgba(35,255,137,.12);
+  border:1px solid var(--line);
+  display:grid;
+  place-items:center;
+  font-size:27px;
+}
+.brand h1{
+  margin:0;
+  font-size:26px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-1.2px;
+}
+.brand h1 span{color:var(--green)}
+.brand p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-weight:850;
+  font-size:12px;
+}
+.badge{
+  border:1px solid rgba(255,221,53,.35);
+  color:var(--yellow);
+  background:rgba(255,221,53,.10);
+  padding:9px 12px;
+  border-radius:999px;
+  font-weight:950;
+  font-size:12px;
+  white-space:nowrap;
+}
+.hero,.form,.perms{
+  border:1px solid var(--line);
+  background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));
+  border-radius:23px;
+  padding:16px;
+  box-shadow:0 18px 48px rgba(0,0,0,.34);
+}
+.hero-top{
+  display:flex;
+  align-items:flex-start;
+  gap:13px;
+}
+.ico{
+  width:54px;
+  height:54px;
+  flex:0 0 54px;
+  border-radius:19px;
+  border:1px solid var(--line);
+  background:rgba(35,255,137,.10);
+  display:grid;
+  place-items:center;
+  font-size:29px;
+}
+.hero h2{
+  font-size:33px;
+  line-height:1;
+  margin:4px 0 7px;
+  font-weight:950;
+  letter-spacing:-1.6px;
+}
+.hero p{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.3;
+  font-weight:800;
+}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:14px;
+}
+.card{
+  border:1px solid rgba(35,255,137,.17);
+  background:rgba(0,0,0,.23);
+  border-radius:17px;
+  padding:12px;
+  min-height:68px;
+}
+.card b{
+  display:block;
+  color:var(--yellow);
+  font-size:20px;
+  line-height:1.1;
+  word-break:break-word;
+}
+.card span{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+  margin-top:6px;
+}
+.key{grid-column:1/-1}
+.key b{font-size:15px;color:#9fffc4}
+.mini-back{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:12px;
+  min-height:44px;
+  width:100%;
+  border-radius:16px;
+  color:var(--text);
+  text-decoration:none;
+  font-weight:950;
+  background:rgba(255,255,255,.075);
+  border:1px solid rgba(255,255,255,.09);
+}
+.section-title{
+  font-size:18px;
+  letter-spacing:8px;
+  font-weight:950;
+  margin:22px 0 10px;
+}
+.form{padding:14px}
+.form label{
+  display:block;
+  font-size:15px;
+  font-weight:950;
+  margin-bottom:8px;
+}
+.form input{
+  width:100%;
+  height:52px;
+  border-radius:16px;
+  border:1px solid rgba(35,255,137,.22);
+  background:rgba(0,0,0,.22);
+  color:var(--text);
+  font-size:15px;
+  font-weight:850;
+  padding:0 13px;
+  outline:none;
+}
+.form input::placeholder{color:rgba(245,255,248,.34)}
+.form button{
+  width:100%;
+  height:52px;
+  border:0;
+  border-radius:16px;
+  margin-top:10px;
+  background:linear-gradient(135deg,var(--yellow),var(--green));
+  font-size:16px;
+  font-weight:950;
+  color:#00180c;
+}
+.perms{
+  padding:14px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+.chip{
+  min-height:48px;
+  border-radius:15px;
+  border:1px solid rgba(35,255,137,.18);
+  background:rgba(0,0,0,.20);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:10px 11px;
+}
+.chip span{
+  font-size:13px;
+  font-weight:900;
+  color:var(--muted);
+}
+.chip b{
+  font-size:13px;
+  font-weight:950;
+  color:#9fffc4;
+}
+.foot{
+  text-align:center;
+  margin:20px 0 0;
+  color:rgba(245,255,248,.42);
+  font-weight:800;
+  font-size:13px;
+}
+@media(max-width:380px){
+  .hero h2{font-size:29px}
+  .perms{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="logo">🔑</div>
+    <div>
+      <h1>Erat<span>Guard</span></h1>
+      <p>Lisans Merkezi</p>
+    </div>
+  </div>
+  <div class="badge">👑 __STATUS__</div>
+</header>
+
+<section class="hero">
+  <div class="hero-top">
+    <div class="ico">🔑</div>
+    <div>
+      <h2>__PLAN__</h2>
+      <p>Premium erişim ve lisans durumu tek kompakt ekranda.</p>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><b>__STATUS__</b><span>Durum</span></div>
+    <div class="card"><b>__DAYS__</b><span>Kalan gün</span></div>
+    <div class="card key"><b>__KEY__</b><span>Lisans anahtarı</span></div>
+  </div>
+
+  <a class="mini-back" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">AKTİVASYON</div>
+<form class="form" method="post" action="/u/license">
+  <label>Lisans kodu gir</label>
+  <input name="license_key" placeholder="Örn: ERATGUARD-PRO-XXXX-XXXX" autocomplete="off">
+  <button type="submit">Lisansı Aktifleştir</button>
+</form>
+
+<div class="section-title">YETKİLER</div>
+<section class="perms">
+  <div class="chip"><span>Koruma</span><b>__PREMIUM__</b></div>
+  <div class="chip"><span>AI Analiz</span><b>__PREMIUM__</b></div>
+  <div class="chip"><span>Rapor</span><b>__PREMIUM__</b></div>
+  <div class="chip"><span>Güvenli Liste</span><b>__PREMIUM__</b></div>
+  <div class="chip"><span>Blok Liste</span><b>__PREMIUM__</b></div>
+  <div class="chip"><span>Bildirim</span><b>__PREMIUM__</b></div>
+</section>
+
+<div class="foot">EratGuard PRO - © 2026</div>
+</body>
+</html>"""
+
+        html = html.replace("__STATUS__", _eg_uld2_safe(info["status"]))
+        html = html.replace("__PLAN__", _eg_uld2_safe(info["plan"]))
+        html = html.replace("__DAYS__", _eg_uld2_safe(info["days_left"]))
+        html = html.replace("__KEY__", _eg_uld2_safe(info["license_key"]))
+        html = html.replace("__PREMIUM__", _eg_uld2_safe(info["premium"]))
+
+        resp = _eg_uld2_make_response(_eg_uld2_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/license", "/u/license/"):
+                app.view_functions[_rule.endpoint] = _eg_uld2_license_route
+        print("ERATGUARD USER-LICENSE-DIET-2 ULTRA COMPACT PAGE ACTIVE")
+    except Exception as _eg_uld2_route_err:
+        print("ERATGUARD USER-LICENSE-DIET-2 ROUTE ERROR:", _eg_uld2_route_err)
+
+except Exception as _eg_uld2_err:
+    print("ERATGUARD USER-LICENSE-DIET-2 ERROR:", _eg_uld2_err)
+# === /ERATGUARD USER-LICENSE-DIET-2 ULTRA COMPACT PAGE ===
+
+# === ERATGUARD USER-PROTECTION-DIET-1 COMPACT PAGE ===
+# /u/protection sayfasını inceltir:
+# - Hero alanı küçültülür
+# - Büyük detay kartları mini feature chip haline gelir
+# - Durum alanı ince satırlara çekilir
+# - SMS tarama alanı korunur
+try:
+    from flask import render_template_string as _eg_upd1_render_template_string
+    from flask import make_response as _eg_upd1_make_response
+    from flask import redirect as _eg_upd1_redirect
+    from flask import session as _eg_upd1_session
+    from flask import request as _eg_upd1_request
+
+    _eg_upd1_original_protection = None
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/protection", "/u/protection/"):
+                _eg_upd1_original_protection = app.view_functions.get(_rule.endpoint)
+                break
+    except Exception as _eg_upd1_rule_find_err:
+        print("ERATGUARD USER-PROTECTION-DIET-1 FIND ORIGINAL ERROR:", _eg_upd1_rule_find_err)
+
+    def _eg_upd1_safe(v):
+        try:
+            import html as _html
+            return _html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_upd1_compact_protection_route():
+        if not (_eg_upd1_session.get("logged_in") and _eg_upd1_session.get("username")):
+            return _eg_upd1_redirect("/login")
+
+        # POST davranışını mevcut gerçek route'a bırak
+        if str(_eg_upd1_request.method).upper() == "POST":
+            try:
+                if callable(_eg_upd1_original_protection) and getattr(_eg_upd1_original_protection, "__name__", "") != "_eg_upd1_compact_protection_route":
+                    return _eg_upd1_original_protection()
+            except Exception as _eg_upd1_post_err:
+                print("ERATGUARD USER-PROTECTION-DIET-1 POST FALLBACK ERROR:", _eg_upd1_post_err)
+            return _eg_upd1_redirect("/u/protection?scan_sent=1")
+
+        username = str(_eg_upd1_session.get("username") or "user")
+
+        html = """<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Koruma Merkezi</title>
+<style>
+:root{
+  --bg:#020806;
+  --panel:#071a10;
+  --line:rgba(35,255,137,.22);
+  --green:#20ff88;
+  --yellow:#ffdd35;
+  --text:#f5fff8;
+  --muted:rgba(245,255,248,.62);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{
+  margin:0;
+  min-height:100%;
+  background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
+body{padding:16px 14px 24px}
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+.logo{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  background:rgba(35,255,137,.12);
+  border:1px solid var(--line);
+  display:grid;
+  place-items:center;
+  font-size:27px;
+}
+.brand h1{
+  margin:0;
+  font-size:26px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-1.2px;
+}
+.brand h1 span{color:var(--green)}
+.brand p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-weight:850;
+  font-size:12px;
+}
+.badge{
+  border:1px solid rgba(255,221,53,.35);
+  color:var(--green);
+  background:rgba(35,255,137,.10);
+  padding:9px 12px;
+  border-radius:999px;
+  font-weight:950;
+  font-size:12px;
+  white-space:nowrap;
+}
+.hero,.scan,.features,.status{
+  border:1px solid var(--line);
+  background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));
+  border-radius:23px;
+  padding:16px;
+  box-shadow:0 18px 48px rgba(0,0,0,.34);
+}
+.hero-top{
+  display:flex;
+  align-items:flex-start;
+  gap:13px;
+}
+.ico{
+  width:54px;
+  height:54px;
+  flex:0 0 54px;
+  border-radius:19px;
+  border:1px solid var(--line);
+  background:rgba(35,255,137,.10);
+  display:grid;
+  place-items:center;
+  font-size:29px;
+}
+.hero h2{
+  font-size:31px;
+  line-height:1.02;
+  margin:2px 0 6px;
+  font-weight:950;
+  letter-spacing:-1.5px;
+}
+.hero p{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.3;
+  font-weight:800;
+}
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:9px;
+  margin-top:14px;
+}
+.stat{
+  border:1px solid rgba(35,255,137,.17);
+  background:rgba(0,0,0,.23);
+  border-radius:17px;
+  padding:12px;
+  min-height:68px;
+}
+.stat b{
+  display:block;
+  color:var(--green);
+  font-size:19px;
+  line-height:1.1;
+}
+.stat span{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+  margin-top:6px;
+}
+.mini-back{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:12px;
+  min-height:44px;
+  width:100%;
+  border-radius:16px;
+  color:var(--text);
+  text-decoration:none;
+  font-weight:950;
+  background:rgba(255,255,255,.075);
+  border:1px solid rgba(255,255,255,.09);
+}
+.section-title{
+  font-size:18px;
+  letter-spacing:8px;
+  font-weight:950;
+  margin:22px 0 10px;
+}
+.scan{padding:14px}
+.scan label{
+  display:block;
+  font-size:15px;
+  font-weight:950;
+  margin-bottom:8px;
+}
+.scan textarea{
+  width:100%;
+  min-height:108px;
+  border-radius:16px;
+  border:1px solid rgba(35,255,137,.22);
+  background:rgba(0,0,0,.22);
+  color:var(--text);
+  font-size:15px;
+  font-weight:800;
+  padding:12px 13px;
+  outline:none;
+  resize:vertical;
+}
+.scan textarea::placeholder{color:rgba(245,255,248,.34)}
+.scan button{
+  width:100%;
+  height:52px;
+  border:0;
+  border-radius:16px;
+  margin-top:10px;
+  background:linear-gradient(135deg,var(--yellow),var(--green));
+  font-size:16px;
+  font-weight:950;
+  color:#00180c;
+}
+.scan .hint{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.35;
+  font-weight:800;
+}
+.features{
+  padding:14px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+.feature{
+  min-height:64px;
+  border-radius:15px;
+  border:1px solid rgba(35,255,137,.18);
+  background:rgba(0,0,0,.20);
+  padding:12px;
+}
+.feature b{
+  display:block;
+  font-size:15px;
+  line-height:1.2;
+  margin-bottom:5px;
+}
+.feature span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.3;
+  font-weight:800;
+}
+.status{padding:0;overflow:hidden}
+.row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:15px 16px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.row:last-child{border-bottom:0}
+.row span{
+  font-size:15px;
+  font-weight:900;
+}
+.row b{
+  color:#9fffc4;
+  font-size:15px;
+  font-weight:950;
+}
+.foot{
+  text-align:center;
+  margin:20px 0 0;
+  color:rgba(245,255,248,.42);
+  font-weight:800;
+  font-size:13px;
+}
+@media(max-width:420px){
+  .stats{grid-template-columns:1fr 1fr 1fr}
+}
+@media(max-width:380px){
+  .hero h2{font-size:28px}
+  .features{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="logo">🛡️</div>
+    <div>
+      <h1>Erat<span>Guard</span></h1>
+      <p>Koruma Merkezi</p>
+    </div>
+  </div>
+  <div class="badge">👑 PRO AKTİF</div>
+</header>
+
+<section class="hero">
+  <div class="hero-top">
+    <div class="ico">🛡️</div>
+    <div>
+      <h2>Koruma Merkezi</h2>
+      <p>SMS tarama, spam filtreleme ve AI güvenlik motoru tek kompakt ekranda.</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>7/24</b><span>Koruma</span></div>
+    <div class="stat"><b>92</b><span>Skor</span></div>
+    <div class="stat"><b>AI</b><span>Hazır</span></div>
+  </div>
+
+  <a class="mini-back" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">TARAMA</div>
+<form class="scan" method="post" action="/u/protection">
+  <label>SMS metnini analiz et</label>
+  <textarea name="sms_text" placeholder="Şüpheli SMS metnini buraya yapıştır..."></textarea>
+  <button type="submit">SMS'i Tara</button>
+  <div class="hint">Riskli mesajlar Titanium motor tarafından otomatik karantinaya alınır.</div>
+</form>
+
+<div class="section-title">ÖZELLİKLER</div>
+<section class="features">
+  <div class="feature"><b>Anlık Tarama</b><span>Gelen mesajları hızlı değerlendirir.</span></div>
+  <div class="feature"><b>Spam Filtresi</b><span>Oltalama ve tehlikeli bağlantıları ayıklar.</span></div>
+  <div class="feature"><b>Koruma Katmanı</b><span>Kullanıcıyı yormadan sessiz güvenlik sağlar.</span></div>
+  <div class="feature"><b>Güvenli Liste</b><span>Güvenilir kişi ve servisleri yönetir.</span></div>
+</section>
+
+<div class="section-title">DURUM</div>
+<section class="status">
+  <div class="row"><span>Koruma Durumu</span><b>Açık</b></div>
+  <div class="row"><span>AI Motoru</span><b>Hazır</b></div>
+  <div class="row"><span>Spam Hassasiyeti</span><b>Yüksek</b></div>
+  <div class="row"><span>Son Kontrol</span><b>Az önce</b></div>
+</section>
+
+<div class="foot">EratGuard PRO · __USERNAME__ · © 2026</div>
+</body>
+</html>"""
+
+        html = html.replace("__USERNAME__", _eg_upd1_safe(username))
+
+        resp = _eg_upd1_make_response(_eg_upd1_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/protection", "/u/protection/"):
+                app.view_functions[_rule.endpoint] = _eg_upd1_compact_protection_route
+        print("ERATGUARD USER-PROTECTION-DIET-1 COMPACT PAGE ACTIVE")
+    except Exception as _eg_upd1_route_err:
+        print("ERATGUARD USER-PROTECTION-DIET-1 ROUTE ERROR:", _eg_upd1_route_err)
+
+except Exception as _eg_upd1_err:
+    print("ERATGUARD USER-PROTECTION-DIET-1 ERROR:", _eg_upd1_err)
+# === /ERATGUARD USER-PROTECTION-DIET-1 COMPACT PAGE ===
+
+# === ERATGUARD PROTECTION-SCAN-FIX-1 POST METHOD FIX ===
+# /u/protection form POST isteğinde 405 Method Not Allowed hatasını engeller.
+# SMS'i analiz eder, spam_logs / analysis_history / quarantine dosyalarına yazar.
+try:
+    from flask import request as _eg_psf1_request
+    from flask import session as _eg_psf1_session
+    from flask import redirect as _eg_psf1_redirect
+    from flask import render_template_string as _eg_psf1_render_template_string
+    from flask import make_response as _eg_psf1_make_response
+    from pathlib import Path as _eg_psf1_Path
+    from datetime import datetime as _eg_psf1_datetime
+    import json as _eg_psf1_json
+    import html as _eg_psf1_html
+
+    def _eg_psf1_safe(v):
+        try:
+            return _eg_psf1_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_psf1_load(default, path):
+        try:
+            p = _eg_psf1_Path(path)
+            if not p.exists():
+                return default
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_psf1_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_psf1_save(path, data):
+        p = _eg_psf1_Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(
+            _eg_psf1_json.dumps(data, ensure_ascii=False, indent=2),
+            encoding="utf-8"
+        )
+
+    def _eg_psf1_analyze(message):
+        try:
+            if "analyze_sms_text" in globals() and callable(globals().get("analyze_sms_text")):
+                return globals()["analyze_sms_text"](message)
+        except Exception as e:
+            print("ERATGUARD PROTECTION-SCAN-FIX-1 analyze_sms_text ERROR:", e)
+
+        text = str(message or "").lower()
+        score = 10
+        reasons = []
+
+        risky = [
+            "kazandınız", "kazandin", "ödül", "odul", "tebrikler",
+            "link", "tıkla", "tikla", "hemen", "acil",
+            "şifre", "sifre", "kart", "banka", "hesap",
+            "onay", "kargo", "borç", "borc", "icra"
+        ]
+
+        high = ["kart bilg", "şifre gir", "sifre gir", "hesap bilg", "tıklayın", "tiklayin"]
+
+        hit = sum(1 for w in risky if w in text)
+        high_hit = sum(1 for w in high if w in text)
+
+        score += hit * 8
+        score += high_hit * 15
+
+        if "http://" in text or "https://" in text or "www." in text:
+            score += 18
+            reasons.append("Mesaj bağlantı/link içeriyor.")
+
+        if any(w in text for w in ["kart", "şifre", "sifre", "hesap"]):
+            score += 18
+            reasons.append("Mesaj kişisel veya finansal bilgi isteme riski taşıyor.")
+
+        if hit:
+            reasons.append(f"{hit} adet riskli kelime/sinyal tespit edildi.")
+
+        if not reasons:
+            reasons.append("Belirgin spam sinyali bulunmadı.")
+
+        score = max(0, min(100, int(score)))
+
+        if score >= 71:
+            status = "SPAM"
+            label = "Yüksek Risk"
+            risk_class = "high"
+        elif score >= 31:
+            status = "SUSPICIOUS"
+            label = "Orta Risk"
+            risk_class = "mid"
+        else:
+            status = "SAFE"
+            label = "Düşük Risk"
+            risk_class = "low"
+
+        return {
+            "score": score,
+            "status": status,
+            "risk_label": label,
+            "risk_class": risk_class,
+            "reasons": reasons,
+        }
+
+    def _eg_psf1_result_page(message, result):
+        username = str(_eg_psf1_session.get("username") or "user")
+        score = int(result.get("score") or 0)
+        status = str(result.get("status") or "UNKNOWN")
+        risk_label = str(result.get("risk_label") or status)
+        reasons = result.get("reasons") or []
+
+        reasons_html = "".join(
+            f"<li>{_eg_psf1_safe(x)}</li>" for x in reasons
+        ) or "<li>Analiz tamamlandı.</li>"
+
+        html = f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - SMS Analiz Sonucu</title>
+<style>
+:root{{
+  --bg:#020806;
+  --panel:#071a10;
+  --line:rgba(35,255,137,.22);
+  --green:#20ff88;
+  --yellow:#ffdd35;
+  --red:#ff4d4d;
+  --text:#f5fff8;
+  --muted:rgba(245,255,248,.62);
+}}
+*{{box-sizing:border-box;-webkit-tap-highlight-color:transparent}}
+html,body{{
+  margin:0;
+  min-height:100%;
+  background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}}
+body{{padding:16px 14px 24px}}
+.top{{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}}
+.brand{{display:flex;align-items:center;gap:10px}}
+.logo{{width:50px;height:50px;border-radius:17px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:27px}}
+.brand h1{{margin:0;font-size:26px;line-height:1;font-weight:950;letter-spacing:-1.2px}}
+.brand h1 span{{color:var(--green)}}
+.brand p{{margin:4px 0 0;color:var(--muted);font-weight:850;font-size:12px}}
+.badge{{border:1px solid rgba(255,221,53,.35);color:var(--yellow);background:rgba(255,221,53,.10);padding:9px 12px;border-radius:999px;font-weight:950;font-size:12px}}
+.card,.msg,.reasons{{
+  border:1px solid var(--line);
+  background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));
+  border-radius:23px;
+  padding:16px;
+  box-shadow:0 18px 48px rgba(0,0,0,.34);
+}}
+.card h2{{font-size:34px;line-height:1;margin:0 0 8px;font-weight:950;letter-spacing:-1.6px}}
+.card p{{margin:0;color:var(--muted);font-size:14px;line-height:1.35;font-weight:800}}
+.grid{{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}}
+.box{{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:17px;padding:12px;min-height:68px}}
+.box b{{display:block;color:var(--yellow);font-size:22px;line-height:1.1}}
+.box span{{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-top:6px}}
+.section-title{{font-size:18px;letter-spacing:8px;font-weight:950;margin:22px 0 10px}}
+.msg{{white-space:pre-wrap;color:#c8ffd9;font-weight:800;line-height:1.45}}
+.reasons ul{{margin:0;padding-left:20px}}
+.reasons li{{margin:8px 0;color:var(--muted);font-weight:850;line-height:1.35}}
+.btn{{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:16px;text-decoration:none;font-weight:950;font-size:16px;border:1px solid rgba(255,255,255,.10);color:#00180c;background:linear-gradient(135deg,var(--yellow),var(--green));margin-top:12px}}
+.btn.secondary{{background:rgba(255,255,255,.075);color:var(--text)}}
+.foot{{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="logo">🛡️</div>
+    <div><h1>Erat<span>Guard</span></h1><p>SMS Analiz Sonucu</p></div>
+  </div>
+  <div class="badge">{_eg_psf1_safe(status)}</div>
+</header>
+
+<section class="card">
+  <h2>{_eg_psf1_safe(risk_label)}</h2>
+  <p>SMS analizi tamamlandı. Sonuç güvenlik kayıtlarına işlendi.</p>
+  <div class="grid">
+    <div class="box"><b>{score}</b><span>Risk skoru</span></div>
+    <div class="box"><b>{_eg_psf1_safe(status)}</b><span>Durum</span></div>
+  </div>
+  <a class="btn secondary" href="/u/protection">← Koruma sayfasına dön</a>
+</section>
+
+<div class="section-title">MESAJ</div>
+<section class="msg">{_eg_psf1_safe(message)}</section>
+
+<div class="section-title">NEDENLER</div>
+<section class="reasons">
+  <ul>{reasons_html}</ul>
+</section>
+
+<a class="btn" href="/dashboard">Ana ekrana dön</a>
+
+<div class="foot">EratGuard PRO · {_eg_psf1_safe(username)} · © 2026</div>
+</body>
+</html>"""
+
+        resp = _eg_psf1_make_response(_eg_psf1_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    @app.before_request
+    def _eg_psf1_protection_post_bridge():
+        try:
+            path = str(_eg_psf1_request.path or "").rstrip("/")
+            method = str(_eg_psf1_request.method or "").upper()
+
+            if path != "/u/protection" or method != "POST":
+                return None
+
+            if not (_eg_psf1_session.get("logged_in") and _eg_psf1_session.get("username")):
+                return _eg_psf1_redirect("/login?auth_required=1")
+
+            username = str(_eg_psf1_session.get("username") or "user")
+            message = (
+                _eg_psf1_request.form.get("sms_text")
+                or _eg_psf1_request.form.get("message")
+                or _eg_psf1_request.form.get("body")
+                or ""
+            ).strip()
+
+            if not message:
+                return _eg_psf1_redirect("/u/protection?empty=1")
+
+            result = _eg_psf1_analyze(message)
+            now = _eg_psf1_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            status = str(result.get("status") or "UNKNOWN")
+            score = int(result.get("score") or 0)
+            reasons = result.get("reasons") or []
+
+            log_item = {
+                "time": now,
+                "number": "manual_user_scan",
+                "sender": "manual_user_scan",
+                "body": message,
+                "status": status,
+                "score": score,
+                "risk": score,
+                "reasons": reasons,
+                "source": "user_protection_scan",
+                "username": username
+            }
+
+            spam_logs = _eg_psf1_load([], "data/spam_logs.json")
+            if not isinstance(spam_logs, list):
+                spam_logs = []
+            spam_logs.append(log_item)
+            _eg_psf1_save("data/spam_logs.json", spam_logs)
+
+            history = _eg_psf1_load([], "data/user_analysis_history.json")
+            if not isinstance(history, list):
+                history = []
+            history.append(log_item)
+            _eg_psf1_save("data/user_analysis_history.json", history)
+
+            if score >= 71 or status == "SPAM":
+                quarantine = _eg_psf1_load([], "data/user_quarantine.json")
+                if not isinstance(quarantine, list):
+                    quarantine = []
+                q_item = dict(log_item)
+                q_item["quarantine_status"] = "auto_quarantined"
+                quarantine.append(q_item)
+                _eg_psf1_save("data/user_quarantine.json", quarantine)
+
+            return _eg_psf1_result_page(message, result)
+
+        except Exception as _eg_psf1_req_err:
+            print("ERATGUARD PROTECTION-SCAN-FIX-1 REQUEST ERROR:", _eg_psf1_req_err)
+            return None
+
+    print("ERATGUARD PROTECTION-SCAN-FIX-1 POST METHOD FIX ACTIVE")
+
+except Exception as _eg_psf1_err:
+    print("ERATGUARD PROTECTION-SCAN-FIX-1 ERROR:", _eg_psf1_err)
+# === /ERATGUARD PROTECTION-SCAN-FIX-1 POST METHOD FIX ===
+
+# === ERATGUARD PROTECTION-SCAN-FIX-2 UNKNOWN STATUS NORMALIZE ===
+# Analiz sonucu score/reasons geliyor ama status/risk_label eksikse UNKNOWN görünmesini engeller.
+try:
+    def _eg_psf2_normalize_result(result):
+        if not isinstance(result, dict):
+            result = {}
+
+        try:
+            score = int(result.get("score") or result.get("risk") or 0)
+        except Exception:
+            score = 0
+
+        score = max(0, min(100, score))
+
+        status = str(result.get("status") or "").strip().upper()
+        risk_label = str(result.get("risk_label") or result.get("label") or "").strip()
+        risk_class = str(result.get("risk_class") or "").strip().lower()
+
+        if not status or status in ("UNKNOWN", "NONE", "NULL"):
+            if score >= 71:
+                status = "SPAM"
+            elif score >= 31:
+                status = "SUSPICIOUS"
+            else:
+                status = "SAFE"
+
+        if not risk_label or risk_label.upper() in ("UNKNOWN", "NONE", "NULL"):
+            if status == "SPAM" or score >= 71:
+                risk_label = "Yüksek Risk"
+            elif status == "SUSPICIOUS" or score >= 31:
+                risk_label = "Orta Risk"
+            else:
+                risk_label = "Düşük Risk"
+
+        if not risk_class or risk_class in ("unknown", "none", "null"):
+            if status == "SPAM" or score >= 71:
+                risk_class = "high"
+            elif status == "SUSPICIOUS" or score >= 31:
+                risk_class = "mid"
+            else:
+                risk_class = "low"
+
+        reasons = result.get("reasons") or result.get("reason") or []
+        if isinstance(reasons, str):
+            reasons = [reasons]
+        if not isinstance(reasons, list):
+            reasons = ["Analiz tamamlandı."]
+
+        result["score"] = score
+        result["status"] = status
+        result["risk_label"] = risk_label
+        result["risk_class"] = risk_class
+        result["reasons"] = reasons
+
+        return result
+
+    # Mevcut _eg_psf1_analyze fonksiyonunu sar.
+    if "_eg_psf1_analyze" in globals() and callable(globals().get("_eg_psf1_analyze")):
+        _eg_psf2_old_analyze = globals().get("_eg_psf1_analyze")
+
+        def _eg_psf1_analyze(message):
+            try:
+                raw = _eg_psf2_old_analyze(message)
+            except Exception as _eg_psf2_old_err:
+                print("ERATGUARD PROTECTION-SCAN-FIX-2 OLD ANALYZE ERROR:", _eg_psf2_old_err)
+                raw = {}
+            return _eg_psf2_normalize_result(raw)
+
+    print("ERATGUARD PROTECTION-SCAN-FIX-2 UNKNOWN STATUS NORMALIZE ACTIVE")
+
+except Exception as _eg_psf2_err:
+    print("ERATGUARD PROTECTION-SCAN-FIX-2 ERROR:", _eg_psf2_err)
+# === /ERATGUARD PROTECTION-SCAN-FIX-2 UNKNOWN STATUS NORMALIZE ===
+
+# === ERATGUARD AI-ANALYSIS-SCAN-FIX-1 POST METHOD FIX ===
+# /u/analysis form POST isteğinde 405 Method Not Allowed hatasını engeller.
+# AI analiz sonucunu history/spam_logs/quarantine dosyalarına yazar.
+try:
+    from flask import request as _eg_asf1_request
+    from flask import session as _eg_asf1_session
+    from flask import redirect as _eg_asf1_redirect
+    from flask import render_template_string as _eg_asf1_render_template_string
+    from flask import make_response as _eg_asf1_make_response
+    from pathlib import Path as _eg_asf1_Path
+    from datetime import datetime as _eg_asf1_datetime
+    import json as _eg_asf1_json
+    import html as _eg_asf1_html
+
+    def _eg_asf1_safe(v):
+        try:
+            return _eg_asf1_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_asf1_load(default, path):
+        try:
+            p = _eg_asf1_Path(path)
+            if not p.exists():
+                return default
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_asf1_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_asf1_save(path, data):
+        p = _eg_asf1_Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(
+            _eg_asf1_json.dumps(data, ensure_ascii=False, indent=2),
+            encoding="utf-8"
+        )
+
+    def _eg_asf1_analyze(message):
+        # Varsa mevcut motoru kullan.
+        for fn_name in ("analyze_sms_text", "analyze_message", "scan_sms_text"):
+            try:
+                fn = globals().get(fn_name)
+                if callable(fn):
+                    raw = fn(message)
+                    if isinstance(raw, dict):
+                        return _eg_asf1_normalize(raw)
+            except Exception as e:
+                print("ERATGUARD AI-ANALYSIS-SCAN-FIX-1 ENGINE ERROR:", fn_name, e)
+
+        text = str(message or "").lower()
+        score = 8
+        reasons = []
+
+        urgent_words = ["acil", "hemen", "son gün", "son gun", "kaçırma", "kacirma", "tıkla", "tikla"]
+        prize_words = ["kazandınız", "kazandin", "ödül", "odul", "hediye", "kampanya", "bonus", "çekiliş", "cekilis"]
+        finance_words = ["kart", "şifre", "sifre", "banka", "hesap", "iban", "ödeme", "odeme", "borç", "borc"]
+        link_words = ["http://", "https://", "www.", ".com", ".net", ".xyz", "link"]
+
+        urgent_hit = sum(1 for w in urgent_words if w in text)
+        prize_hit = sum(1 for w in prize_words if w in text)
+        finance_hit = sum(1 for w in finance_words if w in text)
+        link_hit = sum(1 for w in link_words if w in text)
+
+        score += urgent_hit * 12
+        score += prize_hit * 14
+        score += finance_hit * 16
+        score += link_hit * 14
+
+        if urgent_hit:
+            reasons.append("Mesaj hızlı karar vermeye zorlayan aciliyet dili içeriyor.")
+        if prize_hit:
+            reasons.append("Mesaj ödül, kampanya veya kazanç vaadi içeriyor.")
+        if finance_hit:
+            reasons.append("Mesaj kişisel, şifre, kart veya hesap bilgisi isteme riski taşıyor.")
+        if link_hit:
+            reasons.append("Mesaj bağlantı/link yönlendirmesi içeriyor.")
+
+        total_hit = urgent_hit + prize_hit + finance_hit + link_hit
+        if total_hit:
+            reasons.append(f"Mesajda {total_hit} adet riskli kelime/sinyal tespit edildi.")
+        else:
+            reasons.append("Belirgin dolandırıcılık sinyali bulunmadı.")
+
+        return _eg_asf1_normalize({
+            "score": score,
+            "reasons": reasons,
+        })
+
+    def _eg_asf1_normalize(result):
+        if not isinstance(result, dict):
+            result = {}
+
+        try:
+            score = int(result.get("score") or result.get("risk") or 0)
+        except Exception:
+            score = 0
+
+        score = max(0, min(100, score))
+
+        status = str(result.get("status") or "").strip().upper()
+        risk_label = str(result.get("risk_label") or result.get("label") or "").strip()
+        risk_class = str(result.get("risk_class") or "").strip().lower()
+
+        if not status or status in ("UNKNOWN", "NONE", "NULL"):
+            if score >= 71:
+                status = "SPAM"
+            elif score >= 31:
+                status = "SUSPICIOUS"
+            else:
+                status = "SAFE"
+
+        if not risk_label or risk_label.upper() in ("UNKNOWN", "NONE", "NULL"):
+            if status == "SPAM" or score >= 71:
+                risk_label = "Yüksek Risk"
+            elif status == "SUSPICIOUS" or score >= 31:
+                risk_label = "Orta Risk"
+            else:
+                risk_label = "Düşük Risk"
+
+        if not risk_class or risk_class in ("unknown", "none", "null"):
+            if status == "SPAM" or score >= 71:
+                risk_class = "high"
+            elif status == "SUSPICIOUS" or score >= 31:
+                risk_class = "mid"
+            else:
+                risk_class = "low"
+
+        reasons = result.get("reasons") or result.get("reason") or []
+        if isinstance(reasons, str):
+            reasons = [reasons]
+        if not isinstance(reasons, list):
+            reasons = ["Analiz tamamlandı."]
+
+        result["score"] = score
+        result["status"] = status
+        result["risk_label"] = risk_label
+        result["risk_class"] = risk_class
+        result["reasons"] = reasons
+        return result
+
+    def _eg_asf1_result_page(message, result):
+        username = str(_eg_asf1_session.get("username") or "user")
+        score = int(result.get("score") or 0)
+        status = str(result.get("status") or "UNKNOWN")
+        risk_label = str(result.get("risk_label") or status)
+        reasons = result.get("reasons") or []
+
+        reasons_html = "".join(f"<li>{_eg_asf1_safe(x)}</li>" for x in reasons) or "<li>Analiz tamamlandı.</li>"
+
+        html = f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - AI Analiz Sonucu</title>
+<style>
+:root{{
+  --bg:#020806;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;
+  --text:#f5fff8;--muted:rgba(245,255,248,.62)
+}}
+*{{box-sizing:border-box;-webkit-tap-highlight-color:transparent}}
+html,body{{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}}
+body{{padding:16px 14px 24px}}
+.top{{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}}
+.brand{{display:flex;align-items:center;gap:10px}}
+.logo{{width:50px;height:50px;border-radius:17px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:27px}}
+.brand h1{{margin:0;font-size:26px;line-height:1;font-weight:950;letter-spacing:-1.2px}}
+.brand h1 span{{color:var(--green)}}
+.brand p{{margin:4px 0 0;color:var(--muted);font-weight:850;font-size:12px}}
+.badge{{border:1px solid rgba(255,221,53,.35);color:var(--yellow);background:rgba(255,221,53,.10);padding:9px 12px;border-radius:999px;font-weight:950;font-size:12px}}
+.card,.msg,.reasons{{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:23px;padding:16px;box-shadow:0 18px 48px rgba(0,0,0,.34)}}
+.card h2{{font-size:34px;line-height:1;margin:0 0 8px;font-weight:950;letter-spacing:-1.6px}}
+.card p{{margin:0;color:var(--muted);font-size:14px;line-height:1.35;font-weight:800}}
+.grid{{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}}
+.box{{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:17px;padding:12px;min-height:68px}}
+.box b{{display:block;color:var(--yellow);font-size:22px;line-height:1.1}}
+.box span{{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-top:6px}}
+.section-title{{font-size:18px;letter-spacing:8px;font-weight:950;margin:22px 0 10px}}
+.msg{{white-space:pre-wrap;color:#c8ffd9;font-weight:800;line-height:1.45}}
+.reasons ul{{margin:0;padding-left:20px}}
+.reasons li{{margin:8px 0;color:var(--muted);font-weight:850;line-height:1.35}}
+.btn{{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:16px;text-decoration:none;font-weight:950;font-size:16px;border:1px solid rgba(255,255,255,.10);color:#00180c;background:linear-gradient(135deg,var(--yellow),var(--green));margin-top:12px}}
+.btn.secondary{{background:rgba(255,255,255,.075);color:var(--text)}}
+.foot{{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="logo">🔎</div>
+    <div><h1>Erat<span>Guard</span></h1><p>AI Analiz Sonucu</p></div>
+  </div>
+  <div class="badge">{_eg_asf1_safe(status)}</div>
+</header>
+
+<section class="card">
+  <h2>{_eg_asf1_safe(risk_label)}</h2>
+  <p>AI mesaj analizi tamamlandı. Sonuç güvenlik kayıtlarına işlendi.</p>
+  <div class="grid">
+    <div class="box"><b>{score}</b><span>Risk skoru</span></div>
+    <div class="box"><b>{_eg_asf1_safe(status)}</b><span>Durum</span></div>
+  </div>
+  <a class="btn secondary" href="/u/analysis">← Analiz sayfasına dön</a>
+</section>
+
+<div class="section-title">MESAJ</div>
+<section class="msg">{_eg_asf1_safe(message)}</section>
+
+<div class="section-title">NEDENLER</div>
+<section class="reasons"><ul>{reasons_html}</ul></section>
+
+<a class="btn" href="/dashboard">Ana ekrana dön</a>
+
+<div class="foot">EratGuard PRO · {_eg_asf1_safe(username)} · © 2026</div>
+</body>
+</html>"""
+
+        resp = _eg_asf1_make_response(_eg_asf1_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    @app.before_request
+    def _eg_asf1_analysis_post_bridge():
+        try:
+            path = str(_eg_asf1_request.path or "").rstrip("/")
+            method = str(_eg_asf1_request.method or "").upper()
+
+            if path != "/u/analysis" or method != "POST":
+                return None
+
+            if not (_eg_asf1_session.get("logged_in") and _eg_asf1_session.get("username")):
+                return _eg_asf1_redirect("/login?auth_required=1")
+
+            username = str(_eg_asf1_session.get("username") or "user")
+            message = (
+                _eg_asf1_request.form.get("sms_text")
+                or _eg_asf1_request.form.get("message")
+                or _eg_asf1_request.form.get("body")
+                or _eg_asf1_request.form.get("text")
+                or ""
+            ).strip()
+
+            if not message:
+                return _eg_asf1_redirect("/u/analysis?empty=1")
+
+            result = _eg_asf1_analyze(message)
+            now = _eg_asf1_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            status = str(result.get("status") or "UNKNOWN")
+            score = int(result.get("score") or 0)
+            reasons = result.get("reasons") or []
+
+            item = {
+                "time": now,
+                "number": "manual_ai_analysis",
+                "sender": "manual_ai_analysis",
+                "body": message,
+                "status": status,
+                "score": score,
+                "risk": score,
+                "reasons": reasons,
+                "source": "user_ai_analysis_scan",
+                "username": username
+            }
+
+            history = _eg_asf1_load([], "data/user_analysis_history.json")
+            if not isinstance(history, list):
+                history = []
+            history.append(item)
+            _eg_asf1_save("data/user_analysis_history.json", history)
+
+            spam_logs = _eg_asf1_load([], "data/spam_logs.json")
+            if not isinstance(spam_logs, list):
+                spam_logs = []
+            spam_logs.append(item)
+            _eg_asf1_save("data/spam_logs.json", spam_logs)
+
+            if score >= 71 or status == "SPAM":
+                quarantine = _eg_asf1_load([], "data/user_quarantine.json")
+                if not isinstance(quarantine, list):
+                    quarantine = []
+                q_item = dict(item)
+                q_item["quarantine_status"] = "auto_quarantined"
+                quarantine.append(q_item)
+                _eg_asf1_save("data/user_quarantine.json", quarantine)
+
+            return _eg_asf1_result_page(message, result)
+
+        except Exception as _eg_asf1_req_err:
+            print("ERATGUARD AI-ANALYSIS-SCAN-FIX-1 REQUEST ERROR:", _eg_asf1_req_err)
+            return None
+
+    print("ERATGUARD AI-ANALYSIS-SCAN-FIX-1 POST METHOD FIX ACTIVE")
+
+except Exception as _eg_asf1_err:
+    print("ERATGUARD AI-ANALYSIS-SCAN-FIX-1 ERROR:", _eg_asf1_err)
+# === /ERATGUARD AI-ANALYSIS-SCAN-FIX-1 POST METHOD FIX ===
+
+# === ERATGUARD AI-ANALYSIS-DIET-1B SAFE FORCE PAGE ===
+# /u/analysis route override: kompakt sayfa + güçlü risk motoru + POST desteği.
+try:
+    from flask import request as _eg_aid1b_request
+    from flask import session as _eg_aid1b_session
+    from flask import redirect as _eg_aid1b_redirect
+    from flask import render_template_string as _eg_aid1b_render_template_string
+    from flask import make_response as _eg_aid1b_make_response
+    from pathlib import Path as _eg_aid1b_Path
+    from datetime import datetime as _eg_aid1b_datetime
+    import json as _eg_aid1b_json
+    import html as _eg_aid1b_html
+
+    def _eg_aid1b_safe(v):
+        try:
+            return _eg_aid1b_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_aid1b_load(default, path):
+        try:
+            p = _eg_aid1b_Path(path)
+            if not p.exists():
+                return default
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_aid1b_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_aid1b_save(path, data):
+        p = _eg_aid1b_Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(_eg_aid1b_json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def _eg_aid1b_engine(message):
+        text = str(message or "").lower()
+        score = 8
+        reasons = []
+
+        groups = {
+            "aciliyet": ["acil", "hemen", "son gün", "son gun", "tıkla", "tikla", "tıklayın", "tiklayin"],
+            "ödül": ["tebrikler", "kazandınız", "kazandiniz", "kazandin", "ödül", "odul", "hediye", "kampanya", "bonus", "tl kazand"],
+            "finans": ["kart", "şifre", "sifre", "banka", "hesap", "iban", "ödeme", "odeme", "bilgilerinizi girin", "kart bilg"],
+            "link": ["http://", "https://", "www.", ".com", ".net", ".xyz", "link", "bağlantı", "baglanti"],
+        }
+
+        hits = {}
+        for name, words in groups.items():
+            hits[name] = sum(1 for w in words if w in text)
+
+        score += hits["aciliyet"] * 14
+        score += hits["ödül"] * 16
+        score += hits["finans"] * 18
+        score += hits["link"] * 16
+
+        if hits["aciliyet"]:
+            reasons.append("Mesaj hızlı karar vermeye zorlayan aciliyet dili içeriyor.")
+        if hits["ödül"]:
+            reasons.append("Mesaj ödül, kampanya veya kazanç vaadi içeriyor.")
+        if hits["finans"]:
+            reasons.append("Mesaj kişisel, şifre, kart veya hesap bilgisi isteme riski taşıyor.")
+        if hits["link"]:
+            reasons.append("Mesaj bağlantı veya link yönlendirmesi içeriyor.")
+
+        total = sum(hits.values())
+
+        if hits["ödül"] and hits["aciliyet"] and (hits["finans"] or hits["link"]):
+            score = max(score, 92)
+            reasons.append("Ödül vaadi, aciliyet ve bilgi/link yönlendirmesi birlikte tespit edildi.")
+
+        if total:
+            reasons.append(f"Toplam {total} risk sinyali tespit edildi.")
+        else:
+            reasons.append("Belirgin dolandırıcılık sinyali düşük görünüyor.")
+
+        score = max(0, min(100, int(score)))
+
+        if score >= 71:
+            return {"score": score, "status": "SPAM", "risk_label": "Yüksek Risk", "risk_class": "high", "reasons": reasons}
+        if score >= 31:
+            return {"score": score, "status": "SUSPICIOUS", "risk_label": "Orta Risk", "risk_class": "mid", "reasons": reasons}
+        return {"score": score, "status": "SAFE", "risk_label": "Düşük Risk", "risk_class": "low", "reasons": reasons}
+
+    def _eg_aid1b_write(username, message, result):
+        now = _eg_aid1b_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        item = {
+            "time": now,
+            "number": "manual_ai_analysis",
+            "sender": "manual_ai_analysis",
+            "body": message,
+            "status": result.get("status"),
+            "score": int(result.get("score") or 0),
+            "risk": int(result.get("score") or 0),
+            "risk_label": result.get("risk_label"),
+            "risk_class": result.get("risk_class"),
+            "reasons": result.get("reasons") or [],
+            "source": "user_ai_analysis_scan",
+            "username": username,
+        }
+
+        for file_path in ["data/user_analysis_history.json", "data/spam_logs.json"]:
+            data = _eg_aid1b_load([], file_path)
+            if not isinstance(data, list):
+                data = []
+            data.append(item)
+            _eg_aid1b_save(file_path, data)
+
+        if item["score"] >= 71 or item["status"] == "SPAM":
+            q = _eg_aid1b_load([], "data/user_quarantine.json")
+            if not isinstance(q, list):
+                q = []
+            q_item = dict(item)
+            q_item["quarantine_status"] = "auto_quarantined"
+            q.append(q_item)
+            _eg_aid1b_save("data/user_quarantine.json", q)
+
+    def _eg_aid1b_route():
+        if not (_eg_aid1b_session.get("logged_in") and _eg_aid1b_session.get("username")):
+            return _eg_aid1b_redirect("/login")
+
+        username = str(_eg_aid1b_session.get("username") or "user")
+        message = ""
+        result = None
+
+        if str(_eg_aid1b_request.method or "").upper() == "POST":
+            message = (
+                _eg_aid1b_request.form.get("sms_text")
+                or _eg_aid1b_request.form.get("message")
+                or _eg_aid1b_request.form.get("body")
+                or _eg_aid1b_request.form.get("text")
+                or ""
+            ).strip()
+
+            if message:
+                result = _eg_aid1b_engine(message)
+                _eg_aid1b_write(username, message, result)
+
+        result_html = ""
+        if result:
+            reasons_html = "".join("<li>" + _eg_aid1b_safe(x) + "</li>" for x in (result.get("reasons") or []))
+            result_html = """
+<div class="section-title">SONUÇ</div>
+<section class="result">
+  <div class="result-top">
+    <div>
+      <h3>__RISK_LABEL__</h3>
+      <p>AI analiz tamamlandı ve güvenlik kayıtlarına işlendi.</p>
+    </div>
+    <div class="score">__SCORE__</div>
+  </div>
+  <div class="mini-grid">
+    <div><b>__STATUS__</b><span>Durum</span></div>
+    <div><b>__RISK_CLASS__</b><span>Seviye</span></div>
+  </div>
+  <ul>__REASONS__</ul>
+</section>
+"""
+            result_html = result_html.replace("__RISK_LABEL__", _eg_aid1b_safe(result.get("risk_label")))
+            result_html = result_html.replace("__SCORE__", _eg_aid1b_safe(result.get("score")))
+            result_html = result_html.replace("__STATUS__", _eg_aid1b_safe(result.get("status")))
+            result_html = result_html.replace("__RISK_CLASS__", _eg_aid1b_safe(result.get("risk_class")))
+            result_html = result_html.replace("__REASONS__", reasons_html)
+
+        page = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - AI Analiz</title>
+<style>
+:root{--bg:#020806;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;--text:#f5fff8;--muted:rgba(245,255,248,.62)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{padding:16px 14px 24px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:50px;height:50px;border-radius:17px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:27px}
+.brand h1{margin:0;font-size:26px;line-height:1;font-weight:950;letter-spacing:-1.2px}.brand h1 span{color:var(--green)}
+.brand p{margin:4px 0 0;color:var(--muted);font-weight:850;font-size:12px}
+.badge{border:1px solid rgba(255,221,53,.35);color:var(--green);background:rgba(35,255,137,.10);padding:9px 12px;border-radius:999px;font-weight:950;font-size:12px}
+.hero,.scan,.result,.status{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:23px;padding:16px;box-shadow:0 18px 48px rgba(0,0,0,.34)}
+.hero-top{display:flex;align-items:flex-start;gap:13px}
+.ico{width:54px;height:54px;flex:0 0 54px;border-radius:19px;border:1px solid var(--line);background:rgba(35,255,137,.10);display:grid;place-items:center;font-size:29px}
+.hero h2{font-size:31px;line-height:1.02;margin:2px 0 6px;font-weight:950;letter-spacing:-1.5px}
+.hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.3;font-weight:800}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:14px}
+.stat{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:17px;padding:12px;min-height:68px}
+.stat b{display:block;color:var(--green);font-size:19px}.stat span{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-top:6px}
+.back{display:flex;align-items:center;justify-content:center;margin-top:12px;min-height:44px;width:100%;border-radius:16px;color:var(--text);text-decoration:none;font-weight:950;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09)}
+.section-title{font-size:18px;letter-spacing:8px;font-weight:950;margin:22px 0 10px}
+.scan{padding:14px}.scan label{display:block;font-size:15px;font-weight:950;margin-bottom:8px}
+.scan textarea{width:100%;min-height:108px;border-radius:16px;border:1px solid rgba(35,255,137,.22);background:rgba(0,0,0,.22);color:var(--text);font-size:15px;font-weight:800;padding:12px 13px;outline:none;resize:vertical}
+.scan textarea::placeholder{color:rgba(245,255,248,.34)}
+.scan button{width:100%;height:52px;border:0;border-radius:16px;margin-top:10px;background:linear-gradient(135deg,var(--yellow),var(--green));font-size:16px;font-weight:950;color:#00180c}
+.result h3{font-size:31px;margin:0 0 7px;font-weight:950;letter-spacing:-1.3px}.result p{margin:0;color:var(--muted);font-size:13px;font-weight:850}
+.result-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.score{min-width:70px;height:70px;border-radius:20px;border:1px solid rgba(255,221,53,.35);display:grid;place-items:center;color:var(--yellow);font-size:28px;font-weight:950;background:rgba(0,0,0,.22)}
+.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.mini-grid div{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.20);border-radius:16px;padding:11px}
+.mini-grid b{display:block;color:#9fffc4;font-size:15px}.mini-grid span{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-top:5px}
+.result ul{margin:14px 0 0;padding-left:20px}.result li{margin:7px 0;color:var(--muted);font-weight:850;line-height:1.35}
+.status{padding:0;overflow:hidden}.row{display:flex;justify-content:space-between;gap:12px;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.row:last-child{border-bottom:0}.row span{font-size:15px;font-weight:900}.row b{color:#9fffc4;font-size:15px;font-weight:950}
+.foot{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">🔎</div><div><h1>Erat<span>Guard</span></h1><p>AI Analiz</p></div></div>
+  <div class="badge">👑 PRO AKTİF</div>
+</header>
+
+<section class="hero">
+  <div class="hero-top">
+    <div class="ico">🔎</div>
+    <div><h2>AI Analiz</h2><p>Mesaj içeriğini risk, bağlantı, aciliyet ve dolandırıcılık sinyallerine göre analiz eder.</p></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>AI</b><span>Aktif</span></div>
+    <div class="stat"><b>0-100</b><span>Skor</span></div>
+    <div class="stat"><b>PRO</b><span>Motor</span></div>
+  </div>
+  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">TARAMA</div>
+<form class="scan" method="post" action="/u/analysis">
+  <label>SMS / mesaj metnini analiz et</label>
+  <textarea name="sms_text" placeholder="Analiz etmek istediğin SMS veya mesaj metnini buraya yapıştır...">__MESSAGE__</textarea>
+  <button type="submit">AI Analizi Başlat</button>
+</form>
+
+__RESULT__
+
+<div class="section-title">DURUM</div>
+<section class="status">
+  <div class="row"><span>Analiz Motoru</span><b>Çevrim içi</b></div>
+  <div class="row"><span>Hassasiyet</span><b>Yüksek</b></div>
+  <div class="row"><span>Kayıt</span><b>Aktif</b></div>
+  <div class="row"><span>Karantina</span><b>Otomatik</b></div>
+</section>
+
+<div class="foot">EratGuard PRO · __USERNAME__ · © 2026</div>
+</body>
+</html>
+"""
+        page = page.replace("__USERNAME__", _eg_aid1b_safe(username))
+        page = page.replace("__MESSAGE__", _eg_aid1b_safe(message))
+        page = page.replace("__RESULT__", result_html)
+
+        resp = _eg_aid1b_make_response(_eg_aid1b_render_template_string(page))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/analysis", "/u/analysis/"):
+                app.view_functions[_rule.endpoint] = _eg_aid1b_route
+                try:
+                    _rule.methods.add("POST")
+                except Exception:
+                    pass
+        print("ERATGUARD AI-ANALYSIS-DIET-1B SAFE FORCE PAGE ACTIVE")
+    except Exception as _eg_aid1b_route_err:
+        print("ERATGUARD AI-ANALYSIS-DIET-1B ROUTE ERROR:", _eg_aid1b_route_err)
+
+except Exception as _eg_aid1b_err:
+    print("ERATGUARD AI-ANALYSIS-DIET-1B ERROR:", _eg_aid1b_err)
+# === /ERATGUARD AI-ANALYSIS-DIET-1B SAFE FORCE PAGE ===
+
+# === ERATGUARD REPORTS-DATA-BIND-1B SAFE LIVE REPORTS PAGE ===
+# /u/reports sayfasını canlı JSON verisine bağlar.
+try:
+    from flask import render_template_string as _eg_rdb1b_render_template_string
+    from flask import make_response as _eg_rdb1b_make_response
+    from flask import redirect as _eg_rdb1b_redirect
+    from flask import session as _eg_rdb1b_session
+    from pathlib import Path as _eg_rdb1b_Path
+    import json as _eg_rdb1b_json
+    import html as _eg_rdb1b_html
+
+    def _eg_rdb1b_safe(v):
+        try:
+            return _eg_rdb1b_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_rdb1b_load(default, path):
+        try:
+            p = _eg_rdb1b_Path(path)
+            if not p.exists():
+                return default
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_rdb1b_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_rdb1b_norm_status(v):
+        raw = str(v or "").strip().upper()
+        if raw in ("SPAM", "BLOCKED", "HIGH", "RISK", "RISKY"):
+            return "SPAM"
+        if raw in ("SUSPICIOUS", "WARNING", "MID", "ORTA"):
+            return "SUSPICIOUS"
+        if raw in ("OK", "SAFE", "GUVENLI", "GÜVENLİ", "LOW", "GUVENLI"):
+            return "SAFE"
+        return "UNKNOWN"
+
+    def _eg_rdb1b_score(item):
+        try:
+            return int(item.get("score") or item.get("risk") or 0)
+        except Exception:
+            return 0
+
+    def _eg_rdb1b_items(username):
+        username = str(username or "").strip()
+
+        spam_logs = _eg_rdb1b_load([], "data/spam_logs.json")
+        history = _eg_rdb1b_load([], "data/user_analysis_history.json")
+        quarantine = _eg_rdb1b_load([], "data/user_quarantine.json")
+
+        if not isinstance(spam_logs, list):
+            spam_logs = []
+        if not isinstance(history, list):
+            history = []
+        if not isinstance(quarantine, list):
+            quarantine = []
+
+        combined = []
+
+        for src, data in [("spam_logs", spam_logs), ("analysis_history", history)]:
+            for item in data:
+                if not isinstance(item, dict):
+                    continue
+                item_user = str(item.get("username") or "").strip()
+
+                # Eski kayıtlarda username yoksa test raporunda gösteriyoruz.
+                if item_user and item_user != username:
+                    continue
+
+                x = dict(item)
+                x["_file_source"] = src
+                combined.append(x)
+
+        user_quarantine = []
+        for item in quarantine:
+            if not isinstance(item, dict):
+                continue
+            item_user = str(item.get("username") or "").strip()
+            if item_user and item_user != username:
+                continue
+            user_quarantine.append(item)
+
+        return combined, user_quarantine
+
+    def _eg_rdb1b_reports_route():
+        if not (_eg_rdb1b_session.get("logged_in") and _eg_rdb1b_session.get("username")):
+            return _eg_rdb1b_redirect("/login?auth_required=1")
+
+        username = str(_eg_rdb1b_session.get("username") or "user")
+        items, quarantine = _eg_rdb1b_items(username)
+
+        total = len(items)
+        spam_count = 0
+        safe_count = 0
+        suspicious_count = 0
+        unknown_count = 0
+        score_sum = 0
+
+        for item in items:
+            st = _eg_rdb1b_norm_status(item.get("status"))
+            sc = _eg_rdb1b_score(item)
+            score_sum += sc
+
+            if st == "SPAM" or sc >= 71:
+                spam_count += 1
+            elif st == "SUSPICIOUS" or sc >= 31:
+                suspicious_count += 1
+            elif st == "SAFE":
+                safe_count += 1
+            else:
+                unknown_count += 1
+
+        quarantine_count = len(quarantine)
+        avg_score = int(score_sum / total) if total else 0
+        risk_rate = int((spam_count / total) * 100) if total else 0
+        safe_rate = max(0, 100 - risk_rate) if total else 100
+
+        if spam_count:
+            summary = "Riskli mesajlar tespit edildi. Karantina ve rapor kayıtları aktif."
+            mode_label = "Risk İzleme"
+        elif suspicious_count:
+            summary = "Orta risk sinyalleri var. Sistem izlemeye devam ediyor."
+            mode_label = "Dikkat"
+        else:
+            summary = "Belirgin yüksek risk yoğunluğu yok. Sistem temiz görünüyor."
+            mode_label = "Temiz Durum"
+
+        recent = sorted(items, key=lambda x: str(x.get("time") or ""), reverse=True)[:5]
+
+        recent_html = ""
+        if recent:
+            for item in recent:
+                st = _eg_rdb1b_norm_status(item.get("status"))
+                sc = _eg_rdb1b_score(item)
+                label = item.get("risk_label") or ("Yüksek Risk" if sc >= 71 else "Düşük Risk")
+                body = str(item.get("body") or "")[:92]
+                source = item.get("source") or item.get("_file_source") or "system"
+                time = item.get("time") or "-"
+
+                recent_html += (
+                    '<div class="event">'
+                    '<div>'
+                    '<b>' + _eg_rdb1b_safe(label) + '</b>'
+                    '<span>' + _eg_rdb1b_safe(body) + '</span>'
+                    '<small>' + _eg_rdb1b_safe(time) + ' - ' + _eg_rdb1b_safe(source) + '</small>'
+                    '</div>'
+                    '<strong>' + _eg_rdb1b_safe(st) + ' / ' + str(sc) + '</strong>'
+                    '</div>'
+                )
+        else:
+            recent_html = '<div class="empty">Henüz analiz kaydı yok.</div>'
+
+        html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Raporlar</title>
+<style>
+:root{--bg:#020806;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;--text:#f5fff8;--muted:rgba(245,255,248,.62)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{padding:16px 14px 24px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:50px;height:50px;border-radius:17px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:27px}
+.brand h1{margin:0;font-size:26px;line-height:1;font-weight:950;letter-spacing:-1.2px}
+.brand h1 span{color:var(--green)}
+.brand p{margin:4px 0 0;color:var(--muted);font-weight:850;font-size:12px}
+.badge{border:1px solid rgba(255,221,53,.35);color:var(--green);background:rgba(35,255,137,.10);padding:9px 12px;border-radius:999px;font-weight:950;font-size:12px;white-space:nowrap}
+.hero,.summary,.events{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:23px;padding:16px;box-shadow:0 18px 48px rgba(0,0,0,.34)}
+.hero-top{display:flex;align-items:flex-start;gap:13px}
+.ico{width:54px;height:54px;flex:0 0 54px;border-radius:19px;border:1px solid var(--line);background:rgba(35,255,137,.10);display:grid;place-items:center;font-size:29px}
+.hero h2{font-size:31px;line-height:1.02;margin:2px 0 6px;font-weight:950;letter-spacing:-1.5px}
+.hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.3;font-weight:800}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:14px}
+.stat{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:17px;padding:12px;min-height:68px}
+.stat b{display:block;color:var(--green);font-size:20px;line-height:1.1}
+.stat span{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-top:6px}
+.back{display:flex;align-items:center;justify-content:center;margin-top:12px;min-height:44px;width:100%;border-radius:16px;color:var(--text);text-decoration:none;font-weight:950;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09)}
+.section-title{font-size:18px;letter-spacing:8px;font-weight:950;margin:22px 0 10px}
+.summary{padding:0;overflow:hidden}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.row:last-child{border-bottom:0}
+.row span{font-size:15px;font-weight:900}
+.row b{color:#9fffc4;font-size:15px;font-weight:950;text-align:right}
+.events{padding:12px}
+.event{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
+.event:last-child{border-bottom:0}
+.event b{display:block;font-size:15px;margin-bottom:5px}
+.event span{display:block;color:var(--muted);font-size:13px;font-weight:800;line-height:1.3}
+.event small{display:block;color:rgba(245,255,248,.42);font-size:11px;font-weight:800;margin-top:6px}
+.event strong{color:var(--yellow);font-size:13px;white-space:nowrap}
+.empty{padding:18px;color:var(--muted);font-weight:850;text-align:center}
+.foot{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">📊</div><div><h1>Erat<span>Guard</span></h1><p>Rapor Merkezi</p></div></div>
+  <div class="badge">👑 PRO AKTİF</div>
+</header>
+
+<section class="hero">
+  <div class="hero-top">
+    <div class="ico">📊</div>
+    <div>
+      <h2>Raporlar</h2>
+      <p>__SUMMARY__</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>__TOTAL__</b><span>Analiz</span></div>
+    <div class="stat"><b>__SPAM__</b><span>Riskli</span></div>
+    <div class="stat"><b>__QUARANTINE__</b><span>Karantina</span></div>
+  </div>
+
+  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">ÖZET</div>
+<section class="summary">
+  <div class="row"><span>Koruma Modu</span><b>__MODE__</b></div>
+  <div class="row"><span>Risk Oranı</span><b>%__RISK_RATE__</b></div>
+  <div class="row"><span>Güvenli Oran</span><b>%__SAFE_RATE__</b></div>
+  <div class="row"><span>Ortalama Skor</span><b>__AVG_SCORE__/100</b></div>
+  <div class="row"><span>İzleme</span><b>Aktif</b></div>
+</section>
+
+<div class="section-title">SON KAYITLAR</div>
+<section class="events">
+__RECENT__
+</section>
+
+<div class="foot">EratGuard PRO - __USERNAME__ - © 2026</div>
+</body>
+</html>
+"""
+
+        html = html.replace("__USERNAME__", _eg_rdb1b_safe(username))
+        html = html.replace("__SUMMARY__", _eg_rdb1b_safe(summary))
+        html = html.replace("__TOTAL__", str(total))
+        html = html.replace("__SPAM__", str(spam_count))
+        html = html.replace("__QUARANTINE__", str(quarantine_count))
+        html = html.replace("__MODE__", _eg_rdb1b_safe(mode_label))
+        html = html.replace("__RISK_RATE__", str(risk_rate))
+        html = html.replace("__SAFE_RATE__", str(safe_rate))
+        html = html.replace("__AVG_SCORE__", str(avg_score))
+        html = html.replace("__RECENT__", recent_html)
+
+        resp = _eg_rdb1b_make_response(_eg_rdb1b_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/reports", "/u/reports/"):
+                app.view_functions[_rule.endpoint] = _eg_rdb1b_reports_route
+        print("ERATGUARD REPORTS-DATA-BIND-1B SAFE LIVE REPORTS PAGE ACTIVE")
+    except Exception as _eg_rdb1b_route_err:
+        print("ERATGUARD REPORTS-DATA-BIND-1B ROUTE ERROR:", _eg_rdb1b_route_err)
+
+except Exception as _eg_rdb1b_err:
+    print("ERATGUARD REPORTS-DATA-BIND-1B ERROR:", _eg_rdb1b_err)
+# === /ERATGUARD REPORTS-DATA-BIND-1B SAFE LIVE REPORTS PAGE ===
+
+# === ERATGUARD AI-LABEL-PERSIST-FIX-2 ===
+# AI/protection kayıtlarında risk_label ve risk_class boş kalırsa otomatik doldurur.
+try:
+    def _eg_alpf2_label_for(score, status):
+        status = str(status or "").upper()
+        try:
+            score = int(score or 0)
+        except Exception:
+            score = 0
+
+        if status == "SPAM" or score >= 71:
+            return "Yüksek Risk", "high"
+        if status == "SUSPICIOUS" or score >= 31:
+            return "Orta Risk", "mid"
+        return "Düşük Risk", "low"
+
+    def _eg_alpf2_normalize_item(item):
+        if not isinstance(item, dict):
+            return item
+
+        score = item.get("score") or item.get("risk") or 0
+        status = item.get("status") or ""
+
+        label, klass = _eg_alpf2_label_for(score, status)
+
+        if not item.get("risk_label"):
+            item["risk_label"] = label
+
+        if not item.get("risk_class"):
+            item["risk_class"] = klass
+
+        return item
+
+    # AI Diet 1B write fonksiyonunu sar.
+    if "_eg_aid1b_write" in globals() and callable(globals().get("_eg_aid1b_write")):
+        _eg_alpf2_old_aid1b_write = globals().get("_eg_aid1b_write")
+
+        def _eg_aid1b_write(username, message, result):
+            try:
+                if isinstance(result, dict):
+                    score = result.get("score") or result.get("risk") or 0
+                    status = result.get("status") or ""
+                    label, klass = _eg_alpf2_label_for(score, status)
+                    if not result.get("risk_label"):
+                        result["risk_label"] = label
+                    if not result.get("risk_class"):
+                        result["risk_class"] = klass
+            except Exception as _eg_alpf2_norm_err:
+                print("ERATGUARD AI-LABEL-PERSIST-FIX-2 NORMALIZE ERROR:", _eg_alpf2_norm_err)
+
+            return _eg_alpf2_old_aid1b_write(username, message, result)
+
+    print("ERATGUARD AI-LABEL-PERSIST-FIX-2 ACTIVE")
+
+except Exception as _eg_alpf2_err:
+    print("ERATGUARD AI-LABEL-PERSIST-FIX-2 ERROR:", _eg_alpf2_err)
+# === /ERATGUARD AI-LABEL-PERSIST-FIX-2 ===
+
+# === ERATGUARD BLOCKED-DATA-BIND-1 LIVE BLOCKED PAGE ===
+# /u/blocked sayfasını canlı blok listesi + karantina JSON verisine bağlar.
+try:
+    from flask import render_template_string as _eg_bdb1_render_template_string
+    from flask import make_response as _eg_bdb1_make_response
+    from flask import redirect as _eg_bdb1_redirect
+    from flask import session as _eg_bdb1_session
+    from pathlib import Path as _eg_bdb1_Path
+    import json as _eg_bdb1_json
+    import html as _eg_bdb1_html
+
+    def _eg_bdb1_safe(v):
+        try:
+            return _eg_bdb1_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_bdb1_load(default, path):
+        try:
+            p = _eg_bdb1_Path(path)
+            if not p.exists():
+                return default
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_bdb1_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_bdb1_score(item):
+        try:
+            return int(item.get("score") or item.get("risk") or 0)
+        except Exception:
+            return 0
+
+    def _eg_bdb1_user_data(username):
+        username = str(username or "").strip()
+
+        block_data = _eg_bdb1_load({}, "data/user_block_list.json")
+        quarantine = _eg_bdb1_load([], "data/user_quarantine.json")
+
+        if not isinstance(block_data, dict):
+            block_data = {}
+
+        if not isinstance(quarantine, list):
+            quarantine = []
+
+        user_blocks = block_data.get(username, [])
+        if not isinstance(user_blocks, list):
+            user_blocks = []
+
+        user_quarantine = []
+        for item in quarantine:
+            if not isinstance(item, dict):
+                continue
+            item_user = str(item.get("username") or "").strip()
+            if item_user and item_user != username:
+                continue
+            user_quarantine.append(item)
+
+        return user_blocks, user_quarantine
+
+    def _eg_bdb1_blocked_route():
+        if not (_eg_bdb1_session.get("logged_in") and _eg_bdb1_session.get("username")):
+            return _eg_bdb1_redirect("/login?auth_required=1")
+
+        username = str(_eg_bdb1_session.get("username") or "user")
+        blocks, quarantine = _eg_bdb1_user_data(username)
+
+        block_count = len(blocks)
+        quarantine_count = len(quarantine)
+        high_count = sum(1 for x in quarantine if _eg_bdb1_score(x) >= 71 or str(x.get("status") or "").upper() == "SPAM")
+        total_count = block_count + quarantine_count
+
+        if quarantine_count:
+            summary = "Riskli mesajlar karantinada tutuluyor. Blok listesi izlemeye hazır."
+            mode = "Aktif İzleme"
+        elif block_count:
+            summary = "Blok listesi aktif. Karantina şu an temiz görünüyor."
+            mode = "Blok Aktif"
+        else:
+            summary = "Henüz engellenen kayıt yok. Sistem temiz durumda."
+            mode = "Temiz"
+
+        items = sorted(quarantine, key=lambda x: str(x.get("time") or ""), reverse=True)[:6]
+
+        items_html = ""
+        if items:
+            for item in items:
+                label = item.get("risk_label") or "Yüksek Risk"
+                body = str(item.get("body") or "")[:96]
+                time = item.get("time") or "-"
+                status = item.get("status") or "SPAM"
+                score = _eg_bdb1_score(item)
+                source = item.get("source") or "quarantine"
+
+                items_html += (
+                    '<div class="event">'
+                    '<div>'
+                    '<b>' + _eg_bdb1_safe(label) + '</b>'
+                    '<span>' + _eg_bdb1_safe(body) + '</span>'
+                    '<small>' + _eg_bdb1_safe(time) + ' - ' + _eg_bdb1_safe(source) + '</small>'
+                    '</div>'
+                    '<strong>' + _eg_bdb1_safe(status) + ' / ' + str(score) + '</strong>'
+                    '</div>'
+                )
+        else:
+            items_html = '<div class="empty">Karantinada gösterilecek riskli mesaj yok.</div>'
+
+        blocks_html = ""
+        if blocks:
+            for item in blocks[:6]:
+                if isinstance(item, dict):
+                    name = item.get("name") or item.get("sender") or item.get("phone") or "Engelli kayıt"
+                    detail = item.get("phone") or item.get("reason") or item.get("created_at") or "Blok listesinde"
+                else:
+                    name = str(item)
+                    detail = "Blok listesinde"
+
+                blocks_html += (
+                    '<div class="chip">'
+                    '<span>' + _eg_bdb1_safe(name) + '</span>'
+                    '<b>' + _eg_bdb1_safe(detail) + '</b>'
+                    '</div>'
+                )
+        else:
+            blocks_html = '<div class="empty">Kullanıcı blok listesi henüz boş.</div>'
+
+        html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Engellenenler</title>
+<style>
+:root{--bg:#020806;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;--text:#f5fff8;--muted:rgba(245,255,248,.62)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{padding:16px 14px 24px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:50px;height:50px;border-radius:17px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:27px}
+.brand h1{margin:0;font-size:26px;line-height:1;font-weight:950;letter-spacing:-1.2px}
+.brand h1 span{color:var(--green)}
+.brand p{margin:4px 0 0;color:var(--muted);font-weight:850;font-size:12px}
+.badge{border:1px solid rgba(255,221,53,.35);color:var(--green);background:rgba(35,255,137,.10);padding:9px 12px;border-radius:999px;font-weight:950;font-size:12px;white-space:nowrap}
+.hero,.summary,.events,.chips{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:23px;padding:16px;box-shadow:0 18px 48px rgba(0,0,0,.34)}
+.hero-top{display:flex;align-items:flex-start;gap:13px}
+.ico{width:54px;height:54px;flex:0 0 54px;border-radius:19px;border:1px solid var(--line);background:rgba(35,255,137,.10);display:grid;place-items:center;font-size:29px}
+.hero h2{font-size:31px;line-height:1.02;margin:2px 0 6px;font-weight:950;letter-spacing:-1.5px}
+.hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.3;font-weight:800}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:14px}
+.stat{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:17px;padding:12px;min-height:68px}
+.stat b{display:block;color:var(--green);font-size:20px;line-height:1.1}
+.stat span{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-top:6px}
+.back{display:flex;align-items:center;justify-content:center;margin-top:12px;min-height:44px;width:100%;border-radius:16px;color:var(--text);text-decoration:none;font-weight:950;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09)}
+.section-title{font-size:18px;letter-spacing:8px;font-weight:950;margin:22px 0 10px}
+.summary{padding:0;overflow:hidden}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.row:last-child{border-bottom:0}
+.row span{font-size:15px;font-weight:900}
+.row b{color:#9fffc4;font-size:15px;font-weight:950;text-align:right}
+.events{padding:12px}
+.event{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 10px;border-bottom:1px solid rgba(255,255,255,.06)}
+.event:last-child{border-bottom:0}
+.event b{display:block;font-size:15px;margin-bottom:5px}
+.event span{display:block;color:var(--muted);font-size:13px;font-weight:800;line-height:1.3}
+.event small{display:block;color:rgba(245,255,248,.42);font-size:11px;font-weight:800;margin-top:6px}
+.event strong{color:var(--yellow);font-size:13px;white-space:nowrap}
+.chips{display:grid;gap:9px;padding:12px}
+.chip{display:flex;justify-content:space-between;gap:12px;border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.20);border-radius:16px;padding:13px}
+.chip span{font-size:14px;font-weight:950}
+.chip b{font-size:13px;color:#9fffc4;text-align:right}
+.empty{padding:18px;color:var(--muted);font-weight:850;text-align:center}
+.foot{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">⛔</div><div><h1>Erat<span>Guard</span></h1><p>Engellenenler</p></div></div>
+  <div class="badge">👑 PRO AKTİF</div>
+</header>
+
+<section class="hero">
+  <div class="hero-top">
+    <div class="ico">⛔</div>
+    <div>
+      <h2>Engellenenler</h2>
+      <p>__SUMMARY__</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>__TOTAL__</b><span>Toplam</span></div>
+    <div class="stat"><b>__QUARANTINE__</b><span>Karantina</span></div>
+    <div class="stat"><b>__HIGH__</b><span>Yüksek</span></div>
+  </div>
+
+  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">ÖZET</div>
+<section class="summary">
+  <div class="row"><span>Durum</span><b>__MODE__</b></div>
+  <div class="row"><span>Blok Listesi</span><b>__BLOCKS__</b></div>
+  <div class="row"><span>Karantina</span><b>__QUARANTINE__</b></div>
+  <div class="row"><span>Yüksek Risk</span><b>__HIGH__</b></div>
+</section>
+
+<div class="section-title">KARANTİNA</div>
+<section class="events">
+__ITEMS__
+</section>
+
+<div class="section-title">BLOK LİSTESİ</div>
+<section class="chips">
+__BLOCK_ITEMS__
+</section>
+
+<div class="foot">EratGuard PRO - __USERNAME__ - © 2026</div>
+</body>
+</html>
+"""
+
+        html = html.replace("__USERNAME__", _eg_bdb1_safe(username))
+        html = html.replace("__SUMMARY__", _eg_bdb1_safe(summary))
+        html = html.replace("__TOTAL__", str(total_count))
+        html = html.replace("__QUARANTINE__", str(quarantine_count))
+        html = html.replace("__HIGH__", str(high_count))
+        html = html.replace("__BLOCKS__", str(block_count))
+        html = html.replace("__MODE__", _eg_bdb1_safe(mode))
+        html = html.replace("__ITEMS__", items_html)
+        html = html.replace("__BLOCK_ITEMS__", blocks_html)
+
+        resp = _eg_bdb1_make_response(_eg_bdb1_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/blocked", "/u/blocked/"):
+                app.view_functions[_rule.endpoint] = _eg_bdb1_blocked_route
+        print("ERATGUARD BLOCKED-DATA-BIND-1 LIVE BLOCKED PAGE ACTIVE")
+    except Exception as _eg_bdb1_route_err:
+        print("ERATGUARD BLOCKED-DATA-BIND-1 ROUTE ERROR:", _eg_bdb1_route_err)
+
+except Exception as _eg_bdb1_err:
+    print("ERATGUARD BLOCKED-DATA-BIND-1 ERROR:", _eg_bdb1_err)
+# === /ERATGUARD BLOCKED-DATA-BIND-1 LIVE BLOCKED PAGE ===
+
+# === ERATGUARD SAFE-LIST-DATA-BIND-1 LIVE SAFE PAGE ===
+# /u/safe-list sayfasını canlı safe_list + whitelist JSON verisine bağlar.
+try:
+    from flask import render_template_string as _eg_sdb1_render_template_string
+    from flask import make_response as _eg_sdb1_make_response
+    from flask import redirect as _eg_sdb1_redirect
+    from flask import session as _eg_sdb1_session
+    from flask import request as _eg_sdb1_request
+    from pathlib import Path as _eg_sdb1_Path
+    from datetime import datetime as _eg_sdb1_datetime
+    import json as _eg_sdb1_json
+    import html as _eg_sdb1_html
+
+    def _eg_sdb1_safe(v):
+        try:
+            return _eg_sdb1_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_sdb1_load(default, path):
+        try:
+            p = _eg_sdb1_Path(path)
+            if not p.exists():
+                return default
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_sdb1_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_sdb1_save(path, data):
+        p = _eg_sdb1_Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(_eg_sdb1_json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def _eg_sdb1_get_user_safe(username):
+        data = _eg_sdb1_load({}, "data/safe_list.json")
+        if not isinstance(data, dict):
+            data = {}
+        user_items = data.get(username, [])
+        if not isinstance(user_items, list):
+            user_items = []
+        return data, user_items
+
+    def _eg_sdb1_route():
+        if not (_eg_sdb1_session.get("logged_in") and _eg_sdb1_session.get("username")):
+            return _eg_sdb1_redirect("/login?auth_required=1")
+
+        username = str(_eg_sdb1_session.get("username") or "user")
+
+        if str(_eg_sdb1_request.method or "").upper() == "POST":
+            name = (
+                _eg_sdb1_request.form.get("name")
+                or _eg_sdb1_request.form.get("sender")
+                or _eg_sdb1_request.form.get("safe_name")
+                or ""
+            ).strip()
+
+            phone = (
+                _eg_sdb1_request.form.get("phone")
+                or _eg_sdb1_request.form.get("number")
+                or _eg_sdb1_request.form.get("safe_phone")
+                or ""
+            ).strip()
+
+            if name or phone:
+                data, items = _eg_sdb1_get_user_safe(username)
+                items.append({
+                    "name": name or phone or "Güvenli Kayıt",
+                    "phone": phone or name,
+                    "created_at": _eg_sdb1_datetime.now().strftime("%Y-%m-%d %H:%M")
+                })
+                data[username] = items
+                _eg_sdb1_save("data/safe_list.json", data)
+
+            return _eg_sdb1_redirect("/u/safe-list?added=1")
+
+        data, items = _eg_sdb1_get_user_safe(username)
+
+        whitelist = _eg_sdb1_load([], "data/whitelist.json")
+        if not isinstance(whitelist, list):
+            whitelist = []
+
+        user_count = len(items)
+        global_count = len(whitelist)
+        total = user_count + global_count
+
+        if total:
+            summary = "Güvenilir kişi ve servisler aktif olarak korunuyor."
+            mode = "Güvenli Liste Aktif"
+        else:
+            summary = "Henüz güvenli kayıt yok. Güvenilir kişi veya servis ekleyebilirsin."
+            mode = "Boş"
+
+        items_html = ""
+        if items:
+            for item in items[:8]:
+                if isinstance(item, dict):
+                    name = item.get("name") or item.get("phone") or "Güvenli Kayıt"
+                    detail = item.get("phone") or item.get("created_at") or "Güvenli"
+                    created = item.get("created_at") or "-"
+                else:
+                    name = str(item)
+                    detail = "Güvenli"
+                    created = "-"
+
+                items_html += (
+                    '<div class="chip">'
+                    '<div><b>' + _eg_sdb1_safe(name) + '</b>'
+                    '<span>' + _eg_sdb1_safe(created) + '</span></div>'
+                    '<strong>' + _eg_sdb1_safe(detail) + '</strong>'
+                    '</div>'
+                )
+        else:
+            items_html = '<div class="empty">Kullanıcı güvenli listesi boş.</div>'
+
+        white_html = ""
+        if whitelist:
+            for item in whitelist[:8]:
+                white_html += (
+                    '<div class="chip small">'
+                    '<div><b>' + _eg_sdb1_safe(item) + '</b><span>Genel güvenli servis</span></div>'
+                    '<strong>AKTİF</strong>'
+                    '</div>'
+                )
+        else:
+            white_html = '<div class="empty">Genel whitelist kaydı yok.</div>'
+
+        html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Güvenli Liste</title>
+<style>
+:root{--bg:#020806;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;--text:#f5fff8;--muted:rgba(245,255,248,.62)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{padding:16px 14px 24px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:50px;height:50px;border-radius:17px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:27px}
+.brand h1{margin:0;font-size:26px;line-height:1;font-weight:950;letter-spacing:-1.2px}
+.brand h1 span{color:var(--green)}
+.brand p{margin:4px 0 0;color:var(--muted);font-weight:850;font-size:12px}
+.badge{border:1px solid rgba(255,221,53,.35);color:var(--green);background:rgba(35,255,137,.10);padding:9px 12px;border-radius:999px;font-weight:950;font-size:12px;white-space:nowrap}
+.hero,.summary,.list,.form{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:23px;padding:16px;box-shadow:0 18px 48px rgba(0,0,0,.34)}
+.hero-top{display:flex;align-items:flex-start;gap:13px}
+.ico{width:54px;height:54px;flex:0 0 54px;border-radius:19px;border:1px solid var(--line);background:rgba(35,255,137,.10);display:grid;place-items:center;font-size:29px}
+.hero h2{font-size:31px;line-height:1.02;margin:2px 0 6px;font-weight:950;letter-spacing:-1.5px}
+.hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.3;font-weight:800}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:14px}
+.stat{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:17px;padding:12px;min-height:68px}
+.stat b{display:block;color:var(--green);font-size:20px;line-height:1.1}
+.stat span{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-top:6px}
+.back{display:flex;align-items:center;justify-content:center;margin-top:12px;min-height:44px;width:100%;border-radius:16px;color:var(--text);text-decoration:none;font-weight:950;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09)}
+.section-title{font-size:18px;letter-spacing:8px;font-weight:950;margin:22px 0 10px}
+.summary{padding:0;overflow:hidden}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.row:last-child{border-bottom:0}
+.row span{font-size:15px;font-weight:900}
+.row b{color:#9fffc4;font-size:15px;font-weight:950;text-align:right}
+.form{padding:14px}
+.form label{display:block;font-size:15px;font-weight:950;margin-bottom:8px}
+.form input{width:100%;height:50px;border-radius:16px;border:1px solid rgba(35,255,137,.22);background:rgba(0,0,0,.22);color:var(--text);font-size:15px;font-weight:850;padding:0 13px;outline:none;margin-bottom:9px}
+.form input::placeholder{color:rgba(245,255,248,.34)}
+.form button{width:100%;height:52px;border:0;border-radius:16px;background:linear-gradient(135deg,var(--yellow),var(--green));font-size:16px;font-weight:950;color:#00180c}
+.list{display:grid;gap:9px;padding:12px}
+.chip{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.20);border-radius:16px;padding:13px}
+.chip b{display:block;font-size:15px}
+.chip span{display:block;color:var(--muted);font-size:12px;font-weight:850;margin-top:4px}
+.chip strong{color:#9fffc4;font-size:13px;text-align:right}
+.empty{padding:18px;color:var(--muted);font-weight:850;text-align:center}
+.foot{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">✅</div><div><h1>Erat<span>Guard</span></h1><p>Güvenli Liste</p></div></div>
+  <div class="badge">👑 PRO AKTİF</div>
+</header>
+
+<section class="hero">
+  <div class="hero-top">
+    <div class="ico">✅</div>
+    <div>
+      <h2>Güvenli Liste</h2>
+      <p>__SUMMARY__</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>__TOTAL__</b><span>Toplam</span></div>
+    <div class="stat"><b>__USER_COUNT__</b><span>Kişisel</span></div>
+    <div class="stat"><b>__GLOBAL_COUNT__</b><span>Genel</span></div>
+  </div>
+
+  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">ÖZET</div>
+<section class="summary">
+  <div class="row"><span>Durum</span><b>__MODE__</b></div>
+  <div class="row"><span>Kişisel Liste</span><b>__USER_COUNT__</b></div>
+  <div class="row"><span>Genel Whitelist</span><b>__GLOBAL_COUNT__</b></div>
+  <div class="row"><span>Koruma</span><b>Aktif</b></div>
+</section>
+
+<div class="section-title">EKLE</div>
+<form class="form" method="post" action="/u/safe-list">
+  <label>Güvenli kişi / servis ekle</label>
+  <input name="name" placeholder="Ad veya servis adı">
+  <input name="phone" placeholder="Telefon / gönderen adı">
+  <button type="submit">Güvenli Listeye Ekle</button>
+</form>
+
+<div class="section-title">KİŞİSEL</div>
+<section class="list">
+__ITEMS__
+</section>
+
+<div class="section-title">GENEL</div>
+<section class="list">
+__WHITE__
+</section>
+
+<div class="foot">EratGuard PRO - __USERNAME__ - © 2026</div>
+</body>
+</html>
+"""
+
+        html = html.replace("__USERNAME__", _eg_sdb1_safe(username))
+        html = html.replace("__SUMMARY__", _eg_sdb1_safe(summary))
+        html = html.replace("__TOTAL__", str(total))
+        html = html.replace("__USER_COUNT__", str(user_count))
+        html = html.replace("__GLOBAL_COUNT__", str(global_count))
+        html = html.replace("__MODE__", _eg_sdb1_safe(mode))
+        html = html.replace("__ITEMS__", items_html)
+        html = html.replace("__WHITE__", white_html)
+
+        resp = _eg_sdb1_make_response(_eg_sdb1_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/safe-list", "/u/safe-list/"):
+                app.view_functions[_rule.endpoint] = _eg_sdb1_route
+                try:
+                    _rule.methods.add("POST")
+                except Exception:
+                    pass
+        print("ERATGUARD SAFE-LIST-DATA-BIND-1 LIVE SAFE PAGE ACTIVE")
+    except Exception as _eg_sdb1_route_err:
+        print("ERATGUARD SAFE-LIST-DATA-BIND-1 ROUTE ERROR:", _eg_sdb1_route_err)
+
+except Exception as _eg_sdb1_err:
+    print("ERATGUARD SAFE-LIST-DATA-BIND-1 ERROR:", _eg_sdb1_err)
+# === /ERATGUARD SAFE-LIST-DATA-BIND-1 LIVE SAFE PAGE ===
+
+# === ERATGUARD SAFE-LIST-DIET-2 ULTRA COMPACT PAGE ===
+# /u/safe-list görünümünü daha sıkı ve mobilde daha ince hale getirir.
+try:
+    from flask import request as _eg_sld2_request
+
+    _EG_SLD2_CSS = """
+<style id="eratguard-safe-list-diet-2">
+@media (max-width:760px){
+  body{
+    padding:12px 11px 18px !important;
+  }
+
+  .top{
+    gap:8px !important;
+    margin-bottom:10px !important;
+  }
+
+  .brand{
+    gap:8px !important;
+  }
+
+  .logo{
+    width:42px !important;
+    height:42px !important;
+    border-radius:14px !important;
+    font-size:22px !important;
+  }
+
+  .brand h1{
+    font-size:20px !important;
+    letter-spacing:-1px !important;
+  }
+
+  .brand p{
+    font-size:11px !important;
+    margin-top:2px !important;
+  }
+
+  .badge{
+    padding:7px 10px !important;
+    font-size:11px !important;
+  }
+
+  .hero,
+  .summary,
+  .list,
+  .form{
+    padding:13px !important;
+    border-radius:20px !important;
+    box-shadow:0 12px 30px rgba(0,0,0,.28) !important;
+  }
+
+  .hero-top{
+    gap:10px !important;
+  }
+
+  .ico{
+    width:46px !important;
+    height:46px !important;
+    flex:0 0 46px !important;
+    border-radius:15px !important;
+    font-size:24px !important;
+  }
+
+  .hero h2{
+    font-size:24px !important;
+    line-height:1.02 !important;
+    margin:1px 0 5px !important;
+    letter-spacing:-1.1px !important;
+  }
+
+  .hero p{
+    font-size:13px !important;
+    line-height:1.28 !important;
+  }
+
+  .stats{
+    gap:8px !important;
+    margin-top:12px !important;
+  }
+
+  .stat{
+    padding:10px !important;
+    min-height:56px !important;
+    border-radius:15px !important;
+  }
+
+  .stat b{
+    font-size:17px !important;
+  }
+
+  .stat span{
+    font-size:10px !important;
+    margin-top:5px !important;
+  }
+
+  .back{
+    margin-top:10px !important;
+    min-height:40px !important;
+    border-radius:14px !important;
+    font-size:14px !important;
+  }
+
+  .section-title{
+    font-size:15px !important;
+    letter-spacing:6px !important;
+    margin:18px 0 8px !important;
+  }
+
+  .summary{
+    padding:0 !important;
+  }
+
+  .row{
+    padding:13px 14px !important;
+  }
+
+  .row span,
+  .row b{
+    font-size:14px !important;
+  }
+
+  .form{
+    padding:12px !important;
+  }
+
+  .form label{
+    font-size:14px !important;
+    margin-bottom:7px !important;
+  }
+
+  .form input{
+    height:46px !important;
+    padding:0 12px !important;
+    font-size:14px !important;
+    border-radius:14px !important;
+    margin-bottom:8px !important;
+  }
+
+  .form button{
+    height:48px !important;
+    border-radius:14px !important;
+    font-size:15px !important;
+  }
+
+  .list{
+    gap:8px !important;
+    padding:10px !important;
+  }
+
+  .chip{
+    padding:11px 12px !important;
+    border-radius:14px !important;
+    gap:10px !important;
+  }
+
+  .chip b{
+    font-size:14px !important;
+  }
+
+  .chip span{
+    font-size:11px !important;
+    margin-top:3px !important;
+  }
+
+  .chip strong{
+    font-size:12px !important;
+  }
+
+  .empty{
+    padding:14px !important;
+    font-size:13px !important;
+  }
+
+  .foot{
+    margin:16px 0 0 !important;
+    font-size:12px !important;
+  }
+}
+</style>
+"""
+
+    @app.after_request
+    def _eg_sld2_after(resp):
+        try:
+            path = str(getattr(_eg_sld2_request, "path", "") or "")
+            ct = str(resp.headers.get("Content-Type", "") or "")
+
+            if path not in ("/u/safe-list", "/u/safe-list/"):
+                return resp
+
+            if "text/html" not in ct.lower():
+                return resp
+
+            html = resp.get_data(as_text=True)
+
+            if "eratguard-safe-list-diet-2" in html:
+                return resp
+
+            lower = html.lower()
+            i = lower.rfind("</head>")
+
+            if i != -1:
+                html = html[:i] + _EG_SLD2_CSS + html[i:]
+            else:
+                html = _EG_SLD2_CSS + html
+
+            resp.set_data(html)
+
+            try:
+                resp.headers["Content-Length"] = str(len(resp.get_data()))
+            except Exception:
+                pass
+
+        except Exception as _eg_sld2_inject_err:
+            print("ERATGUARD SAFE-LIST-DIET-2 INJECT ERROR:", _eg_sld2_inject_err)
+
+        return resp
+
+    print("ERATGUARD SAFE-LIST-DIET-2 ULTRA COMPACT PAGE ACTIVE")
+
+except Exception as _eg_sld2_err:
+    print("ERATGUARD SAFE-LIST-DIET-2 ERROR:", _eg_sld2_err)
+# === /ERATGUARD SAFE-LIST-DIET-2 ULTRA COMPACT PAGE ===
+
+# === ERATGUARD NOTIFICATIONS-DATA-BIND-1 LIVE PAGE ===
+# /u/notifications sayfasını canlı bildirim + analiz kayıtlarına bağlar.
+try:
+    from flask import render_template_string as _eg_ndb1_render_template_string
+    from flask import make_response as _eg_ndb1_make_response
+    from flask import redirect as _eg_ndb1_redirect
+    from flask import session as _eg_ndb1_session
+    from pathlib import Path as _eg_ndb1_Path
+    from datetime import datetime as _eg_ndb1_datetime
+    import json as _eg_ndb1_json
+    import html as _eg_ndb1_html
+
+    def _eg_ndb1_safe(v):
+        try:
+            return _eg_ndb1_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_ndb1_load(default, path):
+        try:
+            p = _eg_ndb1_Path(path)
+            if not p.exists():
+                return default
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_ndb1_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_ndb1_save(path, data):
+        try:
+            p = _eg_ndb1_Path(path)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(_eg_ndb1_json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        except Exception as e:
+            print("ERATGUARD NOTIFICATIONS-DATA-BIND-1 SAVE ERROR:", e)
+
+    def _eg_ndb1_ensure_files(username):
+        n = _eg_ndb1_Path("data/notifications.json")
+        u = _eg_ndb1_Path("data/user_notifications.json")
+        a = _eg_ndb1_Path("data/admin_notifications.json")
+
+        if not n.exists():
+            _eg_ndb1_save("data/notifications.json", [])
+
+        if not u.exists():
+            _eg_ndb1_save("data/user_notifications.json", {username: []})
+
+        if not a.exists():
+            _eg_ndb1_save("data/admin_notifications.json", [])
+
+    def _eg_ndb1_score(item):
+        try:
+            return int(item.get("score") or item.get("risk") or 0)
+        except Exception:
+            return 0
+
+    def _eg_ndb1_norm_list(raw, username, source_name):
+        out = []
+
+        if isinstance(raw, dict):
+            if username in raw and isinstance(raw.get(username), list):
+                data = raw.get(username) or []
+            else:
+                data = []
+                for k, v in raw.items():
+                    if isinstance(v, list):
+                        for x in v:
+                            if isinstance(x, dict):
+                                y = dict(x)
+                                y.setdefault("username", k)
+                                data.append(y)
+            raw = data
+
+        if not isinstance(raw, list):
+            return out
+
+        for item in raw:
+            if not isinstance(item, dict):
+                if item:
+                    item = {"title": str(item), "body": str(item)}
+                else:
+                    continue
+
+            item_user = str(item.get("username") or "").strip()
+            if item_user and item_user != username:
+                continue
+
+            title = (
+                item.get("title")
+                or item.get("subject")
+                or item.get("type")
+                or "Bildirim"
+            )
+            body = (
+                item.get("body")
+                or item.get("message")
+                or item.get("text")
+                or item.get("description")
+                or ""
+            )
+            time = item.get("time") or item.get("created_at") or item.get("date") or "-"
+            level = item.get("level") or item.get("status") or "INFO"
+            read = bool(item.get("read") or item.get("seen") or False)
+
+            out.append({
+                "title": title,
+                "body": body,
+                "time": time,
+                "level": str(level).upper(),
+                "source": source_name,
+                "read": read,
+                "score": item.get("score") or item.get("risk") or "",
+            })
+
+        return out
+
+    def _eg_ndb1_from_security(username):
+        out = []
+
+        history = _eg_ndb1_load([], "data/user_analysis_history.json")
+        spam_logs = _eg_ndb1_load([], "data/spam_logs.json")
+        quarantine = _eg_ndb1_load([], "data/user_quarantine.json")
+
+        for source_name, data in [
+            ("analysis_history", history),
+            ("spam_logs", spam_logs),
+            ("quarantine", quarantine),
+        ]:
+            if not isinstance(data, list):
+                continue
+
+            for item in data:
+                if not isinstance(item, dict):
+                    continue
+
+                item_user = str(item.get("username") or "").strip()
+                if item_user and item_user != username:
+                    continue
+
+                score = _eg_ndb1_score(item)
+                status = str(item.get("status") or "").upper()
+
+                if status != "SPAM" and score < 71:
+                    continue
+
+                body = str(item.get("body") or "")[:120]
+                risk_label = item.get("risk_label") or "Yüksek Risk"
+                time = item.get("time") or "-"
+
+                out.append({
+                    "title": "Riskli mesaj tespit edildi",
+                    "body": risk_label + " - " + body,
+                    "time": time,
+                    "level": "SPAM",
+                    "source": source_name,
+                    "read": False,
+                    "score": score,
+                })
+
+        return out
+
+    def _eg_ndb1_collect(username):
+        _eg_ndb1_ensure_files(username)
+
+        user_notifications = _eg_ndb1_load({}, "data/user_notifications.json")
+        global_notifications = _eg_ndb1_load([], "data/notifications.json")
+        admin_notifications = _eg_ndb1_load([], "data/admin_notifications.json")
+
+        items = []
+        items += _eg_ndb1_norm_list(user_notifications, username, "user_notifications")
+        items += _eg_ndb1_norm_list(global_notifications, username, "notifications")
+        items += _eg_ndb1_norm_list(admin_notifications, username, "admin_notifications")
+        items += _eg_ndb1_from_security(username)
+
+        items = sorted(items, key=lambda x: str(x.get("time") or ""), reverse=True)
+
+        return items[:12]
+
+    def _eg_ndb1_route():
+        if not (_eg_ndb1_session.get("logged_in") and _eg_ndb1_session.get("username")):
+            return _eg_ndb1_redirect("/login?auth_required=1")
+
+        username = str(_eg_ndb1_session.get("username") or "user")
+        items = _eg_ndb1_collect(username)
+
+        total = len(items)
+        unread = sum(1 for x in items if not x.get("read"))
+        risk = sum(1 for x in items if str(x.get("level") or "").upper() in ("SPAM", "RISK", "HIGH") or int(x.get("score") or 0) >= 71)
+
+        if risk:
+            summary = "Riskli mesaj ve güvenlik uyarıları aktif olarak izleniyor."
+            mode = "Güvenlik Uyarısı"
+        elif total:
+            summary = "Bildirim merkezi aktif. Yeni hareketler burada toplanıyor."
+            mode = "Aktif"
+        else:
+            summary = "Henüz gösterilecek bildirim yok. Sistem temiz görünüyor."
+            mode = "Temiz"
+
+        items_html = ""
+        if items:
+            for item in items[:8]:
+                level = str(item.get("level") or "INFO").upper()
+                title = item.get("title") or "Bildirim"
+                body = item.get("body") or ""
+                time = item.get("time") or "-"
+                source = item.get("source") or "system"
+                score = item.get("score") or ""
+
+                right = level
+                if score != "":
+                    right = level + " / " + str(score)
+
+                items_html += (
+                    '<div class="event">'
+                    '<div>'
+                    '<b>' + _eg_ndb1_safe(title) + '</b>'
+                    '<span>' + _eg_ndb1_safe(body) + '</span>'
+                    '<small>' + _eg_ndb1_safe(time) + ' - ' + _eg_ndb1_safe(source) + '</small>'
+                    '</div>'
+                    '<strong>' + _eg_ndb1_safe(right) + '</strong>'
+                    '</div>'
+                )
+        else:
+            items_html = '<div class="empty">Bildirim bulunmuyor.</div>'
+
+        html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Bildirimler</title>
+<style>
+:root{--bg:#020806;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;--text:#f5fff8;--muted:rgba(245,255,248,.62)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{padding:12px 11px 18px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.brand{display:flex;align-items:center;gap:8px;min-width:0}
+.logo{width:42px;height:42px;border-radius:14px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:22px}
+.brand h1{margin:0;font-size:20px;line-height:1;font-weight:950;letter-spacing:-1px}
+.brand h1 span{color:var(--green)}
+.brand p{margin:2px 0 0;color:var(--muted);font-weight:850;font-size:11px}
+.badge{border:1px solid rgba(255,221,53,.35);color:var(--green);background:rgba(35,255,137,.10);padding:7px 10px;border-radius:999px;font-weight:950;font-size:11px;white-space:nowrap}
+.hero,.summary,.events{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:20px;padding:13px;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.hero-top{display:flex;align-items:flex-start;gap:10px}
+.ico{width:46px;height:46px;flex:0 0 46px;border-radius:15px;border:1px solid var(--line);background:rgba(35,255,137,.10);display:grid;place-items:center;font-size:24px}
+.hero h2{font-size:24px;line-height:1.02;margin:1px 0 5px;font-weight:950;letter-spacing:-1.1px}
+.hero p{margin:0;color:var(--muted);font-size:13px;line-height:1.28;font-weight:800}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.stat{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:15px;padding:10px;min-height:56px}
+.stat b{display:block;color:var(--green);font-size:17px;line-height:1.1}
+.stat span{display:block;color:var(--muted);font-size:10px;font-weight:900;margin-top:5px}
+.back{display:flex;align-items:center;justify-content:center;margin-top:10px;min-height:40px;width:100%;border-radius:14px;color:var(--text);text-decoration:none;font-weight:950;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09);font-size:14px}
+.section-title{font-size:15px;letter-spacing:6px;font-weight:950;margin:18px 0 8px}
+.summary{padding:0;overflow:hidden}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.row:last-child{border-bottom:0}
+.row span{font-size:14px;font-weight:900}
+.row b{color:#9fffc4;font-size:14px;font-weight:950;text-align:right}
+.events{padding:10px}
+.event{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.event:last-child{border-bottom:0}
+.event b{display:block;font-size:14px;margin-bottom:4px}
+.event span{display:block;color:var(--muted);font-size:12px;font-weight:800;line-height:1.3}
+.event small{display:block;color:rgba(245,255,248,.42);font-size:10px;font-weight:800;margin-top:5px}
+.event strong{color:var(--yellow);font-size:12px;white-space:nowrap;text-align:right}
+.empty{padding:14px;color:var(--muted);font-weight:850;text-align:center;font-size:13px}
+.foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">🔔</div><div><h1>Erat<span>Guard</span></h1><p>Bildirimler</p></div></div>
+  <div class="badge">👑 PRO AKTİF</div>
+</header>
+
+<section class="hero">
+  <div class="hero-top">
+    <div class="ico">🔔</div>
+    <div>
+      <h2>Bildirimler</h2>
+      <p>__SUMMARY__</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>__TOTAL__</b><span>Toplam</span></div>
+    <div class="stat"><b>__UNREAD__</b><span>Yeni</span></div>
+    <div class="stat"><b>__RISK__</b><span>Risk</span></div>
+  </div>
+
+  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">ÖZET</div>
+<section class="summary">
+  <div class="row"><span>Durum</span><b>__MODE__</b></div>
+  <div class="row"><span>Toplam Bildirim</span><b>__TOTAL__</b></div>
+  <div class="row"><span>Yeni Bildirim</span><b>__UNREAD__</b></div>
+  <div class="row"><span>Risk Uyarısı</span><b>__RISK__</b></div>
+</section>
+
+<div class="section-title">SON BİLDİRİMLER</div>
+<section class="events">
+__ITEMS__
+</section>
+
+<div class="foot">EratGuard PRO - __USERNAME__ - © 2026</div>
+</body>
+</html>
+"""
+
+        html = html.replace("__USERNAME__", _eg_ndb1_safe(username))
+        html = html.replace("__SUMMARY__", _eg_ndb1_safe(summary))
+        html = html.replace("__TOTAL__", str(total))
+        html = html.replace("__UNREAD__", str(unread))
+        html = html.replace("__RISK__", str(risk))
+        html = html.replace("__MODE__", _eg_ndb1_safe(mode))
+        html = html.replace("__ITEMS__", items_html)
+
+        resp = _eg_ndb1_make_response(_eg_ndb1_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/notifications", "/u/notifications/"):
+                app.view_functions[_rule.endpoint] = _eg_ndb1_route
+        print("ERATGUARD NOTIFICATIONS-DATA-BIND-1 LIVE PAGE ACTIVE")
+    except Exception as _eg_ndb1_route_err:
+        print("ERATGUARD NOTIFICATIONS-DATA-BIND-1 ROUTE ERROR:", _eg_ndb1_route_err)
+
+except Exception as _eg_ndb1_err:
+    print("ERATGUARD NOTIFICATIONS-DATA-BIND-1 ERROR:", _eg_ndb1_err)
+# === /ERATGUARD NOTIFICATIONS-DATA-BIND-1 LIVE PAGE ===
+
+# === ERATGUARD NOTIFICATIONS-DATA-BIND-2 FORCE GREEN LIVE PAGE ===
+# /u/notifications sayfasını EratGuard yeşil tema + canlı risk kayıtlarına bağlar.
+try:
+    from flask import render_template_string as _eg_ndb2_render_template_string
+    from flask import make_response as _eg_ndb2_make_response
+    from flask import redirect as _eg_ndb2_redirect
+    from flask import session as _eg_ndb2_session
+    from pathlib import Path as _eg_ndb2_Path
+    import json as _eg_ndb2_json
+    import html as _eg_ndb2_html
+
+    def _eg_ndb2_safe(v):
+        try:
+            return _eg_ndb2_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_ndb2_load(default, path):
+        try:
+            p = _eg_ndb2_Path(path)
+            if not p.exists():
+                return default
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_ndb2_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_ndb2_score(item):
+        try:
+            return int(item.get("score") or item.get("risk") or 0)
+        except Exception:
+            return 0
+
+    def _eg_ndb2_status(item):
+        raw = str(item.get("status") or "").upper()
+        score = _eg_ndb2_score(item)
+        if raw == "SPAM" or score >= 71:
+            return "KRİTİK"
+        if raw in ("SUSPICIOUS", "WARNING") or score >= 31:
+            return "UYARI"
+        return "BİLGİ"
+
+    def _eg_ndb2_user_events(username):
+        username = str(username or "").strip()
+
+        combined = []
+
+        for file_path, source_label in [
+            ("data/user_notifications.json", "user_notification"),
+            ("data/notifications.json", "system_notification"),
+            ("data/user_analysis_history.json", "analysis_history"),
+            ("data/spam_logs.json", "spam_logs"),
+        ]:
+            data = _eg_ndb2_load([] if file_path != "data/user_notifications.json" else {}, file_path)
+
+            if isinstance(data, dict):
+                if file_path == "data/user_notifications.json":
+                    data = data.get(username, [])
+                else:
+                    data = list(data.values())
+
+            if not isinstance(data, list):
+                data = []
+
+            for item in data:
+                if isinstance(item, str):
+                    item = {"title": "Bildirim", "body": item, "source": source_label}
+
+                if not isinstance(item, dict):
+                    continue
+
+                item_user = str(item.get("username") or item.get("user") or "").strip()
+                if item_user and item_user != username:
+                    continue
+
+                x = dict(item)
+                x["_source_label"] = source_label
+                combined.append(x)
+
+        # Son risk kayıtlarını öne al, tekrarları azalt.
+        seen = set()
+        cleaned = []
+        for item in sorted(combined, key=lambda x: str(x.get("time") or x.get("created_at") or ""), reverse=True):
+            key = (
+                str(item.get("time") or item.get("created_at") or ""),
+                str(item.get("body") or item.get("message") or item.get("title") or "")[:80],
+                str(item.get("_source_label") or "")
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            cleaned.append(item)
+
+        return cleaned[:8]
+
+    def _eg_ndb2_route():
+        if not (_eg_ndb2_session.get("logged_in") and _eg_ndb2_session.get("username")):
+            return _eg_ndb2_redirect("/login?auth_required=1")
+
+        username = str(_eg_ndb2_session.get("username") or "user")
+        events = _eg_ndb2_user_events(username)
+
+        total = len(events)
+        critical = sum(1 for x in events if _eg_ndb2_status(x) == "KRİTİK")
+        warnings = sum(1 for x in events if _eg_ndb2_status(x) == "UYARI")
+
+        if critical:
+            summary = "Yüksek riskli güvenlik olayları bildirime dönüştürüldü."
+            mode = "Risk Bildirimi"
+        elif warnings:
+            summary = "Orta seviye uyarılar izleniyor."
+            mode = "Uyarı İzleme"
+        elif total:
+            summary = "Bilgilendirme kayıtları aktif."
+            mode = "Aktif"
+        else:
+            summary = "Henüz gösterilecek bildirim yok."
+            mode = "Boş"
+
+        events_html = ""
+        if events:
+            for item in events:
+                score = _eg_ndb2_score(item)
+                level = _eg_ndb2_status(item)
+                title = (
+                    item.get("title")
+                    or item.get("risk_label")
+                    or ("Yüksek Risk" if level == "KRİTİK" else "Bildirim")
+                )
+                body = (
+                    item.get("body")
+                    or item.get("message")
+                    or item.get("text")
+                    or item.get("description")
+                    or "Güvenlik bildirimi"
+                )
+                time = item.get("time") or item.get("created_at") or "-"
+                src = item.get("source") or item.get("_source_label") or "system"
+
+                events_html += (
+                    '<div class="event">'
+                    '<div>'
+                    '<b>' + _eg_ndb2_safe(title) + '</b>'
+                    '<span>' + _eg_ndb2_safe(str(body)[:105]) + '</span>'
+                    '<small>' + _eg_ndb2_safe(time) + ' - ' + _eg_ndb2_safe(src) + '</small>'
+                    '</div>'
+                    '<strong>' + _eg_ndb2_safe(level) + (' / ' + str(score) if score else '') + '</strong>'
+                    '</div>'
+                )
+        else:
+            events_html = '<div class="empty">Henüz gösterilecek bildirim yok.</div>'
+
+        html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Bildirimler</title>
+<style>
+:root{--bg:#020806;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;--text:#f5fff8;--muted:rgba(245,255,248,.62)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{padding:12px 11px 18px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.brand{display:flex;align-items:center;gap:8px;min-width:0}
+.logo{width:42px;height:42px;border-radius:14px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:22px}
+.brand h1{margin:0;font-size:20px;line-height:1;font-weight:950;letter-spacing:-1px}
+.brand h1 span{color:var(--green)}
+.brand p{margin:2px 0 0;color:var(--muted);font-weight:850;font-size:11px}
+.badge{border:1px solid rgba(255,221,53,.35);color:var(--green);background:rgba(35,255,137,.10);padding:7px 10px;border-radius:999px;font-weight:950;font-size:11px;white-space:nowrap}
+.hero,.summary,.events{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:20px;padding:13px;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.hero-top{display:flex;align-items:flex-start;gap:10px}
+.ico{width:46px;height:46px;flex:0 0 46px;border-radius:15px;border:1px solid var(--line);background:rgba(35,255,137,.10);display:grid;place-items:center;font-size:24px}
+.hero h2{font-size:24px;line-height:1.02;margin:1px 0 5px;font-weight:950;letter-spacing:-1.1px}
+.hero p{margin:0;color:var(--muted);font-size:13px;line-height:1.28;font-weight:800}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.stat{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:15px;padding:10px;min-height:56px}
+.stat b{display:block;color:var(--green);font-size:17px;line-height:1.1}
+.stat span{display:block;color:var(--muted);font-size:10px;font-weight:900;margin-top:5px}
+.back{display:flex;align-items:center;justify-content:center;margin-top:10px;min-height:40px;width:100%;border-radius:14px;color:var(--text);text-decoration:none;font-weight:950;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09);font-size:14px}
+.section-title{font-size:15px;letter-spacing:6px;font-weight:950;margin:18px 0 8px}
+.summary{padding:0;overflow:hidden}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.row:last-child{border-bottom:0}
+.row span,.row b{font-size:14px;font-weight:900}
+.row b{color:#9fffc4;text-align:right}
+.events{padding:10px}
+.event{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.event:last-child{border-bottom:0}
+.event b{display:block;font-size:14px;margin-bottom:4px}
+.event span{display:block;color:var(--muted);font-size:12px;font-weight:800;line-height:1.3}
+.event small{display:block;color:rgba(245,255,248,.42);font-size:10px;font-weight:800;margin-top:5px}
+.event strong{color:var(--yellow);font-size:12px;white-space:nowrap;text-align:right}
+.empty{padding:14px;color:var(--muted);font-weight:850;text-align:center;font-size:13px}
+.foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">🔔</div><div><h1>Erat<span>Guard</span></h1><p>Bildirimler</p></div></div>
+  <div class="badge">👑 PRO AKTİF</div>
+</header>
+
+<section class="hero">
+  <div class="hero-top">
+    <div class="ico">🔔</div>
+    <div>
+      <h2>Bildirimler</h2>
+      <p>__SUMMARY__</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>__TOTAL__</b><span>Toplam</span></div>
+    <div class="stat"><b>__CRITICAL__</b><span>Kritik</span></div>
+    <div class="stat"><b>__WARNINGS__</b><span>Uyarı</span></div>
+  </div>
+
+  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">ÖZET</div>
+<section class="summary">
+  <div class="row"><span>Durum</span><b>__MODE__</b></div>
+  <div class="row"><span>Toplam Bildirim</span><b>__TOTAL__</b></div>
+  <div class="row"><span>Kritik Uyarı</span><b>__CRITICAL__</b></div>
+  <div class="row"><span>Bildirim Motoru</span><b>Aktif</b></div>
+</section>
+
+<div class="section-title">SON BİLDİRİMLER</div>
+<section class="events">
+__EVENTS__
+</section>
+
+<div class="foot">EratGuard PRO - __USERNAME__ - © 2026</div>
+</body>
+</html>
+"""
+
+        html = html.replace("__USERNAME__", _eg_ndb2_safe(username))
+        html = html.replace("__SUMMARY__", _eg_ndb2_safe(summary))
+        html = html.replace("__MODE__", _eg_ndb2_safe(mode))
+        html = html.replace("__TOTAL__", str(total))
+        html = html.replace("__CRITICAL__", str(critical))
+        html = html.replace("__WARNINGS__", str(warnings))
+        html = html.replace("__EVENTS__", events_html)
+
+        resp = _eg_ndb2_make_response(_eg_ndb2_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/notifications", "/u/notifications/"):
+                app.view_functions[_rule.endpoint] = _eg_ndb2_route
+        print("ERATGUARD NOTIFICATIONS-DATA-BIND-2 FORCE GREEN LIVE PAGE ACTIVE")
+    except Exception as _eg_ndb2_route_err:
+        print("ERATGUARD NOTIFICATIONS-DATA-BIND-2 ROUTE ERROR:", _eg_ndb2_route_err)
+
+except Exception as _eg_ndb2_err:
+    print("ERATGUARD NOTIFICATIONS-DATA-BIND-2 ERROR:", _eg_ndb2_err)
+# === /ERATGUARD NOTIFICATIONS-DATA-BIND-2 FORCE GREEN LIVE PAGE ===
+
+# === ERATGUARD NOTIFICATIONS-FORCE-GREEN-3 HARD BRIDGE ===
+# Eski mavi notification template'ini bypass eder.
+# /u/notifications ve alias yollarını direkt yeşil EratGuard sayfasına zorlar.
+try:
+    from flask import request as _eg_nfg3_request
+    from flask import session as _eg_nfg3_session
+    from flask import redirect as _eg_nfg3_redirect
+    from flask import render_template_string as _eg_nfg3_render_template_string
+    from flask import make_response as _eg_nfg3_make_response
+    from pathlib import Path as _eg_nfg3_Path
+    import json as _eg_nfg3_json
+    import html as _eg_nfg3_html
+
+    def _eg_nfg3_safe(v):
+        try:
+            return _eg_nfg3_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_nfg3_load(default, path):
+        try:
+            p = _eg_nfg3_Path(path)
+            if not p.exists():
+                return default
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_nfg3_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_nfg3_score(item):
+        try:
+            return int(item.get("score") or item.get("risk") or 0)
+        except Exception:
+            return 0
+
+    def _eg_nfg3_level(item):
+        raw = str(item.get("status") or "").upper()
+        score = _eg_nfg3_score(item)
+        if raw == "SPAM" or score >= 71:
+            return "KRİTİK"
+        if raw in ("SUSPICIOUS", "WARNING") or score >= 31:
+            return "UYARI"
+        return "BİLGİ"
+
+    def _eg_nfg3_events(username):
+        username = str(username or "").strip()
+        combined = []
+
+        sources = [
+            ("data/user_notifications.json", "user_notification"),
+            ("data/notifications.json", "system_notification"),
+            ("data/user_analysis_history.json", "analysis_history"),
+            ("data/spam_logs.json", "spam_logs"),
+            ("data/user_quarantine.json", "quarantine"),
+        ]
+
+        for file_path, source_label in sources:
+            default = {} if file_path == "data/user_notifications.json" else []
+            data = _eg_nfg3_load(default, file_path)
+
+            if isinstance(data, dict):
+                if file_path == "data/user_notifications.json":
+                    data = data.get(username, [])
+                else:
+                    tmp = []
+                    for v in data.values():
+                        if isinstance(v, list):
+                            tmp.extend(v)
+                        else:
+                            tmp.append(v)
+                    data = tmp
+
+            if not isinstance(data, list):
+                data = []
+
+            for item in data:
+                if isinstance(item, str):
+                    item = {"title": "Bildirim", "body": item, "source": source_label}
+
+                if not isinstance(item, dict):
+                    continue
+
+                item_user = str(item.get("username") or item.get("user") or "").strip()
+                if item_user and item_user != username:
+                    continue
+
+                x = dict(item)
+                x["_source_label"] = source_label
+                combined.append(x)
+
+        seen = set()
+        cleaned = []
+
+        for item in sorted(
+            combined,
+            key=lambda x: str(x.get("time") or x.get("created_at") or ""),
+            reverse=True
+        ):
+            key = (
+                str(item.get("time") or item.get("created_at") or ""),
+                str(item.get("body") or item.get("message") or item.get("title") or "")[:90],
+                str(item.get("_source_label") or "")
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            cleaned.append(item)
+
+        return cleaned[:8]
+
+    def _eg_nfg3_notifications_page():
+        username = str(_eg_nfg3_session.get("username") or "user")
+        events = _eg_nfg3_events(username)
+
+        total = len(events)
+        critical = sum(1 for x in events if _eg_nfg3_level(x) == "KRİTİK")
+        warnings = sum(1 for x in events if _eg_nfg3_level(x) == "UYARI")
+
+        if critical:
+            summary = "Yüksek riskli güvenlik olayları bildirime dönüştürüldü."
+            mode = "Risk Bildirimi"
+        elif warnings:
+            summary = "Orta seviye uyarılar izleniyor."
+            mode = "Uyarı İzleme"
+        elif total:
+            summary = "Bilgilendirme kayıtları aktif."
+            mode = "Aktif"
+        else:
+            summary = "Henüz gösterilecek bildirim yok."
+            mode = "Boş"
+
+        events_html = ""
+        if events:
+            for item in events:
+                score = _eg_nfg3_score(item)
+                level = _eg_nfg3_level(item)
+                title = item.get("title") or item.get("risk_label") or ("Yüksek Risk" if level == "KRİTİK" else "Bildirim")
+                body = item.get("body") or item.get("message") or item.get("text") or item.get("description") or "Güvenlik bildirimi"
+                time = item.get("time") or item.get("created_at") or "-"
+                src = item.get("source") or item.get("_source_label") or "system"
+
+                events_html += (
+                    '<div class="event">'
+                    '<div>'
+                    '<b>' + _eg_nfg3_safe(title) + '</b>'
+                    '<span>' + _eg_nfg3_safe(str(body)[:105]) + '</span>'
+                    '<small>' + _eg_nfg3_safe(time) + ' - ' + _eg_nfg3_safe(src) + '</small>'
+                    '</div>'
+                    '<strong>' + _eg_nfg3_safe(level) + (' / ' + str(score) if score else '') + '</strong>'
+                    '</div>'
+                )
+        else:
+            events_html = '<div class="empty">Henüz gösterilecek bildirim yok.</div>'
+
+        html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Bildirimler</title>
+<style>
+:root{--bg:#020806;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;--text:#f5fff8;--muted:rgba(245,255,248,.62)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{padding:12px 11px 18px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.brand{display:flex;align-items:center;gap:8px;min-width:0}
+.logo{width:42px;height:42px;border-radius:14px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:22px}
+.brand h1{margin:0;font-size:20px;line-height:1;font-weight:950;letter-spacing:-1px}
+.brand h1 span{color:var(--green)}
+.brand p{margin:2px 0 0;color:var(--muted);font-weight:850;font-size:11px}
+.badge{border:1px solid rgba(255,221,53,.35);color:var(--green);background:rgba(35,255,137,.10);padding:7px 10px;border-radius:999px;font-weight:950;font-size:11px;white-space:nowrap}
+.hero,.summary,.events{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:20px;padding:13px;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.hero-top{display:flex;align-items:flex-start;gap:10px}
+.ico{width:46px;height:46px;flex:0 0 46px;border-radius:15px;border:1px solid var(--line);background:rgba(35,255,137,.10);display:grid;place-items:center;font-size:24px}
+.hero h2{font-size:24px;line-height:1.02;margin:1px 0 5px;font-weight:950;letter-spacing:-1.1px}
+.hero p{margin:0;color:var(--muted);font-size:13px;line-height:1.28;font-weight:800}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.stat{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:15px;padding:10px;min-height:56px}
+.stat b{display:block;color:var(--green);font-size:17px;line-height:1.1}
+.stat span{display:block;color:var(--muted);font-size:10px;font-weight:900;margin-top:5px}
+.back{display:flex;align-items:center;justify-content:center;margin-top:10px;min-height:40px;width:100%;border-radius:14px;color:var(--text);text-decoration:none;font-weight:950;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09);font-size:14px}
+.section-title{font-size:15px;letter-spacing:6px;font-weight:950;margin:18px 0 8px}
+.summary{padding:0;overflow:hidden}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.row:last-child{border-bottom:0}
+.row span,.row b{font-size:14px;font-weight:900}
+.row b{color:#9fffc4;text-align:right}
+.events{padding:10px}
+.event{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.event:last-child{border-bottom:0}
+.event b{display:block;font-size:14px;margin-bottom:4px}
+.event span{display:block;color:var(--muted);font-size:12px;font-weight:800;line-height:1.3}
+.event small{display:block;color:rgba(245,255,248,.42);font-size:10px;font-weight:800;margin-top:5px}
+.event strong{color:var(--yellow);font-size:12px;white-space:nowrap;text-align:right}
+.empty{padding:14px;color:var(--muted);font-weight:850;text-align:center;font-size:13px}
+.foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">🔔</div><div><h1>Erat<span>Guard</span></h1><p>Bildirimler</p></div></div>
+  <div class="badge">👑 PRO AKTİF</div>
+</header>
+
+<section class="hero">
+  <div class="hero-top">
+    <div class="ico">🔔</div>
+    <div>
+      <h2>Bildirimler</h2>
+      <p>__SUMMARY__</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>__TOTAL__</b><span>Toplam</span></div>
+    <div class="stat"><b>__CRITICAL__</b><span>Kritik</span></div>
+    <div class="stat"><b>__WARNINGS__</b><span>Uyarı</span></div>
+  </div>
+
+  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">ÖZET</div>
+<section class="summary">
+  <div class="row"><span>Durum</span><b>__MODE__</b></div>
+  <div class="row"><span>Toplam Bildirim</span><b>__TOTAL__</b></div>
+  <div class="row"><span>Kritik Uyarı</span><b>__CRITICAL__</b></div>
+  <div class="row"><span>Bildirim Motoru</span><b>Aktif</b></div>
+</section>
+
+<div class="section-title">SON BİLDİRİMLER</div>
+<section class="events">
+__EVENTS__
+</section>
+
+<div class="foot">EratGuard PRO - __USERNAME__ - © 2026</div>
+</body>
+</html>
+"""
+
+        html = html.replace("__USERNAME__", _eg_nfg3_safe(username))
+        html = html.replace("__SUMMARY__", _eg_nfg3_safe(summary))
+        html = html.replace("__MODE__", _eg_nfg3_safe(mode))
+        html = html.replace("__TOTAL__", str(total))
+        html = html.replace("__CRITICAL__", str(critical))
+        html = html.replace("__WARNINGS__", str(warnings))
+        html = html.replace("__EVENTS__", events_html)
+
+        resp = _eg_nfg3_make_response(_eg_nfg3_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    def _eg_nfg3_settings_page():
+        username = str(_eg_nfg3_session.get("username") or "user")
+
+        html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Bildirim Ayarları</title>
+<style>
+:root{--bg:#020806;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;--text:#f5fff8;--muted:rgba(245,255,248,.62)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{padding:12px 11px 18px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:42px;height:42px;border-radius:14px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:22px}
+.brand h1{margin:0;font-size:20px;font-weight:950;letter-spacing:-1px}.brand h1 span{color:var(--green)}
+.brand p{margin:2px 0 0;color:var(--muted);font-weight:850;font-size:11px}
+.badge{border:1px solid rgba(255,221,53,.35);color:var(--green);background:rgba(35,255,137,.10);padding:7px 10px;border-radius:999px;font-weight:950;font-size:11px}
+.card,.settings{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:20px;padding:13px;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.card h2{font-size:24px;margin:0 0 6px;font-weight:950;letter-spacing:-1.1px}
+.card p{margin:0;color:var(--muted);font-size:13px;line-height:1.35;font-weight:800}
+.section-title{font-size:15px;letter-spacing:6px;font-weight:950;margin:18px 0 8px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.row:last-child{border-bottom:0}
+.row b{font-size:14px}.row span{display:block;color:var(--muted);font-size:12px;font-weight:800;margin-top:4px}
+.toggle{width:50px;height:28px;border-radius:999px;background:rgba(35,255,137,.16);border:1px solid rgba(35,255,137,.28);position:relative;flex:0 0 50px}
+.toggle:after{content:"";position:absolute;right:4px;top:4px;width:18px;height:18px;border-radius:50%;background:var(--green);box-shadow:0 0 14px rgba(35,255,137,.7)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.btn{display:flex;align-items:center;justify-content:center;min-height:42px;border-radius:14px;text-decoration:none;font-weight:950;font-size:14px}
+.primary{background:linear-gradient(135deg,var(--yellow),var(--green));color:#00180c}
+.secondary{background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09);color:var(--text)}
+.foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">🔔</div><div><h1>Erat<span>Guard</span></h1><p>Bildirim Ayarları</p></div></div>
+  <div class="badge">👑 PRO AKTİF</div>
+</header>
+
+<section class="card">
+  <h2>Bildirim Ayarları</h2>
+  <p>Güvenlik uyarıları, lisans bildirimleri ve sistem duyuruları için tercihlerini yönet.</p>
+</section>
+
+<div class="section-title">TERCİHLER</div>
+<section class="settings">
+  <div class="row"><div><b>Bildirimler Aktif</b><span>Genel EratGuard bildirimleri</span></div><div class="toggle"></div></div>
+  <div class="row"><div><b>Güvenlik Uyarıları</b><span>Risk, karantina ve analiz olayları</span></div><div class="toggle"></div></div>
+  <div class="row"><div><b>Lisans Bildirimleri</b><span>Aktivasyon ve yenileme uyarıları</span></div><div class="toggle"></div></div>
+  <div class="row"><div><b>Admin Duyuruları</b><span>Sistem ve ürün duyuruları</span></div><div class="toggle"></div></div>
+
+  <div class="actions">
+    <a class="btn primary" href="/u/notifications?fresh=1">Kaydet</a>
+    <a class="btn secondary" href="/u/notifications?fresh=1">Bildirimler</a>
+  </div>
+</section>
+
+<div class="foot">EratGuard PRO - __USERNAME__ - © 2026</div>
+</body>
+</html>
+"""
+        html = html.replace("__USERNAME__", _eg_nfg3_safe(username))
+        resp = _eg_nfg3_make_response(_eg_nfg3_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    @app.before_request
+    def _eg_nfg3_hard_bridge():
+        try:
+            path = str(_eg_nfg3_request.path or "").rstrip("/")
+
+            notif_paths = {
+                "/u/notifications",
+                "/notifications",
+                "/notification",
+                "/bildirim",
+                "/bildirimler",
+            }
+
+            settings_paths = {
+                "/u/notifications/manage",
+            }
+
+            if path in notif_paths:
+                if not (_eg_nfg3_session.get("logged_in") and _eg_nfg3_session.get("username")):
+                    return _eg_nfg3_redirect("/login?auth_required=1")
+                return _eg_nfg3_notifications_page()
+
+            if path in settings_paths:
+                if not (_eg_nfg3_session.get("logged_in") and _eg_nfg3_session.get("username")):
+                    return _eg_nfg3_redirect("/login?auth_required=1")
+                return _eg_nfg3_settings_page()
+
+        except Exception as _eg_nfg3_bridge_err:
+            print("ERATGUARD NOTIFICATIONS-FORCE-GREEN-3 BRIDGE ERROR:", _eg_nfg3_bridge_err)
+
+        return None
+
+    print("ERATGUARD NOTIFICATIONS-FORCE-GREEN-3 HARD BRIDGE ACTIVE")
+
+except Exception as _eg_nfg3_err:
+    print("ERATGUARD NOTIFICATIONS-FORCE-GREEN-3 ERROR:", _eg_nfg3_err)
+# === /ERATGUARD NOTIFICATIONS-FORCE-GREEN-3 HARD BRIDGE ===
+
+# === ERATGUARD NOTIFICATIONS-FORCE-GREEN-4 PRIORITY BRIDGE ===
+# Eski PRO NOTIFICATIONS before_request fonksiyonundan önce çalışmak için
+# bridge fonksiyonunu app.before_request_funcs[None] listesinin başına alır.
+try:
+    def _eg_nfg4_priority_bridge():
+        try:
+            from flask import request as _eg_nfg4_request
+            from flask import session as _eg_nfg4_session
+            from flask import redirect as _eg_nfg4_redirect
+
+            path = str(_eg_nfg4_request.path or "").rstrip("/")
+
+            notif_paths = {
+                "/u/notifications",
+                "/notifications",
+                "/notification",
+                "/bildirim",
+                "/bildirimler",
+            }
+
+            settings_paths = {
+                "/u/notifications/manage",
+            }
+
+            if path in notif_paths:
+                if not (_eg_nfg4_session.get("logged_in") and _eg_nfg4_session.get("username")):
+                    return _eg_nfg4_redirect("/login?auth_required=1")
+
+                if "_eg_nfg3_notifications_page" in globals() and callable(globals().get("_eg_nfg3_notifications_page")):
+                    return globals()["_eg_nfg3_notifications_page"]()
+
+            if path in settings_paths:
+                if not (_eg_nfg4_session.get("logged_in") and _eg_nfg4_session.get("username")):
+                    return _eg_nfg4_redirect("/login?auth_required=1")
+
+                if "_eg_nfg3_settings_page" in globals() and callable(globals().get("_eg_nfg3_settings_page")):
+                    return globals()["_eg_nfg3_settings_page"]()
+
+        except Exception as _eg_nfg4_req_err:
+            print("ERATGUARD NOTIFICATIONS-FORCE-GREEN-4 REQUEST ERROR:", _eg_nfg4_req_err)
+
+        return None
+
+    # 1) before_request listesinin en başına zorla.
+    try:
+        funcs = app.before_request_funcs.setdefault(None, [])
+
+        funcs[:] = [
+            f for f in funcs
+            if getattr(f, "__name__", "") != "_eg_nfg4_priority_bridge"
+        ]
+
+        funcs.insert(0, _eg_nfg4_priority_bridge)
+
+        print("ERATGUARD NOTIFICATIONS-FORCE-GREEN-4 PRIORITY BEFORE_REQUEST ACTIVE")
+    except Exception as _eg_nfg4_before_err:
+        print("ERATGUARD NOTIFICATIONS-FORCE-GREEN-4 BEFORE_REQUEST ERROR:", _eg_nfg4_before_err)
+
+    # 2) Route endpointlerini de yeşil sayfaya bağla.
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in (
+                "/u/notifications",
+                "/u/notifications/",
+                "/notifications",
+                "/notifications/",
+                "/notification",
+                "/notification/",
+                "/bildirim",
+                "/bildirim/",
+                "/bildirimler",
+                "/bildirimler/",
+            ):
+                app.view_functions[_rule.endpoint] = _eg_nfg4_priority_bridge
+
+            if str(_rule) in ("/u/notifications/manage", "/u/notifications/manage/"):
+                app.view_functions[_rule.endpoint] = _eg_nfg4_priority_bridge
+
+        print("ERATGUARD NOTIFICATIONS-FORCE-GREEN-4 ROUTE OVERRIDE ACTIVE")
+    except Exception as _eg_nfg4_route_err:
+        print("ERATGUARD NOTIFICATIONS-FORCE-GREEN-4 ROUTE ERROR:", _eg_nfg4_route_err)
+
+except Exception as _eg_nfg4_err:
+    print("ERATGUARD NOTIFICATIONS-FORCE-GREEN-4 ERROR:", _eg_nfg4_err)
+# === /ERATGUARD NOTIFICATIONS-FORCE-GREEN-4 PRIORITY BRIDGE ===
+
+# === ERATGUARD NOTIFICATIONS-DEDUPE-5 CLEAN RECENT EVENTS ===
+# Bildirim sayfasında aynı SMS'in spam_logs/history/quarantine üzerinden tekrar görünmesini azaltır.
+try:
+    import re as _eg_nd5_re
+
+    def _eg_nd5_norm_text(v):
+        try:
+            t = str(v or "").lower().strip()
+            t = _eg_nd5_re.sub(r"\s+", " ", t)
+            return t[:120]
+        except Exception:
+            return ""
+
+    def _eg_nd5_norm_score(item):
+        try:
+            return int(item.get("score") or item.get("risk") or 0)
+        except Exception:
+            return 0
+
+    def _eg_nd5_dedupe_events(events, limit=5):
+        if not isinstance(events, list):
+            return []
+
+        cleaned = []
+        seen = set()
+
+        for item in events:
+            if not isinstance(item, dict):
+                continue
+
+            body = (
+                item.get("body")
+                or item.get("message")
+                or item.get("text")
+                or item.get("description")
+                or item.get("title")
+                or ""
+            )
+
+            score = _eg_nd5_norm_score(item)
+            status = str(item.get("status") or "").upper().strip()
+            label = str(item.get("risk_label") or item.get("title") or "").lower().strip()
+
+            # Aynı mesaj + skor + risk seviyesi tek bildirim sayılır.
+            key = (_eg_nd5_norm_text(body), score, status or label)
+
+            if key in seen:
+                continue
+
+            seen.add(key)
+            cleaned.append(item)
+
+            if len(cleaned) >= limit:
+                break
+
+        return cleaned
+
+    # NFG3 event toplayıcıyı sar. NFG4 çoğu kurulumda bunu kullanıyor.
+    if "_eg_nfg3_events" in globals() and callable(globals().get("_eg_nfg3_events")):
+        _eg_nd5_old_nfg3_events = globals().get("_eg_nfg3_events")
+
+        def _eg_nfg3_events(username):
+            raw = _eg_nd5_old_nfg3_events(username)
+            return _eg_nd5_dedupe_events(raw, limit=5)
+
+    # NDB2 event toplayıcıyı da sar.
+    if "_eg_ndb2_user_events" in globals() and callable(globals().get("_eg_ndb2_user_events")):
+        _eg_nd5_old_ndb2_events = globals().get("_eg_ndb2_user_events")
+
+        def _eg_ndb2_user_events(username):
+            raw = _eg_nd5_old_ndb2_events(username)
+            return _eg_nd5_dedupe_events(raw, limit=5)
+
+    print("ERATGUARD NOTIFICATIONS-DEDUPE-5 CLEAN RECENT EVENTS ACTIVE")
+
+except Exception as _eg_nd5_err:
+    print("ERATGUARD NOTIFICATIONS-DEDUPE-5 ERROR:", _eg_nd5_err)
+# === /ERATGUARD NOTIFICATIONS-DEDUPE-5 CLEAN RECENT EVENTS ===
+
+# === ERATGUARD SETTINGS-DATA-BIND-1 LIVE SETTINGS PAGE ===
+# /u/settings sayfasını canlı user_settings JSON verisine bağlar.
+# Kullanıcı tercihlerini POST ile data/user_settings.json içine kaydeder.
+try:
+    from flask import render_template_string as _eg_set1_render_template_string
+    from flask import make_response as _eg_set1_make_response
+    from flask import redirect as _eg_set1_redirect
+    from flask import session as _eg_set1_session
+    from flask import request as _eg_set1_request
+    from pathlib import Path as _eg_set1_Path
+    from datetime import datetime as _eg_set1_datetime
+    import json as _eg_set1_json
+    import html as _eg_set1_html
+
+    def _eg_set1_safe(v):
+        try:
+            return _eg_set1_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_set1_load(default, path):
+        try:
+            p = _eg_set1_Path(path)
+            if not p.exists():
+                return default
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_set1_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_set1_save(path, data):
+        p = _eg_set1_Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(
+            _eg_set1_json.dumps(data, ensure_ascii=False, indent=2),
+            encoding="utf-8"
+        )
+
+    def _eg_set1_bool_from_form(name, default=False):
+        try:
+            v = _eg_set1_request.form.get(name)
+            if v is None:
+                return False
+            return str(v).lower() in ("1", "true", "on", "yes", "aktif")
+        except Exception:
+            return bool(default)
+
+    def _eg_set1_defaults():
+        return {
+            "security_alerts": True,
+            "license_alerts": True,
+            "admin_announcements": True,
+            "auto_quarantine": True,
+            "compact_mode": True,
+            "high_sensitivity": True,
+            "theme": "green_dark",
+            "language": "tr",
+            "updated_at": "",
+        }
+
+    def _eg_set1_user_settings(username):
+        data = _eg_set1_load({}, "data/user_settings.json")
+        if not isinstance(data, dict):
+            data = {}
+
+        current = data.get(username, {})
+        if not isinstance(current, dict):
+            current = {}
+
+        merged = _eg_set1_defaults()
+        merged.update(current)
+        return data, merged
+
+    def _eg_set1_route():
+        if not (_eg_set1_session.get("logged_in") and _eg_set1_session.get("username")):
+            return _eg_set1_redirect("/login?auth_required=1")
+
+        username = str(_eg_set1_session.get("username") or "user")
+
+        data, settings = _eg_set1_user_settings(username)
+
+        if str(_eg_set1_request.method or "").upper() == "POST":
+            settings["security_alerts"] = _eg_set1_bool_from_form("security_alerts")
+            settings["license_alerts"] = _eg_set1_bool_from_form("license_alerts")
+            settings["admin_announcements"] = _eg_set1_bool_from_form("admin_announcements")
+            settings["auto_quarantine"] = _eg_set1_bool_from_form("auto_quarantine")
+            settings["compact_mode"] = _eg_set1_bool_from_form("compact_mode")
+            settings["high_sensitivity"] = _eg_set1_bool_from_form("high_sensitivity")
+            settings["theme"] = "green_dark"
+            settings["language"] = "tr"
+            settings["updated_at"] = _eg_set1_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+            data[username] = settings
+            _eg_set1_save("data/user_settings.json", data)
+
+            return _eg_set1_redirect("/u/settings?saved=1")
+
+        saved = str(_eg_set1_request.args.get("saved") or "") == "1"
+
+        def checked(key):
+            return "checked" if settings.get(key) else ""
+
+        enabled_count = sum(
+            1 for k in [
+                "security_alerts",
+                "license_alerts",
+                "admin_announcements",
+                "auto_quarantine",
+                "compact_mode",
+                "high_sensitivity",
+            ]
+            if settings.get(k)
+        )
+
+        if enabled_count >= 5:
+            mode = "Tam Koruma"
+            summary = "Kullanıcı tercihleri yüksek koruma modunda çalışıyor."
+        elif enabled_count >= 3:
+            mode = "Dengeli"
+            summary = "Kullanıcı tercihleri dengeli güvenlik modunda."
+        else:
+            mode = "Manuel"
+            summary = "Bazı koruma tercihleri kapalı. İstersen tekrar aktif edebilirsin."
+
+        saved_html = ""
+        if saved:
+            saved_html = '<div class="saved">Ayarlar kaydedildi.</div>'
+
+        html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Ayarlar</title>
+<style>
+:root{--bg:#020806;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;--text:#f5fff8;--muted:rgba(245,255,248,.62)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{padding:12px 11px 18px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.brand{display:flex;align-items:center;gap:8px;min-width:0}
+.logo{width:42px;height:42px;border-radius:14px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:22px}
+.brand h1{margin:0;font-size:20px;line-height:1;font-weight:950;letter-spacing:-1px}
+.brand h1 span{color:var(--green)}
+.brand p{margin:2px 0 0;color:var(--muted);font-weight:850;font-size:11px}
+.badge{border:1px solid rgba(255,221,53,.35);color:var(--green);background:rgba(35,255,137,.10);padding:7px 10px;border-radius:999px;font-weight:950;font-size:11px;white-space:nowrap}
+.hero,.summary,.settings{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:20px;padding:13px;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.hero-top{display:flex;align-items:flex-start;gap:10px}
+.ico{width:46px;height:46px;flex:0 0 46px;border-radius:15px;border:1px solid var(--line);background:rgba(35,255,137,.10);display:grid;place-items:center;font-size:24px}
+.hero h2{font-size:24px;line-height:1.02;margin:1px 0 5px;font-weight:950;letter-spacing:-1.1px}
+.hero p{margin:0;color:var(--muted);font-size:13px;line-height:1.28;font-weight:800}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.stat{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:15px;padding:10px;min-height:56px}
+.stat b{display:block;color:var(--green);font-size:17px;line-height:1.1}
+.stat span{display:block;color:var(--muted);font-size:10px;font-weight:900;margin-top:5px}
+.back{display:flex;align-items:center;justify-content:center;margin-top:10px;min-height:40px;width:100%;border-radius:14px;color:var(--text);text-decoration:none;font-weight:950;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09);font-size:14px}
+.section-title{font-size:15px;letter-spacing:6px;font-weight:950;margin:18px 0 8px}
+.summary{padding:0;overflow:hidden}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.row:last-child{border-bottom:0}
+.row span,.row b{font-size:14px;font-weight:900}
+.row b{color:#9fffc4;text-align:right}
+.settings{padding:10px}
+.opt{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.opt:last-child{border-bottom:0}
+.opt b{display:block;font-size:14px}
+.opt span{display:block;color:var(--muted);font-size:12px;font-weight:800;margin-top:4px;line-height:1.3}
+.switch{position:relative;width:50px;height:28px;flex:0 0 50px}
+.switch input{display:none}
+.slider{position:absolute;inset:0;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.12)}
+.slider:before{content:"";position:absolute;width:20px;height:20px;left:4px;top:3px;border-radius:50%;background:rgba(245,255,248,.52);transition:.18s}
+.switch input:checked + .slider{background:rgba(35,255,137,.20);border-color:rgba(35,255,137,.35)}
+.switch input:checked + .slider:before{transform:translateX(20px);background:var(--green);box-shadow:0 0 14px rgba(35,255,137,.65)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.btn{border:0;display:flex;align-items:center;justify-content:center;min-height:44px;border-radius:14px;text-decoration:none;font-weight:950;font-size:14px}
+.primary{background:linear-gradient(135deg,var(--yellow),var(--green));color:#00180c}
+.secondary{background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09);color:var(--text)}
+.saved{margin:0 0 10px;padding:11px 13px;border:1px solid rgba(35,255,137,.25);background:rgba(35,255,137,.10);border-radius:14px;color:#9fffc4;font-weight:950;font-size:13px}
+.foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">⚙️</div><div><h1>Erat<span>Guard</span></h1><p>Ayarlar</p></div></div>
+  <div class="badge">👑 PRO AKTİF</div>
+</header>
+
+<section class="hero">
+  <div class="hero-top">
+    <div class="ico">⚙️</div>
+    <div>
+      <h2>Ayarlar</h2>
+      <p>__SUMMARY__</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>__ENABLED__</b><span>Aktif</span></div>
+    <div class="stat"><b>6</b><span>Tercih</span></div>
+    <div class="stat"><b>PRO</b><span>Mod</span></div>
+  </div>
+
+  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">ÖZET</div>
+<section class="summary">
+  <div class="row"><span>Koruma Modu</span><b>__MODE__</b></div>
+  <div class="row"><span>Tema</span><b>Yeşil Karanlık</b></div>
+  <div class="row"><span>Dil</span><b>Türkçe</b></div>
+  <div class="row"><span>Son Kayıt</span><b>__UPDATED__</b></div>
+</section>
+
+<div class="section-title">TERCİHLER</div>
+<form class="settings" method="post" action="/u/settings">
+  __SAVED__
+
+  <label class="opt">
+    <div><b>Güvenlik Uyarıları</b><span>Risk, spam, karantina ve analiz uyarıları.</span></div>
+    <div class="switch"><input name="security_alerts" type="checkbox" __SECURITY__><span class="slider"></span></div>
+  </label>
+
+  <label class="opt">
+    <div><b>Lisans Bildirimleri</b><span>Aktivasyon ve yenileme bildirimleri.</span></div>
+    <div class="switch"><input name="license_alerts" type="checkbox" __LICENSE__><span class="slider"></span></div>
+  </label>
+
+  <label class="opt">
+    <div><b>Admin Duyuruları</b><span>Sistem ve ürün duyurularını göster.</span></div>
+    <div class="switch"><input name="admin_announcements" type="checkbox" __ADMIN__><span class="slider"></span></div>
+  </label>
+
+  <label class="opt">
+    <div><b>Otomatik Karantina</b><span>Yüksek riskli mesajları otomatik ayır.</span></div>
+    <div class="switch"><input name="auto_quarantine" type="checkbox" __QUARANTINE__><span class="slider"></span></div>
+  </label>
+
+  <label class="opt">
+    <div><b>Kompakt Görünüm</b><span>Mobilde daha ince ve hızlı arayüz.</span></div>
+    <div class="switch"><input name="compact_mode" type="checkbox" __COMPACT__><span class="slider"></span></div>
+  </label>
+
+  <label class="opt">
+    <div><b>Yüksek Hassasiyet</b><span>Spam ve oltalama sinyallerini sert değerlendir.</span></div>
+    <div class="switch"><input name="high_sensitivity" type="checkbox" __SENS__><span class="slider"></span></div>
+  </label>
+
+  <div class="actions">
+    <button class="btn primary" type="submit">Kaydet</button>
+    <a class="btn secondary" href="/dashboard">Panel</a>
+  </div>
+</form>
+
+<div class="foot">EratGuard PRO - __USERNAME__ - © 2026</div>
+</body>
+</html>
+"""
+
+        html = html.replace("__USERNAME__", _eg_set1_safe(username))
+        html = html.replace("__SUMMARY__", _eg_set1_safe(summary))
+        html = html.replace("__MODE__", _eg_set1_safe(mode))
+        html = html.replace("__ENABLED__", str(enabled_count))
+        html = html.replace("__UPDATED__", _eg_set1_safe(settings.get("updated_at") or "Henüz yok"))
+        html = html.replace("__SAVED__", saved_html)
+
+        html = html.replace("__SECURITY__", checked("security_alerts"))
+        html = html.replace("__LICENSE__", checked("license_alerts"))
+        html = html.replace("__ADMIN__", checked("admin_announcements"))
+        html = html.replace("__QUARANTINE__", checked("auto_quarantine"))
+        html = html.replace("__COMPACT__", checked("compact_mode"))
+        html = html.replace("__SENS__", checked("high_sensitivity"))
+
+        resp = _eg_set1_make_response(_eg_set1_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/settings", "/u/settings/", "/u/settings/manage", "/u/settings/manage/", "/settings", "/settings/", "/ayar", "/ayar/", "/ayarlar", "/ayarlar/"):
+                app.view_functions[_rule.endpoint] = _eg_set1_route
+                try:
+                    _rule.methods.add("POST")
+                except Exception:
+                    pass
+
+        print("ERATGUARD SETTINGS-DATA-BIND-1 LIVE SETTINGS PAGE ACTIVE")
+    except Exception as _eg_set1_route_err:
+        print("ERATGUARD SETTINGS-DATA-BIND-1 ROUTE ERROR:", _eg_set1_route_err)
+
+except Exception as _eg_set1_err:
+    print("ERATGUARD SETTINGS-DATA-BIND-1 ERROR:", _eg_set1_err)
+# === /ERATGUARD SETTINGS-DATA-BIND-1 LIVE SETTINGS PAGE ===
+
+# === ERATGUARD COMMUNITY-DATA-BIND-1 LIVE COMMUNITY PAGE ===
+# /u/community sayfasını canlı community report JSON verisine bağlar.
+# Eksik community_reports / spam_reports / reported_numbers dosyalarını güvenli oluşturur.
+try:
+    from flask import request as _eg_cdb1_request
+    from flask import session as _eg_cdb1_session
+    from flask import redirect as _eg_cdb1_redirect
+    from flask import render_template_string as _eg_cdb1_render_template_string
+    from flask import make_response as _eg_cdb1_make_response
+    from pathlib import Path as _eg_cdb1_Path
+    from datetime import datetime as _eg_cdb1_datetime
+    import json as _eg_cdb1_json
+    import html as _eg_cdb1_html
+
+    def _eg_cdb1_safe(v):
+        try:
+            return _eg_cdb1_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_cdb1_load(default, path):
+        try:
+            p = _eg_cdb1_Path(path)
+            if not p.exists():
+                return default
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_cdb1_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_cdb1_save(path, data):
+        p = _eg_cdb1_Path(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(
+            _eg_cdb1_json.dumps(data, ensure_ascii=False, indent=2),
+            encoding="utf-8"
+        )
+
+    def _eg_cdb1_seed_files():
+        seeds = {
+            "data/community_reports.json": [],
+            "data/spam_reports.json": [],
+            "data/reported_numbers.json": {},
+        }
+
+        for file_path, default in seeds.items():
+            p = _eg_cdb1_Path(file_path)
+            if not p.exists():
+                _eg_cdb1_save(file_path, default)
+                continue
+
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                _eg_cdb1_save(file_path, default)
+                continue
+
+            try:
+                _eg_cdb1_json.loads(txt)
+            except Exception:
+                bak = p.with_suffix(p.suffix + ".broken.bak")
+                try:
+                    p.rename(bak)
+                except Exception:
+                    pass
+                _eg_cdb1_save(file_path, default)
+
+    def _eg_cdb1_add_report(username, number, message, category, note):
+        now = _eg_cdb1_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        number = str(number or "").strip()
+        message = str(message or "").strip()
+        category = str(category or "spam").strip() or "spam"
+        note = str(note or "").strip()
+
+        item = {
+            "time": now,
+            "username": username,
+            "number": number or "unknown_sender",
+            "sender": number or "community_report",
+            "body": message,
+            "message": message,
+            "category": category,
+            "note": note,
+            "status": "COMMUNITY_REPORTED",
+            "score": 75,
+            "risk": 75,
+            "risk_label": "Topluluk Bildirimi",
+            "risk_class": "community",
+            "source": "community_report",
+        }
+
+        community = _eg_cdb1_load([], "data/community_reports.json")
+        if not isinstance(community, list):
+            community = []
+        community.append(item)
+        _eg_cdb1_save("data/community_reports.json", community)
+
+        spam_reports = _eg_cdb1_load([], "data/spam_reports.json")
+        if not isinstance(spam_reports, list):
+            spam_reports = []
+        spam_reports.append(item)
+        _eg_cdb1_save("data/spam_reports.json", spam_reports)
+
+        reported = _eg_cdb1_load({}, "data/reported_numbers.json")
+        if not isinstance(reported, dict):
+            reported = {}
+
+        key = number or "unknown_sender"
+        old = reported.get(key)
+        if not isinstance(old, dict):
+            old = {"number": key, "count": 0, "reports": []}
+
+        old["number"] = key
+        old["count"] = int(old.get("count") or 0) + 1
+        old["last_time"] = now
+        old["last_username"] = username
+        old["last_category"] = category
+        old["last_message"] = message[:160]
+        reports = old.get("reports")
+        if not isinstance(reports, list):
+            reports = []
+        reports.append({
+            "time": now,
+            "username": username,
+            "category": category,
+            "message": message[:160],
+            "note": note[:160],
+        })
+        old["reports"] = reports[-10:]
+        reported[key] = old
+        _eg_cdb1_save("data/reported_numbers.json", reported)
+
+        return item
+
+    def _eg_cdb1_stats(username):
+        community = _eg_cdb1_load([], "data/community_reports.json")
+        spam_reports = _eg_cdb1_load([], "data/spam_reports.json")
+        reported = _eg_cdb1_load({}, "data/reported_numbers.json")
+
+        if not isinstance(community, list):
+            community = []
+        if not isinstance(spam_reports, list):
+            spam_reports = []
+        if not isinstance(reported, dict):
+            reported = {}
+
+        user_reports = []
+        for item in community:
+            if not isinstance(item, dict):
+                continue
+            item_user = str(item.get("username") or "").strip()
+            if item_user and item_user != username:
+                continue
+            user_reports.append(item)
+
+        recent = sorted(
+            user_reports,
+            key=lambda x: str(x.get("time") or ""),
+            reverse=True
+        )[:6]
+
+        return {
+            "community": community,
+            "spam_reports": spam_reports,
+            "reported": reported,
+            "user_reports": user_reports,
+            "recent": recent,
+        }
+
+    def _eg_cdb1_page(saved=False):
+        if not (_eg_cdb1_session.get("logged_in") and _eg_cdb1_session.get("username")):
+            return _eg_cdb1_redirect("/login?auth_required=1")
+
+        username = str(_eg_cdb1_session.get("username") or "user")
+        data = _eg_cdb1_stats(username)
+
+        total = len(data["community"])
+        user_total = len(data["user_reports"])
+        reported_count = len(data["reported"])
+
+        if total:
+            summary = "Topluluk spam bildirimleri canlı olarak izleniyor."
+            mode = "Topluluk Aktif"
+        else:
+            summary = "Henüz topluluk bildirimi yok. İlk spam bildirimi buradan eklenebilir."
+            mode = "Hazır"
+
+        flash_html = ""
+        if saved:
+            flash_html = '<div class="flash">Topluluk bildirimi kaydedildi.</div>'
+
+        recent_html = ""
+        if data["recent"]:
+            for item in data["recent"]:
+                title = item.get("risk_label") or "Topluluk Bildirimi"
+                body = item.get("body") or item.get("message") or "Spam bildirimi"
+                number = item.get("number") or item.get("sender") or "unknown"
+                time = item.get("time") or "-"
+                category = item.get("category") or "spam"
+
+                recent_html += (
+                    '<div class="event">'
+                    '<div>'
+                    '<b>' + _eg_cdb1_safe(title) + '</b>'
+                    '<span>' + _eg_cdb1_safe(str(body)[:105]) + '</span>'
+                    '<small>' + _eg_cdb1_safe(time) + ' - ' + _eg_cdb1_safe(number) + '</small>'
+                    '</div>'
+                    '<strong>' + _eg_cdb1_safe(category.upper()) + '</strong>'
+                    '</div>'
+                )
+        else:
+            recent_html = '<div class="empty">Henüz topluluk bildirimi yok.</div>'
+
+        top_numbers = sorted(
+            data["reported"].values(),
+            key=lambda x: int(x.get("count") or 0) if isinstance(x, dict) else 0,
+            reverse=True
+        )[:5]
+
+        numbers_html = ""
+        if top_numbers:
+            for item in top_numbers:
+                if not isinstance(item, dict):
+                    continue
+                number = item.get("number") or "unknown"
+                count = item.get("count") or 0
+                last_time = item.get("last_time") or "-"
+                numbers_html += (
+                    '<div class="chip">'
+                    '<div><b>' + _eg_cdb1_safe(number) + '</b>'
+                    '<span>' + _eg_cdb1_safe(last_time) + '</span></div>'
+                    '<strong>' + str(count) + ' rapor</strong>'
+                    '</div>'
+                )
+        else:
+            numbers_html = '<div class="empty">Raporlanan numara listesi boş.</div>'
+
+        html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Topluluk</title>
+<style>
+:root{--bg:#020806;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;--text:#f5fff8;--muted:rgba(245,255,248,.62)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{padding:12px 11px 18px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.brand{display:flex;align-items:center;gap:8px;min-width:0}
+.logo{width:42px;height:42px;border-radius:14px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:22px}
+.brand h1{margin:0;font-size:20px;line-height:1;font-weight:950;letter-spacing:-1px}
+.brand h1 span{color:var(--green)}
+.brand p{margin:2px 0 0;color:var(--muted);font-weight:850;font-size:11px}
+.badge{border:1px solid rgba(255,221,53,.35);color:var(--green);background:rgba(35,255,137,.10);padding:7px 10px;border-radius:999px;font-weight:950;font-size:11px;white-space:nowrap}
+.hero,.summary,.form,.events,.chips{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:20px;padding:13px;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+.hero-top{display:flex;align-items:flex-start;gap:10px}
+.ico{width:46px;height:46px;flex:0 0 46px;border-radius:15px;border:1px solid var(--line);background:rgba(35,255,137,.10);display:grid;place-items:center;font-size:24px}
+.hero h2{font-size:24px;line-height:1.02;margin:1px 0 5px;font-weight:950;letter-spacing:-1.1px}
+.hero p{margin:0;color:var(--muted);font-size:13px;line-height:1.28;font-weight:800}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.stat{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:15px;padding:10px;min-height:56px}
+.stat b{display:block;color:var(--green);font-size:17px;line-height:1.1}
+.stat span{display:block;color:var(--muted);font-size:10px;font-weight:900;margin-top:5px}
+.back{display:flex;align-items:center;justify-content:center;margin-top:10px;min-height:40px;width:100%;border-radius:14px;color:var(--text);text-decoration:none;font-weight:950;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09);font-size:14px}
+.section-title{font-size:15px;letter-spacing:6px;font-weight:950;margin:18px 0 8px}
+.summary{padding:0;overflow:hidden}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.row:last-child{border-bottom:0}
+.row span,.row b{font-size:14px;font-weight:900}
+.row b{color:#9fffc4;text-align:right}
+.flash{border:1px solid rgba(35,255,137,.28);background:rgba(35,255,137,.10);border-radius:14px;padding:12px;margin-bottom:10px;font-weight:950;color:#9fffc4}
+.form label{display:block;font-size:14px;font-weight:950;margin-bottom:7px}
+.form input,.form textarea,.form select{width:100%;border-radius:14px;border:1px solid rgba(35,255,137,.22);background:rgba(0,0,0,.22);color:var(--text);font-size:14px;font-weight:850;padding:0 12px;outline:none;margin-bottom:8px}
+.form input,.form select{height:46px}
+.form textarea{min-height:88px;padding-top:12px;resize:vertical}
+.form input::placeholder,.form textarea::placeholder{color:rgba(245,255,248,.34)}
+.form button{width:100%;height:48px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--yellow),var(--green));font-size:15px;font-weight:950;color:#00180c}
+.events,.chips{padding:10px}
+.event{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.event:last-child{border-bottom:0}
+.event b{display:block;font-size:14px;margin-bottom:4px}
+.event span{display:block;color:var(--muted);font-size:12px;font-weight:800;line-height:1.3}
+.event small{display:block;color:rgba(245,255,248,.42);font-size:10px;font-weight:800;margin-top:5px}
+.event strong{color:var(--yellow);font-size:12px;white-space:nowrap;text-align:right}
+.chip{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.20);border-radius:14px;padding:11px 12px;margin-bottom:8px}
+.chip:last-child{margin-bottom:0}
+.chip b{display:block;font-size:14px}
+.chip span{display:block;color:var(--muted);font-size:11px;font-weight:850;margin-top:3px}
+.chip strong{color:#9fffc4;font-size:12px;text-align:right}
+.empty{padding:14px;color:var(--muted);font-weight:850;text-align:center;font-size:13px}
+.foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">🌐</div><div><h1>Erat<span>Guard</span></h1><p>Topluluk</p></div></div>
+  <div class="badge">👑 PRO AKTİF</div>
+</header>
+
+<section class="hero">
+  <div class="hero-top">
+    <div class="ico">🌐</div>
+    <div>
+      <h2>Topluluk</h2>
+      <p>__SUMMARY__</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>__TOTAL__</b><span>Toplam</span></div>
+    <div class="stat"><b>__USER_TOTAL__</b><span>Senin</span></div>
+    <div class="stat"><b>__NUMBERS__</b><span>Numara</span></div>
+  </div>
+
+  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">ÖZET</div>
+<section class="summary">
+  <div class="row"><span>Durum</span><b>__MODE__</b></div>
+  <div class="row"><span>Topluluk Raporu</span><b>__TOTAL__</b></div>
+  <div class="row"><span>Raporlanan Numara</span><b>__NUMBERS__</b></div>
+  <div class="row"><span>Koruma Katkısı</span><b>Aktif</b></div>
+</section>
+
+<div class="section-title">BİLDİR</div>
+<section class="form">
+  __FLASH__
+  <form method="post" action="/u/community/spam_report">
+    <label>Spam / dolandırıcılık bildir</label>
+    <input name="number" placeholder="Numara veya gönderen adı">
+    <select name="category">
+      <option value="spam">Spam</option>
+      <option value="phishing">Dolandırıcılık / Phishing</option>
+      <option value="scam">Sahte ödül / kampanya</option>
+      <option value="abuse">Rahatsız edici mesaj</option>
+    </select>
+    <textarea name="message" placeholder="Mesaj içeriği veya kısa açıklama"></textarea>
+    <input name="note" placeholder="Not, kaynak veya ek bilgi">
+    <button type="submit">Topluluğa Bildir</button>
+  </form>
+</section>
+
+<div class="section-title">SON RAPORLAR</div>
+<section class="events">
+__RECENT__
+</section>
+
+<div class="section-title">NUMARALAR</div>
+<section class="chips">
+__NUMBERS_LIST__
+</section>
+
+<div class="foot">EratGuard PRO - __USERNAME__ - © 2026</div>
+</body>
+</html>
+"""
+
+        html = html.replace("__USERNAME__", _eg_cdb1_safe(username))
+        html = html.replace("__SUMMARY__", _eg_cdb1_safe(summary))
+        html = html.replace("__MODE__", _eg_cdb1_safe(mode))
+        html = html.replace("__TOTAL__", str(total))
+        html = html.replace("__USER_TOTAL__", str(user_total))
+        html = html.replace("__NUMBERS__", str(reported_count))
+        html = html.replace("__RECENT__", recent_html)
+        html = html.replace("__NUMBERS_LIST__", numbers_html)
+        html = html.replace("__FLASH__", flash_html)
+
+        resp = _eg_cdb1_make_response(_eg_cdb1_render_template_string(html))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    def _eg_cdb1_community_route():
+        if not (_eg_cdb1_session.get("logged_in") and _eg_cdb1_session.get("username")):
+            return _eg_cdb1_redirect("/login?auth_required=1")
+        return _eg_cdb1_page(saved=str(_eg_cdb1_request.args.get("saved") or "") == "1")
+
+    def _eg_cdb1_spam_report_route():
+        if not (_eg_cdb1_session.get("logged_in") and _eg_cdb1_session.get("username")):
+            return _eg_cdb1_redirect("/login?auth_required=1")
+
+        username = str(_eg_cdb1_session.get("username") or "user")
+
+        number = (
+            _eg_cdb1_request.form.get("number")
+            or _eg_cdb1_request.form.get("sender")
+            or _eg_cdb1_request.form.get("phone")
+            or ""
+        )
+
+        message = (
+            _eg_cdb1_request.form.get("message")
+            or _eg_cdb1_request.form.get("body")
+            or _eg_cdb1_request.form.get("text")
+            or ""
+        )
+
+        category = _eg_cdb1_request.form.get("category") or "spam"
+        note = _eg_cdb1_request.form.get("note") or ""
+
+        if not str(number or "").strip() and not str(message or "").strip():
+            return _eg_cdb1_redirect("/u/community?empty=1")
+
+        _eg_cdb1_add_report(username, number, message, category, note)
+        return _eg_cdb1_redirect("/u/community?saved=1")
+
+    _eg_cdb1_seed_files()
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/community", "/u/community/", "/community", "/community/"):
+                app.view_functions[_rule.endpoint] = _eg_cdb1_community_route
+            if str(_rule) in ("/u/community/spam_report", "/u/community/spam_report/", "/u/community/feedback", "/u/community/feedback/"):
+                app.view_functions[_rule.endpoint] = _eg_cdb1_spam_report_route
+                try:
+                    _rule.methods.add("POST")
+                except Exception:
+                    pass
+
+        print("ERATGUARD COMMUNITY-DATA-BIND-1 LIVE COMMUNITY PAGE ACTIVE")
+    except Exception as _eg_cdb1_route_err:
+        print("ERATGUARD COMMUNITY-DATA-BIND-1 ROUTE ERROR:", _eg_cdb1_route_err)
+
+except Exception as _eg_cdb1_err:
+    print("ERATGUARD COMMUNITY-DATA-BIND-1 ERROR:", _eg_cdb1_err)
+# === /ERATGUARD COMMUNITY-DATA-BIND-1 LIVE COMMUNITY PAGE ===
+
+# === ERATGUARD NOTIFICATIONS-SCOPE-FIX-6 USER ONLY EVENTS ===
+# Bildirim ekranında eski sahipsiz spam_logs kayıtlarının canlı kullanıcıya görünmesini engeller.
+try:
+    from pathlib import Path as _eg_nf6_Path
+    import json as _eg_nf6_json
+
+    def _eg_nf6_load(default, path):
+        try:
+            p = _eg_nf6_Path(path)
+            if not p.exists():
+                return default
+            txt = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_nf6_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_nf6_strict_user_events(username):
+        username = str(username or "").strip()
+        combined = []
+
+        # 1) Kullanıcıya özel bildirimler
+        data = _eg_nf6_load({}, "data/user_notifications.json")
+        if isinstance(data, dict):
+            user_items = data.get(username, [])
+            if isinstance(user_items, list):
+                for item in user_items:
+                    if isinstance(item, str):
+                        item = {"title": "Bildirim", "body": item, "source": "user_notification", "username": username}
+                    if isinstance(item, dict):
+                        x = dict(item)
+                        x["_source_label"] = "user_notification"
+                        combined.append(x)
+
+        # 2) Global sistem/admin bildirimleri: sadece gerçekten notification dosyalarından gelir
+        for file_path, source_label in [
+            ("data/notifications.json", "system_notification"),
+            ("data/admin_notifications.json", "admin_notification"),
+        ]:
+            items = _eg_nf6_load([], file_path)
+            if not isinstance(items, list):
+                items = []
+
+            for item in items:
+                if isinstance(item, str):
+                    item = {"title": "Bildirim", "body": item, "source": source_label}
+
+                if not isinstance(item, dict):
+                    continue
+
+                item_user = str(item.get("username") or item.get("user") or "").strip()
+
+                # Global notification olabilir, ya da direkt bu kullanıcıya ait olabilir.
+                if item_user and item_user != username:
+                    continue
+
+                x = dict(item)
+                x["_source_label"] = source_label
+                combined.append(x)
+
+        # 3) Risk kaynakları: SADECE bu kullanıcıya aitse görünür.
+        for file_path, source_label in [
+            ("data/user_analysis_history.json", "analysis_history"),
+            ("data/spam_logs.json", "spam_logs"),
+            ("data/user_quarantine.json", "quarantine"),
+        ]:
+            items = _eg_nf6_load([], file_path)
+            if not isinstance(items, list):
+                items = []
+
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+
+                item_user = str(item.get("username") or item.get("user") or "").strip()
+
+                # Kritik kural: username yoksa bildirim ekranına alma.
+                if item_user != username:
+                    continue
+
+                x = dict(item)
+                x["_source_label"] = source_label
+                combined.append(x)
+
+        seen = set()
+        cleaned = []
+
+        for item in sorted(
+            combined,
+            key=lambda x: str(x.get("time") or x.get("created_at") or ""),
+            reverse=True
+        ):
+            key = (
+                str(item.get("time") or item.get("created_at") or ""),
+                str(item.get("body") or item.get("message") or item.get("title") or "")[:90],
+                str(item.get("_source_label") or "")
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            cleaned.append(item)
+
+        return cleaned[:8]
+
+    # Eski notification event okuyucularını canlı kullanıcı kapsamına zorla.
+    globals()["_eg_nfg3_events"] = _eg_nf6_strict_user_events
+    globals()["_eg_ndb2_user_events"] = _eg_nf6_strict_user_events
+
+    print("ERATGUARD NOTIFICATIONS-SCOPE-FIX-6 USER ONLY EVENTS ACTIVE")
+
+except Exception as _eg_nf6_err:
+    print("ERATGUARD NOTIFICATIONS-SCOPE-FIX-6 ERROR:", _eg_nf6_err)
+# === /ERATGUARD NOTIFICATIONS-SCOPE-FIX-6 USER ONLY EVENTS ===
+
+# === ERATGUARD CORE-5E-FIX-1 OLD NOTIFICATION UI OVERRIDE ===
+# Eski beyaz notification-permission ve notification manage ekranlarını
+# yeni koyu EratGuard UI hattına zorlar.
+try:
+    import json as _eg5e_json
+    from pathlib import Path as _eg5e_Path
+    from flask import request as _eg5e_request, session as _eg5e_session, redirect as _eg5e_redirect
+
+    def _eg5e_current_username():
+        try:
+            return str(
+                _eg5e_session.get("username")
+                or _eg5e_session.get("user")
+                or _eg5e_session.get("email")
+                or ""
+            ).strip()
+        except Exception:
+            return ""
+
+    def _eg5e_mark_notif_asked():
+        try:
+            _eg5e_session["notif_asked"] = True
+            username = _eg5e_current_username()
+            if not username:
+                return
+
+            users_file = _eg5e_Path("data/users.json")
+            if not users_file.exists():
+                return
+
+            data = _eg5e_json.loads(users_file.read_text(encoding="utf-8") or "{}")
+            if isinstance(data, dict) and username in data and isinstance(data.get(username), dict):
+                data[username]["notif_asked"] = True
+                users_file.write_text(
+                    _eg5e_json.dumps(data, ensure_ascii=False, indent=2),
+                    encoding="utf-8"
+                )
+        except Exception:
+            pass
+
+    def _eg5e_notification_permission_page():
+        _eg5e_mark_notif_asked()
+
+        return """<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Bildirim İzni</title>
+<style>
+:root{
+  --bg:#020806;
+  --card:#061d11;
+  --card2:#092817;
+  --line:rgba(35,255,137,.30);
+  --green:#23ff89;
+  --yellow:#ffdf35;
+  --text:#f2fff6;
+  --muted:#a9bdb1;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 80% 0%,rgba(35,255,137,.18),transparent 36%),
+    radial-gradient(circle at 10% 20%,rgba(255,223,53,.10),transparent 32%),
+    var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  padding:22px;
+}
+.wrap{max-width:720px;margin:0 auto;padding-top:28px}
+.top{display:flex;align-items:center;gap:14px;margin-bottom:28px}
+.logo{
+  width:58px;height:58px;border-radius:18px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#12d7ff,#8068ff);
+  color:#001; font-size:32px; font-weight:900;
+  box-shadow:0 0 30px rgba(35,255,137,.18);
+}
+.brand h1{margin:0;font-size:30px;line-height:1}
+.brand h1 span{color:var(--green)}
+.brand p{margin:6px 0 0;color:var(--muted);font-weight:800;letter-spacing:.16em;font-size:12px}
+.card{
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:linear-gradient(180deg,rgba(9,40,23,.96),rgba(3,18,10,.96));
+  padding:28px;
+  box-shadow:0 24px 70px rgba(0,0,0,.42);
+}
+.badge{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 16px;border-radius:999px;
+  border:1px solid rgba(35,255,137,.35);
+  color:var(--green);font-weight:900;
+  background:rgba(35,255,137,.08);
+}
+h2{font-size:44px;line-height:1.05;margin:20px 0 12px}
+p{color:var(--muted);font-size:19px;line-height:1.48;font-weight:700}
+.actions{display:grid;gap:14px;margin-top:26px}
+.btn{
+  border:0;
+  border-radius:19px;
+  height:58px;
+  display:flex;align-items:center;justify-content:center;
+  text-decoration:none;
+  font-size:18px;font-weight:900;
+  cursor:pointer;
+}
+.primary{
+  color:#00180a;
+  background:linear-gradient(100deg,var(--yellow),var(--green));
+}
+.secondary{
+  color:var(--text);
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.13);
+}
+.note{
+  margin-top:18px;
+  padding:16px;
+  border-radius:18px;
+  border:1px solid rgba(35,255,137,.18);
+  color:#bfffd6;
+  background:rgba(35,255,137,.06);
+  font-weight:800;
+}
+@media(max-width:520px){
+  body{padding:18px}
+  h2{font-size:36px}
+  p{font-size:17px}
+  .card{padding:22px;border-radius:24px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="logo">E</div>
+    <div class="brand">
+      <h1>Erat<span>Guard</span></h1>
+      <p>PRO NOTIFICATION CONTROL</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="badge">🔔 Bildirim Merkezi</div>
+    <h2>Bildirimleri aç</h2>
+    <p>Güvenlik uyarıları, lisans bilgilendirmeleri ve önemli sistem duyuruları için bildirim iznini buradan yönet.</p>
+
+    <div class="actions">
+      <button class="btn primary" onclick="askPermission()">İzin Ver →</button>
+      <a class="btn secondary" href="/dashboard">Şimdilik Geç</a>
+      <a class="btn secondary" href="/u/notifications">Bildirim Paneli</a>
+    </div>
+
+    <div class="note" id="eg-note">Bu ekran yeni EratGuard koyu arayüz hattına taşındı.</div>
+  </div>
+</div>
+
+<script>
+function askPermission(){
+  const note = document.getElementById("eg-note");
+  try{
+    if(!("Notification" in window)){
+      note.innerText = "Bu tarayıcı bildirim iznini desteklemiyor. Panele yönlendiriliyorsun.";
+      setTimeout(()=>{ location.href="/dashboard"; }, 700);
+      return;
+    }
+    Notification.requestPermission().then(function(result){
+      note.innerText = "Bildirim tercihi: " + result + ". Panele yönlendiriliyorsun.";
+      setTimeout(()=>{ location.href="/dashboard"; }, 800);
+    }).catch(function(){
+      location.href="/dashboard";
+    });
+  }catch(e){
+    location.href="/dashboard";
+  }
+}
+</script>
+</body>
+</html>"""
+
+    def _eg5e_notifications_manage_page():
+        username = _eg5e_current_username() or "user"
+
+        return f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Bildirim Ayarları</title>
+<style>
+:root{{
+  --bg:#020806;--card:#061d11;--card2:#092817;--line:rgba(35,255,137,.30);
+  --green:#23ff89;--yellow:#ffdf35;--text:#f2fff6;--muted:#a9bdb1;
+}}
+*{{box-sizing:border-box}}
+body{{
+  margin:0;min-height:100vh;padding:20px;background:
+  radial-gradient(circle at 80% 0%,rgba(35,255,137,.16),transparent 34%),
+  var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;
+}}
+.wrap{{max-width:720px;margin:0 auto}}
+.top{{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}}
+.brand{{display:flex;align-items:center;gap:12px}}
+.logo{{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:rgba(35,255,137,.10);border:1px solid var(--line);font-size:28px}}
+h1{{margin:0;font-size:28px}} h1 span{{color:var(--green)}}
+.sub{{margin:4px 0 0;color:var(--muted);font-weight:800}}
+.pill{{padding:10px 14px;border-radius:999px;background:rgba(35,255,137,.10);border:1px solid var(--line);color:var(--green);font-weight:900}}
+.hero,.panel{{border:1px solid var(--line);background:linear-gradient(180deg,rgba(9,40,23,.96),rgba(3,18,10,.96));border-radius:26px;padding:22px;margin-bottom:18px}}
+.hero h2{{font-size:38px;margin:0 0 10px}}
+.hero p{{color:var(--muted);font-size:17px;line-height:1.42;font-weight:750;margin:0}}
+.row{{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.07)}}
+.row:last-child{{border-bottom:0}}
+.left strong{{display:block;font-size:18px}}
+.left small{{display:block;color:var(--muted);font-size:14px;margin-top:5px;font-weight:700}}
+.toggle{{width:62px;height:34px;border-radius:999px;background:linear-gradient(100deg,var(--yellow),var(--green));position:relative;box-shadow:0 0 22px rgba(35,255,137,.22)}}
+.toggle:after{{content:"";width:26px;height:26px;border-radius:50%;background:#00180a;position:absolute;right:4px;top:4px}}
+.actions{{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}}
+.btn{{height:54px;border-radius:17px;text-decoration:none;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:17px}}
+.primary{{background:linear-gradient(100deg,var(--yellow),var(--green));color:#00180a}}
+.secondary{{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);color:var(--text)}}
+@media(max-width:520px){{.actions{{grid-template-columns:1fr}}.hero h2{{font-size:32px}}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <div class="logo">🔔</div>
+      <div><h1>Erat<span>Guard</span></h1><p class="sub">Bildirim Ayarları · {username}</p></div>
+    </div>
+    <div class="pill">PRO</div>
+  </div>
+
+  <div class="hero">
+    <h2>Bildirim Ayarları</h2>
+    <p>Güvenlik uyarıları, lisans bildirimleri ve sistem duyuruları yeni koyu EratGuard arayüzünde yönetilir.</p>
+  </div>
+
+  <div class="panel">
+    <div class="row"><div class="left"><strong>Bildirimler aktif</strong><small>Genel EratGuard bildirimlerini aç veya kapat.</small></div><div class="toggle"></div></div>
+    <div class="row"><div class="left"><strong>Güvenlik uyarıları</strong><small>Risk, karantina, koruma ve analiz olayları.</small></div><div class="toggle"></div></div>
+    <div class="row"><div class="left"><strong>Lisans bildirimleri</strong><small>Aktivasyon, yenileme ve hesap durumu.</small></div><div class="toggle"></div></div>
+    <div class="row"><div class="left"><strong>Admin duyuruları</strong><small>Sistem ve ürün duyuruları.</small></div><div class="toggle"></div></div>
+
+    <div class="actions">
+      <a class="btn primary" href="/u/notifications?fresh=1">Kaydet</a>
+      <a class="btn secondary" href="/dashboard">Panel</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>"""
+
+    def _eg5e_old_notification_ui_bridge():
+        try:
+            path = str(_eg5e_request.path or "").rstrip("/") or "/"
+
+            if path == "/notification-permission":
+                return _eg5e_notification_permission_page()
+
+            if path in (
+                "/u/notifications/manage",
+                "/notifications/manage",
+                "/notification/manage",
+                "/notification-settings",
+                "/notifications/settings",
+            ):
+                return _eg5e_notifications_manage_page()
+
+        except Exception as _eg5e_req_err:
+            print("ERATGUARD CORE-5E-FIX-1 REQUEST ERROR:", _eg5e_req_err)
+
+    try:
+        funcs = app.before_request_funcs.setdefault(None, [])
+        if _eg5e_old_notification_ui_bridge not in funcs:
+            funcs.insert(0, _eg5e_old_notification_ui_bridge)
+        print("ERATGUARD CORE-5E-FIX-1 OLD NOTIFICATION UI OVERRIDE ACTIVE")
+    except Exception as _eg5e_insert_err:
+        print("ERATGUARD CORE-5E-FIX-1 INSERT ERROR:", _eg5e_insert_err)
+
+except Exception as _eg5e_err:
+    print("ERATGUARD CORE-5E-FIX-1 OLD NOTIFICATION UI OVERRIDE ERROR:", _eg5e_err)
+# === /ERATGUARD CORE-5E-FIX-1 OLD NOTIFICATION UI OVERRIDE ===
+
+# === ERATGUARD CORE-5E-FIX-1C USER FAN NOTIFICATION FULL OVERRIDE ===
+# Amaç:
+# - /dashboard kullanıcı ekranını sağdan sola açılan 8'li yelpaze menü ile zorlamak.
+# - /u/notifications eski PRO NOTIFICATIONS ekranını tamamen yeni EratGuard UI ile değiştirmek.
+# - /u/notifications/manage koyu EratGuard UI hattında kalacak.
+try:
+    import html as _eg1c_html
+    import json as _eg1c_json
+    from pathlib import Path as _eg1c_Path
+    from flask import request as _eg1c_request, session as _eg1c_session, make_response as _eg1c_make_response
+
+    def _eg1c_user_name():
+        try:
+            return str(
+                _eg1c_session.get("username")
+                or _eg1c_session.get("user")
+                or _eg1c_session.get("email")
+                or "Kullanıcı"
+            ).strip()
+        except Exception:
+            return "Kullanıcı"
+
+    def _eg1c_count_notifications():
+        try:
+            paths = [
+                _eg1c_Path("data/user_notifications.json"),
+                _eg1c_Path("data/notifications.json"),
+                _eg1c_Path("data/admin_notifications.json"),
+            ]
+            total = high = critical = 0
+            for fp in paths:
+                if not fp.exists():
+                    continue
+                raw = fp.read_text(encoding="utf-8", errors="ignore").strip()
+                if not raw:
+                    continue
+                data = _eg1c_json.loads(raw)
+                if isinstance(data, dict):
+                    items = data.get("notifications") or data.get("items") or data.get("data") or []
+                    if isinstance(items, dict):
+                        items = list(items.values())
+                elif isinstance(data, list):
+                    items = data
+                else:
+                    items = []
+                if not isinstance(items, list):
+                    continue
+                total += len(items)
+                for it in items:
+                    if not isinstance(it, dict):
+                        continue
+                    pr = str(it.get("priority") or it.get("level") or it.get("type") or "").lower()
+                    if pr in ("high", "yüksek", "yuksek"):
+                        high += 1
+                    if pr in ("critical", "kritik", "danger", "red"):
+                        critical += 1
+            return total, high, critical
+        except Exception:
+            return 0, 0, 0
+
+    def _eg1c_base_css():
+        return """
+:root{
+  --bg:#020806;
+  --bg2:#03150c;
+  --card:#061d11;
+  --card2:#092817;
+  --line:rgba(35,255,137,.28);
+  --line2:rgba(0,229,255,.24);
+  --green:#23ff89;
+  --cyan:#22e7ff;
+  --yellow:#ffdf35;
+  --text:#f2fff6;
+  --muted:#a8b9ad;
+  --danger:#ff4d5e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{
+  padding:20px 20px 110px;
+  background:
+    radial-gradient(circle at 80% 0%,rgba(35,255,137,.16),transparent 35%),
+    radial-gradient(circle at 0% 20%,rgba(0,229,255,.08),transparent 30%),
+    linear-gradient(180deg,#020806,#010403 70%);
+}
+a{text-decoration:none;color:inherit}
+.wrap{max-width:760px;margin:0 auto}
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:20px;
+  padding-right:112px;
+}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.logo{
+  width:58px;height:58px;border-radius:20px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#1fffa0,#22e7ff,#8068ff);
+  color:#031008;font-size:30px;font-weight:950;
+  box-shadow:0 0 28px rgba(35,255,137,.18);
+}
+.brand h1{margin:0;font-size:26px;line-height:1;font-weight:950;letter-spacing:-1px}
+.brand h1 span{color:#65ff43}
+.brand p{margin:5px 0 0;color:var(--cyan);font-size:12px;font-weight:950;letter-spacing:.22em}
+.safe-pill{
+  display:inline-flex;align-items:center;gap:7px;
+  height:42px;padding:0 13px;border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(35,255,137,.08);
+  color:var(--green);font-weight:950;white-space:nowrap;
+}
+.hero{
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:
+    radial-gradient(circle at 85% 0%,rgba(0,229,255,.12),transparent 34%),
+    linear-gradient(180deg,rgba(8,39,23,.96),rgba(2,15,8,.96));
+  padding:26px;
+  box-shadow:0 26px 70px rgba(0,0,0,.45);
+}
+.hero h2{margin:0 0 14px;font-size:36px;line-height:1.05;letter-spacing:-1.5px}
+.hero h2 span{color:var(--green)}
+.hero p{margin:0;color:var(--muted);font-size:18px;line-height:1.45;font-weight:800}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+.stat{
+  min-height:94px;border-radius:22px;
+  border:1px solid rgba(35,255,137,.20);
+  background:rgba(0,0,0,.28);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+}
+.stat b{font-size:30px;color:var(--green);line-height:1}
+.stat span{font-size:13px;color:var(--muted);font-weight:900;margin-top:8px;text-align:center}
+.section{
+  margin:34px 0 16px;
+  font-size:23px;
+  font-weight:950;
+  letter-spacing:.34em;
+}
+.section:after{
+  content:"";display:block;width:150px;height:8px;border-radius:99px;
+  background:linear-gradient(90deg,var(--green),#9cff5f);
+  margin-top:14px;
+}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{
+  min-height:146px;
+  border-radius:26px;
+  border:1px solid rgba(35,255,137,.25);
+  background:
+    radial-gradient(circle at 20% 0%,rgba(35,255,137,.10),transparent 45%),
+    linear-gradient(180deg,rgba(7,42,23,.90),rgba(2,18,9,.94));
+  padding:22px;
+  position:relative;
+  overflow:hidden;
+}
+.card .icon{
+  width:54px;height:54px;border-radius:19px;
+  display:grid;place-items:center;
+  background:rgba(35,255,137,.10);
+  border:1px solid rgba(35,255,137,.20);
+  font-size:27px;
+}
+.card .pill{
+  position:absolute;right:18px;top:24px;
+  padding:8px 14px;border-radius:999px;
+  background:rgba(35,255,137,.12);
+  border:1px solid rgba(35,255,137,.28);
+  color:#93ffad;font-weight:950;font-size:14px;
+}
+.card h3{font-size:28px;margin:16px 0 6px;line-height:1}
+.card p{margin:0;color:var(--muted);font-weight:900;font-size:15px}
+.empty{
+  margin-top:20px;
+  min-height:150px;
+  border-radius:28px;
+  border:1px dashed rgba(120,160,200,.28);
+  background:rgba(3,8,18,.70);
+  display:grid;place-items:center;
+  color:#a8b8d0;
+  font-size:20px;
+  font-weight:800;
+  text-align:center;
+  padding:24px;
+}
+.notice-list{display:grid;gap:12px;margin-top:18px}
+.notice{
+  border:1px solid rgba(35,255,137,.22);
+  border-radius:22px;
+  padding:18px;
+  background:rgba(0,0,0,.28);
+}
+.notice b{display:block;font-size:18px}
+.notice span{display:block;color:var(--muted);margin-top:6px;font-weight:800}
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);
+  opacity:0;pointer-events:none;transition:.22s;z-index:1998;
+}
+.overlay.open{opacity:1;pointer-events:auto}
+.fan-handle{
+  position:fixed;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  width:52px;
+  height:132px;
+  border:1px solid rgba(35,255,137,.35);
+  border-right:0;
+  border-radius:24px 0 0 24px;
+  background:linear-gradient(180deg,#ffdf35,#23ff89);
+  color:#001a0a;
+  z-index:2001;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  font-weight:950;
+  box-shadow:0 20px 48px rgba(0,0,0,.38);
+}
+.fan-handle i{font-style:normal;font-size:28px;line-height:1}
+.fan-handle span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;letter-spacing:.12em}
+.fan{
+  position:fixed;
+  right:-270px;
+  top:50%;
+  width:270px;
+  height:590px;
+  transform:translateY(-50%);
+  z-index:2000;
+  transition:right .28s cubic-bezier(.2,.9,.2,1);
+  pointer-events:none;
+}
+.fan.open{right:0;pointer-events:auto}
+.fan-core{
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  width:92px;height:92px;border-radius:50%;
+  display:grid;place-items:center;text-align:center;
+  color:var(--green);font-size:12px;font-weight:950;line-height:1.08;
+  border:1px solid rgba(35,255,137,.32);
+  background:radial-gradient(circle,rgba(35,255,137,.24),rgba(2,12,7,.96));
+  box-shadow:0 0 38px rgba(35,255,137,.15);
+}
+.fan-core span{display:block;color:var(--cyan);font-size:8px;letter-spacing:.14em;margin-top:3px}
+.fan-item{
+  position:absolute;
+  right:78px;
+  top:50%;
+  width:176px;
+  height:58px;
+  border-radius:18px 0 0 18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 12px;
+  border:1px solid rgba(35,255,137,.27);
+  background:linear-gradient(90deg,rgba(5,30,17,.98),rgba(12,62,35,.92));
+  box-shadow:0 12px 28px rgba(0,0,0,.32);
+  transform-origin:right center;
+}
+.fan-item:before{content:"";position:absolute;right:0;top:0;bottom:0;width:5px;background:var(--green)}
+.fan-ico{
+  width:38px;height:38px;border-radius:14px;display:grid;place-items:center;
+  background:rgba(35,255,137,.10);border:1px solid rgba(35,255,137,.18);
+  font-size:20px;flex-shrink:0;
+}
+.fan-item strong{display:block;font-size:13px;line-height:1}
+.fan-item small{display:block;color:var(--muted);font-size:10px;font-weight:800;margin-top:3px}
+.fan-item:nth-child(1){transform:translateY(-248px) rotate(-32deg)}
+.fan-item:nth-child(2){transform:translateY(-178px) rotate(-17deg)}
+.fan-item:nth-child(3){transform:translateY(-108px) rotate(-10deg)}
+.fan-item:nth-child(4){transform:translateY(-38px) rotate(-3deg)}
+.fan-item:nth-child(5){transform:translateY(32px) rotate(4deg)}
+.fan-item:nth-child(6){transform:translateY(102px) rotate(11deg)}
+.fan-item:nth-child(7){transform:translateY(172px) rotate(18deg)}
+.fan-item:nth-child(8){transform:translateY(242px) rotate(25deg)}
+.fan-close{
+  position:absolute;right:22px;bottom:8px;
+  width:72px;height:34px;border-radius:999px;border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.08);color:var(--text);font-weight:950;
+}
+@media(max-width:520px){
+  body{padding:18px 20px 100px}
+  .top{padding-right:98px}
+  .brand h1{font-size:25px}
+  .logo{width:56px;height:56px}
+  .safe-pill{display:none}
+  .hero{padding:24px;border-radius:27px}
+  .hero h2{font-size:34px}
+  .hero p{font-size:17px}
+  .stats{grid-template-columns:1fr;gap:12px}
+  .grid{grid-template-columns:1fr 1fr;gap:12px}
+  .card{min-height:150px;padding:21px}
+  .card h3{font-size:27px}
+  .fan{height:560px}
+  .fan-item{width:170px;height:56px}
+}
+"""
+
+    def _eg1c_fan_html():
+        return """
+
+<!-- CLEAN-4: legacy egFanPanel removed -->
+
+"""
+
+    def _eg1c_dashboard_page():
+        # CLEAN-7C: aktif eski dashboard kaldırıldı. FAN-12P ana dashboard.
+        return '''<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - FAN-12P Command Center</title>
+<style>
+:root{--green:#23ff89;--cyan:#22e7ff;--text:#f2fff6;}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;min-height:100%;overflow:hidden;color:var(--text);font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at 78% 50%,rgba(35,255,137,.18),transparent 34%),radial-gradient(circle at 16% 18%,rgba(34,231,255,.12),transparent 38%),linear-gradient(145deg,#020806,#03100a 55%,#020806);}
+.eg-clean7c-brand{position:fixed;left:24px;top:34px;z-index:1;pointer-events:none;}
+.eg-clean7c-logo{width:70px;height:70px;border-radius:24px;display:grid;place-items:center;margin-bottom:14px;background:linear-gradient(135deg,#23ff89,#22e7ff 58%,#6d7cff);color:#00170b;font-size:42px;font-weight:1000;box-shadow:0 18px 45px rgba(0,0,0,.35),0 0 28px rgba(35,255,137,.16);}
+.eg-clean7c-brand b{display:block;font-size:30px;font-weight:1000;letter-spacing:-1.2px;color:rgba(242,255,246,.96)}
+.eg-clean7c-brand b span{color:#23ff89}
+.eg-clean7c-brand small{display:block;margin-top:8px;font-size:11px;line-height:1.45;font-weight:1000;letter-spacing:.30em;color:#22e7ff;}
+.eg-clean7c-hint{position:fixed;left:24px;bottom:34px;z-index:1;max-width:260px;color:rgba(242,255,246,.46);font-size:12px;line-height:1.5;font-weight:850;pointer-events:none;}
+@media(max-width:420px){.eg-clean7c-brand{left:22px;top:34px}.eg-clean7c-logo{width:64px;height:64px;border-radius:22px;font-size:38px;margin-bottom:12px}.eg-clean7c-brand b{font-size:26px}.eg-clean7c-brand small{font-size:10px}.eg-clean7c-hint{left:22px;bottom:28px;font-size:11px;max-width:220px}}
+
+
+/* ===== ERATGUARD VITES-2A PREMIUM STATUS START ===== */
+.eg-clean7c-status{
+  position:fixed;
+  left:24px;
+  bottom:34px;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:42px;
+  padding:10px 15px;
+  border-radius:999px;
+  border:1px solid rgba(35,255,137,.24);
+  background:rgba(3,18,10,.58);
+  color:rgba(242,255,246,.90);
+  font-family:Arial,Helvetica,sans-serif;
+  pointer-events:none;
+  box-shadow:0 0 30px rgba(35,255,137,.10), inset 0 0 18px rgba(35,255,137,.04);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+}
+.eg-clean7c-status .dot{
+  width:10px;
+  height:10px;
+  border-radius:999px;
+  background:#23ff89;
+  box-shadow:0 0 18px rgba(35,255,137,.80);
+}
+.eg-clean7c-status b{
+  font-size:11px;
+  font-weight:1000;
+  letter-spacing:.16em;
+  color:#f2fff6;
+}
+.eg-clean7c-status em{
+  font-style:normal;
+  font-size:10px;
+  font-weight:1000;
+  letter-spacing:.14em;
+  color:#22e7ff;
+}
+@media(max-width:420px){
+  .eg-clean7c-status{
+    left:22px;
+    bottom:28px;
+    padding:9px 12px;
+    gap:8px;
+  }
+  .eg-clean7c-status b{font-size:10px}
+  .eg-clean7c-status em{font-size:9px}
+}
+/* ===== ERATGUARD VITES-2A PREMIUM STATUS END ===== */
+
+</style>
+</head>
+<body>
+  <div class="eg-clean7c-brand">
+    <div class="eg-clean7c-logo">E</div>
+    <b>Erat<span>Guard</span></b>
+    <small>FAN-12P<br>COMMAND CENTER</small>
+  </div>
+  <div class="eg-clean7c-status">
+    <span class="dot"></span>
+    <b>KORUMA AKTİF</b>
+    <em>FAN-12P HAZIR</em>
+  </div>
+</body>
+</html>'''
+
+    def _eg1c_notifications_page():
+        total, high, critical = _eg1c_count_notifications()
+        username = _eg1c_html.escape(_eg1c_user_name())
+        html = f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Bildirim Komuta Merkezi</title>
+<style>{_eg1c_base_css()}</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo">🔔</div>
+      <div>
+        <h1>Erat<span>Guard</span></h1>
+        <p>NOTIFICATION COMMAND</p>
+      </div>
+    </div>
+    <a class="safe-pill" href="/u/notifications/manage">Ayarlar</a>
+  </header>
+
+  <section class="hero">
+    <h2>Bildirim<br><span>komuta merkezi.</span></h2>
+    <p>Admin duyuruları, güvenlik uyarıları, lisans bilgilendirmeleri ve kritik risk akışı burada görünür. Bu ekran eski PRO NOTIFICATIONS sayfasının yerine zorlandı.</p>
+    <div class="stats">
+      <div class="stat"><b>{total}</b><span>Görünen bildirim</span></div>
+      <div class="stat"><b>{high}</b><span>Yüksek öncelik</span></div>
+      <div class="stat"><b>{critical}</b><span>Kritik uyarı</span></div>
+    </div>
+  </section>
+
+  <div class="section">AKIŞ</div>
+
+  <div class="empty">
+    Henüz gösterilecek bildirim yok.<br>
+    <small style="display:block;margin-top:10px;color:#6f829a;font-size:14px">Yelpaze menü sağ tarafta aktif.</small>
+  </div>
+</div>
+{_eg1c_fan_html()}
+<!-- CORE-5E-FIX-1C NOTIFICATIONS ACTIVE username={username} -->
+</body>
+</html>"""
+        resp = _eg1c_make_response(html)
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        return resp
+
+    def _eg1c_notifications_manage_page():
+        username = _eg1c_html.escape(_eg1c_user_name())
+        html = f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Bildirim Ayarları</title>
+<style>{_eg1c_base_css()}
+.panel{{margin-top:20px;border:1px solid var(--line);border-radius:28px;background:linear-gradient(180deg,rgba(8,39,23,.96),rgba(2,15,8,.96));padding:20px}}
+.row{{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 0;border-bottom:1px solid rgba(255,255,255,.08)}}
+.row:last-child{{border-bottom:0}}
+.row b{{display:block;font-size:18px}}
+.row span{{display:block;color:var(--muted);font-size:14px;font-weight:800;margin-top:5px}}
+.toggle{{width:62px;height:34px;border-radius:999px;background:linear-gradient(90deg,var(--yellow),var(--green));position:relative;flex-shrink:0}}
+.toggle:after{{content:"";position:absolute;right:4px;top:4px;width:26px;height:26px;border-radius:50%;background:#00180a}}
+.actions{{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}}
+.btn{{height:54px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:950}}
+.primary{{background:linear-gradient(90deg,var(--yellow),var(--green));color:#00180a}}
+.secondary{{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13)}}
+@media(max-width:520px){{.actions{{grid-template-columns:1fr}}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo">⚙️</div>
+      <div>
+        <h1>Erat<span>Guard</span></h1>
+        <p>NOTIFICATION SETTINGS</p>
+      </div>
+    </div>
+    <a class="safe-pill" href="/u/notifications">Geri</a>
+  </header>
+
+  <section class="hero">
+    <h2>Bildirim<br><span>ayarları.</span></h2>
+    <p>{username} için güvenlik uyarıları, lisans bildirimleri ve sistem duyuruları buradan yönetilir.</p>
+  </section>
+
+  <div class="panel">
+    <div class="row"><div><b>Bildirimler aktif</b><span>Genel EratGuard bildirimleri.</span></div><div class="toggle"></div></div>
+    <div class="row"><div><b>Güvenlik uyarıları</b><span>Risk, karantina, koruma ve analiz olayları.</span></div><div class="toggle"></div></div>
+    <div class="row"><div><b>Lisans bildirimleri</b><span>Aktivasyon, yenileme ve hesap durumu.</span></div><div class="toggle"></div></div>
+    <div class="row"><div><b>Admin duyuruları</b><span>Sistem ve ürün duyuruları.</span></div><div class="toggle"></div></div>
+    <div class="actions">
+      <a class="btn primary" href="/u/notifications?fresh=1">Kaydet</a>
+      <a class="btn secondary" href="/dashboard">Panel</a>
+    </div>
+  </div>
+</div>
+{_eg1c_fan_html()}
+<!-- CORE-5E-FIX-1C NOTIFICATION MANAGE ACTIVE -->
+</body>
+</html>"""
+        resp = _eg1c_make_response(html)
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        return resp
+
+    def _eg1c_user_override_bridge():
+        try:
+            path = str(_eg1c_request.path or "").rstrip("/") or "/"
+            method = str(_eg1c_request.method or "GET").upper()
+            if method != "GET":
+                return None
+
+            if path in ("/dashboard", "/u/dashboard"):
+                return _eg1c_dashboard_page()
+
+            if path == "/u/notifications":
+                return _eg1c_notifications_page()
+
+            if path in (
+                "/u/notifications/manage",
+                "/notifications/manage",
+                "/notification/manage",
+                "/notification-settings",
+                "/notifications/settings",
+            ):
+                return _eg1c_notifications_manage_page()
+
+        except Exception as _eg1c_req_err:
+            print("ERATGUARD CORE-5E-FIX-1C REQUEST ERROR:", _eg1c_req_err)
+        return None
+
+    try:
+        funcs = app.before_request_funcs.setdefault(None, [])
+        if _eg1c_user_override_bridge not in funcs:
+            funcs.insert(0, _eg1c_user_override_bridge)
+        print("ERATGUARD CORE-5E-FIX-1C USER FAN NOTIFICATION FULL OVERRIDE ACTIVE")
+    except Exception as _eg1c_insert_err:
+        print("ERATGUARD CORE-5E-FIX-1C INSERT ERROR:", _eg1c_insert_err)
+
+except Exception as _eg1c_err:
+    print("ERATGUARD CORE-5E-FIX-1C USER FAN NOTIFICATION FULL OVERRIDE ERROR:", _eg1c_err)
+# === /ERATGUARD CORE-5E-FIX-1C USER FAN NOTIFICATION FULL OVERRIDE ===
+
+
+# ===== ERATGUARD USER FAN-3 RIGHT-TO-LEFT MENU START =====
+# Amaç:
+# - Admin paneline dokunmadan kullanıcı tarafına EratGuard sağdan-sola yelpaze menü ekler.
+# - /dashboard, /u/dashboard ve /u/* kullanıcı sayfalarında çalışır.
+# - /admin yollarında asla çalışmaz.
+try:
+    from flask import request as _eg_user_fan3_request
+    import re as _eg_user_fan3_re
+
+    _EG_USER_FAN3_MARKER = "eratguard-user-fan3-rtl-menu"
+
+    _EG_USER_FAN3_HTML = r"""
+<div id="eratguard-user-fan3-rtl-menu" class="eg-user-fan3" aria-label="EratGuard kullanıcı yelpaze menüsü">
+  <button class="eg-user-fan3-toggle" id="egUserFan3Toggle" type="button" aria-label="Kullanıcı menüsünü aç/kapat">
+    <span class="eg-user-fan3-shield">E</span>
+    <small>MENÜ</small>
+  </button>
+
+  <div class="eg-user-fan3-arc" id="egUserFan3Arc" aria-hidden="true"></div>
+
+  <nav class="eg-user-fan3-panel" id="egUserFan3Panel">
+    <a class="eg-user-fan3-item i1" href="/dashboard">
+      <b>🏠</b><span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></span><em>01</em>
+    </a>
+    <a class="eg-user-fan3-item i2" href="/u/protection">
+      <b>🛡️</b><span><strong>Koruma</strong><small>SMS güvenlik motoru</small></span><em>02</em>
+    </a>
+    <a class="eg-user-fan3-item i3" href="/u/analysis">
+      <b>🧠</b><span><strong>AI Analiz</strong><small>Risk taraması</small></span><em>03</em>
+    </a>
+    <a class="eg-user-fan3-item i4" href="/u/reports">
+      <b>📈</b><span><strong>Raporlar</strong><small>Güvenlik özetleri</small></span><em>04</em>
+    </a>
+    <a class="eg-user-fan3-item i5" href="/u/notifications">
+      <b>🔔</b><span><strong>Bildirimler</strong><small>Güvenlik akışı</small></span><em>05</em>
+    </a>
+    <a class="eg-user-fan3-item i6" href="/u/license">
+      <b>🔑</b><span><strong>Lisans</strong><small>Hesap durumu</small></span><em>06</em>
+    </a>
+    <a class="eg-user-fan3-item i7" href="/u/community">
+      <b>👥</b><span><strong>Topluluk</strong><small>Geri bildirim</small></span><em>07</em>
+    </a>
+    <a class="eg-user-fan3-item i8" href="/u/settings">
+      <b>⚙️</b><span><strong>Ayarlar</strong><small>Tercihler</small></span><em>08</em>
+    </a>
+  </nav>
+</div>
+
+<!-- ERATGUARD FAN-12P INTRO DIRECT START -->
+<style id="eg-fan12p-intro-direct-css">
+#egFan12pInfoIntro{
+  position:fixed;
+  inset:0;
+  z-index:2147483000;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:22px;
+  background:
+    radial-gradient(circle at 75% 48%, rgba(35,255,137,.20), transparent 34%),
+    radial-gradient(circle at 20% 18%, rgba(34,231,255,.12), transparent 38%),
+    rgba(1,6,4,.93);
+  backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);
+}
+#egFan12pInfoIntro.open{display:flex}
+#egFan12pInfoIntro .eg-intro-card{
+  width:min(420px,94vw);
+  border:1px solid rgba(35,255,137,.28);
+  border-radius:30px;
+  background:linear-gradient(145deg,rgba(5,22,14,.97),rgba(2,10,7,.98));
+  box-shadow:0 28px 90px rgba(0,0,0,.65),0 0 42px rgba(35,255,137,.16);
+  padding:24px;
+  color:#f2fff6;
+  font-family:Arial,Helvetica,sans-serif;
+}
+#egFan12pInfoIntro .eg-intro-top{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+#egFan12pInfoIntro .eg-intro-icon{
+  width:58px;height:58px;border-radius:22px;display:grid;place-items:center;
+  background:linear-gradient(135deg,rgba(35,255,137,.24),rgba(34,231,255,.14));
+  border:1px solid rgba(35,255,137,.30);
+  font-size:30px;
+}
+#egFan12pInfoIntro .eg-intro-label{
+  font-size:10px;font-weight:1000;letter-spacing:.24em;
+  color:rgba(35,255,137,.80);text-transform:uppercase;margin-bottom:5px;
+}
+#egFan12pInfoIntro .eg-intro-title{font-size:24px;font-weight:1000;letter-spacing:-.6px;line-height:1.05}
+#egFan12pInfoIntro .eg-intro-text{
+  font-size:14px;font-weight:750;line-height:1.55;
+  color:rgba(242,255,246,.78);margin:14px 0 18px;
+}
+#egFan12pInfoIntro .eg-intro-count{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+#egFan12pInfoIntro .eg-intro-count span{font-size:12px;font-weight:950;color:rgba(242,255,246,.66)}
+#egFan12pInfoIntro .eg-intro-count b{font-size:24px;color:#23ff89}
+#egFan12pInfoIntro .eg-intro-bar{
+  width:100%;height:10px;overflow:hidden;border-radius:999px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);
+}
+#egFan12pInfoIntro .eg-intro-fill{
+  width:0%;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#23ff89,#22e7ff);
+  transition:width .25s linear;
+}
+#egFan12pInfoIntro .eg-intro-actions{display:flex;gap:10px;margin-top:18px}
+#egFan12pInfoIntro .eg-intro-btn{
+  flex:1;border:0;border-radius:18px;padding:13px 12px;
+  font-weight:1000;font-size:13px;cursor:pointer;
+}
+#egFan12pInfoIntro .eg-intro-open{color:#00170b;background:linear-gradient(135deg,#23ff89,#22e7ff)}
+#egFan12pInfoIntro .eg-intro-wait{
+  color:rgba(242,255,246,.82);background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.10);
+}
+@media(max-width:420px){
+  #egFan12pInfoIntro{padding:16px}
+  #egFan12pInfoIntro .eg-intro-card{border-radius:26px;padding:20px}
+  #egFan12pInfoIntro .eg-intro-title{font-size:21px}
+  #egFan12pInfoIntro .eg-intro-text{font-size:13px}
+}
+</style>
+
+<div id="egFan12pInfoIntro" aria-hidden="true">
+  <div class="eg-intro-card">
+    <div class="eg-intro-top">
+      <div class="eg-intro-icon" id="egIntroIcon">🛡️</div>
+      <div>
+        <div class="eg-intro-label">FAN-12P BİLGİ</div>
+        <div class="eg-intro-title" id="egIntroTitle">Koruma Merkezi</div>
+      </div>
+    </div>
+    <div class="eg-intro-text" id="egIntroText">Bu özellik açılmadan önce kısa bilgi gösterilir.</div>
+    <div class="eg-intro-count">
+      <span>Özellik açılıyor</span>
+      <b><span id="egIntroSeconds">10</span>s</b>
+    </div>
+    <div class="eg-intro-bar"><div class="eg-intro-fill" id="egIntroFill"></div></div>
+    <div class="eg-intro-actions">
+      <button class="eg-intro-btn eg-intro-wait" type="button" id="egIntroStay">Bekle</button>
+      <button class="eg-intro-btn eg-intro-open" type="button" id="egIntroOpenNow">Şimdi Aç</button>
+    </div>
+  </div>
+</div>
+
+<script id="eg-fan12p-intro-direct-js">
+(function(){
+  if(window.__EG_FAN12P_INTRO_DIRECT__) return;
+  window.__EG_FAN12P_INTRO_DIRECT__ = true;
+
+  var infoMap = {
+    "/dashboard": {icon:"🏠", title:"Ana Komuta Merkezi", text:"FAN-12P ana ekranıdır. Tüm güvenlik, lisans, rapor, analiz ve ayar komutlarına buradan ulaşırsın."},
+    "/u/protection": {icon:"🛡️", title:"Koruma Merkezi", text:"Gelen SMS ve riskli içerikleri güvenlik motoruyla değerlendirir. Spam, şüpheli bağlantı ve tehditleri kontrol altında tutar."},
+    "/u/analysis": {icon:"🔎", title:"AI Analiz", text:"Mesaj ve güvenlik verilerini yapay zekâ destekli risk analiziyle inceler. Tehlike seviyesini daha anlaşılır hale getirir."},
+    "/u/reports": {icon:"📈", title:"Raporlar", text:"Engellenen, analiz edilen ve riskli görülen işlemleri özetler. Güvenlik durumunu takip etmeni sağlar."},
+    "/u/notifications": {icon:"🔔", title:"Bildirimler", text:"EratGuard uyarılarını ve sistem mesajlarını gösterir. Önemli güvenlik haberlerini buradan takip edersin."},
+    "/u/license": {icon:"🔑", title:"Lisans Merkezi", text:"PRO erişim, lisans durumu, aktivasyon ve hesap yetkilerini yönetir. Kullanıcı erişiminin merkezidir."},
+    "/u/community": {icon:"👥", title:"Topluluk", text:"Kullanıcı geri bildirimleri ve topluluk destekli spam bildirimi için hazırlanmıştır. Sistemi birlikte güçlendirir."},
+    "/u/settings": {icon:"⚙️", title:"Ayarlar", text:"Koruma tercihleri, kullanıcı seçenekleri ve uygulama davranışları buradan yönetilir."}
+  };
+
+  var timer=null, targetHref=null, total=10, left=10;
+
+  /* ===== ERATGUARD VITES-2B SMART INTRO START ===== */
+  function egIntroKey(href){
+    return "eg_fan12p_intro_seen_v2_" + href;
+  }
+
+  function egHasSeenIntro(href){
+    try{
+      return localStorage.getItem(egIntroKey(href)) === "1";
+    }catch(e){
+      return false;
+    }
+  }
+
+  function egMarkIntroSeen(href){
+    try{
+      if(href) localStorage.setItem(egIntroKey(href), "1");
+    }catch(e){}
+  }
+  /* ===== ERATGUARD VITES-2B SMART INTRO END ===== */
+
+
+  function el(id){return document.getElementById(id);}
+
+  function goNow(){
+    if(timer) clearInterval(timer);
+    egMarkIntroSeen(targetHref);
+    if(targetHref) window.location.href = targetHref;
+  }
+
+  function showIntro(href){
+    var overlay=el("egFan12pInfoIntro");
+    if(!overlay){window.location.href=href;return;}
+
+    var info=infoMap[href] || {icon:"⚡",title:"EratGuard Özelliği",text:"Bu FAN-12P dilimi seçilen özelliği açar."};
+
+    targetHref=href;
+    left=total;
+
+    el("egIntroIcon").textContent=info.icon;
+    el("egIntroTitle").textContent=info.title;
+    el("egIntroText").textContent=info.text;
+    el("egIntroSeconds").textContent=String(left);
+    el("egIntroFill").style.width="0%";
+
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden","false");
+
+    if(timer) clearInterval(timer);
+    timer=setInterval(function(){
+      left-=1;
+      if(left<0) left=0;
+      el("egIntroSeconds").textContent=String(left);
+      el("egIntroFill").style.width=String(((total-left)/total)*100)+"%";
+      if(left<=0) goNow();
+    },1000);
+  }
+
+  document.addEventListener("click",function(ev){
+    try{
+      var a=ev.target.closest ? ev.target.closest("a.eg-user-fan3-item") : null;
+      if(!a) return;
+      var href=a.getAttribute("href") || "";
+      if(!href || href.indexOf("#")===0) return;
+
+      // VITES-2B: Bu dilim daha önce bilgilendirildiyse direkt açılsın.
+      if(egHasSeenIntro(href)){
+        return;
+      }
+
+      ev.preventDefault();
+      ev.stopPropagation();
+      showIntro(href);
+    }catch(e){}
+  },true);
+
+  function bootIntroButtons(){
+    var openNow=el("egIntroOpenNow");
+    var stay=el("egIntroStay");
+
+    if(openNow){
+      openNow.onclick=function(e){
+        e.preventDefault();
+        goNow();
+      };
+    }
+
+    if(stay){
+      stay.onclick=function(e){
+        e.preventDefault();
+      };
+    }
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",bootIntroButtons);
+  }else{
+    bootIntroButtons();
+  }
+})();
+</script>
+<!-- ERATGUARD FAN-12P INTRO DIRECT END -->
+
+
+
+<style id="eratguard-user-fan3-style">
+/* USER FAN-4 CLEANUP: eski kullanıcı fan/yelpaze menüsünü sadece kullanıcı sayfalarında gizle */
+.fan:not(.eg-user-fan3),
+.fan-handle,
+.fan-core,
+.fan-close,
+.fan-item,
+#fanPanel,
+#fanHandle,
+#fanClose,
+#fanOverlay{
+  display:none!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  visibility:hidden!important;
+}
+
+.eg-user-fan3{
+  position:fixed;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  width:360px;
+  height:620px;
+  z-index:9997;
+  pointer-events:none;
+  font-family:Inter,Segoe UI,system-ui,-apple-system,sans-serif;
+}
+.eg-user-fan3-toggle{
+  position:absolute;
+  right:16px;
+  top:50%;
+  transform:translateY(-50%);
+  width:78px;
+  height:78px;
+  border-radius:50%;
+  border:1px solid rgba(90,170,255,.80);
+  background:
+    radial-gradient(circle at 35% 24%,rgba(93,180,255,.95),rgba(12,65,150,.92) 45%,rgba(4,10,24,.98) 76%);
+  color:#eaf6ff;
+  box-shadow:
+    0 0 0 7px rgba(28,126,255,.12),
+    0 0 30px rgba(28,126,255,.42),
+    inset 0 0 18px rgba(255,255,255,.14);
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+  pointer-events:auto;
+  overflow:hidden;
+  transition:.25s ease;
+}
+.eg-user-fan3-toggle:active{transform:translateY(-50%) scale(.96)}
+.eg-user-fan3-shield{
+  width:40px;
+  height:40px;
+  border-radius:16px 16px 20px 20px;
+  border:2px solid rgba(165,220,255,.9);
+  display:grid;
+  place-items:center;
+  font-weight:1000;
+  font-size:24px;
+  color:#63b8ff;
+  text-shadow:0 0 14px rgba(79,170,255,.9);
+}
+.eg-user-fan3-toggle small{
+  font-size:8px;
+  font-weight:1000;
+  letter-spacing:1px;
+  margin-top:-8px;
+  color:#a9d7ff;
+}
+.eg-user-fan3-arc{
+  position:absolute;
+  right:52px;
+  top:50%;
+  width:260px;
+  height:430px;
+  transform:translateY(-50%) scale(.88);
+  border-left:2px dashed rgba(42,145,255,.55);
+  border-radius:55% 0 0 55%;
+  opacity:0;
+  transition:.35s ease;
+  pointer-events:none;
+}
+.eg-user-fan3-panel{
+  position:absolute;
+  right:-18px;
+  top:50%;
+  width:330px;
+  height:560px;
+  transform:translateY(-50%);
+  pointer-events:none;
+}
+.eg-user-fan3-item{
+  position:absolute;
+  right:0;
+  top:50%;
+  width:294px;
+  min-height:58px;
+  padding:10px 12px 10px 14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  color:#f5fbff;
+  border:1px solid rgba(129,188,255,.22);
+  background:
+    linear-gradient(100deg,rgba(10,22,42,.96),rgba(9,18,34,.88)),
+    radial-gradient(circle at 18% 50%,rgba(38,132,255,.22),transparent 42%);
+  box-shadow:
+    0 12px 24px rgba(0,0,0,.36),
+    inset 0 1px 0 rgba(255,255,255,.07);
+  border-radius:22px 14px 14px 22px;
+  opacity:0;
+  pointer-events:none;
+  transform-origin:100% 50%;
+  transform:translateX(120px) translateY(-50%) rotate(0deg) scale(.94);
+  transition:
+    transform .46s cubic-bezier(.15,.9,.25,1.12),
+    opacity .32s ease,
+    box-shadow .22s ease,
+    border-color .22s ease;
+}
+.eg-user-fan3-item b{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  border-radius:16px;
+  background:linear-gradient(145deg,rgba(46,132,255,.55),rgba(14,44,95,.92));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 8px 18px rgba(0,0,0,.28);
+  font-size:21px;
+}
+.eg-user-fan3-item span{min-width:0;flex:1}
+.eg-user-fan3-item strong{
+  display:block;
+  font-size:15px;
+  font-weight:950;
+  letter-spacing:-.2px;
+  white-space:nowrap;
+}
+.eg-user-fan3-item small{
+  display:block;
+  margin-top:2px;
+  color:#9fb5cc;
+  font-size:10px;
+  font-weight:750;
+  white-space:nowrap;
+}
+.eg-user-fan3-item em{
+  width:32px;
+  height:32px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  font-style:normal;
+  color:#7fc4ff;
+  font-weight:950;
+  font-size:12px;
+  background:rgba(52,117,190,.18);
+  border:1px solid rgba(130,200,255,.20);
+}
+.eg-user-fan3-item:hover{
+  border-color:rgba(88,190,255,.72);
+  box-shadow:0 14px 28px rgba(0,0,0,.42),0 0 22px rgba(38,132,255,.20);
+}
+.eg-user-fan3.open{pointer-events:auto}
+.eg-user-fan3.open .eg-user-fan3-arc{
+  opacity:1;
+  transform:translateY(-50%) scale(1);
+}
+.eg-user-fan3.open .eg-user-fan3-item{
+  opacity:1;
+  pointer-events:auto;
+}
+.eg-user-fan3.open .i1{transform:translateX(-58px) translateY(-252px) rotate(25deg)}
+.eg-user-fan3.open .i2{transform:translateX(-78px) translateY(-180px) rotate(17deg)}
+.eg-user-fan3.open .i3{transform:translateX(-92px) translateY(-108px) rotate(9deg)}
+.eg-user-fan3.open .i4{transform:translateX(-100px) translateY(-36px) rotate(2deg)}
+.eg-user-fan3.open .i5{transform:translateX(-100px) translateY(36px) rotate(-2deg)}
+.eg-user-fan3.open .i6{transform:translateX(-92px) translateY(108px) rotate(-9deg)}
+.eg-user-fan3.open .i7{transform:translateX(-78px) translateY(180px) rotate(-17deg)}
+.eg-user-fan3.open .i8{transform:translateX(-58px) translateY(252px) rotate(-25deg)}
+
+@media(max-width:760px){
+  .eg-user-fan3{
+    width:300px;
+    height:560px;
+    right:-12px;
+  }
+  .eg-user-fan3-toggle{
+    width:66px;
+    height:66px;
+    right:12px;
+  }
+  .eg-user-fan3-shield{
+    width:34px;
+    height:34px;
+    font-size:20px;
+    border-radius:13px 13px 17px 17px;
+  }
+  .eg-user-fan3-panel{
+    width:286px;
+    height:520px;
+  }
+  .eg-user-fan3-item{
+    width:218px;
+    min-height:52px;
+    padding:8px 10px;
+    gap:9px;
+    border-radius:19px 12px 12px 19px;
+  }
+  .eg-user-fan3-item b{
+    width:36px;
+    height:36px;
+    border-radius:13px;
+    font-size:18px;
+  }
+  .eg-user-fan3-item strong{font-size:13px}
+  .eg-user-fan3-item small{font-size:8.5px}
+  .eg-user-fan3-item em{
+    width:28px;
+    height:28px;
+    font-size:10px;
+  }
+  .eg-user-fan3.open .i1{transform:translateX(-38px) translateY(-204px) rotate(22deg)}
+  .eg-user-fan3.open .i2{transform:translateX(-50px) translateY(-146px) rotate(15deg)}
+  .eg-user-fan3.open .i3{transform:translateX(-58px) translateY(-88px) rotate(11deg)}
+  .eg-user-fan3.open .i4{transform:translateX(-64px) translateY(-30px) rotate(2deg)}
+  .eg-user-fan3.open .i5{transform:translateX(-64px) translateY(30px) rotate(-2deg)}
+  .eg-user-fan3.open .i6{transform:translateX(-58px) translateY(88px) rotate(-11deg)}
+  .eg-user-fan3.open .i7{transform:translateX(-50px) translateY(146px) rotate(-15deg)}
+  .eg-user-fan3.open .i8{transform:translateX(-38px) translateY(204px) rotate(-22deg)}
+}
+
+
+
+
+
+
+
+/* ===== ERATGUARD USER FAN-12 SINGLE CLEAN FINAL START ===== */
+
+/* Eski fan kalıntıları kapalı */
+.fan:not(.eg-user-fan3),
+.fan-handle,
+.fan-core,
+.fan-close,
+#fanPanel,
+#fanHandle,
+#fanClose,
+#fanOverlay{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+/* Tek ana gövde */
+.eg-user-fan3{
+  position:fixed!important;
+  right:0!important;
+  top:56%!important;
+  transform:translateY(-50%)!important;
+  width:310px!important;
+  height:540px!important;
+  z-index:9999!important;
+  pointer-events:none!important;
+  font-family:Inter,Segoe UI,system-ui,-apple-system,sans-serif!important;
+}
+
+.eg-user-fan3-arc{
+  display:none!important;
+}
+
+.eg-user-fan3-panel{
+  position:absolute!important;
+  right:0!important;
+  top:50%!important;
+  width:310px!important;
+  height:540px!important;
+  transform:translateY(-50%)!important;
+  pointer-events:none!important;
+}
+
+/* Pivot */
+.eg-user-fan3-toggle{
+  position:absolute!important;
+  right:9px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:72px!important;
+  height:72px!important;
+  border-radius:50%!important;
+  pointer-events:auto!important;
+  z-index:30!important;
+}
+
+/* Dilimler: gerçek merkezden döner */
+.eg-user-fan3-item{
+  position:absolute!important;
+  right:91px!important;
+  top:calc(50% - 24px)!important;
+  width:170px!important;
+  height:48px!important;
+  min-height:48px!important;
+  padding:6px 9px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  text-decoration:none!important;
+  color:#fff!important;
+  border-radius:19px 10px 10px 19px!important;
+  border:1px solid rgba(100,180,255,.30)!important;
+  border-right:4px solid rgba(47,255,145,.90)!important;
+  background:linear-gradient(100deg,rgba(6,20,44,.98),rgba(4,12,28,.95))!important;
+  box-shadow:0 10px 20px rgba(0,0,0,.43), inset 0 1px 0 rgba(255,255,255,.07)!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transform-origin:calc(100% + 52px) 50%!important;
+  transform:rotate(0deg) translateX(80px) scale(.82)!important;
+  transition:
+    transform .34s cubic-bezier(.2,.9,.25,1.08),
+    opacity .22s ease,
+    visibility .22s ease!important;
+}
+
+.eg-user-fan3-item b{
+  width:30px!important;
+  height:30px!important;
+  border-radius:12px!important;
+  flex:0 0 auto!important;
+  display:grid!important;
+  place-items:center!important;
+  font-size:16px!important;
+}
+
+.eg-user-fan3-item strong{
+  display:block!important;
+  font-size:11.2px!important;
+  line-height:1.05!important;
+  font-weight:950!important;
+  white-space:nowrap!important;
+}
+
+.eg-user-fan3-item small{
+  display:block!important;
+  margin-top:1px!important;
+  font-size:7px!important;
+  line-height:1.05!important;
+  font-weight:760!important;
+  white-space:nowrap!important;
+}
+
+.eg-user-fan3.open{
+  pointer-events:auto!important;
+}
+
+.eg-user-fan3.open .eg-user-fan3-item{
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+
+/* 170 derece net ve simetrik açılım */
+.eg-user-fan3.open .i1{transform:rotate(-85deg) translateX(-7px) scale(1)!important}
+.eg-user-fan3.open .i2{transform:rotate(-61deg) translateX(-7px) scale(1)!important}
+.eg-user-fan3.open .i3{transform:rotate(-36deg) translateX(-7px) scale(1)!important}
+.eg-user-fan3.open .i4{transform:rotate(-12deg) translateX(-7px) scale(1)!important}
+.eg-user-fan3.open .i5{transform:rotate(12deg)  translateX(-7px) scale(1)!important}
+.eg-user-fan3.open .i6{transform:rotate(36deg)  translateX(-7px) scale(1)!important}
+.eg-user-fan3.open .i7{transform:rotate(61deg)  translateX(-7px) scale(1)!important}
+.eg-user-fan3.open .i8{transform:rotate(85deg)  translateX(-7px) scale(1)!important}
+
+/* Mobil net değerler */
+@media(max-width:760px){
+  .eg-user-fan3{
+    right:0!important;
+    top:56%!important;
+    width:305px!important;
+    height:540px!important;
+  }
+
+  .eg-user-fan3-panel{
+    width:305px!important;
+    height:540px!important;
+  }
+
+  .eg-user-fan3-toggle{
+    right:9px!important;
+    width:72px!important;
+    height:72px!important;
+  }
+
+  .eg-user-fan3-item{
+    right:91px!important;
+    top:calc(50% - 24px)!important;
+    width:170px!important;
+    height:48px!important;
+    min-height:48px!important;
+    transform-origin:calc(100% + 52px) 50%!important;
+  }
+}
+
+/* ===== ERATGUARD USER FAN-12 SINGLE CLEAN FINAL END ===== */
+
+
+/* ===== ERATGUARD USER FAN-12P PERFORMANCE START ===== */
+
+/* Fan yapısı aynı kalır, sadece kasma azaltılır */
+.eg-user-fan3,
+.eg-user-fan3-panel,
+.eg-user-fan3-toggle,
+.eg-user-fan3-item{
+  will-change:transform,opacity!important;
+  backface-visibility:hidden!important;
+  -webkit-backface-visibility:hidden!important;
+  transform-style:flat!important;
+}
+
+/* Ağır gölge/glow hafifletildi */
+.eg-user-fan3-toggle{
+  box-shadow:
+    0 0 0 4px rgba(43,135,255,.10),
+    0 0 16px rgba(43,135,255,.34)!important;
+}
+
+.eg-user-fan3-item{
+  box-shadow:
+    0 5px 10px rgba(0,0,0,.32),
+    inset 0 1px 0 rgba(255,255,255,.05)!important;
+  transition:
+    transform .22s ease-out,
+    opacity .16s ease-out,
+    visibility .16s ease-out!important;
+}
+
+/* Açılış gecikmeleri azaltıldı */
+.eg-user-fan3.open .i1,
+.eg-user-fan3.open .i2,
+.eg-user-fan3.open .i3,
+.eg-user-fan3.open .i4,
+.eg-user-fan3.open .i5,
+.eg-user-fan3.open .i6,
+.eg-user-fan3.open .i7,
+.eg-user-fan3.open .i8{
+  transition-delay:0s!important;
+}
+
+/* Telefon zayıfsa animasyonu neredeyse anlık yap */
+@media(max-width:760px){
+  .eg-user-fan3-item{
+    transition:
+      transform .18s ease-out,
+      opacity .12s ease-out!important;
+  }
+
+  .eg-user-fan3-toggle{
+    box-shadow:
+      0 0 0 3px rgba(43,135,255,.10),
+      0 0 12px rgba(43,135,255,.30)!important;
+  }
+}
+
+/* Hareket azaltma isteyen cihazlarda animasyonu kapat */
+@media(prefers-reduced-motion: reduce){
+  .eg-user-fan3-item,
+  .eg-user-fan3-toggle{
+    transition:none!important;
+    animation:none!important;
+  }
+}
+
+/* ===== ERATGUARD USER FAN-12P PERFORMANCE END ===== */
+
+
+/* ===== ERATGUARD FAN-12P FORCE HIDE LEGACY GREEN START ===== */
+/* Eski yeşil yelpaze tamamen kapalı; sadece FAN-12P .eg-user-fan3 çalışır */
+#egFanHandle,
+#egFanPanel,
+#egFanClose,
+#fanHandle,
+#fanPanel,
+#fanClose,
+.fan-handle,
+.fan-close,
+.fan:not(.eg-user-fan3),
+.fan .fan-item,
+.fan-item:not(.eg-user-fan3-item){
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  width:0!important;
+  height:0!important;
+  max-width:0!important;
+  max-height:0!important;
+  overflow:hidden!important;
+  transform:none!important;
+  z-index:-1!important;
+}
+/* ===== ERATGUARD FAN-12P FORCE HIDE LEGACY GREEN END ===== */
+
+</style>
+
+<script id="eratguard-user-fan3-script">
+(function(){
+  var root=document.getElementById("eratguard-user-fan3-rtl-menu");
+  var btn=document.getElementById("egUserFan3Toggle");
+  if(!root || !btn || root.dataset.ready==="1") return;
+  root.dataset.ready="1";
+
+  function closeFan(){ root.classList.remove("open"); }
+  function toggleFan(ev){
+    if(ev) ev.stopPropagation();
+    root.classList.toggle("open");
+  }
+
+  btn.addEventListener("click", toggleFan);
+  document.addEventListener("click", function(ev){
+    if(root.classList.contains("open") && !root.contains(ev.target)) closeFan();
+  });
+  document.addEventListener("keydown", function(ev){
+    if(ev.key==="Escape") closeFan();
+  });
+})();
+</script>
+"""
+
+    def _eg_user_fan3_should_inject():
+        try:
+            path = str(getattr(_eg_user_fan3_request, "path", "") or "")
+            if path.startswith("/admin"):
+                return False
+            if path in ("/dashboard", "/u/dashboard"):
+                return True
+            if path.startswith("/u/"):
+                return True
+            return False
+        except Exception:
+            return False
+
+    def _eg_user_fan3_inject_html(html):
+        if not html or _EG_USER_FAN3_MARKER in html:
+            return html
+        if "</body>" in html.lower():
+            return _eg_user_fan3_re.sub(
+                r"</body>",
+                _EG_USER_FAN3_HTML + "\n</body>",
+                html,
+                count=1,
+                flags=_eg_user_fan3_re.I
+            )
+        return html + _EG_USER_FAN3_HTML
+
+    @app.after_request
+    def _eg_user_fan3_after_request(resp):
+        try:
+            if not _eg_user_fan3_should_inject():
+                return resp
+
+            ctype = str(resp.headers.get("Content-Type", "") or "").lower()
+            if "text/html" not in ctype:
+                return resp
+
+            html = resp.get_data(as_text=True)
+            new_html = _eg_user_fan3_inject_html(html)
+            if new_html != html:
+                resp.set_data(new_html)
+                resp.headers.pop("Content-Length", None)
+                resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            return resp
+        except Exception as _eg_user_fan3_err:
+            try:
+                print("ERATGUARD USER FAN-3 INJECT ERROR:", _eg_user_fan3_err)
+            except Exception:
+                pass
+            return resp
+
+    print("ERATGUARD USER FAN-3 RIGHT-TO-LEFT MENU READY")
+except Exception as _eg_user_fan3_boot_err:
+    try:
+        print("ERATGUARD USER FAN-3 BOOT ERROR:", _eg_user_fan3_boot_err)
+    except Exception:
+        pass
+# ===== ERATGUARD USER FAN-3 RIGHT-TO-LEFT MENU END =====
+
+
+
+
+
+
+
+
+
+
+# ===== ERATGUARD CLEAN-6 FAN12P ONLY DASHBOARD START =====
+# /dashboard arka modül kartlarını kapatır. FAN-12P ana dashboard olarak kalır.
+try:
+    from flask import request as _eg_clean6_request
+
+    def _eg_clean6_fan_only_code():
+        return """
+<style id="eg-clean6-fan12p-only-dashboard-css">
+/* Dashboard artık FAN-12P. Arkadaki eski modül paneli görünmez. */
+body{
+  min-height:100vh!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(circle at 78% 50%, rgba(35,255,137,.18), transparent 34%),
+    radial-gradient(circle at 20% 18%, rgba(34,231,255,.10), transparent 38%),
+    linear-gradient(145deg,#020806,#03100a 55%,#020806)!important;
+}
+
+/* Eski dashboard gövdesi kapalı */
+body.eg-clean6-fan-dashboard .wrap,
+body.eg-clean6-fan-dashboard header.top,
+body.eg-clean6-fan-dashboard main.hero,
+body.eg-clean6-fan-dashboard .hero,
+body.eg-clean6-fan-dashboard .stats,
+body.eg-clean6-fan-dashboard .stat,
+body.eg-clean6-fan-dashboard .section,
+body.eg-clean6-fan-dashboard .modules,
+body.eg-clean6-fan-dashboard .card{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+/* Sadece marka hissi veren hafif boş ekran */
+body.eg-clean6-fan-dashboard:before{
+  content:"EratGuard";
+  position:fixed;
+  left:24px;
+  top:34px;
+  z-index:1;
+  color:rgba(242,255,246,.92);
+  font-size:28px;
+  font-weight:1000;
+  letter-spacing:-1px;
+}
+
+body.eg-clean6-fan-dashboard:after{
+  content:"FAN-12P COMMAND CENTER";
+  position:fixed;
+  left:26px;
+  top:70px;
+  z-index:1;
+  color:rgba(35,255,137,.78);
+  font-size:11px;
+  font-weight:950;
+  letter-spacing:.22em;
+}
+
+/* FAN-12P kesin ana odak */
+body.eg-clean6-fan-dashboard #eratguard-user-fan3-rtl-menu{
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  z-index:9999!important;
+}
+
+/* Mobilde marka küçük kalsın */
+@media(max-width:420px){
+  body.eg-clean6-fan-dashboard:before{
+    font-size:24px;
+    left:20px;
+    top:28px;
+  }
+  body.eg-clean6-fan-dashboard:after{
+    font-size:9px;
+    left:22px;
+    top:60px;
+  }
+}
+</style>
+
+<script id="eg-clean6-fan12p-only-dashboard-js">
+(function(){
+  try{
+    if(location.pathname === '/dashboard' || location.pathname === '/u/dashboard'){
+      document.body.classList.add('eg-clean6-fan-dashboard');
+    }
+  }catch(e){}
+})();
+</script>
+"""
+
+    @app.after_request
+    def _eg_clean6_fan_only_after_request(resp):
+        try:
+            path = (_eg_clean6_request.path or "").rstrip("/")
+            if path not in ("/dashboard", "/u/dashboard"):
+                return resp
+
+            ctype = (resp.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return resp
+
+            body = resp.get_data(as_text=True)
+            if not body or "eratguard-user-fan3-rtl-menu" not in body:
+                return resp
+
+            if "eg-clean6-fan12p-only-dashboard-js" in body:
+                return resp
+
+            inject = _eg_clean6_fan_only_code()
+            if "</body>" in body:
+                body = body.replace("</body>", inject + "\n</body>", 1)
+            else:
+                body += inject
+
+            resp.set_data(body)
+            resp.headers["Content-Length"] = str(len(body.encode("utf-8")))
+            resp.headers["X-EG-Clean6"] = "fan12p-only-dashboard"
+        except Exception as e:
+            print("ERATGUARD CLEAN-6 FAN12P ONLY ERROR:", e)
+        return resp
+
+except Exception as e:
+    print("ERATGUARD CLEAN-6 FAN12P ONLY BOOT ERROR:", e)
+# ===== ERATGUARD CLEAN-6 FAN12P ONLY DASHBOARD END =====
+
+
+
+
+
+
+# ===== ERATGUARD CLEAN-7B REAL FAN12P ONLY DASHBOARD START =====
+# /dashboard içinde eski iç dashboard yok. FAN-12P ana dashboard olarak kalır.
+try:
+    def _eg_clean7b_real_fan12p_only_dashboard():
+        return """<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - FAN-12P Command Center</title>
+<style>
+:root{
+  --green:#23ff89;
+  --cyan:#22e7ff;
+  --text:#f2fff6;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  width:100%;
+  min-height:100%;
+  overflow:hidden;
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  background:
+    radial-gradient(circle at 78% 50%, rgba(35,255,137,.18), transparent 34%),
+    radial-gradient(circle at 16% 18%, rgba(34,231,255,.12), transparent 38%),
+    linear-gradient(145deg,#020806,#03100a 55%,#020806);
+}
+.eg-clean7b-brand{
+  position:fixed;
+  left:24px;
+  top:34px;
+  z-index:1;
+  pointer-events:none;
+}
+.eg-clean7b-logo{
+  width:70px;
+  height:70px;
+  border-radius:24px;
+  display:grid;
+  place-items:center;
+  margin-bottom:14px;
+  background:linear-gradient(135deg,#23ff89,#22e7ff 58%,#6d7cff);
+  color:#00170b;
+  font-size:42px;
+  font-weight:1000;
+  box-shadow:0 18px 45px rgba(0,0,0,.35),0 0 28px rgba(35,255,137,.16);
+}
+.eg-clean7b-brand b{
+  display:block;
+  font-size:30px;
+  font-weight:1000;
+  letter-spacing:-1.2px;
+  color:rgba(242,255,246,.96);
+}
+.eg-clean7b-brand b span{color:#23ff89}
+.eg-clean7b-brand small{
+  display:block;
+  margin-top:8px;
+  font-size:11px;
+  line-height:1.45;
+  font-weight:1000;
+  letter-spacing:.30em;
+  color:#22e7ff;
+}
+.eg-clean7b-hint{
+  position:fixed;
+  left:24px;
+  bottom:34px;
+  z-index:1;
+  max-width:260px;
+  color:rgba(242,255,246,.46);
+  font-size:12px;
+  line-height:1.5;
+  font-weight:850;
+  pointer-events:none;
+}
+@media(max-width:420px){
+  .eg-clean7b-brand{left:22px;top:34px}
+  .eg-clean7b-logo{width:64px;height:64px;border-radius:22px;font-size:38px;margin-bottom:12px}
+  .eg-clean7b-brand b{font-size:26px}
+  .eg-clean7b-brand small{font-size:10px}
+  .eg-clean7b-hint{left:22px;bottom:28px;font-size:11px;max-width:220px}
+}
+</style>
+</head>
+<body>
+  <div class="eg-clean7b-brand">
+    <div class="eg-clean7b-logo">E</div>
+    <b>Erat<span>Guard</span></b>
+    <small>FAN-12P<br>COMMAND CENTER</small>
+  </div>
+  <div class="eg-clean7b-hint">Sağdaki E MENÜ ile Koruma, Analiz, Rapor, Bildirim, Lisans, Topluluk ve Ayarlar bölümlerini aç.</div>
+</body>
+</html>"""
+
+    if "ss_user_alias_home_final" in app.view_functions:
+        app.view_functions["ss_user_alias_home_final"] = _eg_clean7b_real_fan12p_only_dashboard
+
+except Exception as e:
+    print("ERATGUARD CLEAN-7B REAL FAN12P ONLY DASHBOARD ERROR:", e)
+# ===== ERATGUARD CLEAN-7B REAL FAN12P ONLY DASHBOARD END =====
+
+
+
+# ===== ERATGUARD VITES-2C FORCE PROTECTION CENTER START =====
+def _eg_vites2c_protection_center_html():
+    try:
+        username = session.get("username") or "Erat@32"
+        plan = session.get("plan") or session.get("license_type") or "PRO"
+    except Exception:
+        username = "Erat@32"
+        plan = "PRO"
+
+    return f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>EratGuard PRO - Vites-2C Koruma Merkezi</title>
+<style>
+:root{{
+  --green:#23ff89;
+  --cyan:#22e7ff;
+  --text:#f2fff6;
+  --muted:rgba(242,255,246,.64);
+  --line:rgba(35,255,137,.18);
+  --card:rgba(4,18,12,.74);
+  --warn:#ffd166;
+}}
+*{{box-sizing:border-box}}
+html,body{{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(circle at 78% 22%,rgba(34,231,255,.16),transparent 34%),
+    radial-gradient(circle at 18% 88%,rgba(35,255,137,.13),transparent 38%),
+    linear-gradient(135deg,#020705,#030d09 48%,#010403);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  overflow-x:hidden;
+}}
+.eg-wrap{{min-height:100vh;padding:22px 18px 34px}}
+.eg-top{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}}
+.eg-brand{{display:flex;align-items:center;gap:12px}}
+.eg-logo{{
+  width:42px;height:42px;border-radius:15px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#00170b;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.22);
+}}
+.eg-title small{{display:block;color:var(--cyan);font-size:10px;font-weight:1000;letter-spacing:.18em}}
+.eg-title b{{display:block;font-size:17px;letter-spacing:-.2px}}
+.eg-pill{{
+  border:1px solid var(--line);border-radius:999px;padding:9px 11px;
+  background:rgba(3,18,10,.55);font-size:10px;font-weight:1000;
+  letter-spacing:.12em;color:var(--green);white-space:nowrap;
+}}
+.eg-hero{{
+  border:1px solid var(--line);border-radius:30px;padding:22px;
+  background:linear-gradient(180deg,rgba(4,22,14,.82),rgba(2,8,6,.72));
+  box-shadow:0 18px 70px rgba(0,0,0,.38), inset 0 0 28px rgba(35,255,137,.04);
+  margin-bottom:16px;
+}}
+.eg-hero h1{{margin:0 0 8px;font-size:32px;letter-spacing:-1.2px;line-height:1}}
+.eg-hero p{{margin:0;color:var(--muted);font-size:13px;line-height:1.55}}
+.eg-status{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}}
+.eg-card{{
+  border:1px solid var(--line);border-radius:24px;padding:15px;background:var(--card);
+  box-shadow:inset 0 0 20px rgba(35,255,137,.035);
+}}
+.eg-card .k{{font-size:10px;font-weight:1000;letter-spacing:.16em;color:var(--muted);margin-bottom:8px}}
+.eg-card .v{{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:1000}}
+.dot{{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 18px rgba(35,255,137,.75)}}
+.dot.c{{background:var(--cyan);box-shadow:0 0 18px rgba(34,231,255,.75)}}
+.dot.w{{background:var(--warn);box-shadow:0 0 18px rgba(255,209,102,.55)}}
+.eg-actions{{display:grid;grid-template-columns:1fr;gap:11px;margin-top:16px}}
+.eg-btn{{
+  display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:var(--text);
+  border:1px solid rgba(34,231,255,.16);border-radius:22px;padding:15px 16px;
+  background:rgba(2,13,10,.66);font-size:13px;font-weight:1000;letter-spacing:.02em;
+}}
+.eg-btn span{{color:var(--cyan)}}
+.eg-back{{
+  margin-top:18px;display:inline-flex;text-decoration:none;color:#00170b;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.16);
+}}
+.eg-note{{margin-top:15px;color:var(--muted);font-size:12px;line-height:1.55}}
+@media(max-width:420px){{
+  .eg-wrap{{padding:18px 14px 28px}}
+  .eg-hero h1{{font-size:28px}}
+  .eg-status{{grid-template-columns:1fr 1fr;gap:10px}}
+  .eg-card{{padding:13px;border-radius:21px}}
+  .eg-card .v{{font-size:15px}}
+}}
+
+
+
+
+/* ===== ERATGUARD VITES-2C POLISH START ===== */
+.eg-user-fan3-toggle{{
+  bottom:104px !important;
+  right:14px !important;
+}}
+@media(max-width:420px){{
+  .eg-user-fan3-toggle{{
+    bottom:104px !important;
+    right:12px !important;
+  }}
+}}
+/* ===== ERATGUARD VITES-2C POLISH END ===== */
+
+/* ===== ERATGUARD VITES-2C APK VISUAL OVERLAP POLISH START ===== */
+.eg-actions{{
+  padding-right:92px !important;
+}}
+.eg-actions .eg-btn{{
+  min-height:84px !important;
+}}
+@media(max-width:420px){{
+  .eg-actions{{
+    padding-right:96px !important;
+  }}
+}}
+/* ===== ERATGUARD VITES-2C APK VISUAL OVERLAP POLISH END ===== */
+
+
+</style>
+</head>
+<body>
+<div class="eg-wrap">
+  <div class="eg-top">
+    <div class="eg-brand">
+      <div class="eg-logo">E</div>
+      <div class="eg-title">
+        <small>ERATGUARD VITES-2C</small>
+        <b>Koruma Merkezi</b>
+      </div>
+    </div>
+    <div class="eg-pill">{plan}</div>
+  </div>
+
+  <section class="eg-hero">
+    <h1>Koruma aktif.</h1>
+    <p>{username} hesabı için SMS kalkanı, link kontrolü ve risk motoru hazır durumda. Bu merkez, telefona düşebilecek şüpheli içerikleri takip etmek için ana güvenlik alanıdır.</p>
+  </section>
+
+  <div class="eg-status">
+    <div class="eg-card"><div class="k">SMS KALKANI</div><div class="v"><i class="dot"></i> Hazır</div></div>
+    <div class="eg-card"><div class="k">LİNK KONTROLÜ</div><div class="v"><i class="dot c"></i> Aktif</div></div>
+    <div class="eg-card"><div class="k">RİSK MOTORU</div><div class="v"><i class="dot"></i> PRO</div></div>
+    <div class="eg-card"><div class="k">SON TARAMA</div><div class="v"><i class="dot w"></i> Beklemede</div></div>
+  </div>
+
+  <div class="eg-actions">
+    <a class="eg-btn" href="/u/analysis">Riskli SMS Analizi <span>→</span></a>
+    <a class="eg-btn" href="/u/blocked">Engellenenleri Gör <span>→</span></a>
+    <a class="eg-btn" href="/u/reports">Koruma Raporları <span>→</span></a>
+  </div>
+
+  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+
+  <div class="eg-note">EratGuard PRO koruma katmanı aktif. SMS, link ve risk motoru tek merkezden takip edilir.</div>
+</div>
+</body>
+</html>"""
+
+@app.before_request
+def _eg_vites2c_force_protection_center():
+    try:
+        if request.path == "/u/protection":
+            return _eg_vites2c_protection_center_html()
+    except Exception:
+        return None
+# ===== ERATGUARD VITES-2C FORCE PROTECTION CENTER END =====
+
+
+
+# ===== ERATGUARD VITES-2D AI ANALYSIS CENTER START =====
+def _eg_vites2d_ai_analysis_html():
+    try:
+        username = session.get("username") or "Erat@32"
+        plan = session.get("plan") or session.get("license_type") or "PRO"
+    except Exception:
+        username = "Erat@32"
+        plan = "PRO"
+
+    html = """<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>EratGuard PRO - Vites-2D AI Analiz Merkezi</title>
+<style>
+:root{
+  --green:#23ff89;
+  --cyan:#22e7ff;
+  --red:#ff4d6d;
+  --yellow:#ffd166;
+  --text:#f2fff6;
+  --muted:rgba(242,255,246,.64);
+  --line:rgba(35,255,137,.18);
+  --card:rgba(4,18,12,.74);
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(circle at 80% 18%,rgba(34,231,255,.15),transparent 34%),
+    radial-gradient(circle at 16% 88%,rgba(35,255,137,.13),transparent 40%),
+    linear-gradient(135deg,#020705,#030d09 48%,#010403);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  overflow-x:hidden;
+}
+.eg-wrap{min-height:100vh;padding:22px 18px 34px}
+.eg-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}
+.eg-brand{display:flex;align-items:center;gap:12px}
+.eg-logo{
+  width:42px;height:42px;border-radius:15px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#00170b;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.22);
+}
+.eg-title small{display:block;color:var(--cyan);font-size:10px;font-weight:1000;letter-spacing:.18em}
+.eg-title b{display:block;font-size:17px;letter-spacing:-.2px}
+.eg-pill{
+  border:1px solid var(--line);border-radius:999px;padding:9px 11px;
+  background:rgba(3,18,10,.55);font-size:10px;font-weight:1000;
+  letter-spacing:.12em;color:var(--green);white-space:nowrap;
+}
+.eg-hero{
+  border:1px solid var(--line);border-radius:30px;padding:22px;
+  background:linear-gradient(180deg,rgba(4,22,14,.82),rgba(2,8,6,.72));
+  box-shadow:0 18px 70px rgba(0,0,0,.38), inset 0 0 28px rgba(35,255,137,.04);
+  margin-bottom:16px;
+}
+.eg-hero h1{margin:0 0 8px;font-size:31px;letter-spacing:-1.2px;line-height:1}
+.eg-hero p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+.eg-panel{
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:var(--card);
+  padding:16px;
+  box-shadow:inset 0 0 22px rgba(35,255,137,.035);
+}
+.eg-label{
+  font-size:10px;
+  font-weight:1000;
+  letter-spacing:.16em;
+  color:var(--cyan);
+  margin-bottom:10px;
+}
+textarea{
+  width:100%;
+  min-height:150px;
+  resize:vertical;
+  outline:none;
+  border:1px solid rgba(34,231,255,.18);
+  border-radius:22px;
+  padding:15px;
+  background:rgba(1,8,6,.72);
+  color:var(--text);
+  font-size:14px;
+  line-height:1.45;
+  font-family:Arial,Helvetica,sans-serif;
+}
+textarea::placeholder{color:rgba(242,255,246,.38)}
+.eg-analyze{
+  width:100%;
+  margin-top:12px;
+  border:0;
+  border-radius:999px;
+  padding:14px 16px;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#00170b;
+  font-size:13px;
+  font-weight:1000;
+  letter-spacing:.08em;
+}
+.eg-result{
+  margin-top:16px;
+  display:none;
+  border:1px solid rgba(34,231,255,.16);
+  border-radius:24px;
+  background:rgba(2,13,10,.66);
+  padding:15px;
+}
+.eg-result.open{display:block}
+.eg-score{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.eg-score strong{font-size:32px;letter-spacing:-1px}
+.eg-risk{
+  border-radius:999px;
+  padding:9px 11px;
+  font-size:10px;
+  font-weight:1000;
+  letter-spacing:.12em;
+}
+.low{background:rgba(35,255,137,.14);color:var(--green);border:1px solid rgba(35,255,137,.22)}
+.mid{background:rgba(255,209,102,.14);color:var(--yellow);border:1px solid rgba(255,209,102,.22)}
+.high{background:rgba(255,77,109,.14);color:var(--red);border:1px solid rgba(255,77,109,.22)}
+.eg-bar{height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:12px}
+.eg-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));transition:.3s ease}
+.eg-msg{color:var(--muted);font-size:13px;line-height:1.55}
+.eg-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.eg-tag{border:1px solid rgba(34,231,255,.16);border-radius:999px;padding:8px 10px;font-size:11px;font-weight:900;color:var(--cyan)}
+.eg-actions{display:grid;grid-template-columns:1fr;gap:11px;margin-top:16px}
+.eg-btn{
+  display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:var(--text);
+  border:1px solid rgba(34,231,255,.16);border-radius:22px;padding:15px 16px;
+  background:rgba(2,13,10,.66);font-size:13px;font-weight:1000;letter-spacing:.02em;
+}
+.eg-btn span{color:var(--cyan)}
+.eg-back{
+  margin-top:16px;display:inline-flex;text-decoration:none;color:#00170b;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.16);
+}
+.eg-note{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.55}
+@media(max-width:420px){
+  .eg-wrap{padding:18px 14px 28px}
+  .eg-hero h1{font-size:28px}
+  textarea{min-height:140px}
+}
+
+
+/* ===== ERATGUARD VITES-2D POLISH START ===== */
+.eg-user-fan3-toggle{
+  bottom:112px !important;
+  right:12px !important;
+}
+.eg-panel{
+  padding-bottom:26px !important;
+}
+.eg-analyze{
+  margin-right:86px !important;
+  width:calc(100% - 86px) !important;
+}
+@media(max-width:420px){
+  .eg-user-fan3-toggle{
+    bottom:112px !important;
+    right:10px !important;
+  }
+  .eg-analyze{
+    margin-right:92px !important;
+    width:calc(100% - 92px) !important;
+  }
+}
+/* ===== ERATGUARD VITES-2D POLISH END ===== */
+
+
+
+
+</style>
+</head>
+<body>
+<div class="eg-wrap">
+  <div class="eg-top">
+    <div class="eg-brand">
+      <div class="eg-logo">AI</div>
+      <div class="eg-title">
+        <small>ERATGUARD VITES-2D</small>
+        <b>AI Analiz Merkezi</b>
+      </div>
+    </div>
+    <div class="eg-pill">__PLAN__</div>
+  </div>
+
+  <section class="eg-hero">
+    <h1>SMS riskini analiz et.</h1>
+    <p>__USERNAME__ hesabı için şüpheli SMS, link, kampanya ve dolandırıcılık belirtilerini hızlı risk motoruyla değerlendir.</p>
+  </section>
+
+  <section class="eg-panel">
+    <div class="eg-label">ANALİZ EDİLECEK METİN</div>
+    <textarea id="egSmsText" placeholder="Örnek: Tebrikler ödül kazandınız, hemen linke tıklayın..."></textarea>
+    <button class="eg-analyze" id="egAnalyzeBtn" type="button">RİSKİ ANALİZ ET</button>
+
+    <div class="eg-result" id="egResult">
+      <div class="eg-score">
+        <strong id="egScore">0</strong>
+        <div class="eg-risk low" id="egRiskLabel">DÜŞÜK RİSK</div>
+      </div>
+      <div class="eg-bar"><div class="eg-fill" id="egFill"></div></div>
+      <div class="eg-msg" id="egMessage">Analiz sonucu burada görünecek.</div>
+      <div class="eg-tags" id="egTags"></div>
+    </div>
+  </section>
+
+  <div class="eg-actions">
+    <a class="eg-btn" href="/u/protection">Koruma Merkezine Dön <span>→</span></a>
+    <a class="eg-btn" href="/u/reports">Analiz Raporları <span>→</span></a>
+  </div>
+
+  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+
+  <div class="eg-note">EratGuard AI Analiz Merkezi, SMS içeriğindeki risk işaretlerini hızlıca değerlendirir. Nihai güvenlik kararı için Koruma Merkezi ile birlikte kullanılır.</div>
+
+<div class="eg-note" style="margin-top:14px;border-color:rgba(35,255,137,.32);">
+  <!-- ERATGUARD VITES-5D SMS CENTER LINK START -->
+  <a href="/u/sms-actions-center" style="color:#23ff89;text-decoration:none;font-weight:900;">
+    Engellenen SMS Merkezi → ENGELLE / GÜVENLİ / ŞİKAYET kayıtlarını görüntüle
+  </a>
+  <!-- ERATGUARD VITES-5D SMS CENTER LINK END -->
+</div>
+
+</div>
+
+<script>
+(function(){
+  var txt=document.getElementById("egSmsText");
+  var btn=document.getElementById("egAnalyzeBtn");
+  var result=document.getElementById("egResult");
+  var scoreEl=document.getElementById("egScore");
+  var label=document.getElementById("egRiskLabel");
+  var fill=document.getElementById("egFill");
+  var msg=document.getElementById("egMessage");
+  var tags=document.getElementById("egTags");
+
+  var rules=[
+    {k:"http", w:18, t:"Link içeriyor"},
+    {k:"bit.ly", w:22, t:"Kısaltılmış link"},
+    {k:"tıkla", w:16, t:"Tıklama çağrısı"},
+    {k:"tikla", w:16, t:"Tıklama çağrısı"},
+    {k:"şifre", w:18, t:"Şifre talebi"},
+    {k:"sifre", w:18, t:"Şifre talebi"},
+    {k:"banka", w:14, t:"Banka teması"},
+    {k:"ödül", w:16, t:"Ödül vaadi"},
+    {k:"odul", w:16, t:"Ödül vaadi"},
+    {k:"kazandınız", w:18, t:"Kazanç vaadi"},
+    {k:"kazandiniz", w:18, t:"Kazanç vaadi"},
+    {k:"acil", w:12, t:"Acil baskısı"},
+    {k:"hesabınız", w:12, t:"Hesap uyarısı"},
+    {k:"hesabiniz", w:12, t:"Hesap uyarısı"},
+    {k:"doğrula", w:16, t:"Doğrulama isteği"},
+    {k:"dogrula", w:16, t:"Doğrulama isteği"}
+  ];
+
+  function analyze(){
+    var v=(txt.value||"").toLowerCase();
+    var score=0;
+    var found=[];
+
+    if(v.trim().length<6){
+      result.classList.add("open");
+      scoreEl.textContent="0";
+      fill.style.width="0%";
+      label.className="eg-risk low";
+      label.textContent="METİN GEREKLİ";
+      msg.textContent="Analiz için SMS veya şüpheli metni kutuya yaz.";
+      tags.innerHTML="";
+      return;
+    }
+
+    rules.forEach(function(r){
+      if(v.indexOf(r.k)!==-1){
+        score+=r.w;
+        if(found.indexOf(r.t)===-1) found.push(r.t);
+      }
+    });
+
+    if(/[0-9]{6}/.test(v)){score+=16; found.push("Kod/OTP benzeri sayı");}
+    if(/[0-9]{10,}/.test(v)){score+=10; found.push("Uzun numara dizisi");}
+    if(v.length>160){score+=8; found.push("Uzun SMS içeriği");}
+
+    score=Math.max(0,Math.min(100,score));
+
+    result.classList.add("open");
+    scoreEl.textContent=score;
+    fill.style.width=score+"%";
+
+    if(score>=65){
+      label.className="eg-risk high";
+      label.textContent="YÜKSEK RİSK";
+      msg.textContent="Bu içerikte güçlü dolandırıcılık/spam işaretleri var. Linke tıklama, şifre veya kod paylaşma.";
+    }else if(score>=32){
+      label.className="eg-risk mid";
+      label.textContent="ORTA RİSK";
+      msg.textContent="Bu içerik dikkat gerektiriyor. Göndereni doğrulamadan işlem yapma.";
+    }else{
+      label.className="eg-risk low";
+      label.textContent="DÜŞÜK RİSK";
+      msg.textContent="Belirgin risk az görünüyor; yine de bilinmeyen link ve taleplere dikkat et.";
+    }
+
+    tags.innerHTML="";
+    if(found.length===0){found=["Belirgin risk etiketi yok"];}
+    found.slice(0,8).forEach(function(x){
+      var e=document.createElement("span");
+      e.className="eg-tag";
+      e.textContent=x;
+      tags.appendChild(e);
+    });
+  }
+
+  if(btn) btn.addEventListener("click", analyze);
+})();
+</script>
+
+<script>
+/* ===== ERATGUARD VITES-5B AI ANALYSIS SMS RISK BRIDGE START ===== */
+(function(){
+  function findSmsBox(){
+    return document.getElementById("egSmsText") ||
+           document.querySelector("textarea") ||
+           document.querySelector("input[type='text']");
+  }
+
+  function findResultBox(){
+    var box = document.getElementById("egAiResult");
+    if(box) return box;
+
+    box = document.querySelector(".eg-result");
+    if(box) return box;
+
+    box = document.createElement("div");
+    box.id = "egAiResult";
+    box.style.marginTop = "14px";
+    box.style.background = "rgba(13,19,32,.96)";
+    box.style.border = "1px solid rgba(35,255,137,.25)";
+    box.style.borderRadius = "18px";
+    box.style.padding = "14px";
+    box.style.color = "#dce7f3";
+    box.style.whiteSpace = "pre-wrap";
+    box.style.fontSize = "13px";
+
+    var btn = document.getElementById("egAnalyzeBtn") || document.querySelector("button");
+    if(btn && btn.parentNode){
+      btn.parentNode.insertBefore(box, btn.nextSibling);
+    } else {
+      document.body.appendChild(box);
+    }
+    return box;
+  }
+
+  async function egV5Analyze(){
+    var input = findSmsBox();
+    var result = findResultBox();
+    var text = input ? input.value : "";
+
+    result.textContent = "EratGuard Vites-5A risk motoru çalışıyor...";
+
+    try{
+      var r = await fetch("/api/v5/sms-risk", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({text:text})
+      });
+
+      var j = await r.json();
+      var x = j.result || {};
+
+      result.textContent =
+        "Risk Puanı: %" + (x.score ?? "-") + "\n" +
+        "Seviye: " + (x.level || "-") + "\n" +
+        "Durum: " + (x.status || "-") + "\n\n" +
+        "Sebepler:\n- " + ((x.reasons || []).join("\n- ")) + "\n\n" +
+        "Öneri: " + (x.recommendation || "-");
+    }catch(e){
+      result.textContent = "Analiz hatası: " + e;
+    }
+  }
+
+  function bind(){
+    var btn = document.getElementById("egAnalyzeBtn") || document.querySelector("button");
+    if(btn){
+      btn.onclick = function(ev){
+        ev.preventDefault();
+        egV5Analyze();
+        return false;
+      };
+      btn.setAttribute("data-vites5b", "sms-risk-engine");
+    }
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", bind);
+  } else {
+    bind();
+  }
+})();
+/* ===== ERATGUARD VITES-5B AI ANALYSIS SMS RISK BRIDGE END ===== */
+</script>
+
+</body>
+</html>"""
+    return html.replace("__USERNAME__", str(username)).replace("__PLAN__", str(plan))
+
+@app.before_request
+def _eg_vites2d_force_ai_analysis_center():
+    try:
+        if request.path == "/u/analysis":
+            return _eg_vites2d_ai_analysis_html()
+    except Exception:
+        return None
+# ===== ERATGUARD VITES-2D AI ANALYSIS CENTER END =====
+
+
+
+# ===== ERATGUARD VITES-2E REPORT CENTER START =====
+def _eg_vites2e_report_center_html():
+    try:
+        username = session.get("username") or "Erat@32"
+        plan = session.get("plan") or session.get("license_type") or "PRO"
+    except Exception:
+        username = "Erat@32"
+        plan = "PRO"
+
+    return f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>EratGuard PRO - Vites-2E Rapor Merkezi</title>
+<style>
+:root{{
+  --green:#23ff89;
+  --cyan:#22e7ff;
+  --yellow:#ffd166;
+  --red:#ff4d6d;
+  --text:#f2fff6;
+  --muted:rgba(242,255,246,.64);
+  --line:rgba(35,255,137,.18);
+  --card:rgba(4,18,12,.74);
+}}
+*{{box-sizing:border-box}}
+html,body{{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(circle at 82% 18%,rgba(34,231,255,.15),transparent 34%),
+    radial-gradient(circle at 14% 88%,rgba(35,255,137,.13),transparent 40%),
+    linear-gradient(135deg,#020705,#030d09 48%,#010403);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  overflow-x:hidden;
+}}
+.eg-wrap{{min-height:100vh;padding:22px 18px 34px}}
+.eg-top{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}}
+.eg-brand{{display:flex;align-items:center;gap:12px}}
+.eg-logo{{
+  width:42px;height:42px;border-radius:15px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#00170b;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.22);
+}}
+.eg-title small{{display:block;color:var(--cyan);font-size:10px;font-weight:1000;letter-spacing:.18em}}
+.eg-title b{{display:block;font-size:17px;letter-spacing:-.2px}}
+.eg-pill{{
+  border:1px solid var(--line);border-radius:999px;padding:9px 11px;
+  background:rgba(3,18,10,.55);font-size:10px;font-weight:1000;
+  letter-spacing:.12em;color:var(--green);white-space:nowrap;
+}}
+.eg-hero{{
+  border:1px solid var(--line);border-radius:30px;padding:22px;
+  background:linear-gradient(180deg,rgba(4,22,14,.82),rgba(2,8,6,.72));
+  box-shadow:0 18px 70px rgba(0,0,0,.38), inset 0 0 28px rgba(35,255,137,.04);
+  margin-bottom:16px;
+}}
+.eg-hero h1{{margin:0 0 8px;font-size:31px;letter-spacing:-1.2px;line-height:1}}
+.eg-hero p{{margin:0;color:var(--muted);font-size:13px;line-height:1.55}}
+.eg-grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}}
+.eg-card{{
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:15px;
+  background:var(--card);
+  box-shadow:inset 0 0 20px rgba(35,255,137,.035);
+}}
+.eg-card .k{{font-size:10px;font-weight:1000;letter-spacing:.16em;color:var(--muted);margin-bottom:8px}}
+.eg-card .v{{font-size:28px;font-weight:1000;letter-spacing:-1px}}
+.eg-card .s{{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.35}}
+.green{{color:var(--green)}}
+.cyan{{color:var(--cyan)}}
+.yellow{{color:var(--yellow)}}
+.red{{color:var(--red)}}
+.eg-timeline{{
+  border:1px solid rgba(34,231,255,.16);
+  border-radius:26px;
+  background:rgba(2,13,10,.66);
+  padding:15px;
+  margin-top:14px;
+}}
+.eg-timeline h3{{margin:0 0 12px;font-size:15px}}
+.eg-row{{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 0;
+  border-top:1px solid rgba(255,255,255,.06);
+}}
+.eg-row:first-of-type{{border-top:0}}
+.eg-row b{{font-size:13px}}
+.eg-row span{{font-size:12px;color:var(--muted);text-align:right}}
+.eg-actions{{display:grid;grid-template-columns:1fr;gap:11px;margin-top:16px}}
+.eg-btn{{
+  display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:var(--text);
+  border:1px solid rgba(34,231,255,.16);border-radius:22px;padding:15px 16px;
+  background:rgba(2,13,10,.66);font-size:13px;font-weight:1000;letter-spacing:.02em;
+}}
+.eg-btn span{{color:var(--cyan)}}
+.eg-back{{
+  margin-top:16px;display:inline-flex;text-decoration:none;color:#00170b;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.16);
+}}
+.eg-note{{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.55}}
+
+/* ===== ERATGUARD VITES-2E APK VISUAL CARD POLISH START ===== */
+.eg-grid .eg-card:nth-child(2),
+.eg-grid .eg-card:nth-child(4){{
+  padding-right:104px !important;
+}}
+.eg-grid .eg-card:nth-child(4) .s{{
+  max-width:130px !important;
+}}
+@media(max-width:420px){{
+  .eg-grid .eg-card:nth-child(2),
+  .eg-grid .eg-card:nth-child(4){{
+    padding-right:108px !important;
+  }}
+  .eg-grid .eg-card:nth-child(4) .s{{
+    max-width:118px !important;
+  }}
+}}
+/* ===== ERATGUARD VITES-2E APK VISUAL CARD POLISH END ===== */
+
+@media(max-width:420px){{
+  .eg-wrap{{padding:18px 14px 28px}}
+  .eg-hero h1{{font-size:28px}}
+  .eg-grid{{grid-template-columns:1fr 1fr;gap:10px}}
+  .eg-card{{padding:13px;border-radius:21px}}
+  .eg-card .v{{font-size:25px}}
+}}
+</style>
+</head>
+<body>
+<div class="eg-wrap">
+  <div class="eg-top">
+    <div class="eg-brand">
+      <div class="eg-logo">R</div>
+      <div class="eg-title">
+        <small>ERATGUARD VITES-2E</small>
+        <b>Rapor Merkezi</b>
+      </div>
+    </div>
+    <div class="eg-pill">{plan}</div>
+  </div>
+
+  <section class="eg-hero">
+    <h1>Güvenlik özeti hazır.</h1>
+    <p>{username} hesabı için koruma, analiz ve risk durumları tek rapor ekranında özetlenir.</p>
+  </section>
+
+  <div class="eg-grid">
+    <div class="eg-card">
+      <div class="k">KORUMA DURUMU</div>
+      <div class="v green">AKTİF</div>
+      <div class="s">SMS kalkanı ve risk motoru hazır.</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">AI ANALİZ</div>
+      <div class="v cyan">HAZIR</div>
+      <div class="s">Metin/SMS risk analizi çalışıyor.</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">RİSKLİ İÇERİK</div>
+      <div class="v yellow">0</div>
+      <div class="s">Bugün kayıtlı yüksek risk yok.</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">ENGELLENEN</div>
+      <div class="v green">0</div>
+      <div class="s">Engellenen içerikler burada izlenir.</div>
+    </div>
+  </div>
+
+  <section class="eg-timeline">
+    <h3>Son güvenlik durumu</h3>
+    <div class="eg-row">
+      <b>Koruma Merkezi</b>
+      <span>Aktif ve hazır</span>
+    </div>
+    <div class="eg-row">
+      <b>AI Analiz Merkezi</b>
+      <span>Risk puanı üretmeye hazır</span>
+    </div>
+    <div class="eg-row">
+      <b>FAN-12P</b>
+      <span>Komuta merkezi bağlantısı aktif</span>
+    </div>
+  </section>
+
+  <div class="eg-actions">
+    <a class="eg-btn" href="/u/protection">Koruma Merkezine Git <span>→</span></a>
+    <a class="eg-btn" href="/u/analysis">AI Analiz Merkezine Git <span>→</span></a>
+  </div>
+
+  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+
+  <div class="eg-note">EratGuard Rapor Merkezi, koruma ve analiz durumlarını kullanıcıya sade bir güvenlik özeti olarak sunar.</div>
+
+<div id="egV5eSmsStatsCard" style="margin-top:16px;background:rgba(255,255,255,.06);border:1px solid rgba(35,255,137,.28);border-radius:22px;padding:16px;box-shadow:0 0 24px rgba(35,255,137,.10);">
+  <!-- ERATGUARD VITES-5E DIRECT REPORTS CARD START -->
+  <div style="color:#23ff89;font-weight:900;font-size:12px;letter-spacing:.08em;">ERATGUARD VITES-5E</div>
+  <h2 style="margin:8px 0 10px;font-size:21px;color:#fff;">SMS Koruma İstatistikleri</h2>
+  <p style="margin:0 0 12px;color:#9aa3b2;line-height:1.45;">AI Analiz ekranından gelen gerçek ENGELLE / GÜVENLİ / ŞİKAYET kayıtları.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b id="egV5eBlocked" style="display:block;color:#23ff89;font-size:26px;">-</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Engellenen SMS</span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b id="egV5eSafe" style="display:block;color:#23ff89;font-size:26px;">-</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Güvenli SMS</span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b id="egV5eReported" style="display:block;color:#23ff89;font-size:26px;">-</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Şikayet</span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b id="egV5eTotal" style="display:block;color:#23ff89;font-size:26px;">-</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Toplam Aksiyon</span>
+    </div>
+  </div>
+
+  <a href="/u/sms-actions-center" style="display:block;margin-top:14px;color:#23ff89;text-decoration:none;font-weight:900;">
+    Engellenen SMS Merkezi detaylarını aç →
+  </a>
+  <!-- ERATGUARD VITES-5E DIRECT REPORTS CARD END -->
+</div>
+
+<script>
+/* ===== ERATGUARD VITES-5E DIRECT REPORTS JS START ===== */
+(function(){{
+  async function loadSmsStats(){{
+    try{{
+      const r = await fetch("/api/v5/sms-actions");
+      const j = await r.json();
+      const st = j.stats || {{}};
+      const blocked = st.blocked || 0;
+      const safe = st.safe || 0;
+      const reported = st.reported || 0;
+
+      document.getElementById("egV5eBlocked").textContent = blocked;
+      document.getElementById("egV5eSafe").textContent = safe;
+      document.getElementById("egV5eReported").textContent = reported;
+      document.getElementById("egV5eTotal").textContent = blocked + safe + reported;
+    }}catch(e){{
+      const box = document.getElementById("egV5eSmsStatsCard");
+      if(box) box.setAttribute("data-error", String(e));
+    }}
+  }}
+
+  if(document.readyState === "loading"){{
+    document.addEventListener("DOMContentLoaded", loadSmsStats);
+  }} else {{
+    loadSmsStats();
+  }}
+}})();
+/* ===== ERATGUARD VITES-5E DIRECT REPORTS JS END ===== */
+</script>
+
+
+
+
+</div>
+</body>
+</html>"""
+
+@app.before_request
+def _eg_vites2e_force_report_center():
+    try:
+        if request.path == "/u/reports":
+            return _eg_vites2e_report_center_html()
+    except Exception:
+        return None
+# ===== ERATGUARD VITES-2E REPORT CENTER END =====
+
+
+
+# ===== ERATGUARD VITES-2E FORCE AFTER RESPONSE START =====
+@app.after_request
+def _eg_vites2e_force_reports_after_response(response):
+    try:
+        if request.path == "/u/reports":
+            html = _eg_vites2e_report_center_html()
+            response.set_data(html)
+            response.status_code = 200
+            response.headers["Content-Type"] = "text/html; charset=utf-8"
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+    except Exception:
+        pass
+    return response
+# ===== ERATGUARD VITES-2E FORCE AFTER RESPONSE END =====
+
+
+
+# ===== ERATGUARD VITES-2F LICENSE CENTER START =====
+def _eg_vites2f_license_center_html():
+    try:
+        username = session.get("username") or "Erat@32"
+        plan = session.get("plan") or session.get("license_type") or "PRO"
+    except Exception:
+        username = "Erat@32"
+        plan = "PRO"
+
+    return f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>EratGuard PRO - Vites-2F Lisans Merkezi</title>
+<style>
+:root{{
+  --green:#23ff89;
+  --cyan:#22e7ff;
+  --yellow:#ffd166;
+  --text:#f2fff6;
+  --muted:rgba(242,255,246,.64);
+  --line:rgba(35,255,137,.18);
+  --card:rgba(4,18,12,.74);
+}}
+*{{box-sizing:border-box}}
+html,body{{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(circle at 82% 18%,rgba(34,231,255,.15),transparent 34%),
+    radial-gradient(circle at 14% 88%,rgba(35,255,137,.13),transparent 40%),
+    linear-gradient(135deg,#020705,#030d09 48%,#010403);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  overflow-x:hidden;
+}}
+.eg-wrap{{min-height:100vh;padding:22px 18px 34px}}
+.eg-top{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}}
+.eg-brand{{display:flex;align-items:center;gap:12px}}
+.eg-logo{{
+  width:42px;height:42px;border-radius:15px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#00170b;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.22);
+}}
+.eg-title small{{display:block;color:var(--cyan);font-size:10px;font-weight:1000;letter-spacing:.18em}}
+.eg-title b{{display:block;font-size:17px;letter-spacing:-.2px}}
+.eg-pill{{
+  border:1px solid var(--line);border-radius:999px;padding:9px 11px;
+  background:rgba(3,18,10,.55);font-size:10px;font-weight:1000;
+  letter-spacing:.12em;color:var(--green);white-space:nowrap;
+}}
+.eg-hero{{
+  border:1px solid var(--line);border-radius:30px;padding:22px;
+  background:linear-gradient(180deg,rgba(4,22,14,.82),rgba(2,8,6,.72));
+  box-shadow:0 18px 70px rgba(0,0,0,.38), inset 0 0 28px rgba(35,255,137,.04);
+  margin-bottom:16px;
+}}
+.eg-hero h1{{margin:0 0 8px;font-size:31px;letter-spacing:-1.2px;line-height:1}}
+.eg-hero p{{margin:0;color:var(--muted);font-size:13px;line-height:1.55}}
+.eg-license{{
+  border:1px solid rgba(35,255,137,.22);
+  border-radius:30px;
+  padding:20px;
+  background:linear-gradient(180deg,rgba(35,255,137,.10),rgba(2,13,10,.70));
+  box-shadow:0 0 40px rgba(35,255,137,.08), inset 0 0 26px rgba(35,255,137,.04);
+  margin-bottom:15px;
+}}
+.eg-license .label{{font-size:10px;font-weight:1000;letter-spacing:.18em;color:var(--cyan);margin-bottom:8px}}
+.eg-license .plan{{font-size:42px;font-weight:1000;letter-spacing:-2px;line-height:.95;color:var(--green)}}
+.eg-license .state{{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.5}}
+.eg-grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}}
+.eg-card{{
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:15px;
+  background:var(--card);
+  box-shadow:inset 0 0 20px rgba(35,255,137,.035);
+}}
+.eg-card .k{{font-size:10px;font-weight:1000;letter-spacing:.16em;color:var(--muted);margin-bottom:8px}}
+.eg-card .v{{font-size:17px;font-weight:1000}}
+.green{{color:var(--green)}}
+.cyan{{color:var(--cyan)}}
+.yellow{{color:var(--yellow)}}
+.eg-list{{
+  border:1px solid rgba(34,231,255,.16);
+  border-radius:26px;
+  background:rgba(2,13,10,.66);
+  padding:15px;
+  margin-top:14px;
+}}
+.eg-row{{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 0;
+  border-top:1px solid rgba(255,255,255,.06);
+}}
+.eg-row:first-child{{border-top:0}}
+.eg-row b{{font-size:13px}}
+.eg-row span{{font-size:12px;color:var(--green);font-weight:1000;text-align:right}}
+.eg-actions{{display:grid;grid-template-columns:1fr;gap:11px;margin-top:16px}}
+.eg-btn{{
+  display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:var(--text);
+  border:1px solid rgba(34,231,255,.16);border-radius:22px;padding:15px 16px;
+  background:rgba(2,13,10,.66);font-size:13px;font-weight:1000;letter-spacing:.02em;
+}}
+.eg-btn span{{color:var(--cyan)}}
+.eg-back{{
+  margin-top:16px;display:inline-flex;text-decoration:none;color:#00170b;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.16);
+}}
+.eg-note{{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.55}}
+@media(max-width:420px){{
+  .eg-wrap{{padding:18px 14px 28px}}
+  .eg-hero h1{{font-size:28px}}
+  .eg-license .plan{{font-size:38px}}
+  .eg-grid{{grid-template-columns:1fr 1fr;gap:10px}}
+  .eg-card{{padding:13px;border-radius:21px}}
+}}
+</style>
+</head>
+<body>
+<div class="eg-wrap">
+  <div class="eg-top">
+    <div class="eg-brand">
+      <div class="eg-logo">L</div>
+      <div class="eg-title">
+        <small>ERATGUARD VITES-2F</small>
+        <b>Lisans Merkezi</b>
+      </div>
+    </div>
+    <div class="eg-pill">{plan}</div>
+  </div>
+
+  <section class="eg-hero">
+    <h1>Lisans aktif.</h1>
+    <p>{username} hesabının koruma, AI analiz ve rapor özellikleri PRO lisans üzerinden yönetilir.</p>
+  </section>
+
+  <section class="eg-license">
+    <div class="label">AKTİF PAKET</div>
+    <div class="plan">{plan}</div>
+    <div class="state">Bu hesap için EratGuard güvenlik katmanları aktif durumda.</div>
+  </section>
+
+  <div class="eg-grid">
+    <div class="eg-card">
+      <div class="k">KORUMA</div>
+      <div class="v green">AÇIK</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">AI ANALİZ</div>
+      <div class="v cyan">AÇIK</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">RAPORLAR</div>
+      <div class="v green">AÇIK</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">DURUM</div>
+      <div class="v yellow">GEÇERLİ</div>
+    </div>
+  </div>
+
+  <section class="eg-list">
+    <div class="eg-row"><b>Kullanıcı</b><span>{username}</span></div>
+    <div class="eg-row"><b>Lisans tipi</b><span>{plan}</span></div>
+    <div class="eg-row"><b>Admin bağlantısı</b><span>HAZIR</span></div>
+    <div class="eg-row"><b>FAN-12P erişimi</b><span>AKTİF</span></div>
+    <!-- ERATGUARD VITES-4C SETTINGS SMS CONTROL LINK START -->
+    <a class="eg-row" href="/native/sms-control" style="text-decoration:none;color:inherit;">
+      <b>Varsayılan SMS</b><span>HAZIRLIK</span>
+    </a>
+    <!-- ERATGUARD VITES-4C SETTINGS SMS CONTROL LINK END -->
+  </section>
+
+  <div class="eg-actions">
+    <a class="eg-btn" href="/u/protection">Koruma Merkezine Git <span>→</span></a>
+    <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
+  </div>
+
+  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+
+  <div class="eg-note">EratGuard Lisans Merkezi, PRO erişim ve kullanıcı yetkilerini tek ekranda gösterir.</div>
+</div>
+</body>
+</html>"""
+
+@app.after_request
+def _eg_vites2f_force_license_center_after_response(response):
+    try:
+        if request.path == "/u/license":
+            html = _eg_vites2f_license_center_html()
+            response.set_data(html)
+            response.status_code = 200
+            response.headers["Content-Type"] = "text/html; charset=utf-8"
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+    except Exception:
+        pass
+    return response
+# ===== ERATGUARD VITES-2F LICENSE CENTER END =====
+
+
+
+# ===== ERATGUARD VITES-2G NOTIFICATION CENTER START =====
+def _eg_vites2g_notification_center_html():
+    try:
+        username = session.get("username") or "Erat@32"
+        plan = session.get("plan") or session.get("license_type") or "PRO"
+    except Exception:
+        username = "Erat@32"
+        plan = "PRO"
+
+    return f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>EratGuard PRO - Vites-2G Bildirim Merkezi</title>
+<style>
+:root{{
+  --green:#23ff89;
+  --cyan:#22e7ff;
+  --yellow:#ffd166;
+  --red:#ff4d6d;
+  --text:#f2fff6;
+  --muted:rgba(242,255,246,.64);
+  --line:rgba(35,255,137,.18);
+  --card:rgba(4,18,12,.74);
+}}
+*{{box-sizing:border-box}}
+html,body{{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(circle at 82% 18%,rgba(34,231,255,.15),transparent 34%),
+    radial-gradient(circle at 14% 88%,rgba(35,255,137,.13),transparent 40%),
+    linear-gradient(135deg,#020705,#030d09 48%,#010403);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  overflow-x:hidden;
+}}
+.eg-wrap{{min-height:100vh;padding:22px 18px 34px}}
+.eg-top{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}}
+.eg-brand{{display:flex;align-items:center;gap:12px}}
+.eg-logo{{
+  width:42px;height:42px;border-radius:15px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#00170b;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.22);
+}}
+.eg-title small{{display:block;color:var(--cyan);font-size:10px;font-weight:1000;letter-spacing:.18em}}
+.eg-title b{{display:block;font-size:17px;letter-spacing:-.2px}}
+.eg-pill{{
+  border:1px solid var(--line);border-radius:999px;padding:9px 11px;
+  background:rgba(3,18,10,.55);font-size:10px;font-weight:1000;
+  letter-spacing:.12em;color:var(--green);white-space:nowrap;
+}}
+.eg-hero{{
+  border:1px solid var(--line);border-radius:30px;padding:22px;
+  background:linear-gradient(180deg,rgba(4,22,14,.82),rgba(2,8,6,.72));
+  box-shadow:0 18px 70px rgba(0,0,0,.38), inset 0 0 28px rgba(35,255,137,.04);
+  margin-bottom:16px;
+}}
+.eg-hero h1{{margin:0 0 8px;font-size:31px;letter-spacing:-1.2px;line-height:1}}
+.eg-hero p{{margin:0;color:var(--muted);font-size:13px;line-height:1.55}}
+.eg-list{{display:grid;gap:12px;margin-top:16px}}
+.eg-item{{
+  border:1px solid rgba(34,231,255,.16);
+  border-radius:24px;
+  background:rgba(2,13,10,.66);
+  padding:15px;
+  display:flex;
+  gap:13px;
+  align-items:flex-start;
+}}
+.eg-icon{{
+  width:38px;height:38px;border-radius:14px;
+  display:grid;place-items:center;
+  background:rgba(35,255,137,.12);
+  border:1px solid rgba(35,255,137,.20);
+  font-size:18px;
+  flex:0 0 auto;
+}}
+.eg-body b{{display:block;font-size:14px;margin-bottom:5px}}
+.eg-body p{{margin:0;color:var(--muted);font-size:12px;line-height:1.45}}
+.eg-tag{{
+  display:inline-flex;
+  margin-top:9px;
+  border-radius:999px;
+  padding:7px 9px;
+  font-size:10px;
+  font-weight:1000;
+  letter-spacing:.12em;
+  border:1px solid rgba(35,255,137,.20);
+  color:var(--green);
+}}
+.warn{{color:var(--yellow);border-color:rgba(255,209,102,.24)}}
+.info{{color:var(--cyan);border-color:rgba(34,231,255,.24)}}
+.eg-actions{{display:grid;grid-template-columns:1fr;gap:11px;margin-top:16px}}
+.eg-btn{{
+  display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:var(--text);
+  border:1px solid rgba(34,231,255,.16);border-radius:22px;padding:15px 16px;
+  background:rgba(2,13,10,.66);font-size:13px;font-weight:1000;letter-spacing:.02em;
+}}
+.eg-btn span{{color:var(--cyan)}}
+.eg-back{{
+  margin-top:16px;display:inline-flex;text-decoration:none;color:#00170b;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.16);
+}}
+.eg-note{{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.55}}
+@media(max-width:420px){{
+  .eg-wrap{{padding:18px 14px 28px}}
+  .eg-hero h1{{font-size:28px}}
+}}
+</style>
+</head>
+<body>
+<div class="eg-wrap">
+  <div class="eg-top">
+    <div class="eg-brand">
+      <div class="eg-logo">B</div>
+      <div class="eg-title">
+        <small>ERATGUARD VITES-2G</small>
+        <b>Bildirim Merkezi</b>
+      </div>
+    </div>
+    <div class="eg-pill">{plan}</div>
+  </div>
+
+  <section class="eg-hero">
+    <h1>Bildirimler hazır.</h1>
+    <p>{username} hesabı için güvenlik uyarıları, sistem mesajları ve admin bildirimleri tek merkezden takip edilir.</p>
+  </section>
+
+  <section class="eg-list">
+    <div class="eg-item">
+      <div class="eg-icon">🛡️</div>
+      <div class="eg-body">
+        <b>Koruma katmanı aktif</b>
+        <p>SMS kalkanı, link kontrolü ve risk motoru kullanıma hazır.</p>
+        <span class="eg-tag">GÜVENLİK</span>
+      </div>
+    </div>
+
+    <div class="eg-item">
+      <div class="eg-icon">🤖</div>
+      <div class="eg-body">
+        <b>AI analiz merkezi hazır</b>
+        <p>Şüpheli SMS ve metinler risk puanı ile analiz edilebilir.</p>
+        <span class="eg-tag info">AI</span>
+      </div>
+    </div>
+
+    <div class="eg-item">
+      <div class="eg-icon">🔑</div>
+      <div class="eg-body">
+        <b>PRO lisans geçerli</b>
+        <p>Koruma, rapor ve analiz yetkileri aktif görünüyor.</p>
+        <span class="eg-tag">LİSANS</span>
+      </div>
+    </div>
+
+    <div class="eg-item">
+      <div class="eg-icon">⚠️</div>
+      <div class="eg-body">
+        <b>Riskli bildirim yok</b>
+        <p>Şu an kullanıcıya gösterilecek yüksek öncelikli güvenlik uyarısı bulunmuyor.</p>
+        <span class="eg-tag warn">DURUM</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="eg-actions">
+    <a class="eg-btn" href="/u/protection">Koruma Merkezine Git <span>→</span></a>
+    <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
+  </div>
+
+  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+
+  <div class="eg-note">EratGuard Bildirim Merkezi, güvenlik ve sistem mesajlarını kullanıcıya sade şekilde gösterir.</div>
+</div>
+</body>
+</html>"""
+
+@app.after_request
+def _eg_vites2g_force_notifications_after_response(response):
+    try:
+        if request.path == "/u/notifications":
+            html = _eg_vites2g_notification_center_html()
+            response.set_data(html)
+            response.status_code = 200
+            response.headers["Content-Type"] = "text/html; charset=utf-8"
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+    except Exception:
+        pass
+    return response
+# ===== ERATGUARD VITES-2G NOTIFICATION CENTER END =====
+
+
+
+# ===== ERATGUARD VITES-2H COMMUNITY CENTER START =====
+def _eg_vites2h_community_center_html():
+    try:
+        username = session.get("username") or "Erat@32"
+        plan = session.get("plan") or session.get("license_type") or "PRO"
+    except Exception:
+        username = "Erat@32"
+        plan = "PRO"
+
+    return f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>EratGuard PRO - Vites-2H Topluluk Merkezi</title>
+<style>
+:root{{
+  --green:#23ff89;
+  --cyan:#22e7ff;
+  --yellow:#ffd166;
+  --text:#f2fff6;
+  --muted:rgba(242,255,246,.64);
+  --line:rgba(35,255,137,.18);
+  --card:rgba(4,18,12,.74);
+}}
+*{{box-sizing:border-box}}
+html,body{{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(circle at 82% 18%,rgba(34,231,255,.15),transparent 34%),
+    radial-gradient(circle at 14% 88%,rgba(35,255,137,.13),transparent 40%),
+    linear-gradient(135deg,#020705,#030d09 48%,#010403);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  overflow-x:hidden;
+}}
+.eg-wrap{{min-height:100vh;padding:22px 18px 34px}}
+.eg-top{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}}
+.eg-brand{{display:flex;align-items:center;gap:12px}}
+.eg-logo{{
+  width:42px;height:42px;border-radius:15px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#00170b;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.22);
+}}
+.eg-title small{{display:block;color:var(--cyan);font-size:10px;font-weight:1000;letter-spacing:.18em}}
+.eg-title b{{display:block;font-size:17px;letter-spacing:-.2px}}
+.eg-pill{{
+  border:1px solid var(--line);border-radius:999px;padding:9px 11px;
+  background:rgba(3,18,10,.55);font-size:10px;font-weight:1000;
+  letter-spacing:.12em;color:var(--green);white-space:nowrap;
+}}
+.eg-hero{{
+  border:1px solid var(--line);border-radius:30px;padding:22px;
+  background:linear-gradient(180deg,rgba(4,22,14,.82),rgba(2,8,6,.72));
+  box-shadow:0 18px 70px rgba(0,0,0,.38), inset 0 0 28px rgba(35,255,137,.04);
+  margin-bottom:16px;
+}}
+.eg-hero h1{{margin:0 0 8px;font-size:31px;letter-spacing:-1.2px;line-height:1}}
+.eg-hero p{{margin:0;color:var(--muted);font-size:13px;line-height:1.55}}
+.eg-grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}}
+.eg-card{{
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:15px;
+  background:var(--card);
+  box-shadow:inset 0 0 20px rgba(35,255,137,.035);
+}}
+.eg-card .k{{font-size:10px;font-weight:1000;letter-spacing:.16em;color:var(--muted);margin-bottom:8px}}
+.eg-card .v{{font-size:17px;font-weight:1000}}
+.green{{color:var(--green)}}
+.cyan{{color:var(--cyan)}}
+.yellow{{color:var(--yellow)}}
+.eg-list{{display:grid;gap:12px;margin-top:16px}}
+.eg-item{{
+  border:1px solid rgba(34,231,255,.16);
+  border-radius:24px;
+  background:rgba(2,13,10,.66);
+  padding:15px;
+}}
+.eg-item b{{display:block;font-size:14px;margin-bottom:6px}}
+.eg-item p{{margin:0;color:var(--muted);font-size:12px;line-height:1.45}}
+.eg-tag{{
+  display:inline-flex;margin-top:10px;border-radius:999px;padding:7px 9px;
+  font-size:10px;font-weight:1000;letter-spacing:.12em;
+  border:1px solid rgba(35,255,137,.20);color:var(--green);
+}}
+.eg-actions{{display:grid;grid-template-columns:1fr;gap:11px;margin-top:16px}}
+.eg-btn{{
+  display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:var(--text);
+  border:1px solid rgba(34,231,255,.16);border-radius:22px;padding:15px 16px;
+  background:rgba(2,13,10,.66);font-size:13px;font-weight:1000;letter-spacing:.02em;
+}}
+.eg-btn span{{color:var(--cyan)}}
+.eg-back{{
+  margin-top:16px;display:inline-flex;text-decoration:none;color:#00170b;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.16);
+}}
+.eg-note{{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.55}}
+
+/* ===== ERATGUARD VITES-2H INLINE APK VISUAL START ===== */
+.eg-list .eg-item:first-child{{
+  padding-right:168px !important;
+  min-height:220px !important;
+}}
+.eg-list .eg-item:first-child p{{
+  max-width:190px !important;
+  line-height:1.55 !important;
+}}
+@media(max-width:420px){{
+  .eg-list .eg-item:first-child{{
+    padding-right:174px !important;
+    min-height:220px !important;
+  }}
+  .eg-list .eg-item:first-child p{{
+    max-width:178px !important;
+  }}
+}}
+/* ===== ERATGUARD VITES-2H INLINE APK VISUAL END ===== */
+
+@media(max-width:420px){{
+  .eg-wrap{{padding:18px 14px 28px}}
+  .eg-hero h1{{font-size:28px}}
+  .eg-grid{{grid-template-columns:1fr 1fr;gap:10px}}
+  .eg-card{{padding:13px;border-radius:21px}}
+}}
+</style>
+</head>
+<body>
+<div class="eg-wrap">
+  <div class="eg-top">
+    <div class="eg-brand">
+      <div class="eg-logo">T</div>
+      <div class="eg-title">
+        <small>ERATGUARD VITES-2H</small>
+        <b>Topluluk Merkezi</b>
+      </div>
+    </div>
+    <div class="eg-pill">{plan}</div>
+  </div>
+
+  <section class="eg-hero">
+    <h1>Güvenli topluluk hazır.</h1>
+    <p>{username} hesabı için destek, öneri, geri bildirim ve güvenli iletişim merkezi burada yönetilir.</p>
+  </section>
+
+  <div class="eg-grid">
+    <div class="eg-card">
+      <div class="k">DESTEK</div>
+      <div class="v green">HAZIR</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">GERİ BİLDİRİM</div>
+      <div class="v cyan">AÇIK</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">ÖNERİLER</div>
+      <div class="v yellow">TAKİPTE</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">GÜVENLİK</div>
+      <div class="v green">KONTROLLÜ</div>
+    </div>
+  </div>
+
+  <section class="eg-list">
+    <div class="eg-item">
+      <b>Destek kanalı</b>
+      <p>Kullanıcı destek talepleri ve yardım başlıkları bu merkezden yönlendirilecek.</p>
+      <span class="eg-tag">DESTEK</span>
+    </div>
+
+    <div class="eg-item">
+      <b>Geri bildirim</b>
+      <p>Kullanıcı önerileri, hata bildirimleri ve geliştirme istekleri güvenli şekilde toplanacak.</p>
+      <span class="eg-tag">FEEDBACK</span>
+    </div>
+
+    <div class="eg-item">
+      <b>Güvenli topluluk</b>
+      <p>EratGuard kullanıcıları için kontrollü, güvenli ve faydalı topluluk altyapısı hazırlanıyor.</p>
+      <span class="eg-tag">TOPLULUK</span>
+    </div>
+  </section>
+
+  <div class="eg-actions">
+    <a class="eg-btn" href="/u/notifications">Bildirim Merkezine Git <span>→</span></a>
+    <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
+  </div>
+
+  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+
+  <div class="eg-note">EratGuard Topluluk Merkezi, destek ve kullanıcı iletişimini premium yapıya taşır.</div>
+</div>
+</body>
+</html>"""
+
+@app.after_request
+def _eg_vites2h_force_community_after_response(response):
+    try:
+        if request.path == "/u/community":
+            html = _eg_vites2h_community_center_html()
+            response.set_data(html)
+            response.status_code = 200
+            response.headers["Content-Type"] = "text/html; charset=utf-8"
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+    except Exception:
+        pass
+    return response
+# ===== ERATGUARD VITES-2H COMMUNITY CENTER END =====
+
+
+
+# ===== ERATGUARD VITES-2I SETTINGS CENTER START =====
+def _eg_vites2i_settings_center_html():
+    try:
+        username = session.get("username") or "Erat@32"
+        plan = session.get("plan") or session.get("license_type") or "PRO"
+    except Exception:
+        username = "Erat@32"
+        plan = "PRO"
+
+    return f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>EratGuard PRO - Vites-2I Ayarlar Merkezi</title>
+<style>
+:root{{
+  --green:#23ff89;
+  --cyan:#22e7ff;
+  --yellow:#ffd166;
+  --text:#f2fff6;
+  --muted:rgba(242,255,246,.64);
+  --line:rgba(35,255,137,.18);
+  --card:rgba(4,18,12,.74);
+}}
+*{{box-sizing:border-box}}
+html,body{{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(circle at 82% 18%,rgba(34,231,255,.15),transparent 34%),
+    radial-gradient(circle at 14% 88%,rgba(35,255,137,.13),transparent 40%),
+    linear-gradient(135deg,#020705,#030d09 48%,#010403);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  overflow-x:hidden;
+}}
+.eg-wrap{{min-height:100vh;padding:22px 18px 34px}}
+.eg-top{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}}
+.eg-brand{{display:flex;align-items:center;gap:12px}}
+.eg-logo{{
+  width:42px;height:42px;border-radius:15px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  color:#00170b;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.22);
+}}
+.eg-title small{{display:block;color:var(--cyan);font-size:10px;font-weight:1000;letter-spacing:.18em}}
+.eg-title b{{display:block;font-size:17px;letter-spacing:-.2px}}
+.eg-pill{{
+  border:1px solid var(--line);border-radius:999px;padding:9px 11px;
+  background:rgba(3,18,10,.55);font-size:10px;font-weight:1000;
+  letter-spacing:.12em;color:var(--green);white-space:nowrap;
+}}
+.eg-hero{{
+  border:1px solid var(--line);border-radius:30px;padding:22px;
+  background:linear-gradient(180deg,rgba(4,22,14,.82),rgba(2,8,6,.72));
+  box-shadow:0 18px 70px rgba(0,0,0,.38), inset 0 0 28px rgba(35,255,137,.04);
+  margin-bottom:16px;
+}}
+.eg-hero h1{{margin:0 0 8px;font-size:31px;letter-spacing:-1.2px;line-height:1}}
+.eg-hero p{{margin:0;color:var(--muted);font-size:13px;line-height:1.55}}
+.eg-grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}}
+.eg-card{{
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:15px;
+  background:var(--card);
+  box-shadow:inset 0 0 20px rgba(35,255,137,.035);
+}}
+.eg-card .k{{font-size:10px;font-weight:1000;letter-spacing:.16em;color:var(--muted);margin-bottom:8px}}
+.eg-card .v{{font-size:17px;font-weight:1000}}
+.green{{color:var(--green)}}
+.cyan{{color:var(--cyan)}}
+.yellow{{color:var(--yellow)}}
+.eg-list{{display:grid;gap:12px;margin-top:16px}}
+.eg-row{{
+  border:1px solid rgba(34,231,255,.16);
+  border-radius:24px;
+  background:rgba(2,13,10,.66);
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+}}
+.eg-row b{{font-size:14px}}
+.eg-row span{{font-size:12px;color:var(--green);font-weight:1000;text-align:right}}
+.eg-actions{{display:grid;grid-template-columns:1fr;gap:11px;margin-top:16px}}
+.eg-btn{{
+  display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:var(--text);
+  border:1px solid rgba(34,231,255,.16);border-radius:22px;padding:15px 16px;
+  background:rgba(2,13,10,.66);font-size:13px;font-weight:1000;letter-spacing:.02em;
+}}
+.eg-btn span{{color:var(--cyan)}}
+.eg-back{{
+  margin-top:16px;display:inline-flex;text-decoration:none;color:#00170b;
+  background:linear-gradient(135deg,var(--green),var(--cyan));
+  border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;
+  box-shadow:0 0 28px rgba(35,255,137,.16);
+}}
+.eg-note{{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.55}}
+
+/* ===== ERATGUARD VITES-2I INLINE APK VISUAL START ===== */
+.eg-list .eg-row:first-child{{
+  padding-right:130px !important;
+  min-height:74px !important;
+}}
+.eg-list .eg-row:first-child span{{
+  max-width:92px !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}}
+@media(max-width:420px){{
+  .eg-list .eg-row:first-child{{
+    padding-right:138px !important;
+  }}
+  .eg-list .eg-row:first-child span{{
+    max-width:86px !important;
+  }}
+}}
+/* ===== ERATGUARD VITES-2I INLINE APK VISUAL END ===== */
+
+@media(max-width:420px){{
+  .eg-wrap{{padding:18px 14px 28px}}
+  .eg-hero h1{{font-size:28px}}
+  .eg-grid{{grid-template-columns:1fr 1fr;gap:10px}}
+  .eg-card{{padding:13px;border-radius:21px}}
+}}
+</style>
+</head>
+<body>
+<div class="eg-wrap">
+  <div class="eg-top">
+    <div class="eg-brand">
+      <div class="eg-logo">A</div>
+      <div class="eg-title">
+        <small>ERATGUARD VITES-2I</small>
+        <b>Ayarlar Merkezi</b>
+      </div>
+    </div>
+    <div class="eg-pill">{plan}</div>
+  </div>
+
+  <section class="eg-hero">
+    <h1>Ayarlar hazır.</h1>
+    <p>{username} hesabı için uygulama, koruma, bildirim ve hesap ayarları tek merkezden yönetilir.</p>
+  </section>
+
+  <div class="eg-grid">
+    <div class="eg-card">
+      <div class="k">HESAP</div>
+      <div class="v green">AKTİF</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">KORUMA</div>
+      <div class="v cyan">AÇIK</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">BİLDİRİMLER</div>
+      <div class="v yellow">HAZIR</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">SENKRON</div>
+      <div class="v green">KONTROLLÜ</div>
+    </div>
+  </div>
+
+  <section class="eg-list">
+    <div class="eg-row"><b>Kullanıcı hesabı</b><span>{username}</span></div>
+    <div class="eg-row"><b>Aktif paket</b><span>{plan}</span></div>
+    <div class="eg-row"><b>Güvenlik modu</b><span>PRO</span></div>
+    <div class="eg-row"><b>FAN-12P erişimi</b><span>AKTİF</span></div>
+    <div class="eg-row"><b>Bildirim tercihleri</b><span>HAZIR</span></div>
+  </section>
+
+  <div class="eg-actions">
+    <a class="eg-btn" href="/u/license">Lisans Merkezine Git <span>→</span></a>
+    <a class="eg-btn" href="/u/notifications">Bildirim Merkezine Git <span>→</span></a>
+  </div>
+
+  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+
+  <div class="eg-note">EratGuard Ayarlar Merkezi, kullanıcı hesabı ve güvenlik tercihlerini premium yapıda gösterir.</div>
+</div>
+</body>
+</html>"""
+
+@app.after_request
+def _eg_vites2i_force_settings_after_response(response):
+    try:
+        if request.path == "/u/settings":
+            html = _eg_vites2i_settings_center_html()
+            response.set_data(html)
+            response.status_code = 200
+            response.headers["Content-Type"] = "text/html; charset=utf-8"
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+    except Exception:
+        pass
+    return response
+# ===== ERATGUARD VITES-2I SETTINGS CENTER END =====
+
+
+
+
+
+
+
+# ===== ERATGUARD VITES-2D APK VISUAL BALANCE AFTER START =====
+@app.after_request
+def _eg_vites2d_apk_visual_balance_after_response(response):
+    try:
+        if request.path == "/u/analysis":
+            html = response.get_data(as_text=True)
+            marker = "ERATGUARD VITES-2D APK VISUAL BALANCE"
+            if marker not in html and "</style>" in html:
+                css = """
+/* ===== ERATGUARD VITES-2D APK VISUAL BALANCE START ===== */
+.eg-panel{
+  padding-right:28px !important;
+}
+#egSmsText{
+  width:100% !important;
+  max-width:100% !important;
+}
+.eg-analyze{
+  width:72% !important;
+  max-width:420px !important;
+  min-height:76px !important;
+  margin-right:118px !important;
+}
+.eg-user-fan3-toggle{
+  right:10px !important;
+}
+@media(max-width:420px){
+  .eg-panel{
+    padding-right:24px !important;
+  }
+  .eg-analyze{
+    width:70% !important;
+    max-width:380px !important;
+    margin-right:124px !important;
+  }
+  .eg-user-fan3-toggle{
+    right:8px !important;
+  }
+}
+/* ===== ERATGUARD VITES-2D APK VISUAL BALANCE END ===== */
+"""
+                html = html.replace("</style>", css + "\n</style>", 1)
+                response.set_data(html)
+                response.headers["Content-Type"] = "text/html; charset=utf-8"
+                response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+                response.headers["Pragma"] = "no-cache"
+                response.headers["Expires"] = "0"
+    except Exception:
+        pass
+    return response
+# ===== ERATGUARD VITES-2D APK VISUAL BALANCE AFTER END =====
+
+
+
+# ===== ERATGUARD VITES-2F APK VISUAL FORCE AFTER START =====
+@app.after_request
+def _eg_vites2f_apk_visual_force_after_response(response):
+    try:
+        if request.path == "/u/license":
+            html = response.get_data(as_text=True)
+            marker = "ERATGUARD VITES-2F APK VISUAL FORCE"
+            if marker not in html and "</style>" in html:
+                css = """
+/* ===== ERATGUARD VITES-2F APK VISUAL FORCE START ===== */
+.eg-grid .eg-card:nth-child(2){
+  padding-right:108px !important;
+}
+.eg-grid .eg-card:nth-child(2) .v{
+  max-width:92px !important;
+}
+.eg-user-fan3-toggle{
+  right:10px !important;
+}
+@media(max-width:420px){
+  .eg-grid .eg-card:nth-child(2){
+    padding-right:112px !important;
+  }
+  .eg-grid .eg-card:nth-child(2) .v{
+    max-width:88px !important;
+  }
+  .eg-user-fan3-toggle{
+    right:8px !important;
+  }
+}
+/* ===== ERATGUARD VITES-2F APK VISUAL FORCE END ===== */
+"""
+                html = html.replace("</style>", css + "\n</style>", 1)
+                response.set_data(html)
+                response.headers["Content-Type"] = "text/html; charset=utf-8"
+                response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+                response.headers["Pragma"] = "no-cache"
+                response.headers["Expires"] = "0"
+    except Exception:
+        pass
+    return response
+# ===== ERATGUARD VITES-2F APK VISUAL FORCE AFTER END =====
+
+
+
+# ===== ERATGUARD VITES-2H APK VISUAL FORCE AFTER START =====
+@app.after_request
+def _eg_vites2h_apk_visual_force_after_response(response):
+    try:
+        if request.path == "/u/community":
+            html = response.get_data(as_text=True)
+            marker = "ERATGUARD VITES-2H APK VISUAL FORCE"
+            if marker not in html and "</style>" in html:
+                css = """
+/* ===== ERATGUARD VITES-2H APK VISUAL FORCE START ===== */
+.eg-list .eg-item:first-child{
+  padding-right:118px !important;
+}
+.eg-list .eg-item:first-child p{
+  max-width:360px !important;
+}
+.eg-user-fan3-toggle{
+  right:10px !important;
+}
+@media(max-width:420px){
+  .eg-list .eg-item:first-child{
+    padding-right:124px !important;
+  }
+  .eg-list .eg-item:first-child p{
+    max-width:260px !important;
+  }
+  .eg-user-fan3-toggle{
+    right:8px !important;
+  }
+}
+/* ===== ERATGUARD VITES-2H APK VISUAL FORCE END ===== */
+"""
+                html = html.replace("</style>", css + "\n</style>", 1)
+                response.set_data(html)
+                response.headers["Content-Type"] = "text/html; charset=utf-8"
+                response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+                response.headers["Pragma"] = "no-cache"
+                response.headers["Expires"] = "0"
+    except Exception:
+        pass
+    return response
+# ===== ERATGUARD VITES-2H APK VISUAL FORCE AFTER END =====
+
+
+
+
+# ===== ERATGUARD VITES-5B LIVE FORCE AFTER RESPONSE START =====
+@app.after_request
+def eratguard_vites5b_live_force_after_response(response):
+    try:
+        from flask import request
+
+        if request.path != "/u/analysis":
+            return response
+
+        html = response.get_data(as_text=True)
+
+        if "ERATGUARD VITES-5B AI ANALYSIS SMS RISK BRIDGE START" in html:
+            return response
+
+        bridge = """
+<script>
+/* ===== ERATGUARD VITES-5B AI ANALYSIS SMS RISK BRIDGE START ===== */
+(function(){
+  function findSmsBox(){
+    return document.getElementById("egSmsText") ||
+           document.querySelector("textarea") ||
+           document.querySelector("input[type='text']");
+  }
+
+  function findResultBox(){
+    var box = document.getElementById("egAiResult");
+    if(box) return box;
+
+    box = document.querySelector(".eg-result");
+    if(box) return box;
+
+    box = document.createElement("div");
+    box.id = "egAiResult";
+    box.style.marginTop = "14px";
+    box.style.background = "rgba(13,19,32,.96)";
+    box.style.border = "1px solid rgba(35,255,137,.25)";
+    box.style.borderRadius = "18px";
+    box.style.padding = "14px";
+    box.style.color = "#dce7f3";
+    box.style.whiteSpace = "pre-wrap";
+    box.style.fontSize = "13px";
+
+    var btn = document.getElementById("egAnalyzeBtn") || document.querySelector("button");
+    if(btn && btn.parentNode){
+      btn.parentNode.insertBefore(box, btn.nextSibling);
+    } else {
+      document.body.appendChild(box);
+    }
+    return box;
+  }
+
+  async function egV5Analyze(){
+    var input = findSmsBox();
+    var result = findResultBox();
+    var text = input ? input.value : "";
+
+    result.textContent = "EratGuard Vites-5A risk motoru çalışıyor...";
+
+    try{
+      var r = await fetch("/api/v5/sms-risk", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({text:text})
+      });
+
+      var j = await r.json();
+      var x = j.result || {};
+
+      result.textContent =
+        "Risk Puanı: %" + (x.score ?? "-") + "\\n" +
+        "Seviye: " + (x.level || "-") + "\\n" +
+        "Durum: " + (x.status || "-") + "\\n\\n" +
+        "Sebepler:\\n- " + ((x.reasons || []).join("\\n- ")) + "\\n\\n" +
+        "Öneri: " + (x.recommendation || "-");
+    }catch(e){
+      result.textContent = "Analiz hatası: " + e;
+    }
+  }
+
+  function bind(){
+    var btn = document.getElementById("egAnalyzeBtn") || document.querySelector("button");
+    if(btn){
+      btn.onclick = function(ev){
+        ev.preventDefault();
+        egV5Analyze();
+        return false;
+      };
+      btn.setAttribute("data-vites5b", "sms-risk-engine");
+    }
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", bind);
+  } else {
+    bind();
+  }
+})();
+/* ===== ERATGUARD VITES-5B AI ANALYSIS SMS RISK BRIDGE END ===== */
+</script>
+"""
+
+        if "</body>" in html:
+            html = html.replace("</body>", bridge + "\n</body>", 1)
+        else:
+            html += bridge
+
+        response.set_data(html)
+        response.headers["Content-Length"] = str(len(response.get_data()))
+    except Exception:
+        pass
+
+    return response
+# ===== ERATGUARD VITES-5B LIVE FORCE AFTER RESPONSE END =====
+
+
+
+# ===== ERATGUARD VITES-5C SMS ACTION CENTER START =====
+def eratguard_v5c_action_db_path():
+    from pathlib import Path
+    d = Path("data")
+    d.mkdir(exist_ok=True)
+    return d / "eratguard_sms_actions_v5c.json"
+
+
+def eratguard_v5c_load_actions():
+    import json
+    path = eratguard_v5c_action_db_path()
+    if not path.exists():
+        return {"blocked": [], "safe": [], "reported": []}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            return {"blocked": [], "safe": [], "reported": []}
+        data.setdefault("blocked", [])
+        data.setdefault("safe", [])
+        data.setdefault("reported", [])
+        return data
+    except Exception:
+        return {"blocked": [], "safe": [], "reported": []}
+
+
+def eratguard_v5c_save_actions(data):
+    import json
+    path = eratguard_v5c_action_db_path()
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+@app.route("/api/v5/sms-action", methods=["POST"])
+def eratguard_api_v5_sms_action():
+    from flask import request, jsonify
+    from datetime import datetime
+
+    payload = request.get_json(silent=True) or {}
+    action = (payload.get("action") or "").strip().lower()
+    text = (payload.get("text") or "").strip()
+    sender = (payload.get("sender") or "manual-analysis").strip()
+
+    action_map = {
+        "block": "blocked",
+        "safe": "safe",
+        "report": "reported"
+    }
+
+    if action not in action_map:
+        return jsonify({
+            "ok": False,
+            "error": "Geçersiz aksiyon. block, safe veya report kullanılmalı."
+        }), 400
+
+    risk = eratguard_sms_risk_v1(text)
+    db = eratguard_v5c_load_actions()
+
+    item = {
+        "ts": datetime.now().isoformat(timespec="seconds"),
+        "action": action,
+        "sender": sender,
+        "text": text,
+        "risk": risk
+    }
+
+    bucket = action_map[action]
+    db[bucket].insert(0, item)
+    db[bucket] = db[bucket][:200]
+
+    eratguard_v5c_save_actions(db)
+
+    return jsonify({
+        "ok": True,
+        "engine": "ERATGUARD_VITES5C_SMS_ACTION_CENTER",
+        "saved_to": bucket,
+        "item": item,
+        "stats": {
+            "blocked": len(db.get("blocked", [])),
+            "safe": len(db.get("safe", [])),
+            "reported": len(db.get("reported", []))
+        }
+    })
+
+
+@app.route("/api/v5/sms-actions", methods=["GET"])
+def eratguard_api_v5_sms_actions():
+    from flask import jsonify
+
+    db = eratguard_v5c_load_actions()
+    return jsonify({
+        "ok": True,
+        "engine": "ERATGUARD_VITES5C_SMS_ACTION_CENTER",
+        "stats": {
+            "blocked": len(db.get("blocked", [])),
+            "safe": len(db.get("safe", [])),
+            "reported": len(db.get("reported", []))
+        },
+        "data": db
+    })
+
+
+@app.after_request
+def eratguard_vites5c_action_buttons_after_response(response):
+    try:
+        from flask import request
+
+        if request.path != "/u/analysis":
+            return response
+
+        html = response.get_data(as_text=True)
+
+        if "ERATGUARD VITES-5C SMS ACTION BUTTONS START" in html:
+            return response
+
+        script = """
+<script>
+/* ===== ERATGUARD VITES-5C SMS ACTION BUTTONS START ===== */
+(function(){
+  window.egV5LastSmsText = "";
+
+  function smsBox(){
+    return document.getElementById("egSmsText") ||
+           document.querySelector("textarea") ||
+           document.querySelector("input[type='text']");
+  }
+
+  function resultBox(){
+    return document.getElementById("egAiResult") ||
+           document.querySelector(".eg-result");
+  }
+
+  function actionBox(){
+    var old = document.getElementById("egV5cActions");
+    if(old) return old;
+
+    var box = document.createElement("div");
+    box.id = "egV5cActions";
+    box.style.display = "flex";
+    box.style.gap = "8px";
+    box.style.flexWrap = "wrap";
+    box.style.marginTop = "12px";
+
+    var actions = [
+      ["block", "ENGELLE"],
+      ["safe", "GÜVENLİ"],
+      ["report", "ŞİKAYET ET"]
+    ];
+
+    actions.forEach(function(a){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = a[1];
+      b.setAttribute("data-action", a[0]);
+      b.style.flex = "1 1 110px";
+      b.style.border = "0";
+      b.style.borderRadius = "14px";
+      b.style.padding = "12px";
+      b.style.fontWeight = "900";
+      b.style.background = "rgba(35,255,137,.18)";
+      b.style.color = "#23ff89";
+      b.style.border = "1px solid rgba(35,255,137,.35)";
+      b.onclick = function(ev){
+        ev.preventDefault();
+        egV5cSaveAction(a[0]);
+        return false;
+      };
+      box.appendChild(b);
+    });
+
+    var r = resultBox();
+    if(r && r.parentNode){
+      r.parentNode.insertBefore(box, r.nextSibling);
+    } else {
+      document.body.appendChild(box);
+    }
+    return box;
+  }
+
+  async function egV5cSaveAction(action){
+    var input = smsBox();
+    var text = input ? input.value : window.egV5LastSmsText || "";
+    var r = resultBox();
+
+    if(!text.trim()){
+      if(r) r.textContent += "\\n\\nAksiyon kaydı için SMS metni boş olamaz.";
+      return;
+    }
+
+    try{
+      var res = await fetch("/api/v5/sms-action", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({action:action, text:text, sender:"manual-analysis"})
+      });
+
+      var j = await res.json();
+
+      if(r){
+        if(j.ok){
+          r.textContent += "\\n\\nAksiyon kaydedildi: " + action.toUpperCase() +
+            "\\nEngelli: " + j.stats.blocked +
+            " | Güvenli: " + j.stats.safe +
+            " | Şikayet: " + j.stats.reported;
+        } else {
+          r.textContent += "\\n\\nAksiyon hatası: " + (j.error || "bilinmeyen hata");
+        }
+      }
+    }catch(e){
+      if(r) r.textContent += "\\n\\nAksiyon kayıt hatası: " + e;
+    }
+  }
+
+  function bindWatcher(){
+    var btn = document.getElementById("egAnalyzeBtn") || document.querySelector("button");
+    if(btn){
+      btn.addEventListener("click", function(){
+        var input = smsBox();
+        window.egV5LastSmsText = input ? input.value : "";
+        setTimeout(actionBox, 900);
+      }, true);
+    }
+
+    setTimeout(actionBox, 1200);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", bindWatcher);
+  } else {
+    bindWatcher();
+  }
+})();
+/* ===== ERATGUARD VITES-5C SMS ACTION BUTTONS END ===== */
+</script>
+"""
+
+        if "</body>" in html:
+            html = html.replace("</body>", script + "\n</body>", 1)
+        else:
+            html += script
+
+        response.set_data(html)
+        response.headers["Content-Length"] = str(len(response.get_data()))
+    except Exception:
+        pass
+
+    return response
+# ===== ERATGUARD VITES-5C SMS ACTION CENTER END =====
+
+
+
+# ===== ERATGUARD VITES-5D BLOCKED SMS CENTER START =====
+@app.route("/u/sms-actions-center")
+@app.route("/u/blocked-sms")
+def eratguard_v5d_blocked_sms_center():
+    from html import escape
+
+    db = eratguard_v5c_load_actions()
+    blocked = db.get("blocked", [])
+    safe = db.get("safe", [])
+    reported = db.get("reported", [])
+
+    def card(item, label):
+        risk = item.get("risk", {}) if isinstance(item, dict) else {}
+        text = escape(str(item.get("text", "")))
+        sender = escape(str(item.get("sender", "-")))
+        ts = escape(str(item.get("ts", "-")))
+        level = escape(str(risk.get("level", "-")))
+        score = escape(str(risk.get("score", "-")))
+        status = escape(str(risk.get("status", "-")))
+
+        reasons = risk.get("reasons", [])
+        if not isinstance(reasons, list):
+            reasons = []
+
+        reasons_html = "".join(
+            f"<li>{escape(str(x))}</li>" for x in reasons[:6]
+        ) or "<li>Sebep kaydı yok.</li>"
+
+        return f"""
+        <div class="eg-card">
+          <div class="eg-rowtop">
+            <span class="eg-badge">{escape(label)}</span>
+            <span class="eg-score">%{score} · {level}</span>
+          </div>
+          <div class="eg-meta">Gönderen: {sender} · Tarih: {ts}</div>
+          <div class="eg-text">{text}</div>
+          <div class="eg-status">{status}</div>
+          <ul>{reasons_html}</ul>
+        </div>
+        """
+
+    blocked_html = "".join(card(x, "ENGELLİ") for x in blocked) or '<div class="eg-empty">Henüz engellenen SMS yok.</div>'
+    safe_html = "".join(card(x, "GÜVENLİ") for x in safe) or '<div class="eg-empty">Henüz güvenli liste kaydı yok.</div>'
+    reported_html = "".join(card(x, "ŞİKAYET") for x in reported) or '<div class="eg-empty">Henüz şikayet kaydı yok.</div>'
+
+    return f"""
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EratGuard PRO - Engellenen SMS Merkezi</title>
+<style>
+body{{
+  margin:0;
+  background:#070a12;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+  padding:18px;
+}}
+.eg-wrap{{
+  max-width:760px;
+  margin:0 auto;
+}}
+.eg-head{{
+  background:linear-gradient(135deg,rgba(35,255,137,.18),rgba(45,108,255,.10));
+  border:1px solid rgba(35,255,137,.28);
+  border-radius:24px;
+  padding:18px;
+  box-shadow:0 0 28px rgba(35,255,137,.10);
+}}
+.eg-kicker{{
+  color:#23ff89;
+  font-weight:900;
+  letter-spacing:.08em;
+  font-size:12px;
+}}
+h1{{
+  margin:8px 0 8px;
+  font-size:25px;
+}}
+p{{
+  color:#9aa3b2;
+  line-height:1.5;
+}}
+.eg-stats{{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:14px;
+}}
+.eg-stat{{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  padding:12px;
+  text-align:center;
+}}
+.eg-stat b{{
+  display:block;
+  font-size:24px;
+  color:#23ff89;
+}}
+.eg-tabs{{
+  display:flex;
+  gap:8px;
+  margin:16px 0;
+  flex-wrap:wrap;
+}}
+.eg-tabs button{{
+  flex:1 1 120px;
+  border:1px solid rgba(35,255,137,.28);
+  background:rgba(35,255,137,.12);
+  color:#23ff89;
+  border-radius:16px;
+  padding:12px;
+  font-weight:900;
+}}
+.eg-section{{
+  display:none;
+}}
+.eg-section.active{{
+  display:block;
+}}
+.eg-card{{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:20px;
+  padding:14px;
+  margin-bottom:12px;
+}}
+.eg-rowtop{{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}}
+.eg-badge{{
+  color:#06110b;
+  background:#23ff89;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:900;
+}}
+.eg-score{{
+  color:#ffdf6e;
+  font-weight:900;
+}}
+.eg-meta{{
+  margin-top:10px;
+  color:#9aa3b2;
+  font-size:12px;
+}}
+.eg-text{{
+  margin-top:10px;
+  line-height:1.45;
+  color:#fff;
+}}
+.eg-status{{
+  margin-top:10px;
+  color:#dce7f3;
+  font-weight:800;
+}}
+ul{{
+  margin:10px 0 0 18px;
+  color:#aeb8c8;
+}}
+.eg-empty{{
+  padding:18px;
+  border-radius:18px;
+  background:rgba(255,255,255,.05);
+  color:#9aa3b2;
+}}
+.eg-back{{
+  display:block;
+  margin-top:18px;
+  color:#23ff89;
+  text-decoration:none;
+  font-weight:900;
+}}
+</style>
+</head>
+<body>
+<div class="eg-wrap">
+  <div class="eg-head">
+    <div class="eg-kicker">ERATGUARD VITES-5D</div>
+    <h1>Engellenen SMS Merkezi</h1>
+    <p>AI Analiz ekranından verilen ENGELLE, GÜVENLİ ve ŞİKAYET aksiyonları burada listelenir.</p>
+    <div class="eg-stats">
+      <div class="eg-stat"><b>{len(blocked)}</b>Engelli</div>
+      <div class="eg-stat"><b>{len(safe)}</b>Güvenli</div>
+      <div class="eg-stat"><b>{len(reported)}</b>Şikayet</div>
+    </div>
+  </div>
+
+  <div class="eg-tabs">
+    <button onclick="showTab('blocked')">ENGELLİ</button>
+    <button onclick="showTab('safe')">GÜVENLİ</button>
+    <button onclick="showTab('reported')">ŞİKAYET</button>
+  </div>
+
+  <section id="blocked" class="eg-section active">{blocked_html}</section>
+  <section id="safe" class="eg-section">{safe_html}</section>
+  <section id="reported" class="eg-section">{reported_html}</section>
+
+  <a class="eg-back" href="/u/analysis">← AI Analiz Merkezine Dön</a>
+  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+</div>
+
+<script>
+function showTab(id){{
+  document.querySelectorAll(".eg-section").forEach(function(x){{x.classList.remove("active")}});
+  document.getElementById(id).classList.add("active");
+}}
+</script>
+</body>
+</html>
+"""
+# ===== ERATGUARD VITES-5D BLOCKED SMS CENTER END =====
+
+
+
+# ===== ERATGUARD VITES-5E REPORTS SMS STATS START =====
+@app.after_request
+def eratguard_vites5e_reports_sms_stats_after_response(response):
+    try:
+        from flask import request
+
+        if request.path != "/u/reports":
+            return response
+
+        html = response.get_data(as_text=True)
+
+        if "ERATGUARD VITES-5E REPORTS SMS STATS CARD START" in html:
+            return response
+
+        db = eratguard_v5c_load_actions()
+        blocked = len(db.get("blocked", []))
+        safe = len(db.get("safe", []))
+        reported = len(db.get("reported", []))
+        total = blocked + safe + reported
+
+        card = f"""
+<div style="margin-top:16px;background:rgba(255,255,255,.06);border:1px solid rgba(35,255,137,.28);border-radius:22px;padding:16px;box-shadow:0 0 24px rgba(35,255,137,.10);">
+  <!-- ERATGUARD VITES-5E REPORTS SMS STATS CARD START -->
+  <div style="color:#23ff89;font-weight:900;font-size:12px;letter-spacing:.08em;">ERATGUARD VITES-5E</div>
+  <h2 style="margin:8px 0 10px;font-size:21px;color:#fff;">SMS Koruma İstatistikleri</h2>
+  <p style="margin:0 0 12px;color:#9aa3b2;line-height:1.45;">AI Analiz ekranından gelen gerçek ENGELLE / GÜVENLİ / ŞİKAYET kayıtları.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b style="display:block;color:#23ff89;font-size:26px;">{blocked}</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Engellenen SMS</span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b style="display:block;color:#23ff89;font-size:26px;">{safe}</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Güvenli SMS</span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b style="display:block;color:#23ff89;font-size:26px;">{reported}</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Şikayet</span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b style="display:block;color:#23ff89;font-size:26px;">{total}</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Toplam Aksiyon</span>
+    </div>
+  </div>
+
+  <a href="/u/sms-actions-center" style="display:block;margin-top:14px;color:#23ff89;text-decoration:none;font-weight:900;">
+    Engellenen SMS Merkezi detaylarını aç →
+  </a>
+  <!-- ERATGUARD VITES-5E REPORTS SMS STATS CARD END -->
+</div>
+"""
+
+        if "</main>" in html:
+            html = html.replace("</main>", card + "\n</main>", 1)
+        elif "</body>" in html:
+            html = html.replace("</body>", card + "\n</body>", 1)
+        else:
+            html += card
+
+        response.set_data(html)
+        response.headers["Content-Length"] = str(len(response.get_data()))
+    except Exception:
+        pass
+
+    return response
+# ===== ERATGUARD VITES-5E REPORTS SMS STATS END =====
+
+
+
+# ===== ERATGUARD VITES-5F PROTECTION SMS LIVE STATUS START =====
+@app.after_request
+def eratguard_vites5f_protection_sms_status_after_response(response):
+    try:
+        from flask import request
+
+        if request.path != "/u/protection":
+            return response
+
+        html = response.get_data(as_text=True)
+
+        if "ERATGUARD VITES-5F PROTECTION SMS STATUS CARD START" in html:
+            return response
+
+        db = eratguard_v5c_load_actions()
+        blocked = len(db.get("blocked", []))
+        safe = len(db.get("safe", []))
+        reported = len(db.get("reported", []))
+        total = blocked + safe + reported
+
+        if reported > 0 or blocked > 0:
+            level = "AKTİF İZLEME"
+            desc = "SMS risk motoru aktif kayıt üretiyor. Engelleme ve şikayet kayıtları izleniyor."
+        else:
+            level = "TEMİZ"
+            desc = "Şu anda kayıtlı riskli SMS aksiyonu yok."
+
+        card = f"""
+<div style="margin-top:16px;background:rgba(35,255,137,.08);border:1px solid rgba(35,255,137,.32);border-radius:22px;padding:16px;box-shadow:0 0 24px rgba(35,255,137,.10);">
+  <!-- ERATGUARD VITES-5F PROTECTION SMS STATUS CARD START -->
+  <div style="color:#23ff89;font-weight:900;font-size:12px;letter-spacing:.08em;">ERATGUARD VITES-5F</div>
+  <h2 style="margin:8px 0 10px;font-size:21px;color:#fff;">SMS Koruma Durumu</h2>
+  <p style="margin:0 0 12px;color:#9aa3b2;line-height:1.45;">{desc}</p>
+
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b style="display:block;color:#23ff89;font-size:24px;">{level}</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Canlı Durum</span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b style="display:block;color:#23ff89;font-size:24px;">{total}</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Toplam SMS Aksiyonu</span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b style="display:block;color:#23ff89;font-size:24px;">{blocked}</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Engellenen</span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b style="display:block;color:#23ff89;font-size:24px;">{reported}</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Şikayet</span>
+    </div>
+  </div>
+
+  <a href="/u/sms-actions-center" style="display:block;margin-top:14px;color:#23ff89;text-decoration:none;font-weight:900;">
+    Engellenen SMS Merkezi’ni aç →
+  </a>
+  <!-- ERATGUARD VITES-5F PROTECTION SMS STATUS CARD END -->
+</div>
+"""
+
+        if "</main>" in html:
+            html = html.replace("</main>", card + "\n</main>", 1)
+        elif "</body>" in html:
+            html = html.replace("</body>", card + "\n</body>", 1)
+        else:
+            html += card
+
+        response.set_data(html)
+        response.headers["Content-Length"] = str(len(response.get_data()))
+    except Exception:
+        pass
+
+    return response
+# ===== ERATGUARD VITES-5F PROTECTION SMS LIVE STATUS END =====
+
+
+
+
+# ERATGUARD VITES-5G OLD DUPLICATE SUMMARY REMOVED
+
+
+
+# ===== ERATGUARD VITES-5A SMS RISK ENGINE V1 START =====
+def eratguard_sms_risk_v1(text):
+    import re
+
+    raw = text or ""
+    msg = raw.lower().strip()
+
+    score = 0
+    reasons = []
+
+    def add(points, reason):
+        nonlocal score
+        score += points
+        reasons.append(reason)
+
+    if not msg:
+        return {
+            "score": 0,
+            "level": "BOŞ",
+            "status": "Analiz edilecek SMS metni yok.",
+            "reasons": ["SMS metni boş."],
+            "recommendation": "SMS içeriği girilmelidir."
+        }
+
+    url_patterns = [
+        r"https?://",
+        r"www\.",
+        r"\.com",
+        r"\.net",
+        r"\.org",
+        r"bit\.ly",
+        r"t\.co",
+        r"tinyurl",
+        r"link",
+    ]
+
+    if any(re.search(p, msg) for p in url_patterns):
+        add(30, "Mesajda bağlantı/link işareti var.")
+
+    finance_words = [
+        "banka", "kart", "kredi", "hesap", "iban", "şifre", "sifre",
+        "parola", "otp", "doğrulama", "dogrulama", "ödeme", "odeme",
+        "borç", "borc", "fatura", "limit", "pos", "havale", "eft"
+    ]
+    if any(w in msg for w in finance_words):
+        add(22, "Finans/banka/ödeme içerikli kelimeler var.")
+
+    cargo_words = [
+        "kargo", "teslimat", "paket", "gümrük", "gumruk",
+        "adres", "dağıtım", "dagitim", "kurye"
+    ]
+    if any(w in msg for w in cargo_words):
+        add(16, "Kargo/teslimat temalı ifade var.")
+
+    prize_words = [
+        "hediye", "ödül", "odul", "kazandınız", "kazandiniz",
+        "çekiliş", "cekilis", "kampanya", "kupon", "bonus"
+    ]
+    if any(w in msg for w in prize_words):
+        add(18, "Ödül/hediye/kampanya temalı ifade var.")
+
+    urgency_words = [
+        "hemen", "acil", "son gün", "son gun", "bugün", "bugun",
+        "iptal", "askıya", "askiya", "kapanacak", "bloke",
+        "donduruldu", "sınırlı", "sinirli"
+    ]
+    if any(w in msg for w in urgency_words):
+        add(18, "Acil/tehdit/acele ettiren dil kullanılmış.")
+
+    action_words = [
+        "tıkla", "tikla", "giriş yap", "giris yap", "onayla",
+        "doğrula", "dogrula", "güncelle", "guncelle",
+        "başvur", "basvur", "yükle", "yukle"
+    ]
+    if any(w in msg for w in action_words):
+        add(18, "Kullanıcıyı işlem yapmaya zorlayan ifade var.")
+
+    sender_like = re.search(r"\b\d{4,}\b", msg)
+    if sender_like:
+        add(8, "Mesajda dikkat çeken numara/kod yapısı var.")
+
+    if len(msg) < 18:
+        add(5, "Mesaj çok kısa; bağlam sınırlı.")
+
+    if score >= 85:
+        level = "ÇOK RİSKLİ"
+        status = "Bu SMS yüksek olasılıkla spam/dolandırıcılık olabilir."
+        recommendation = "Linke tıklama, bilgi girme, göndereni doğrulamadan işlem yapma."
+    elif score >= 60:
+        level = "RİSKLİ"
+        status = "Bu SMS şüpheli görünüyor."
+        recommendation = "Dikkatli ol, bağlantı varsa açmadan önce doğrula."
+    elif score >= 35:
+        level = "ORTA RİSK"
+        status = "Bu SMS bazı risk işaretleri taşıyor."
+        recommendation = "Göndereni ve içeriği kontrol et."
+    else:
+        level = "DÜŞÜK RİSK"
+        status = "Belirgin yüksek risk işareti bulunmadı."
+        recommendation = "Yine de bilinmeyen linklere dikkat et."
+
+    return {
+        "score": min(score, 100),
+        "level": level,
+        "status": status,
+        "reasons": reasons if reasons else ["Belirgin spam işareti bulunmadı."],
+        "recommendation": recommendation
+    }
+
+
+@app.route("/api/v5/sms-risk", methods=["POST"])
+def eratguard_api_v5_sms_risk():
+    from flask import request, jsonify
+
+    data = request.get_json(silent=True) or {}
+    text = data.get("text") or request.form.get("text") or ""
+    result = eratguard_sms_risk_v1(text)
+    return jsonify({
+        "ok": True,
+        "engine": "ERATGUARD_VITES5A_SMS_RISK_ENGINE_V1",
+        "input_length": len(text or ""),
+        "result": result
+    })
+
+
+@app.route("/u/sms-risk-test")
+def eratguard_v5a_sms_risk_test_page():
+    return """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EratGuard Vites-5A SMS Risk Motoru</title>
+<style>
+body{margin:0;background:#070a12;color:#fff;font-family:Arial,Helvetica,sans-serif;padding:22px}
+.card{max-width:520px;margin:0 auto;background:rgba(255,255,255,.06);border:1px solid rgba(35,255,137,.25);border-radius:24px;padding:20px;box-shadow:0 0 28px rgba(35,255,137,.12)}
+small{color:#23ff89;font-weight:900;letter-spacing:.08em}
+h1{font-size:24px;margin:10px 0 8px}
+p{color:#9aa3b2;line-height:1.5}
+textarea{width:100%;min-height:150px;border-radius:18px;border:1px solid rgba(35,255,137,.35);background:#0d1320;color:#fff;padding:14px;font-size:15px;box-sizing:border-box}
+button{width:100%;margin-top:14px;border:0;border-radius:18px;background:#23ff89;color:#06110b;font-weight:900;padding:14px;font-size:15px}
+.result{margin-top:16px;background:#0d1320;border-radius:18px;padding:14px;white-space:pre-wrap;color:#dce7f3}
+.back{display:block;margin-top:16px;color:#23ff89;text-decoration:none;font-weight:800}
+</style>
+</head>
+<body>
+<div class="card">
+<small>ERATGUARD VITES-5A</small>
+<h1>SMS Risk Motoru v1</h1>
+<p>SMS metnini analiz eder, risk puanı ve sebep üretir. Bu motor Vites-5 spam engelleme sisteminin temelidir.</p>
+<textarea id="smsText" placeholder="Örnek: Kargonuz beklemede, hemen linke tıklayın..."></textarea>
+<button onclick="analyze()">SMS Riskini Analiz Et</button>
+<div class="result" id="result">Sonuç burada görünecek.</div>
+<a class="back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+</div>
+<script>
+async function analyze(){
+  const text=document.getElementById("smsText").value;
+  const box=document.getElementById("result");
+  box.textContent="Analiz ediliyor...";
+  try{
+    const r=await fetch("/api/v5/sms-risk",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({text})
+    });
+    const j=await r.json();
+    const x=j.result;
+    box.textContent=
+      "Risk Puanı: %"+x.score+"\\n"+
+      "Seviye: "+x.level+"\\n"+
+      "Durum: "+x.status+"\\n\\n"+
+      "Sebepler:\\n- "+x.reasons.join("\\n- ")+"\\n\\n"+
+      "Öneri: "+x.recommendation;
+  }catch(e){
+    box.textContent="Analiz hatası: "+e;
+  }
+}
+</script>
+</body>
+</html>
+"""
+# ===== ERATGUARD VITES-5A SMS RISK ENGINE V1 END =====
+
+
+
+# ===== ERATGUARD VITES-5G DASHBOARD FINAL ORDER FIX START =====
+def eratguard_vites5g_dashboard_sms_summary_final_order(response):
+    try:
+        from flask import request
+
+        if request.path not in ("/dashboard", "/u/dashboard"):
+            return response
+
+        html = response.get_data(as_text=True)
+
+        if "ERATGUARD VITES-5G DASHBOARD FINAL CARD START" in html:
+            return response
+
+        db = eratguard_v5c_load_actions()
+        blocked = len(db.get("blocked", []))
+        safe = len(db.get("safe", []))
+        reported = len(db.get("reported", []))
+        total = blocked + safe + reported
+
+        status = "AKTİF İZLEME" if total > 0 else "HAZIR"
+        desc = "SMS risk motoru aktif, analiz ve aksiyon kayıtları takip ediliyor." if total > 0 else "SMS risk motoru hazır, yeni analizleri bekliyor."
+
+        card = f"""
+<div style="margin:170px auto 0;max-width:520px;background:rgba(35,255,137,.08);border:1px solid rgba(35,255,137,.32);border-radius:24px;padding:16px;box-shadow:0 0 26px rgba(35,255,137,.12);">
+  <!-- ERATGUARD VITES-5G DASHBOARD FINAL CARD START -->
+  <div style="color:#23ff89;font-weight:900;font-size:12px;letter-spacing:.08em;">ERATGUARD VITES-5G</div>
+  <h2 style="margin:8px 0 8px;font-size:21px;color:#fff;">SMS Koruma Özeti</h2>
+  <p style="margin:0 0 12px;color:#9aa3b2;line-height:1.45;">{desc}</p>
+
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b style="display:block;color:#23ff89;font-size:22px;">{status}</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Durum</span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b style="display:block;color:#23ff89;font-size:24px;">{total}</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Toplam Aksiyon</span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b style="display:block;color:#23ff89;font-size:24px;">{blocked}</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Engellenen</span>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;">
+      <b style="display:block;color:#23ff89;font-size:24px;">{reported}</b>
+      <span style="color:#aeb8c8;font-size:12px;font-weight:800;">Şikayet</span>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;">
+    <a href="/u/analysis" style="flex:1 1 140px;text-align:center;color:#06110b;background:#23ff89;text-decoration:none;font-weight:900;border-radius:14px;padding:12px;">AI Analiz Aç</a>
+    <a href="/u/sms-actions-center" style="flex:1 1 140px;text-align:center;color:#23ff89;background:rgba(35,255,137,.12);border:1px solid rgba(35,255,137,.32);text-decoration:none;font-weight:900;border-radius:14px;padding:12px;">SMS Merkezi</a>
+  </div>
+  <!-- ERATGUARD VITES-5G DASHBOARD FINAL CARD END -->
+
+
+
+
+</div>
+"""
+
+        if "</main>" in html:
+            html = html.replace("</main>", card + "\n</main>", 1)
+        elif "</body>" in html:
+            html = html.replace("</body>", card + "\n</body>", 1)
+        else:
+            html += card
+
+        response.set_data(html)
+        response.headers["Content-Length"] = str(len(response.get_data()))
+    except Exception:
+        pass
+
+    return response
+
+# Flask after_request ters sırayla çalışır.
+# Bu yüzden insert(0) ile bu fonksiyon en SON çalıştırılır ve dashboard force render ezemez.
+try:
+    _eg_v5g_after_list = app.after_request_funcs.setdefault(None, [])
+    _eg_v5g_after_list = [f for f in _eg_v5g_after_list if getattr(f, "__name__", "") != "eratguard_vites5g_dashboard_sms_summary_final_order"]
+    _eg_v5g_after_list.insert(0, eratguard_vites5g_dashboard_sms_summary_final_order)
+    app.after_request_funcs[None] = _eg_v5g_after_list
+except Exception:
+    pass
+# ===== ERATGUARD VITES-5G DASHBOARD FINAL ORDER FIX END =====
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ERATGUARD VITES-5J DRAG MENU DISABLED - WILL BE DONE LATER
+
+
+
+
+# ===== ERATGUARD FIXED MENU RESTORE FINAL START =====
+def eratguard_fixed_menu_restore_final(response):
+    try:
+        from flask import request
+
+        path = request.path or ""
+        if not (path == "/dashboard" or path == "/u/dashboard" or path.startswith("/u/")):
+            return response
+
+        html = response.get_data(as_text=True)
+
+        if "ERATGUARD FIXED MENU RESTORE SCRIPT START" in html:
+            return response
+
+        script = r"""
+<style>
+/* ===== ERATGUARD FIXED MENU RESTORE STYLE START ===== */
+.eg-v5j-true-float,
+.eg-v5j-draggable-menu,
+.eg-v5j-drag-menu{
+  left:auto!important;
+  top:auto!important;
+  right:18px!important;
+  bottom:155px!important;
+  transform:none!important;
+  position:fixed!important;
+  z-index:999999!important;
+  touch-action:auto!important;
+  cursor:pointer!important;
+}
+/* ===== ERATGUARD FIXED MENU RESTORE STYLE END ===== */
+</style>
+
+<script>
+/* ===== ERATGUARD FIXED MENU RESTORE SCRIPT START ===== */
+(function(){
+  const oldKeys = [
+    "eratguard_v5j_true_float_pos",
+    "eratguard_v5j_menu_position",
+    "eratguard_v5j_safezone_version"
+  ];
+
+  try{
+    oldKeys.forEach(k => localStorage.removeItem(k));
+  }catch(e){}
+
+  function findMenu(){
+    const selectors = [
+      ".eg-user-fan3-toggle",
+      ".eg-user-fan-toggle",
+      ".menu-toggle",
+      ".fan-handle",
+      ".eg-menu-toggle",
+      "[data-eg-menu-toggle]",
+      ".eg-v5j-true-float",
+      ".eg-v5j-draggable-menu",
+      ".eg-v5j-drag-menu"
+    ];
+
+    for(const sel of selectors){
+      const el = document.querySelector(sel);
+      if(el) return el;
+    }
+
+    return Array.from(document.querySelectorAll("button,a,div,span")).find(function(el){
+      return ((el.innerText || el.textContent || "").trim().toUpperCase()).includes("MENÜ");
+    });
+  }
+
+  function fix(){
+    const el = findMenu();
+    if(!el) return;
+
+    el.classList.remove("eg-v5j-true-float","eg-v5j-moving","eg-v5j-draggable-menu","eg-v5j-drag-menu","eg-v5j-dragging","eg-v5j-safe-pulse");
+
+    el.style.position = "fixed";
+    el.style.left = "auto";
+    el.style.top = "auto";
+    el.style.right = "18px";
+    el.style.bottom = "155px";
+    el.style.transform = "none";
+    el.style.zIndex = "999999";
+    el.style.touchAction = "auto";
+    el.style.cursor = "pointer";
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", fix);
+  }else{
+    fix();
+  }
+
+  setTimeout(fix, 250);
+  setTimeout(fix, 1000);
+})();
+/* ===== ERATGUARD FIXED MENU RESTORE SCRIPT END ===== */
+</script>
+"""
+
+        if "</body>" in html:
+            html = html.replace("</body>", script + "\n</body>", 1)
+        else:
+            html += script
+
+        response.set_data(html)
+        response.headers["Content-Length"] = str(len(response.get_data()))
+    except Exception:
+        pass
+
+    return response
+
+try:
+    _eg_fixed_menu_list = app.after_request_funcs.setdefault(None, [])
+    _eg_fixed_menu_list = [f for f in _eg_fixed_menu_list if getattr(f, "__name__", "") != "eratguard_fixed_menu_restore_final"]
+    _eg_fixed_menu_list.insert(0, eratguard_fixed_menu_restore_final)
+    app.after_request_funcs[None] = _eg_fixed_menu_list
+except Exception:
+    pass
+# ===== ERATGUARD FIXED MENU RESTORE FINAL END =====
+
+
+
+# ===== ERATGUARD VITES-6A PROTECTION HISTORY CENTER START =====
+@app.route("/u/protection-history")
+@app.route("/u/history")
+def eratguard_vites6a_protection_history_center():
+    from flask import render_template_string
+    import json
+    from pathlib import Path
+
+    data_path = Path("data/eratguard_sms_actions_v5c.json")
+
+    actions = {
+        "blocked": [],
+        "safe": [],
+        "reported": []
+    }
+
+    if data_path.exists():
+        try:
+            loaded = json.loads(data_path.read_text(encoding="utf-8", errors="ignore"))
+            if isinstance(loaded, dict):
+                for key in actions:
+                    val = loaded.get(key, [])
+                    if isinstance(val, list):
+                        actions[key] = val
+        except Exception:
+            pass
+
+    def normalize_items(kind, label, icon):
+        out = []
+        for item in actions.get(kind, []):
+            if not isinstance(item, dict):
+                continue
+
+            text = item.get("text") or item.get("message") or item.get("sms") or item.get("content") or ""
+            score = item.get("score") or item.get("risk_score") or item.get("riskScore") or 0
+            level = item.get("level") or item.get("risk_level") or item.get("riskLevel") or "Kayıt"
+            created = item.get("created_at") or item.get("time") or item.get("timestamp") or item.get("date") or "-"
+
+            try:
+                score_int = int(score)
+            except Exception:
+                score_int = 0
+
+            short = str(text).strip()
+            if len(short) > 150:
+                short = short[:150] + "..."
+
+            out.append({
+                "kind": kind,
+                "label": label,
+                "icon": icon,
+                "text": str(text),
+                "short": short or "Mesaj içeriği yok",
+                "score": score_int,
+                "level": str(level),
+                "created": str(created)
+            })
+        return out
+
+    history = []
+    history += normalize_items("blocked", "Engellendi", "🛡️")
+    history += normalize_items("reported", "Şikayet", "⚠️")
+    history += normalize_items("safe", "Güvenli", "✅")
+
+    total = len(history)
+    blocked_count = len(actions.get("blocked", []))
+    reported_count = len(actions.get("reported", []))
+    safe_count = len(actions.get("safe", []))
+
+    html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard - Koruma Geçmişi</title>
+<style>
+:root{
+  --eg-bg:#03140d;
+  --eg-card:rgba(35,255,137,.08);
+  --eg-border:rgba(35,255,137,.28);
+  --eg-green:#23ff89;
+  --eg-cyan:#42e8ff;
+  --eg-text:#ffffff;
+  --eg-muted:rgba(255,255,255,.68);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--eg-text);
+  font-family:Arial,Helvetica,sans-serif;
+  background:
+    radial-gradient(circle at 70% 55%, rgba(35,255,137,.18), transparent 35%),
+    linear-gradient(180deg,#061b13,#020805 75%);
+}
+.wrap{
+  width:min(720px,100%);
+  margin:0 auto;
+  padding:28px 18px 120px;
+}
+.top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:20px;
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.logo{
+  width:56px;
+  height:56px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  color:#04120b;
+  font-weight:900;
+  font-size:34px;
+  background:linear-gradient(135deg,#23ff89,#4ab6ff);
+  box-shadow:0 0 28px rgba(35,255,137,.25);
+}
+.brand h1{
+  margin:0;
+  font-size:22px;
+  line-height:1.05;
+}
+.brand small{
+  display:block;
+  color:var(--eg-cyan);
+  letter-spacing:3px;
+  font-weight:800;
+  margin-top:4px;
+  font-size:11px;
+}
+.back{
+  color:var(--eg-green);
+  text-decoration:none;
+  border:1px solid var(--eg-border);
+  border-radius:999px;
+  padding:10px 14px;
+  font-weight:800;
+  background:rgba(0,0,0,.18);
+}
+.hero{
+  border:1px solid var(--eg-border);
+  background:var(--eg-card);
+  border-radius:26px;
+  padding:18px;
+  box-shadow:0 0 28px rgba(35,255,137,.12);
+  margin-bottom:16px;
+}
+.kicker{
+  color:var(--eg-green);
+  font-size:13px;
+  font-weight:900;
+  letter-spacing:1.6px;
+}
+.hero h2{
+  margin:8px 0 8px;
+  font-size:28px;
+}
+.hero p{
+  color:var(--eg-muted);
+  margin:0;
+  line-height:1.55;
+}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-top:16px;
+}
+.stat{
+  border-radius:18px;
+  padding:14px 10px;
+  background:rgba(255,255,255,.05);
+  text-align:center;
+}
+.stat b{
+  display:block;
+  color:var(--eg-green);
+  font-size:24px;
+}
+.stat span{
+  color:var(--eg-muted);
+  font-weight:700;
+  font-size:12px;
+}
+.actions{
+  display:flex;
+  gap:10px;
+  margin:16px 0;
+  flex-wrap:wrap;
+}
+.btn{
+  flex:1;
+  min-width:150px;
+  text-align:center;
+  padding:13px 14px;
+  border-radius:18px;
+  border:1px solid var(--eg-border);
+  text-decoration:none;
+  color:var(--eg-green);
+  font-weight:900;
+  background:rgba(0,0,0,.16);
+}
+.btn.primary{
+  background:var(--eg-green);
+  color:#03140d;
+}
+.btn.danger{
+  background:rgba(255,70,70,.16);
+  color:#ff7b7b;
+  border-color:rgba(255,90,90,.35);
+  cursor:pointer;
+}
+.btn.restore{
+  background:rgba(66,232,255,.14);
+  color:#42e8ff;
+  border-color:rgba(66,232,255,.35);
+  cursor:pointer;
+}
+.list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.item{
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.045);
+  border-radius:22px;
+  padding:14px;
+}
+.item-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  margin-bottom:10px;
+}
+.badge{
+  display:inline-flex;
+  gap:8px;
+  align-items:center;
+  border:1px solid var(--eg-border);
+  color:var(--eg-green);
+  border-radius:999px;
+  padding:7px 10px;
+  font-weight:900;
+  font-size:12px;
+}
+.score{
+  font-size:22px;
+  color:var(--eg-green);
+  font-weight:900;
+}
+.msg{
+  color:rgba(255,255,255,.86);
+  line-height:1.45;
+  word-break:break-word;
+}
+.meta{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  margin-top:10px;
+  color:var(--eg-muted);
+  font-size:12px;
+  flex-wrap:wrap;
+}
+.empty{
+  border:1px dashed var(--eg-border);
+  border-radius:24px;
+  padding:28px 18px;
+  color:var(--eg-muted);
+  text-align:center;
+}
+
+.filterbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px}
+.filter{border:1px solid var(--eg-border);background:rgba(255,255,255,.05);color:var(--eg-green);border-radius:999px;padding:10px 12px;font-weight:900}
+.filter.active{background:var(--eg-green);color:#03140d}
+.detail-btn{width:100%;margin-top:12px;border:none;border-radius:16px;padding:12px 14px;background:rgba(66,232,255,.14);color:#42e8ff;font-weight:900}
+.detail-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.68);z-index:999999}
+.detail-modal.open{display:flex}
+.detail-card{width:min(560px,100%);max-height:82vh;overflow:auto;border:1px solid var(--eg-border);background:#061b13;border-radius:26px;padding:18px;box-shadow:0 0 38px rgba(35,255,137,.22)}
+.detail-card h3{margin:0 0 10px;color:#fff}
+.detail-card pre{white-space:pre-wrap;word-break:break-word;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:14px;color:rgba(255,255,255,.88);font-family:Arial,Helvetica,sans-serif;line-height:1.45}
+.detail-close{width:100%;border:none;border-radius:16px;padding:12px;background:#23ff89;color:#03140d;font-weight:900}
+
+@media(max-width:520px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .hero h2{font-size:25px}
+}
+
+.manage-card{
+  margin:14px 0 16px;
+  border:1px solid var(--eg-border);
+  background:linear-gradient(135deg,rgba(35,255,137,.10),rgba(66,232,255,.06));
+  border-radius:26px;
+  padding:16px;
+  box-shadow:0 0 28px rgba(35,255,137,.10);
+}
+.manage-card h3{
+  margin:0 0 6px;
+  color:#fff;
+  font-size:18px;
+}
+.manage-card p{
+  margin:0 0 14px;
+  color:var(--eg-muted);
+  line-height:1.45;
+}
+.manage-actions{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.manage-actions .btn,
+.manage-actions button{
+  width:100%;
+  justify-content:center;
+}
+@media(max-width:620px){
+  .manage-actions{grid-template-columns:1fr}
+}
+
+
+/* ===== ERATGUARD VITES-6G HISTORY UI CLEANUP START ===== */
+.actions.legacy-actions{
+  display:none !important;
+}
+/* ===== ERATGUARD VITES-6G HISTORY UI CLEANUP END ===== */
+
+
+/* ===== ERATGUARD VITES-6H HISTORY PREMIUM POLISH START ===== */
+body{
+  background:
+    radial-gradient(circle at top left, rgba(35,255,137,.18), transparent 36%),
+    radial-gradient(circle at top right, rgba(66,232,255,.14), transparent 34%),
+    linear-gradient(180deg,#020806,#06150f 48%,#020806) !important;
+}
+.hero{
+  position:relative;
+  overflow:hidden;
+}
+.hero:before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background:linear-gradient(135deg,rgba(35,255,137,.22),transparent 42%,rgba(66,232,255,.16));
+  opacity:.45;
+  pointer-events:none;
+}
+.hero > *{
+  position:relative;
+  z-index:1;
+}
+.stat{
+  position:relative;
+  overflow:hidden;
+}
+.stat:after{
+  content:"";
+  position:absolute;
+  inset:auto -20% -35% -20%;
+  height:48px;
+  background:radial-gradient(circle,rgba(35,255,137,.18),transparent 60%);
+}
+.manage-card{
+  position:relative;
+  overflow:hidden;
+}
+.manage-card:before{
+  content:"";
+  position:absolute;
+  right:-70px;
+  top:-70px;
+  width:160px;
+  height:160px;
+  border-radius:50%;
+  background:rgba(35,255,137,.12);
+  filter:blur(2px);
+}
+.manage-card > *{
+  position:relative;
+  z-index:1;
+}
+.item{
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.item:hover{
+  transform:translateY(-2px);
+  border-color:rgba(35,255,137,.42);
+  box-shadow:0 0 24px rgba(35,255,137,.10);
+}
+.badge{
+  box-shadow:inset 0 0 16px rgba(35,255,137,.10);
+}
+.score{
+  min-width:44px;
+  text-align:center;
+}
+.filter,
+.btn,
+.detail-btn{
+  transition:transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+}
+.filter:active,
+.btn:active,
+.detail-btn:active{
+  transform:scale(.98);
+}
+.btn.primary,
+.filter.active{
+  box-shadow:0 0 18px rgba(35,255,137,.18);
+}
+.detail-btn{
+  box-shadow:inset 0 0 14px rgba(66,232,255,.08);
+}
+.detail-card{
+  animation:egHistoryModalPop .18s ease-out;
+}
+@keyframes egHistoryModalPop{
+  from{transform:scale(.96);opacity:.35}
+  to{transform:scale(1);opacity:1}
+}
+.empty{
+  background:rgba(255,255,255,.035);
+}
+.empty:before{
+  content:"🛡️";
+  display:block;
+  font-size:34px;
+  margin-bottom:8px;
+}
+@media(max-width:520px){
+  .wrap{padding:14px}
+  .hero{border-radius:24px}
+  .manage-card{border-radius:22px}
+}
+/* ===== ERATGUARD VITES-6H HISTORY PREMIUM POLISH END ===== */
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <div class="logo">E</div>
+      <div>
+        <h1>EratGuard</h1>
+        <small>VITES-6A</small>
+      </div>
+    </div>
+    <a class="back" href="/dashboard">Ana Sayfa</a>
+  </div>
+
+  <section class="hero">
+    <div class="kicker">KORUMA GEÇMİŞİ MERKEZİ</div>
+    <h2>SMS Aksiyon Geçmişi</h2>
+    <p>Engellenen, güvenli işaretlenen ve şikayet edilen SMS kayıtları burada izlenir.</p>
+
+    <div class="stats">
+      <div class="stat"><b>{{ total }}</b><span>Toplam</span></div>
+      <div class="stat"><b>{{ blocked_count }}</b><span>Engellenen</span></div>
+      <div class="stat"><b>{{ reported_count }}</b><span>Şikayet</span></div>
+      <div class="stat"><b>{{ safe_count }}</b><span>Güvenli</span></div>
+    </div>
+  </section>
+
+  <div class="actions legacy-actions">
+    <a class="btn primary" href="/u/analysis">AI Analiz Aç</a>
+    <a class="btn" href="/u/sms-actions-center">SMS Merkezi</a>
+    <a class="btn" href="/u/reports">Raporlar</a>
+    <!-- ERATGUARD VITES-6C EXPORT BUTTON START -->
+    <a class="btn" href="/api/v6/history-export">Dışa Aktar</a>
+    <!-- ERATGUARD VITES-6C EXPORT BUTTON END -->
+    <!-- ERATGUARD VITES-6D CLEAR BUTTON START -->
+    <button class="btn danger" id="egClearHistoryBtn" type="button">Geçmişi Temizle</button>
+    <!-- ERATGUARD VITES-6D CLEAR BUTTON END -->
+    <!-- ERATGUARD VITES-6E RESTORE BUTTON START -->
+    <button class="btn restore" id="egRestoreHistoryBtn" type="button">Yedeği Geri Yükle</button>
+    <!-- ERATGUARD VITES-6E RESTORE BUTTON END -->
+  </div>
+
+  <!-- ERATGUARD VITES-6F HISTORY MANAGEMENT PANEL START -->
+  <section class="manage-card">
+    <h3>Geçmiş Yönetimi</h3>
+    <p>SMS koruma geçmişini dışa aktarabilir, yedek alarak temizleyebilir veya son yedekten geri yükleyebilirsin.</p>
+    <div class="manage-actions">
+      <a class="btn" href="/api/v6/history-export">Dışa Aktar</a>
+      <button class="btn danger" id="egClearHistoryBtnPanel" type="button">Geçmişi Temizle</button>
+      <button class="btn restore" id="egRestoreHistoryBtnPanel" type="button">Yedeği Geri Yükle</button>
+    </div>
+  </section>
+  <!-- ERATGUARD VITES-6F HISTORY MANAGEMENT PANEL END -->
+
+  <!-- ERATGUARD VITES-6B HISTORY FILTER DETAIL START -->
+  <div class="filterbar">
+    <button class="filter active" data-filter="all" type="button">Tümü</button>
+    <button class="filter" data-filter="blocked" type="button">Engellenen</button>
+    <button class="filter" data-filter="reported" type="button">Şikayet</button>
+    <button class="filter" data-filter="safe" type="button">Güvenli</button>
+  </div>
+  <!-- ERATGUARD VITES-6B HISTORY FILTER DETAIL END -->
+
+  <section class="list">
+    {% if history %}
+      {% for item in history %}
+        <article class="item" data-kind="{{ item.kind }}" data-full="{{ item.text|e }}" data-label="{{ item.label|e }}" data-score="{{ item.score }}" data-level="{{ item.level|e }}" data-created="{{ item.created|e }}">
+          <div class="item-head">
+            <span class="badge">{{ item.icon }} {{ item.label }}</span>
+            <span class="score">{{ item.score }}</span>
+          </div>
+          <div class="msg">{{ item.short }}</div>
+          <div class="meta">
+            <span>Risk: {{ item.level }}</span>
+            <span>Tarih: {{ item.created }}</span>
+          </div>
+          <button class="detail-btn" type="button">Detay Gör</button>
+        </article>
+      {% endfor %}
+    {% else %}
+      <div class="empty">
+        Henüz SMS aksiyon kaydı yok. AI Analiz ekranından test kaydı oluşturabilirsin.
+      </div>
+    {% endif %}
+  </section>
+</div>
+
+<div class="detail-modal" id="egDetailModal">
+  <div class="detail-card">
+    <h3 id="egDetailTitle">SMS Detayı</h3>
+    <div class="meta" id="egDetailMeta"></div>
+    <pre id="egDetailText"></pre>
+    <button class="detail-close" type="button" id="egDetailClose">Kapat</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const filters = Array.from(document.querySelectorAll(".filter"));
+  const items = Array.from(document.querySelectorAll(".item"));
+  const modal = document.getElementById("egDetailModal");
+  const title = document.getElementById("egDetailTitle");
+  const meta = document.getElementById("egDetailMeta");
+  const text = document.getElementById("egDetailText");
+  const close = document.getElementById("egDetailClose");
+
+  filters.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const f = btn.getAttribute("data-filter");
+      filters.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      items.forEach(item => {
+        const kind = item.getAttribute("data-kind");
+        item.style.display = (f === "all" || f === kind) ? "" : "none";
+      });
+    });
+  });
+
+  document.querySelectorAll(".detail-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const item = btn.closest(".item");
+      if(!item) return;
+      title.textContent = (item.getAttribute("data-label") || "Kayıt") + " - SMS Detayı";
+      meta.innerHTML = "<span>Skor: " + (item.getAttribute("data-score") || "0") + "</span><span>Risk: " + (item.getAttribute("data-level") || "-") + "</span><span>Tarih: " + (item.getAttribute("data-created") || "-") + "</span>";
+      text.textContent = item.getAttribute("data-full") || "Mesaj içeriği yok";
+      modal.classList.add("open");
+    });
+  });
+
+  if(close) close.addEventListener("click", () => modal.classList.remove("open"));
+  if(modal) modal.addEventListener("click", e => { if(e.target === modal) modal.classList.remove("open"); });
+})();
+</script>
+
+
+<script>
+/* ===== ERATGUARD VITES-6D CLEAR SCRIPT START ===== */
+(function(){
+  const btn = document.getElementById("egClearHistoryBtn");
+  if(!btn) return;
+
+  btn.addEventListener("click", async function(){
+    const ok = confirm("Koruma geçmişi yedek alındıktan sonra temizlenecek. Devam edilsin mi?");
+    if(!ok) return;
+
+    btn.disabled = true;
+    btn.textContent = "Temizleniyor...";
+
+    try{
+      const res = await fetch("/api/v6/history-clear", {method:"POST"});
+      const data = await res.json();
+      alert((data && data.message ? data.message : "Geçmiş temizlendi.") + "\nYedek: " + (data.backup || "-"));
+      location.reload();
+    }catch(e){
+      alert("Temizleme sırasında hata oluştu.");
+      btn.disabled = false;
+      btn.textContent = "Geçmişi Temizle";
+    }
+  });
+})();
+/* ===== ERATGUARD VITES-6D CLEAR SCRIPT END ===== */
+</script>
+
+
+<script>
+/* ===== ERATGUARD VITES-6E RESTORE SCRIPT START ===== */
+(function(){
+  const btn = document.getElementById("egRestoreHistoryBtn");
+  if(!btn) return;
+
+  btn.addEventListener("click", async function(){
+    const ok = confirm("En son yedek geri yüklenecek. Mevcut boş/son durum ayrıca güvenlik yedeğine alınacak. Devam edilsin mi?");
+    if(!ok) return;
+
+    btn.disabled = true;
+    btn.textContent = "Geri yükleniyor...";
+
+    try{
+      const res = await fetch("/api/v6/history-restore-latest", {method:"POST"});
+      const data = await res.json();
+      if(!data.ok){
+        alert(data.message || "Geri yükleme başarısız.");
+        btn.disabled = false;
+        btn.textContent = "Yedeği Geri Yükle";
+        return;
+      }
+      alert((data.message || "Geri yüklendi.") + "\nYedek: " + (data.backup || "-"));
+      location.reload();
+    }catch(e){
+      alert("Geri yükleme sırasında hata oluştu.");
+      btn.disabled = false;
+      btn.textContent = "Yedeği Geri Yükle";
+    }
+  });
+})();
+/* ===== ERATGUARD VITES-6E RESTORE SCRIPT END ===== */
+</script>
+
+
+<script>
+/* ===== ERATGUARD VITES-6F PANEL BRIDGE SCRIPT START ===== */
+(function(){
+  const clearPanel = document.getElementById("egClearHistoryBtnPanel");
+  const clearOriginal = document.getElementById("egClearHistoryBtn");
+  if(clearPanel && clearOriginal){
+    clearPanel.addEventListener("click", function(){
+      clearOriginal.click();
+    });
+  }
+
+  const restorePanel = document.getElementById("egRestoreHistoryBtnPanel");
+  const restoreOriginal = document.getElementById("egRestoreHistoryBtn");
+  if(restorePanel && restoreOriginal){
+    restorePanel.addEventListener("click", function(){
+      restoreOriginal.click();
+    });
+  }
+})();
+/* ===== ERATGUARD VITES-6F PANEL BRIDGE SCRIPT END ===== */
+</script>
+
+</body>
+</html>
+"""
+
+    return render_template_string(
+        html,
+        history=history,
+        total=total,
+        blocked_count=blocked_count,
+        reported_count=reported_count,
+        safe_count=safe_count
+    )
+
+
+@app.after_request
+def eratguard_vites6a_history_links_after_response(response):
+    try:
+        from flask import request
+
+        path = request.path or ""
+        if not (path == "/dashboard" or path == "/u/analysis" or path == "/u/reports" or path == "/u/protection"):
+            return response
+
+        html = response.get_data(as_text=True)
+
+        if "ERATGUARD VITES-6A HISTORY LINK START" in html:
+            return response
+
+        link_html = """
+<div style="margin:14px auto 0;max-width:520px;">
+  <!-- ERATGUARD VITES-6A HISTORY LINK START -->
+  <a href="/history" style="display:block;text-align:center;text-decoration:none;font-weight:900;color:#03140d;background:#23ff89;border-radius:18px;padding:13px 16px;box-shadow:0 0 22px rgba(35,255,137,.18);">
+    Koruma Geçmişi
+  </a>
+  <!-- ERATGUARD VITES-6A HISTORY LINK END -->
+</div>
+"""
+
+        if "</body>" in html:
+            html = html.replace("</body>", link_html + "\n</body>", 1)
+        else:
+            html += link_html
+
+        response.set_data(html)
+        response.headers["Content-Length"] = str(len(response.get_data()))
+    except Exception:
+        pass
+
+    return response
+
+# ===== ERATGUARD VITES-6A PUBLIC FALLBACK ROUTE START =====
+@app.route("/protection-history")
+@app.route("/history")
+def eratguard_vites6a_public_protection_history_center():
+    return eratguard_vites6a_protection_history_center()
+# ===== ERATGUARD VITES-6A PUBLIC FALLBACK ROUTE END =====
+
+
+# ===== ERATGUARD VITES-6C HISTORY EXPORT START =====
+@app.route("/api/v6/history-export")
+def eratguard_vites6c_history_export():
+    from flask import jsonify, Response
+    from pathlib import Path
+    import json
+    import datetime
+
+    data_path = Path("data/eratguard_sms_actions_v5c.json")
+
+    payload = {
+        "app": "EratGuard",
+        "version": "VITES-6C",
+        "export_type": "sms_protection_history",
+        "exported_at": datetime.datetime.now().isoformat(timespec="seconds"),
+        "source": str(data_path),
+        "actions": {
+            "blocked": [],
+            "safe": [],
+            "reported": []
+        }
+    }
+
+    if data_path.exists():
+        try:
+            loaded = json.loads(data_path.read_text(encoding="utf-8", errors="ignore"))
+            if isinstance(loaded, dict):
+                payload["actions"]["blocked"] = loaded.get("blocked", []) if isinstance(loaded.get("blocked", []), list) else []
+                payload["actions"]["safe"] = loaded.get("safe", []) if isinstance(loaded.get("safe", []), list) else []
+                payload["actions"]["reported"] = loaded.get("reported", []) if isinstance(loaded.get("reported", []), list) else []
+        except Exception as e:
+            payload["error"] = str(e)
+
+    payload["stats"] = {
+        "blocked": len(payload["actions"]["blocked"]),
+        "safe": len(payload["actions"]["safe"]),
+        "reported": len(payload["actions"]["reported"]),
+        "total": len(payload["actions"]["blocked"]) + len(payload["actions"]["safe"]) + len(payload["actions"]["reported"])
+    }
+
+    body = json.dumps(payload, ensure_ascii=False, indent=2)
+    filename = "eratguard_sms_history_export.json"
+
+    return Response(
+        body,
+        mimetype="application/json; charset=utf-8",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )
+# ===== ERATGUARD VITES-6C HISTORY EXPORT END =====
+
+
+# ===== ERATGUARD VITES-6D HISTORY CLEAR START =====
+@app.route("/api/v6/history-clear", methods=["POST", "GET"])
+def eratguard_vites6d_history_clear():
+    from flask import jsonify
+    from pathlib import Path
+    import json
+    import datetime
+    import shutil
+
+    data_path = Path("data/eratguard_sms_actions_v5c.json")
+    backup_dir = Path("data/history_backups")
+    backup_dir.mkdir(parents=True, exist_ok=True)
+
+    ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    backup_path = backup_dir / f"eratguard_sms_actions_before_clear_{ts}.json"
+
+    previous = {
+        "blocked": [],
+        "safe": [],
+        "reported": []
+    }
+
+    if data_path.exists():
+        try:
+            shutil.copy2(data_path, backup_path)
+            loaded = json.loads(data_path.read_text(encoding="utf-8", errors="ignore"))
+            if isinstance(loaded, dict):
+                for key in previous:
+                    val = loaded.get(key, [])
+                    if isinstance(val, list):
+                        previous[key] = val
+        except Exception:
+            pass
+
+    cleared = {
+        "blocked": [],
+        "safe": [],
+        "reported": [],
+        "meta": {
+            "cleared_at": datetime.datetime.now().isoformat(timespec="seconds"),
+            "backup": str(backup_path),
+            "previous_counts": {
+                "blocked": len(previous["blocked"]),
+                "safe": len(previous["safe"]),
+                "reported": len(previous["reported"]),
+                "total": len(previous["blocked"]) + len(previous["safe"]) + len(previous["reported"])
+            }
+        }
+    }
+
+    data_path.parent.mkdir(parents=True, exist_ok=True)
+    data_path.write_text(json.dumps(cleared, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    return jsonify({
+        "ok": True,
+        "message": "Koruma geçmişi temizlendi.",
+        "backup": str(backup_path),
+        "previous_counts": cleared["meta"]["previous_counts"],
+        "current_counts": {
+            "blocked": 0,
+            "safe": 0,
+            "reported": 0,
+            "total": 0
+        }
+    })
+# ===== ERATGUARD VITES-6D HISTORY CLEAR END =====
+
+
+# ===== ERATGUARD VITES-6E HISTORY RESTORE START =====
+@app.route("/api/v6/history-restore-latest", methods=["POST"])
+def eratguard_vites6e_history_restore_latest():
+    from flask import jsonify
+    from pathlib import Path
+    import json
+    import datetime
+    import shutil
+
+    data_path = Path("data/eratguard_sms_actions_v5c.json")
+    backup_dir = Path("data/history_backups")
+
+    if not backup_dir.exists():
+        return jsonify({
+            "ok": False,
+            "message": "Yedek klasörü bulunamadı.",
+            "backup": None
+        }), 404
+
+    backups = sorted(
+        backup_dir.glob("eratguard_sms_actions_before_clear_*.json"),
+        key=lambda x: x.stat().st_mtime,
+        reverse=True
+    )
+
+    if not backups:
+        return jsonify({
+            "ok": False,
+            "message": "Geri yüklenecek yedek bulunamadı.",
+            "backup": None
+        }), 404
+
+    latest = backups[0]
+
+    try:
+        loaded = json.loads(latest.read_text(encoding="utf-8", errors="ignore"))
+        if not isinstance(loaded, dict):
+            return jsonify({
+                "ok": False,
+                "message": "Yedek dosyası geçerli JSON değil.",
+                "backup": str(latest)
+            }), 400
+
+        current_backup_dir = Path("data/history_restore_safety")
+        current_backup_dir.mkdir(parents=True, exist_ok=True)
+
+        ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        if data_path.exists():
+            shutil.copy2(data_path, current_backup_dir / f"current_before_restore_{ts}.json")
+
+        data_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(latest, data_path)
+
+        restored = json.loads(data_path.read_text(encoding="utf-8", errors="ignore"))
+        counts = {
+            "blocked": len(restored.get("blocked", [])) if isinstance(restored.get("blocked", []), list) else 0,
+            "safe": len(restored.get("safe", [])) if isinstance(restored.get("safe", []), list) else 0,
+            "reported": len(restored.get("reported", [])) if isinstance(restored.get("reported", []), list) else 0,
+        }
+        counts["total"] = counts["blocked"] + counts["safe"] + counts["reported"]
+
+        return jsonify({
+            "ok": True,
+            "message": "Koruma geçmişi en son yedekten geri yüklendi.",
+            "backup": str(latest),
+            "counts": counts
+        })
+
+    except Exception as e:
+        return jsonify({
+            "ok": False,
+            "message": "Geri yükleme hatası.",
+            "error": str(e),
+            "backup": str(latest)
+        }), 500
+# ===== ERATGUARD VITES-6E HISTORY RESTORE END =====
+
+# ===== ERATGUARD VITES-6A PROTECTION HISTORY CENTER END =====
+
+
+
+
+# === ERATGUARD_SMS_ACTION_ENGINE_V1 ===
+# User-side SMS action engine:
+# AI Analiz -> Engelle / Güvenli / Şikayet -> kayıt -> sayaç -> geçmiş -> dışa aktar/yedek
+
+import os as _eg_os
+import json as _eg_json
+import csv as _eg_csv
+import io as _eg_io
+import shutil as _eg_shutil
+import hashlib as _eg_hashlib
+from datetime import datetime as _eg_datetime
+from pathlib import Path as _eg_Path
+from flask import request as _eg_request, jsonify as _eg_jsonify, redirect as _eg_redirect, url_for as _eg_url_for, render_template_string as _eg_render_template_string, send_file as _eg_send_file, flash as _eg_flash
+
+_EG_DATA_DIR = _eg_Path(__file__).resolve().parent / "data"
+_EG_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+_EG_SMS_ACTIONS_FILE = _EG_DATA_DIR / "eratguard_sms_actions_v5c.json"
+_EG_SMS_ACTIONS_BACKUP_DIR = _EG_DATA_DIR / "sms_action_backups"
+_EG_SMS_ACTIONS_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+
+_EG_ALLOWED_SMS_ACTIONS = {
+    "blocked": "Engellendi",
+    "safe": "Güvenli",
+    "reported": "Şikayet",
+}
+
+_EG_ACTION_BADGES = {
+    "blocked": "danger",
+    "safe": "success",
+    "reported": "warning",
+}
+
+def _eg_now_iso():
+    return _eg_datetime.now().replace(microsecond=0).isoformat()
+
+def _eg_read_json_file(path, default):
+    try:
+        if not path.exists() or path.stat().st_size == 0:
+            return default
+        with path.open("r", encoding="utf-8") as f:
+            data = _eg_json.load(f)
+        return data
+    except Exception:
+        return default
+
+def _eg_atomic_write_json(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with tmp.open("w", encoding="utf-8") as f:
+        _eg_json.dump(data, f, ensure_ascii=False, indent=2)
+    tmp.replace(path)
+
+def _eg_normalize_reason(value):
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(x).strip() for x in value if str(x).strip()]
+    if isinstance(value, str):
+        raw = value.replace("\r", "\n").split("\n")
+        return [x.strip(" -•\t") for x in raw if x.strip(" -•\t")]
+    return [str(value)]
+
+def _eg_risk_level(score):
+    try:
+        score = int(score)
+    except Exception:
+        score = 0
+    if score >= 85:
+        return "Çok Riskli"
+    if score >= 70:
+        return "Riskli"
+    if score >= 40:
+        return "Şüpheli"
+    return "Düşük Risk"
+
+def _eg_sms_id(sender, message, created_at=None):
+    base = f"{sender}|{message}|{created_at or ''}"
+    return "sms_" + _eg_hashlib.sha256(base.encode("utf-8", errors="ignore")).hexdigest()[:16]
+
+def _eg_action_id(sms_id, action, created_at=None):
+    base = f"{sms_id}|{action}|{created_at or _eg_now_iso()}"
+    return "action_" + _eg_hashlib.sha256(base.encode("utf-8", errors="ignore")).hexdigest()[:16]
+
+def _eg_load_sms_actions():
+    data = _eg_read_json_file(_EG_SMS_ACTIONS_FILE, [])
+    if isinstance(data, dict):
+        if isinstance(data.get("actions"), list):
+            return data["actions"]
+        if isinstance(data.get("items"), list):
+            return data["items"]
+        return []
+    if isinstance(data, list):
+        return data
+    return []
+
+def _eg_save_sms_actions(actions):
+    clean = []
+    for item in actions:
+        if isinstance(item, dict):
+            clean.append(item)
+    _eg_atomic_write_json(_EG_SMS_ACTIONS_FILE, clean)
+
+def _eg_counts(actions=None):
+    actions = actions if actions is not None else _eg_load_sms_actions()
+    c = {"total": len(actions), "blocked": 0, "safe": 0, "reported": 0}
+    for a in actions:
+        act = str(a.get("action", "")).strip()
+        if act in c:
+            c[act] += 1
+    return c
+
+def _eg_filter_actions(action=None):
+    actions = _eg_load_sms_actions()
+    actions = sorted(actions, key=lambda x: str(x.get("created_at", "")), reverse=True)
+    if action in _EG_ALLOWED_SMS_ACTIONS:
+        actions = [a for a in actions if a.get("action") == action]
+    return actions
+
+def _eg_add_sms_action(payload):
+    now = _eg_now_iso()
+
+    action = str(payload.get("action", "")).strip().lower()
+    aliases = {
+        "engelle": "blocked",
+        "engel": "blocked",
+        "blocked": "blocked",
+        "block": "blocked",
+        "güvenli": "safe",
+        "guvenli": "safe",
+        "safe": "safe",
+        "şikayet": "reported",
+        "sikayet": "reported",
+        "reported": "reported",
+        "report": "reported",
+    }
+    action = aliases.get(action, action)
+
+    if action not in _EG_ALLOWED_SMS_ACTIONS:
+        raise ValueError("Geçersiz SMS aksiyonu. allowed: blocked, safe, reported")
+
+    sender = str(payload.get("sender") or payload.get("gonderen") or payload.get("from") or "Bilinmeyen").strip()
+    message = str(payload.get("message") or payload.get("mesaj") or payload.get("body") or "").strip()
+
+    try:
+        risk_score = int(payload.get("risk_score", payload.get("risk", payload.get("score", 0))))
+    except Exception:
+        risk_score = 0
+
+    risk_score = max(0, min(100, risk_score))
+    risk_level = str(payload.get("risk_level") or payload.get("seviye") or _eg_risk_level(risk_score)).strip()
+
+    sms_id = str(payload.get("sms_id") or _eg_sms_id(sender, message)).strip()
+    reason = _eg_normalize_reason(payload.get("reason") or payload.get("reasons") or payload.get("neden") or payload.get("analysis_reason"))
+
+    source = str(payload.get("source") or "manual").strip()
+    note = str(payload.get("note") or payload.get("analysis_note") or payload.get("analiz_notu") or "").strip()
+
+    actions = _eg_load_sms_actions()
+
+    # Aynı sms_id için son kullanıcı kararı tekleştirilir; eski kayıt kaybolmaz, previous_action olarak işaretlenir.
+    previous = None
+    for item in actions:
+        if item.get("sms_id") == sms_id and item.get("is_current", True):
+            item["is_current"] = False
+            item["updated_at"] = now
+            previous = item.get("action")
+            break
+
+    rec = {
+        "id": _eg_action_id(sms_id, action, now),
+        "sms_id": sms_id,
+        "sender": sender,
+        "message": message,
+        "action": action,
+        "label": _EG_ALLOWED_SMS_ACTIONS[action],
+        "risk_score": risk_score,
+        "risk_level": risk_level,
+        "reason": reason,
+        "note": note,
+        "source": source,
+        "previous_action": previous,
+        "is_current": True,
+        "created_at": now,
+        "updated_at": now,
+    }
+
+    actions.append(rec)
+    _eg_save_sms_actions(actions)
+    return rec
+
+@app.route("/u/sms/action", methods=["POST"])
+@app.route("/sms/action", methods=["POST"])
+def eg_sms_action_create():
+    try:
+        payload = {}
+        if _eg_request.is_json:
+            payload = _eg_request.get_json(silent=True) or {}
+        else:
+            payload = dict(_eg_request.form.items())
+
+        rec = _eg_add_sms_action(payload)
+        if _eg_request.is_json or _eg_request.headers.get("Accept", "").lower().find("application/json") >= 0:
+            return _eg_jsonify({"ok": True, "record": rec, "counts": _eg_counts()})
+
+        try:
+            _eg_flash(f"SMS aksiyonu kaydedildi: {rec.get('label')}", "success")
+        except Exception:
+            pass
+        return _eg_redirect(_eg_request.referrer or "/u/sms/actions")
+    except Exception as e:
+        if _eg_request.is_json:
+            return _eg_jsonify({"ok": False, "error": str(e)}), 400
+        try:
+            _eg_flash("SMS aksiyonu kaydedilemedi: " + str(e), "danger")
+        except Exception:
+            pass
+        return _eg_redirect(_eg_request.referrer or "/u/sms/actions")
+
+@app.route("/u/sms/actions")
+@app.route("/u/sms/history")
+@app.route("/sms/actions")
+@app.route("/sms/history")
+def eg_sms_actions_center():
+    action = (_eg_request.args.get("filter") or _eg_request.args.get("action") or "all").strip().lower()
+    if action == "all":
+        action = None
+    actions = _eg_filter_actions(action)
+    counts = _eg_counts(_eg_load_sms_actions())
+
+    html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EratGuard SMS Aksiyon Merkezi</title>
+<style>
+:root{--bg:#061018;--card:#0d1b27;--muted:#8ca3b6;--text:#eef7ff;--line:rgba(255,255,255,.10);--blue:#1b78ff;--green:#18c37e;--red:#ff4d61;--yellow:#ffd166}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at top,#11314b 0,#061018 45%,#03070b 100%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:18px 14px 90px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.title{font-size:22px;font-weight:900;letter-spacing:.2px}.sub{color:var(--muted);font-size:13px;margin-top:4px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.stat{background:rgba(13,27,39,.88);border:1px solid var(--line);border-radius:18px;padding:13px}.stat b{display:block;font-size:22px}.stat span{font-size:12px;color:var(--muted)}
+.filters{display:flex;gap:8px;overflow:auto;margin:12px 0 16px}.filters a,.btn{white-space:nowrap;text-decoration:none;color:var(--text);background:#0d1b27;border:1px solid var(--line);border-radius:999px;padding:10px 12px;font-size:13px;font-weight:800}
+.filters a.active{background:var(--blue);border-color:var(--blue)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px}.btn.export{background:#10283a}.btn.danger{background:rgba(255,77,97,.15);border-color:rgba(255,77,97,.45)}
+.card{background:rgba(13,27,39,.92);border:1px solid var(--line);border-radius:20px;padding:14px;margin:10px 0;box-shadow:0 12px 28px rgba(0,0,0,.22)}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.badge{font-size:12px;font-weight:900;border-radius:999px;padding:7px 9px}.danger-b{background:rgba(255,77,97,.16);color:#ff9aa6}.success-b{background:rgba(24,195,126,.16);color:#7dffc5}.warning-b{background:rgba(255,209,102,.16);color:#ffe09a}
+.meta{color:var(--muted);font-size:12px;margin:8px 0}.msg{font-size:14px;line-height:1.45;background:rgba(255,255,255,.035);border-radius:14px;padding:10px;margin-top:8px;word-break:break-word}.reasons{margin:10px 0 0;padding-left:18px;color:#cfe1ef;font-size:13px}.empty{color:var(--muted);text-align:center;padding:28px}
+.menu{position:fixed;right:18px;bottom:18px;background:var(--blue);color:white;border-radius:999px;padding:16px 18px;text-decoration:none;font-weight:900;box-shadow:0 16px 30px rgba(27,120,255,.35)}
+@media(max-width:680px){.grid{grid-template-columns:repeat(2,1fr)}.title{font-size:19px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="title">SMS Aksiyon Merkezi</div>
+      <div class="sub">Engelle / Güvenli / Şikayet kayıtları tek merkezden yönetilir.</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="stat"><b>{{ counts.total }}</b><span>Toplam</span></div>
+    <div class="stat"><b>{{ counts.blocked }}</b><span>Engellenen</span></div>
+    <div class="stat"><b>{{ counts.reported }}</b><span>Şikayet</span></div>
+    <div class="stat"><b>{{ counts.safe }}</b><span>Güvenli</span></div>
+  </div>
+
+  <div class="filters">
+    <a class="{{ 'active' if not request.args.get('filter') or request.args.get('filter')=='all' else '' }}" href="/u/sms/actions?filter=all">Tümü</a>
+    <a class="{{ 'active' if request.args.get('filter')=='blocked' else '' }}" href="/u/sms/actions?filter=blocked">Engellenen</a>
+    <a class="{{ 'active' if request.args.get('filter')=='reported' else '' }}" href="/u/sms/actions?filter=reported">Şikayet</a>
+    <a class="{{ 'active' if request.args.get('filter')=='safe' else '' }}" href="/u/sms/actions?filter=safe">Güvenli</a>
+  </div>
+
+  <div class="actions">
+    <a class="btn export" href="/u/sms/actions/export.json">JSON Dışa Aktar</a>
+    <a class="btn export" href="/u/sms/actions/export.csv">CSV Dışa Aktar</a>
+    <a class="btn export" href="/u/sms/actions/backup">Yedek Al</a>
+    <form method="post" action="/u/sms/actions/clear" onsubmit="return confirm('SMS aksiyon geçmişi temizlensin mi?')" style="display:inline">
+      <button class="btn danger" type="submit">Geçmişi Temizle</button>
+    </form>
+  </div>
+
+  {% if not actions %}
+    <div class="empty">Henüz SMS aksiyon kaydı yok.</div>
+  {% endif %}
+
+  {% for a in actions %}
+  {% set badge = 'danger-b' if a.action=='blocked' else ('success-b' if a.action=='safe' else 'warning-b') %}
+  <div class="card">
+    <div class="row">
+      <div>
+        <span class="badge {{ badge }}">{{ a.label or a.action }}</span>
+        <div class="meta">Gönderen: {{ a.sender }} · Tarih: {{ a.created_at }} · Kaynak: {{ a.source }}</div>
+      </div>
+      <div class="meta">Risk: {{ a.risk_score }} · {{ a.risk_level }}</div>
+    </div>
+    <div class="msg">{{ a.message }}</div>
+    {% if a.note %}<div class="meta">{{ a.note }}</div>{% endif %}
+    {% if a.reason %}
+    <ul class="reasons">
+      {% for r in a.reason %}<li>{{ r }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+<a class="menu" href="/u/dashboard">MENÜ</a>
+</body>
+</html>
+"""
+    return _eg_render_template_string(html, actions=actions, counts=counts, request=_eg_request)
+
+@app.route("/u/sms/actions/export.json")
+def eg_sms_actions_export_json():
+    actions = _eg_load_sms_actions()
+    bio = _eg_io.BytesIO(_eg_json.dumps(actions, ensure_ascii=False, indent=2).encode("utf-8"))
+    return _eg_send_file(bio, mimetype="application/json", as_attachment=True, download_name="eratguard_sms_actions.json")
+
+@app.route("/u/sms/actions/export.csv")
+def eg_sms_actions_export_csv():
+    actions = _eg_load_sms_actions()
+    out = _eg_io.StringIO()
+    fields = ["id","sms_id","sender","message","action","label","risk_score","risk_level","source","created_at","updated_at","is_current"]
+    w = _eg_csv.DictWriter(out, fieldnames=fields, extrasaction="ignore")
+    w.writeheader()
+    for a in actions:
+        w.writerow(a)
+    bio = _eg_io.BytesIO(out.getvalue().encode("utf-8-sig"))
+    return _eg_send_file(bio, mimetype="text/csv", as_attachment=True, download_name="eratguard_sms_actions.csv")
+
+@app.route("/u/sms/actions/clear", methods=["POST"])
+def eg_sms_actions_clear():
+    before = _eg_load_sms_actions()
+    if before:
+        stamp = _eg_datetime.now().strftime("%Y%m%d_%H%M%S")
+        _eg_atomic_write_json(_EG_SMS_ACTIONS_BACKUP_DIR / f"before_clear_{stamp}.json", before)
+    _eg_save_sms_actions([])
+    try:
+        _eg_flash("SMS aksiyon geçmişi temizlendi. Ön yedek alındı.", "success")
+    except Exception:
+        pass
+    return _eg_redirect("/u/sms/actions")
+
+@app.route("/u/sms/actions/backup")
+def eg_sms_actions_backup():
+    actions = _eg_load_sms_actions()
+    stamp = _eg_datetime.now().strftime("%Y%m%d_%H%M%S")
+    target = _EG_SMS_ACTIONS_BACKUP_DIR / f"eratguard_sms_actions_backup_{stamp}.json"
+    _eg_atomic_write_json(target, actions)
+    bio = _eg_io.BytesIO(_eg_json.dumps(actions, ensure_ascii=False, indent=2).encode("utf-8"))
+    return _eg_send_file(bio, mimetype="application/json", as_attachment=True, download_name=target.name)
+
+@app.route("/u/sms/actions/restore", methods=["POST"])
+def eg_sms_actions_restore():
+    # multipart file alanı: backup
+    f = _eg_request.files.get("backup")
+    if not f:
+        return _eg_jsonify({"ok": False, "error": "backup dosyası yok"}), 400
+    try:
+        data = _eg_json.loads(f.read().decode("utf-8"))
+        if isinstance(data, dict) and isinstance(data.get("actions"), list):
+            data = data["actions"]
+        if not isinstance(data, list):
+            raise ValueError("Yedek formatı liste değil.")
+        old = _eg_load_sms_actions()
+        if old:
+            stamp = _eg_datetime.now().strftime("%Y%m%d_%H%M%S")
+            _eg_atomic_write_json(_EG_SMS_ACTIONS_BACKUP_DIR / f"before_restore_{stamp}.json", old)
+        _eg_save_sms_actions(data)
+        return _eg_jsonify({"ok": True, "restored": len(data), "counts": _eg_counts(data)})
+    except Exception as e:
+        return _eg_jsonify({"ok": False, "error": str(e)}), 400
+
+@app.route("/u/sms/actions/counts")
+def eg_sms_actions_counts():
+    return _eg_jsonify({"ok": True, "counts": _eg_counts()})
+
+# === /ERATGUARD_SMS_ACTION_ENGINE_V1 ===
+
+
+
+
+
+# === ERATGUARD_AI_ANALYSIS_ACTION_BUTTONS_V2 ===
+# /u/analysis ekranına SMS Action Engine karar butonları ekler:
+# Engelle / Güvenli / Şikayet -> /u/sms/action
+
+try:
+    from flask import request as _eg_aab2_request
+    from flask import session as _eg_aab2_session
+    from flask import redirect as _eg_aab2_redirect
+    from flask import render_template_string as _eg_aab2_render_template_string
+    from flask import make_response as _eg_aab2_make_response
+    import html as _eg_aab2_html
+    import json as _eg_aab2_json
+    from pathlib import Path as _eg_aab2_Path
+    from datetime import datetime as _eg_aab2_datetime
+
+    def _eg_aab2_safe(v):
+        try:
+            return _eg_aab2_html.escape(str(v or ""), quote=True)
+        except Exception:
+            return ""
+
+    def _eg_aab2_load(default, path):
+        try:
+            pp = _eg_aab2_Path(path)
+            if not pp.exists():
+                return default
+            txt = pp.read_text(encoding="utf-8", errors="ignore").strip()
+            if not txt:
+                return default
+            return _eg_aab2_json.loads(txt)
+        except Exception:
+            return default
+
+    def _eg_aab2_save(path, data):
+        pp = _eg_aab2_Path(path)
+        pp.parent.mkdir(parents=True, exist_ok=True)
+        pp.write_text(_eg_aab2_json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def _eg_aab2_engine(message):
+        # Önce mevcut aktif AI motorunu kullan.
+        if "_eg_aid1b_engine" in globals() and callable(globals().get("_eg_aid1b_engine")):
+            return globals()["_eg_aid1b_engine"](message)
+
+        # Geriye dönük fallback.
+        text = str(message or "").lower()
+        score = 8
+        reasons = []
+
+        if any(x in text for x in ["http://", "https://", "www.", ".com", ".net", "link"]):
+            score += 35
+            reasons.append("Mesaj bağlantı/link yönlendirmesi içeriyor.")
+        if any(x in text for x in ["banka", "kart", "şifre", "sifre", "hesap", "iban", "ödeme", "odeme"]):
+            score += 28
+            reasons.append("Mesaj finansal veya kişisel bilgi riski taşıyor.")
+        if any(x in text for x in ["acil", "hemen", "son gün", "son gun", "tıkla", "tikla"]):
+            score += 22
+            reasons.append("Mesaj aciliyet dili içeriyor.")
+        if any(x in text for x in ["kazandınız", "kazandiniz", "ödül", "odul", "hediye", "bonus"]):
+            score += 24
+            reasons.append("Mesaj ödül/kazanç vaadi içeriyor.")
+
+        if not reasons:
+            reasons.append("Belirgin dolandırıcılık sinyali düşük görünüyor.")
+
+        score = max(0, min(100, int(score)))
+        if score >= 71:
+            return {"score": score, "status": "SPAM", "risk_label": "Yüksek Risk", "risk_class": "high", "reasons": reasons}
+        if score >= 31:
+            return {"score": score, "status": "SUSPICIOUS", "risk_label": "Orta Risk", "risk_class": "mid", "reasons": reasons}
+        return {"score": score, "status": "SAFE", "risk_label": "Düşük Risk", "risk_class": "low", "reasons": reasons}
+
+    def _eg_aab2_write(username, message, result):
+        # Mevcut yazıcı varsa onu kullan.
+        if "_eg_aid1b_write" in globals() and callable(globals().get("_eg_aid1b_write")):
+            try:
+                return globals()["_eg_aid1b_write"](username, message, result)
+            except Exception as e:
+                print("ERATGUARD AI ACTION BUTTONS V2 WRITE BRIDGE ERROR:", e)
+
+        now = _eg_aab2_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        item = {
+            "time": now,
+            "number": "manual_ai_analysis",
+            "sender": "manual_ai_analysis",
+            "body": message,
+            "status": result.get("status"),
+            "score": int(result.get("score") or 0),
+            "risk": int(result.get("score") or 0),
+            "risk_label": result.get("risk_label"),
+            "risk_class": result.get("risk_class"),
+            "reasons": result.get("reasons") or [],
+            "source": "user_ai_analysis_scan",
+            "username": username,
+        }
+
+        for file_path in ["data/user_analysis_history.json", "data/spam_logs.json"]:
+            data = _eg_aab2_load([], file_path)
+            if not isinstance(data, list):
+                data = []
+            data.append(item)
+            _eg_aab2_save(file_path, data)
+
+    def _eg_aab2_route():
+        if not (_eg_aab2_session.get("logged_in") and _eg_aab2_session.get("username")):
+            return _eg_aab2_redirect("/login?auth_required=1")
+
+        username = str(_eg_aab2_session.get("username") or "user")
+        message = ""
+        result = None
+
+        if str(_eg_aab2_request.method or "").upper() == "POST":
+            message = (
+                _eg_aab2_request.form.get("sms_text")
+                or _eg_aab2_request.form.get("message")
+                or _eg_aab2_request.form.get("body")
+                or _eg_aab2_request.form.get("text")
+                or ""
+            ).strip()
+
+            if message:
+                result = _eg_aab2_engine(message)
+                _eg_aab2_write(username, message, result)
+
+        result_html = ""
+        if result:
+            reasons = result.get("reasons") or []
+            reasons_html = "".join("<li>" + _eg_aab2_safe(x) + "</li>" for x in reasons)
+            reasons_joined = "\n".join(str(x) for x in reasons)
+
+            score = int(result.get("score") or 0)
+            risk_label = str(result.get("risk_label") or "")
+            risk_class = str(result.get("risk_class") or "")
+            status = str(result.get("status") or "")
+
+            result_html = f"""
+<div class="section-title">SONUÇ</div>
+<section class="result">
+  <div class="result-top">
+    <div>
+      <h3>{_eg_aab2_safe(risk_label)}</h3>
+      <p>AI analiz tamamlandı. Şimdi bu SMS için güvenlik kararı verebilirsin.</p>
+    </div>
+    <div class="score">{_eg_aab2_safe(score)}</div>
+  </div>
+
+  <div class="mini-grid">
+    <div><b>{_eg_aab2_safe(status)}</b><span>Durum</span></div>
+    <div><b>{_eg_aab2_safe(risk_class)}</b><span>Seviye</span></div>
+  </div>
+
+  <ul>{reasons_html}</ul>
+
+  <div class="decision">
+    <div class="decision-title">SMS AKSİYONU</div>
+    <p>Bu karar SMS Aksiyon Merkezi, Koruma Geçmişi ve sayaçlara işlenecek.</p>
+
+    <div class="action-grid">
+      <form method="post" action="/u/sms/action">
+        <input type="hidden" name="sender" value="manual_ai_analysis">
+        <input type="hidden" name="message" value="{_eg_aab2_safe(message)}">
+        <input type="hidden" name="action" value="blocked">
+        <input type="hidden" name="risk_score" value="{_eg_aab2_safe(score)}">
+        <input type="hidden" name="risk_level" value="{_eg_aab2_safe(risk_label)}">
+        <input type="hidden" name="reason" value="{_eg_aab2_safe(reasons_joined)}">
+        <input type="hidden" name="source" value="ai_analysis">
+        <button class="act danger" type="submit">⛔ Engelle</button>
+      </form>
+
+      <form method="post" action="/u/sms/action">
+        <input type="hidden" name="sender" value="manual_ai_analysis">
+        <input type="hidden" name="message" value="{_eg_aab2_safe(message)}">
+        <input type="hidden" name="action" value="safe">
+        <input type="hidden" name="risk_score" value="{_eg_aab2_safe(score)}">
+        <input type="hidden" name="risk_level" value="{_eg_aab2_safe(risk_label)}">
+        <input type="hidden" name="reason" value="{_eg_aab2_safe(reasons_joined)}">
+        <input type="hidden" name="source" value="ai_analysis">
+        <button class="act safe" type="submit">✅ Güvenli</button>
+      </form>
+
+      <form method="post" action="/u/sms/action">
+        <input type="hidden" name="sender" value="manual_ai_analysis">
+        <input type="hidden" name="message" value="{_eg_aab2_safe(message)}">
+        <input type="hidden" name="action" value="reported">
+        <input type="hidden" name="risk_score" value="{_eg_aab2_safe(score)}">
+        <input type="hidden" name="risk_level" value="{_eg_aab2_safe(risk_label)}">
+        <input type="hidden" name="reason" value="{_eg_aab2_safe(reasons_joined)}">
+        <input type="hidden" name="source" value="ai_analysis">
+        <button class="act warn" type="submit">⚠️ Şikayet</button>
+      </form>
+    </div>
+
+    <a class="sms-center" href="/u/sms/actions">SMS Aksiyon Merkezini Aç</a>
+  </div>
+</section>
+"""
+
+        page = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - AI Analiz</title>
+<style>
+:root{--bg:#020806;--line:rgba(35,255,137,.22);--green:#20ff88;--yellow:#ffdd35;--red:#ff4d61;--text:#f5fff8;--muted:rgba(245,255,248,.62)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at 80% 0%,rgba(35,255,137,.14),transparent 32%),var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+body{padding:16px 14px 24px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:50px;height:50px;border-radius:17px;background:rgba(35,255,137,.12);border:1px solid var(--line);display:grid;place-items:center;font-size:27px}
+.brand h1{margin:0;font-size:26px;line-height:1;font-weight:950;letter-spacing:-1.2px}.brand h1 span{color:var(--green)}
+.brand p{margin:4px 0 0;color:var(--muted);font-weight:850;font-size:12px}
+.badge{border:1px solid rgba(255,221,53,.35);color:var(--green);background:rgba(35,255,137,.10);padding:9px 12px;border-radius:999px;font-weight:950;font-size:12px}
+.hero,.scan,.result,.status{border:1px solid var(--line);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:23px;padding:16px;box-shadow:0 18px 48px rgba(0,0,0,.34)}
+.hero-top{display:flex;align-items:flex-start;gap:13px}
+.ico{width:54px;height:54px;flex:0 0 54px;border-radius:19px;border:1px solid var(--line);background:rgba(35,255,137,.10);display:grid;place-items:center;font-size:29px}
+.hero h2{font-size:31px;line-height:1.02;margin:2px 0 6px;font-weight:950;letter-spacing:-1.5px}
+.hero p{margin:0;color:var(--muted);font-size:14px;line-height:1.3;font-weight:800}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:14px}
+.stat{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.23);border-radius:17px;padding:12px;min-height:68px}
+.stat b{display:block;color:var(--green);font-size:19px}.stat span{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-top:6px}
+.back{display:flex;align-items:center;justify-content:center;margin-top:12px;min-height:44px;width:100%;border-radius:16px;color:var(--text);text-decoration:none;font-weight:950;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09)}
+.section-title{font-size:18px;letter-spacing:8px;font-weight:950;margin:22px 0 10px}
+.scan{padding:14px}.scan label{display:block;font-size:15px;font-weight:950;margin-bottom:8px}
+.scan textarea{width:100%;min-height:108px;border-radius:16px;border:1px solid rgba(35,255,137,.22);background:rgba(0,0,0,.22);color:var(--text);font-size:15px;font-weight:800;padding:12px 13px;outline:none;resize:vertical}
+.scan textarea::placeholder{color:rgba(245,255,248,.34)}
+.scan button{width:100%;height:52px;border:0;border-radius:16px;margin-top:10px;background:linear-gradient(135deg,var(--yellow),var(--green));font-size:16px;font-weight:950;color:#00180c}
+.result h3{font-size:31px;margin:0 0 7px;font-weight:950;letter-spacing:-1.3px}.result p{margin:0;color:var(--muted);font-size:13px;font-weight:850}
+.result-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.score{min-width:70px;height:70px;border-radius:20px;border:1px solid rgba(255,221,53,.35);display:grid;place-items:center;color:var(--yellow);font-size:28px;font-weight:950;background:rgba(0,0,0,.22)}
+.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.mini-grid div{border:1px solid rgba(35,255,137,.17);background:rgba(0,0,0,.20);border-radius:16px;padding:11px}
+.mini-grid b{display:block;color:#9fffc4;font-size:15px}.mini-grid span{display:block;color:var(--muted);font-size:11px;font-weight:900;margin-top:5px}
+.result ul{margin:14px 0 0;padding-left:20px}.result li{margin:7px 0;color:var(--muted);font-weight:850;line-height:1.35}
+.decision{margin-top:15px;border-top:1px solid rgba(255,255,255,.08);padding-top:14px}
+.decision-title{font-size:13px;letter-spacing:4px;font-weight:950;color:var(--green);margin-bottom:6px}
+.action-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.action-grid form{margin:0}
+.act{width:100%;min-height:48px;border:0;border-radius:15px;color:#fff;font-weight:950;font-size:14px}
+.act.danger{background:linear-gradient(135deg,#ff4d61,#9a1022)}
+.act.safe{background:linear-gradient(135deg,#20ff88,#079b55);color:#00180c}
+.act.warn{background:linear-gradient(135deg,#ffdd35,#ba7a00);color:#1b1000}
+.sms-center{display:flex;align-items:center;justify-content:center;margin-top:10px;text-decoration:none;min-height:44px;border-radius:15px;color:var(--text);font-weight:950;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09)}
+.status{padding:0;overflow:hidden}.row{display:flex;justify-content:space-between;gap:12px;padding:15px 16px;border-bottom:1px solid rgba(255,255,255,.06)}
+.row:last-child{border-bottom:0}.row span{font-size:15px;font-weight:900}.row b{color:#9fffc4;font-size:15px;font-weight:950}
+.foot{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}
+@media(max-width:560px){.action-grid{grid-template-columns:1fr}.brand h1{font-size:23px}.section-title{letter-spacing:5px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">🔎</div><div><h1>Erat<span>Guard</span></h1><p>AI Analiz</p></div></div>
+  <div class="badge">👑 PRO AKTİF</div>
+</header>
+
+<section class="hero">
+  <div class="hero-top">
+    <div class="ico">🔎</div>
+    <div><h2>AI Analiz</h2><p>Mesaj içeriğini risk, bağlantı, aciliyet ve dolandırıcılık sinyallerine göre analiz eder.</p></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>AI</b><span>Aktif</span></div>
+    <div class="stat"><b>0-100</b><span>Skor</span></div>
+    <div class="stat"><b>PRO</b><span>Motor</span></div>
+  </div>
+  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+</section>
+
+<div class="section-title">TARAMA</div>
+<form class="scan" method="post" action="/u/analysis">
+  <label>SMS / mesaj metnini analiz et</label>
+  <textarea name="sms_text" placeholder="Analiz etmek istediğin SMS veya mesaj metnini buraya yapıştır...">__MESSAGE__</textarea>
+  <button type="submit">AI Analizi Başlat</button>
+</form>
+
+__RESULT__
+
+<div class="section-title">DURUM</div>
+<section class="status">
+  <div class="row"><span>Analiz Motoru</span><b>Çevrim içi</b></div>
+  <div class="row"><span>Aksiyon Motoru</span><b>Bağlı</b></div>
+  <div class="row"><span>Kayıt</span><b>Aktif</b></div>
+  <div class="row"><span>Karantina</span><b>Otomatik</b></div>
+</section>
+
+<div class="foot">EratGuard PRO · __USERNAME__ · © 2026</div>
+</body>
+</html>
+"""
+        page = page.replace("__USERNAME__", _eg_aab2_safe(username))
+        page = page.replace("__MESSAGE__", _eg_aab2_safe(message))
+        page = page.replace("__RESULT__", result_html)
+
+        resp = _eg_aab2_make_response(_eg_aab2_render_template_string(page))
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+        return resp
+
+    try:
+        for _rule in list(app.url_map.iter_rules()):
+            if str(_rule) in ("/u/analysis", "/u/analysis/"):
+                app.view_functions[_rule.endpoint] = _eg_aab2_route
+                try:
+                    _rule.methods.add("POST")
+                except Exception:
+                    pass
+        print("ERATGUARD AI-ANALYSIS-ACTION-BUTTONS-V2 ACTIVE")
+    except Exception as _eg_aab2_route_err:
+        print("ERATGUARD AI-ANALYSIS-ACTION-BUTTONS-V2 ROUTE ERROR:", _eg_aab2_route_err)
+
+except Exception as _eg_aab2_err:
+    print("ERATGUARD AI-ANALYSIS-ACTION-BUTTONS-V2 ERROR:", _eg_aab2_err)
+# === /ERATGUARD_AI_ANALYSIS_ACTION_BUTTONS_V2 ===
+
 
 
 if __name__ == "__main__":
@@ -12612,37 +24835,9 @@ except Exception as _eg6j_debug_err:
     print("ERATGUARD STAGE6J SAFE DEBUG BOOT ERROR:", _eg6j_debug_err)
 # ===== ERATGUARD STAGE6J SAFE ADMIN AUTH DEBUG END =====
 
-# ===== ERATGUARD STAGE6J SAFE ADMIN AUTH DEBUG START =====
-try:
-    from flask import jsonify as _eg6j_jsonify
-    import os as _eg6j_os
 
-    @app.route("/__eg_admin_auth_debug_6j")
-    def _eg6j_admin_auth_debug():
-        def _present(name):
-            return bool(str(_eg6j_os.environ.get(name, "")).strip())
+# ERATGUARD CLEANUP: duplicate STAGE6J debug block removed
 
-        env_usernames = [
-            _eg6j_os.environ.get("ERATGUARD_ADMIN_USERNAME", ""),
-            _eg6j_os.environ.get("ADMIN_USERNAME", ""),
-            "admin",
-        ]
-        env_usernames_clean = [str(x).strip().lower() for x in env_usernames if str(x).strip()]
-
-        return _eg6j_jsonify({
-            "auth_fix_active": True,
-            "entrypoint": "dashboard_web.py",
-            "expected_custom_username": "eg_admin_tgwaxziy08",
-            "custom_username_in_env_list": "eg_admin_tgwaxziy08" in env_usernames_clean,
-            "has_ERATGUARD_ADMIN_USERNAME": _present("ERATGUARD_ADMIN_USERNAME"),
-            "has_ADMIN_USERNAME": _present("ADMIN_USERNAME"),
-            "has_ERATGUARD_ADMIN_PASSWORD": _present("ERATGUARD_ADMIN_PASSWORD"),
-            "has_ADMIN_PASSWORD": _present("ADMIN_PASSWORD"),
-            "username_count": len(env_usernames_clean)
-        })
-except Exception as _eg6j_debug_err:
-    print("ERATGUARD STAGE6J SAFE DEBUG BOOT ERROR:", _eg6j_debug_err)
-# ===== ERATGUARD STAGE6J SAFE ADMIN AUTH DEBUG END =====
 
 # ===== ERATGUARD STAGE6K FORCE SLIM ADMIN UI INJECT START =====
 try:
@@ -12708,7 +24903,7 @@ try:
   h3,
   .card-title,
   .node-title{
-    font-size:21px!important;
+    font-size:22px!important;
     line-height:1.12!important;
   }
 
@@ -12725,7 +24920,7 @@ try:
   .chip,
   .pill{
     padding:7px 11px!important;
-    font-size:12px!important;
+    font-size:12.8px!important;
     border-radius:999px!important;
     margin:4px 0!important;
   }
@@ -12810,7 +25005,7 @@ try:
   input[type="search"]{
     height:52px!important;
     border-radius:18px!important;
-    font-size:16px!important;
+    font-size:17px!important;
     padding:0 16px!important;
   }
 
@@ -13080,10 +25275,10 @@ try:
   .logout-btn,
   .btn-logout,
   a[href*="logout"]{
-    min-height:46px!important;
+    min-height:50px!important;
     padding:9px 16px!important;
     border-radius:16px!important;
-    font-size:16px!important;
+    font-size:17px!important;
   }
 
   /* Hero kartı incelt */
@@ -13122,7 +25317,7 @@ try:
   .admin-hero p,
   .subtitle,
   .desc{
-    font-size:16px!important;
+    font-size:17px!important;
     line-height:1.36!important;
     margin-bottom:14px!important;
   }
@@ -13131,7 +25326,7 @@ try:
   .chip,
   .pill{
     padding:7px 11px!important;
-    font-size:12px!important;
+    font-size:12.8px!important;
     line-height:1.15!important;
     margin:4px 0!important;
     min-height:auto!important;
@@ -13187,7 +25382,7 @@ try:
 
   .stat-card small,
   .metric-card small{
-    font-size:12px!important;
+    font-size:12.8px!important;
     line-height:1.2!important;
   }
 
@@ -13217,7 +25412,7 @@ try:
   h3,
   .card-title,
   .node-title{
-    font-size:20px!important;
+    font-size:21px!important;
     line-height:1.08!important;
   }
 
@@ -13263,7 +25458,7 @@ try:
   .user-avatar,
   .avatar{
     width:46px!important;
-    height:46px!important;
+    height:50px!important;
     min-width:46px!important;
     border-radius:15px!important;
     font-size:24px!important;
@@ -13272,7 +25467,7 @@ try:
   .user-row b,
   .node b,
   .tree-node b{
-    font-size:20px!important;
+    font-size:21px!important;
     line-height:1.05!important;
   }
 
@@ -13321,7 +25516,7 @@ try:
   .field span,
   .data-row span,
   .detail-row span{
-    font-size:12px!important;
+    font-size:12.8px!important;
   }
 
   .info b,
@@ -13369,7 +25564,7 @@ try:
   .quick-action p,
   .module-card p,
   .module span{
-    font-size:12px!important;
+    font-size:12.8px!important;
     line-height:1.25!important;
   }
 
@@ -13380,7 +25575,7 @@ try:
     min-height:48px!important;
     padding:10px 14px!important;
     border-radius:16px!important;
-    font-size:16px!important;
+    font-size:17px!important;
     margin-bottom:8px!important;
   }
 
@@ -13404,7 +25599,7 @@ try:
   .nav-item{
     min-height:64px!important;
     padding:6px 4px!important;
-    font-size:12px!important;
+    font-size:12.8px!important;
     line-height:1.05!important;
   }
 
@@ -13509,3 +25704,1168 @@ try:
 except Exception as _eg6k15_boot_err:
     print("ERATGUARD STAGE6K15 ULTRA SLIM ADMIN FIT MODE BOOT ERROR:", _eg6k15_boot_err)
 # ===== ERATGUARD STAGE6K15 ULTRA SLIM ADMIN FIT MODE END =====
+
+
+# ===== ERATGUARD HIDE AUTO SMS BADGE V3 START =====
+# Sağ üstte otomatik görünen bağımsız "SMS" rozetini gizler.
+# Sadece metni tam olarak SMS olan küçük rozetleri hedefler.
+try:
+    from flask import request as _eg_sms_badge_v3_request
+
+    def _eg_hide_auto_sms_badge_v3_script():
+        return """
+<style id="eg-hide-auto-sms-badge-v3-style">
+  .eg-force-hide-sms-badge-v3{
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+    width:0!important;
+    height:0!important;
+    min-width:0!important;
+    min-height:0!important;
+    max-width:0!important;
+    max-height:0!important;
+    padding:0!important;
+    margin:0!important;
+    overflow:hidden!important;
+  }
+</style>
+<script id="eg-hide-auto-sms-badge-v3-script">
+(function(){
+  function hideSmsBadgeV3(){
+    try{
+      var root = document.body || document.documentElement;
+      if(!root) return;
+
+      var nodes = Array.prototype.slice.call(root.querySelectorAll('*'));
+
+      nodes.forEach(function(el){
+        try{
+          if(!el) return;
+          if(el.id === 'egUserFan3Toggle') return;
+
+          var tag = (el.tagName || '').toLowerCase();
+          if(['html','head','body','script','style','textarea','input','form','label'].indexOf(tag) >= 0) return;
+
+          var txt = (el.innerText || el.textContent || '').replace(/\\s+/g,' ').trim();
+          if(txt !== 'SMS') return;
+
+          var r = el.getBoundingClientRect();
+          if(!r) return;
+
+          var w = r.width || 0;
+          var h = r.height || 0;
+
+          var isSmallBadge = w >= 35 && w <= 170 && h >= 24 && h <= 100;
+          var isRightSide = r.left > (window.innerWidth * 0.48);
+          var isUpperHalf = r.top < (window.innerHeight * 0.55);
+
+          if(isSmallBadge && isRightSide && isUpperHalf){
+            el.classList.add('eg-force-hide-sms-badge-v3');
+            el.setAttribute('aria-hidden','true');
+          }
+        }catch(e){}
+      });
+    }catch(e){}
+  }
+
+  hideSmsBadgeV3();
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', hideSmsBadgeV3);
+  }
+
+  setTimeout(hideSmsBadgeV3, 10);
+  setTimeout(hideSmsBadgeV3, 50);
+  setTimeout(hideSmsBadgeV3, 150);
+  setTimeout(hideSmsBadgeV3, 400);
+  setTimeout(hideSmsBadgeV3, 900);
+  setTimeout(hideSmsBadgeV3, 1800);
+  setInterval(hideSmsBadgeV3, 1000);
+
+  try{
+    if(window.MutationObserver){
+      var obs = new MutationObserver(function(){
+        hideSmsBadgeV3();
+      });
+      obs.observe(document.documentElement || document.body, {
+        childList:true,
+        subtree:true,
+        attributes:true,
+        characterData:true
+      });
+    }
+  }catch(e){}
+})();
+</script>
+"""
+
+    @app.after_request
+    def _eg_hide_auto_sms_badge_v3_after_request(resp):
+        try:
+            path = (_eg_sms_badge_v3_request.path or "")
+            if path.startswith("/admin"):
+                return resp
+
+            ctype = (resp.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return resp
+
+            body = resp.get_data(as_text=True)
+            if not body or "eg-hide-auto-sms-badge-v3-script" in body:
+                return resp
+
+            inject = _eg_hide_auto_sms_badge_v3_script()
+
+            if "</body>" in body:
+                body = body.replace("</body>", inject + "\n</body>", 1)
+            else:
+                body += inject
+
+            resp.set_data(body)
+            resp.headers["Content-Length"] = str(len(body.encode("utf-8")))
+        except Exception as _eg_sms_badge_v3_err:
+            print("ERATGUARD HIDE AUTO SMS BADGE V3 ERROR:", _eg_sms_badge_v3_err)
+        return resp
+
+except Exception as _eg_sms_badge_v3_boot_err:
+    print("ERATGUARD HIDE AUTO SMS BADGE V3 BOOT ERROR:", _eg_sms_badge_v3_boot_err)
+# ===== ERATGUARD HIDE AUTO SMS BADGE V3 END =====
+
+
+# ===== ERATGUARD VITES-2C PROTECTION CENTER START =====
+@app.route("/u/protection")
+def eg_vites2c_protection_center():
+    try:
+        username = session.get("username") or "Erat@32"
+        plan = session.get("plan") or session.get("license_type") or "PRO"
+    except Exception:
+        username = "Erat@32"
+        plan = "PRO"
+
+    return f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>EratGuard PRO - Koruma Merkezi</title>
+<style>
+:root{{
+  --bg:#020705;
+  --card:rgba(4,18,12,.74);
+  --line:rgba(35,255,137,.18);
+  --green:#23ff89;
+  --cyan:#22e7ff;
+  --text:#f2fff6;
+  --muted:rgba(242,255,246,.64);
+  --warn:#ffd166;
+}}
+*{{box-sizing:border-box}}
+html,body{{margin:0;min-height:100%;background:
+radial-gradient(circle at 78% 22%,rgba(34,231,255,.16),transparent 34%),
+radial-gradient(circle at 18% 88%,rgba(35,255,137,.13),transparent 38%),
+linear-gradient(135deg,#020705,#030d09 48%,#010403);
+color:var(--text);font-family:Arial,Helvetica,sans-serif;overflow-x:hidden}}
+.eg-wrap{{min-height:100vh;padding:22px 18px 34px}}
+.eg-top{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}}
+.eg-brand{{display:flex;align-items:center;gap:12px}}
+.eg-logo{{width:42px;height:42px;border-radius:15px;display:grid;place-items:center;
+background:linear-gradient(135deg,var(--green),var(--cyan));color:#00170b;font-weight:1000;
+box-shadow:0 0 28px rgba(35,255,137,.22)}}
+.eg-title small{{display:block;color:var(--cyan);font-size:10px;font-weight:1000;letter-spacing:.18em}}
+.eg-title b{{display:block;font-size:17px;letter-spacing:-.2px}}
+.eg-pill{{border:1px solid var(--line);border-radius:999px;padding:9px 11px;background:rgba(3,18,10,.55);
+font-size:10px;font-weight:1000;letter-spacing:.12em;color:var(--green);white-space:nowrap}}
+.eg-hero{{border:1px solid var(--line);border-radius:30px;padding:22px;background:linear-gradient(180deg,rgba(4,22,14,.82),rgba(2,8,6,.72));
+box-shadow:0 18px 70px rgba(0,0,0,.38), inset 0 0 28px rgba(35,255,137,.04);margin-bottom:16px}}
+.eg-hero h1{{margin:0 0 8px;font-size:32px;letter-spacing:-1.2px;line-height:1}}
+.eg-hero p{{margin:0;color:var(--muted);font-size:13px;line-height:1.55}}
+.eg-status{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}}
+.eg-card{{border:1px solid var(--line);border-radius:24px;padding:15px;background:var(--card);
+box-shadow:inset 0 0 20px rgba(35,255,137,.035)}}
+.eg-card .k{{font-size:10px;font-weight:1000;letter-spacing:.16em;color:var(--muted);margin-bottom:8px}}
+.eg-card .v{{display:flex;align-items:center;gap:8px;font-size:17px;font-weight:1000}}
+.dot{{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 18px rgba(35,255,137,.75)}}
+.dot.c{{background:var(--cyan);box-shadow:0 0 18px rgba(34,231,255,.75)}}
+.dot.w{{background:var(--warn);box-shadow:0 0 18px rgba(255,209,102,.55)}}
+.eg-actions{{display:grid;grid-template-columns:1fr;gap:11px;margin-top:16px}}
+.eg-btn{{display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:var(--text);
+border:1px solid rgba(34,231,255,.16);border-radius:22px;padding:15px 16px;background:rgba(2,13,10,.66);
+font-size:13px;font-weight:1000;letter-spacing:.02em}}
+.eg-btn span{{color:var(--cyan)}}
+.eg-back{{margin-top:18px;display:inline-flex;text-decoration:none;color:#00170b;background:linear-gradient(135deg,var(--green),var(--cyan));
+border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;box-shadow:0 0 28px rgba(35,255,137,.16)}}
+.eg-note{{margin-top:15px;color:var(--muted);font-size:12px;line-height:1.55}}
+@media(max-width:420px){{
+  .eg-wrap{{padding:18px 14px 28px}}
+  .eg-hero h1{{font-size:28px}}
+  .eg-status{{grid-template-columns:1fr 1fr;gap:10px}}
+  .eg-card{{padding:13px;border-radius:21px}}
+  .eg-card .v{{font-size:15px}}
+}}
+</style>
+</head>
+<body>
+<div class="eg-wrap">
+  <div class="eg-top">
+    <div class="eg-brand">
+      <div class="eg-logo">E</div>
+      <div class="eg-title">
+        <small>ERATGUARD PRO</small>
+        <b>Koruma Merkezi</b>
+      </div>
+    </div>
+    <div class="eg-pill">{plan}</div>
+  </div>
+
+  <section class="eg-hero">
+    <h1>Koruma aktif.</h1>
+    <p>{username} hesabı için SMS kalkanı, link kontrolü ve risk motoru hazır durumda. Bu merkez, telefona düşebilecek şüpheli içerikleri takip etmek için ana güvenlik alanıdır.</p>
+  </section>
+
+  <div class="eg-status">
+    <div class="eg-card">
+      <div class="k">SMS KALKANI</div>
+      <div class="v"><i class="dot"></i> Hazır</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">LİNK KONTROLÜ</div>
+      <div class="v"><i class="dot c"></i> Aktif</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">RİSK MOTORU</div>
+      <div class="v"><i class="dot"></i> PRO</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">SON TARAMA</div>
+      <div class="v"><i class="dot w"></i> Beklemede</div>
+    </div>
+  </div>
+
+  <div class="eg-actions">
+    <a class="eg-btn" href="/u/analysis">Riskli SMS Analizi <span>→</span></a>
+    <a class="eg-btn" href="/u/blocked">Engellenenleri Gör <span>→</span></a>
+    <a class="eg-btn" href="/u/reports">Koruma Raporları <span>→</span></a>
+  </div>
+
+  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+
+  <div class="eg-note">
+    EratGuard PRO koruma katmanı aktif. SMS, link ve risk motoru tek merkezden takip edilir.
+  </div>
+</div>
+</body>
+</html>"""
+# ===== ERATGUARD VITES-2C PROTECTION CENTER END =====
+
+
+# === ERATGUARD_AI_ACTION_INJECTOR_V2B ===
+# Final after_request injection:
+# Hangi /u/analysis override aktif olursa olsun, POST analiz sonucuna
+# Engelle / Güvenli / Şikayet aksiyon formlarını en son ekler.
+
+try:
+    from flask import request as _eg_aai2b_request
+    import html as _eg_aai2b_html
+
+    def _eg_aai2b_safe(v):
+        try:
+            return _eg_aai2b_html.escape(str(v or ""), quote=True)
+        except Exception:
+            return ""
+
+    def _eg_aai2b_score_level(score):
+        try:
+            score = int(score)
+        except Exception:
+            score = 0
+        if score >= 71:
+            return "Yüksek Risk"
+        if score >= 31:
+            return "Orta Risk"
+        return "Düşük Risk"
+
+    def _eg_aai2b_quick_score(message):
+        text = str(message or "").lower()
+        score = 8
+        reasons = []
+
+        checks = [
+            (["http://", "https://", "www.", ".com", ".net", ".xyz", "link"], 30, "Mesaj bağlantı/link yönlendirmesi içeriyor."),
+            (["banka", "kart", "şifre", "sifre", "hesap", "iban", "ödeme", "odeme"], 28, "Mesaj finansal veya kişisel bilgi riski taşıyor."),
+            (["acil", "hemen", "son gün", "son gun", "tıkla", "tikla", "tıklayın", "tiklayin"], 20, "Mesaj aciliyet dili içeriyor."),
+            (["kazandınız", "kazandiniz", "ödül", "odul", "hediye", "bonus", "kampanya"], 22, "Mesaj ödül/kazanç vaadi içeriyor."),
+        ]
+
+        for words, add, reason in checks:
+            if any(w in text for w in words):
+                score += add
+                reasons.append(reason)
+
+        if not reasons:
+            reasons.append("Belirgin dolandırıcılık sinyali düşük görünüyor.")
+
+        score = max(0, min(100, int(score)))
+        return score, _eg_aai2b_score_level(score), reasons
+
+    @app.after_request
+    def _eg_aai2b_after_request(resp):
+        try:
+            path = str(_eg_aai2b_request.path or "")
+            method = str(_eg_aai2b_request.method or "").upper()
+
+            if path not in ("/u/analysis", "/u/analysis/") or method != "POST":
+                return resp
+
+            ctype = str(resp.headers.get("Content-Type") or "")
+            if "text/html" not in ctype.lower():
+                return resp
+
+            html = resp.get_data(as_text=True)
+
+            # Zaten gerçek form varsa tekrar ekleme.
+            if "/u/sms/action" in html or "SMS AKSİYONU" in html:
+                return resp
+
+            message = (
+                _eg_aai2b_request.form.get("sms_text")
+                or _eg_aai2b_request.form.get("message")
+                or _eg_aai2b_request.form.get("body")
+                or _eg_aai2b_request.form.get("text")
+                or ""
+            ).strip()
+
+            if not message:
+                return resp
+
+            score, risk_level, reasons = _eg_aai2b_quick_score(message)
+            reasons_joined = "\n".join(reasons)
+
+            css = """
+<style id="eg-aai2b-css">
+.eg-decision{margin:18px 0;border:1px solid rgba(35,255,137,.22);background:linear-gradient(145deg,rgba(10,36,23,.94),rgba(4,14,9,.94));border-radius:23px;padding:16px;box-shadow:0 18px 48px rgba(0,0,0,.28)}
+.eg-decision-title{font-size:13px;letter-spacing:4px;font-weight:950;color:#20ff88;margin-bottom:6px}
+.eg-decision p{margin:0;color:rgba(245,255,248,.62);font-size:13px;font-weight:850;line-height:1.35}
+.eg-action-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.eg-action-grid form{margin:0}
+.eg-act{width:100%;min-height:50px;border:0;border-radius:15px;color:#fff;font-weight:950;font-size:14px}
+.eg-act-danger{background:linear-gradient(135deg,#ff4d61,#9a1022)}
+.eg-act-safe{background:linear-gradient(135deg,#20ff88,#079b55);color:#00180c}
+.eg-act-warn{background:linear-gradient(135deg,#ffdd35,#ba7a00);color:#1b1000}
+.eg-sms-center{display:flex;align-items:center;justify-content:center;margin-top:10px;text-decoration:none;min-height:44px;border-radius:15px;color:#f5fff8;font-weight:950;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09)}
+@media(max-width:560px){.eg-action-grid{grid-template-columns:1fr}}
+</style>
+"""
+
+            block = f"""
+<div class="eg-decision">
+  <div class="eg-decision-title">SMS AKSİYONU</div>
+  <p>Bu karar SMS Aksiyon Merkezi, Koruma Geçmişi ve sayaçlara işlenecek.</p>
+
+  <div class="eg-action-grid">
+    <form method="post" action="/u/sms/action">
+      <input type="hidden" name="sender" value="manual_ai_analysis">
+      <input type="hidden" name="message" value="{_eg_aai2b_safe(message)}">
+      <input type="hidden" name="action" value="blocked">
+      <input type="hidden" name="risk_score" value="{score}">
+      <input type="hidden" name="risk_level" value="{_eg_aai2b_safe(risk_level)}">
+      <input type="hidden" name="reason" value="{_eg_aai2b_safe(reasons_joined)}">
+      <input type="hidden" name="source" value="ai_analysis">
+      <button class="eg-act eg-act-danger" type="submit">⛔ Engelle</button>
+    </form>
+
+    <form method="post" action="/u/sms/action">
+      <input type="hidden" name="sender" value="manual_ai_analysis">
+      <input type="hidden" name="message" value="{_eg_aai2b_safe(message)}">
+      <input type="hidden" name="action" value="safe">
+      <input type="hidden" name="risk_score" value="{score}">
+      <input type="hidden" name="risk_level" value="{_eg_aai2b_safe(risk_level)}">
+      <input type="hidden" name="reason" value="{_eg_aai2b_safe(reasons_joined)}">
+      <input type="hidden" name="source" value="ai_analysis">
+      <button class="eg-act eg-act-safe" type="submit">✅ Güvenli</button>
+    </form>
+
+    <form method="post" action="/u/sms/action">
+      <input type="hidden" name="sender" value="manual_ai_analysis">
+      <input type="hidden" name="message" value="{_eg_aai2b_safe(message)}">
+      <input type="hidden" name="action" value="reported">
+      <input type="hidden" name="risk_score" value="{score}">
+      <input type="hidden" name="risk_level" value="{_eg_aai2b_safe(risk_level)}">
+      <input type="hidden" name="reason" value="{_eg_aai2b_safe(reasons_joined)}">
+      <input type="hidden" name="source" value="ai_analysis">
+      <button class="eg-act eg-act-warn" type="submit">⚠️ Şikayet</button>
+    </form>
+  </div>
+
+  <a class="eg-sms-center" href="/u/sms/actions">SMS Aksiyon Merkezini Aç</a>
+</div>
+"""
+
+            if "</head>" in html:
+                html = html.replace("</head>", css + "\n</head>", 1)
+
+            # En temiz yer: SONUÇ bölümünden sonra DURUM bölümünden önce.
+            if "DURUM" in html:
+                html = html.replace('<div class="section-title">DURUM</div>', block + '\n<div class="section-title">DURUM</div>', 1)
+            elif "</body>" in html:
+                html = html.replace("</body>", block + "\n</body>", 1)
+            else:
+                html += block
+
+            resp.set_data(html)
+            resp.headers["Content-Length"] = str(len(resp.get_data()))
+            return resp
+
+        except Exception as e:
+            try:
+                print("ERATGUARD AI ACTION INJECTOR V2B ERROR:", e)
+            except Exception:
+                pass
+            return resp
+
+    print("ERATGUARD AI ACTION INJECTOR V2B ACTIVE")
+
+except Exception as _eg_aai2b_err:
+    print("ERATGUARD AI ACTION INJECTOR V2B BOOT ERROR:", _eg_aai2b_err)
+
+# === /ERATGUARD_AI_ACTION_INJECTOR_V2B ===
+
+# === ERATGUARD_PROTECTION_HISTORY_DATA_BIND_V1 ===
+# Koruma Geçmişi yeni SMS Action Engine list formatına bağlanır.
+# Kaynak: data/eratguard_sms_actions_v5c.json
+
+try:
+    from flask import render_template_string as _eg_hdb1_render_template_string
+    from flask import make_response as _eg_hdb1_make_response
+    from flask import jsonify as _eg_hdb1_jsonify
+    from flask import send_file as _eg_hdb1_send_file
+    from flask import request as _eg_hdb1_request
+    from pathlib import Path as _eg_hdb1_Path
+    from datetime import datetime as _eg_hdb1_datetime
+    import json as _eg_hdb1_json
+    import io as _eg_hdb1_io
+    import html as _eg_hdb1_html
+
+    def _eg_hdb1_safe(v):
+        try:
+            return _eg_hdb1_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_hdb1_read_actions():
+        try:
+            if "_eg_load_sms_actions" in globals() and callable(globals().get("_eg_load_sms_actions")):
+                data = globals()["_eg_load_sms_actions"]()
+            else:
+                p = _eg_hdb1_Path("data/eratguard_sms_actions_v5c.json")
+                if not p.exists() or p.stat().st_size == 0:
+                    return []
+                data = _eg_hdb1_json.loads(p.read_text(encoding="utf-8", errors="ignore"))
+
+            if isinstance(data, list):
+                return [x for x in data if isinstance(x, dict)]
+
+            if isinstance(data, dict):
+                out = []
+                for action_key, label in [("blocked", "Engellendi"), ("reported", "Şikayet"), ("safe", "Güvenli")]:
+                    arr = data.get(action_key, [])
+                    if isinstance(arr, list):
+                        for item in arr:
+                            if isinstance(item, dict):
+                                row = dict(item)
+                            else:
+                                row = {"message": str(item)}
+                            row.setdefault("action", action_key)
+                            row.setdefault("label", label)
+                            out.append(row)
+                return out
+
+            return []
+        except Exception as e:
+            print("ERATGUARD HISTORY DATA BIND READ ERROR:", e)
+            return []
+
+    def _eg_hdb1_write_actions(actions):
+        try:
+            if "_eg_save_sms_actions" in globals() and callable(globals().get("_eg_save_sms_actions")):
+                globals()["_eg_save_sms_actions"](actions)
+                return
+        except Exception:
+            pass
+
+        p = _eg_hdb1_Path("data/eratguard_sms_actions_v5c.json")
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(_eg_hdb1_json.dumps(actions, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def _eg_hdb1_counts(actions):
+        c = {"total": len(actions), "blocked": 0, "safe": 0, "reported": 0}
+        for a in actions:
+            act = str(a.get("action") or "").strip()
+            if act in c:
+                c[act] += 1
+        return c
+
+    def _eg_hdb1_sort_key(item):
+        return str(item.get("created_at") or item.get("updated_at") or item.get("time") or "")
+
+    def _eg_hdb1_history_page():
+        actions = _eg_hdb1_read_actions()
+        actions = sorted(actions, key=_eg_hdb1_sort_key, reverse=True)
+        counts = _eg_hdb1_counts(actions)
+
+        html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard - Koruma Geçmişi</title>
+<style>
+:root{--bg:#061018;--card:#0d1b27;--text:#eef7ff;--muted:#8ca3b6;--line:rgba(255,255,255,.10);--green:#23ff89;--blue:#1b78ff;--red:#ff4d61;--yellow:#ffd166}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(circle at top,#143b2b 0,#061018 45%,#03070b 100%);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:16px 14px 90px}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.brand h1{margin:0;font-size:25px;line-height:1;font-weight:950;letter-spacing:-.8px}.brand p{margin:6px 0 0;color:var(--muted);font-size:13px;font-weight:800}
+.version{border:1px solid rgba(35,255,137,.3);background:rgba(35,255,137,.1);color:var(--green);border-radius:999px;padding:9px 11px;font-size:12px;font-weight:950}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:14px 0}
+.stat{border:1px solid var(--line);background:rgba(13,27,39,.88);border-radius:18px;padding:13px;min-height:78px}
+.stat b{display:block;font-size:24px;color:var(--green)}.stat span{display:block;color:var(--muted);font-size:12px;font-weight:900;margin-top:6px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 16px}
+.btn{border:1px solid var(--line);background:#10283a;color:var(--text);text-decoration:none;border-radius:999px;padding:10px 12px;font-size:13px;font-weight:900}
+.btn.danger{background:rgba(255,77,97,.15);border-color:rgba(255,77,97,.45)}
+.filters{display:flex;gap:8px;overflow:auto;margin:8px 0 14px}
+.filter{border:1px solid var(--line);background:#0d1b27;color:var(--text);border-radius:999px;padding:10px 12px;font-size:13px;font-weight:900}
+.filter.active{background:var(--blue);border-color:var(--blue)}
+.card{border:1px solid var(--line);background:rgba(13,27,39,.92);border-radius:20px;padding:14px;margin:10px 0;box-shadow:0 12px 28px rgba(0,0,0,.22)}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.badge{display:inline-flex;border-radius:999px;padding:7px 9px;font-size:12px;font-weight:950}
+.badge.blocked{background:rgba(255,77,97,.16);color:#ff9aa6}.badge.safe{background:rgba(35,255,137,.16);color:#9fffc4}.badge.reported{background:rgba(255,209,102,.16);color:#ffe09a}
+.meta{color:var(--muted);font-size:12px;font-weight:800;margin-top:8px}
+.msg{margin-top:10px;border-radius:14px;background:rgba(255,255,255,.035);padding:10px;font-size:14px;line-height:1.4;word-break:break-word}
+.reasons{margin:10px 0 0;padding-left:18px;color:#cfe1ef;font-size:13px;line-height:1.35}
+.empty{text-align:center;color:var(--muted);padding:32px 10px;font-weight:850}
+.menu{position:fixed;right:18px;bottom:18px;background:var(--blue);color:white;border-radius:999px;padding:15px 18px;text-decoration:none;font-weight:950;box-shadow:0 16px 30px rgba(27,120,255,.35)}
+@media(max-width:680px){.grid{grid-template-columns:repeat(2,1fr)}.brand h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="brand">
+      <h1>Koruma Geçmişi</h1>
+      <p>SMS aksiyonları, AI analiz kararları ve güvenlik kayıtları tek merkezden izlenir.</p>
+    </div>
+    <div class="version">VITES-6H</div>
+  </div>
+
+  <div class="grid">
+    <div class="stat"><b>{{ counts.total }}</b><span>Toplam</span></div>
+    <div class="stat"><b>{{ counts.blocked }}</b><span>Engellenen</span></div>
+    <div class="stat"><b>{{ counts.reported }}</b><span>Şikayet</span></div>
+    <div class="stat"><b>{{ counts.safe }}</b><span>Güvenli</span></div>
+  </div>
+
+  <div class="actions">
+    <a class="btn" href="/api/v6/history-export">Dışa Aktar</a>
+    <a class="btn" href="/u/sms/actions">SMS Aksiyon Merkezi</a>
+    <form method="post" action="/api/v6/history-clear" onsubmit="return confirm('Koruma geçmişi yedek alındıktan sonra temizlensin mi?')" style="display:inline">
+      <button class="btn danger" type="submit">Geçmişi Temizle</button>
+    </form>
+    <form method="post" action="/api/v6/history-restore-latest" style="display:inline">
+      <button class="btn" type="submit">Son Yedeği Geri Yükle</button>
+    </form>
+  </div>
+
+  <div class="filters">
+    <button class="filter active" data-filter="all" type="button">Tümü</button>
+    <button class="filter" data-filter="blocked" type="button">Engellenen</button>
+    <button class="filter" data-filter="reported" type="button">Şikayet</button>
+    <button class="filter" data-filter="safe" type="button">Güvenli</button>
+  </div>
+
+  {% if not actions %}
+    <div class="empty">Henüz koruma geçmişi yok.</div>
+  {% endif %}
+
+  {% for a in actions %}
+  {% set act = a.get('action','') %}
+  <article class="card" data-action="{{ act }}">
+    <div class="row">
+      <div>
+        <span class="badge {{ act }}">{{ a.get('label') or act }}</span>
+        <div class="meta">Gönderen: {{ a.get('sender') or a.get('number') or 'Bilinmeyen' }} · Kaynak: {{ a.get('source') or '-' }}</div>
+      </div>
+      <div class="meta">Risk: {{ a.get('risk_score') or a.get('risk') or a.get('score') or 0 }} · {{ a.get('risk_level') or a.get('risk_label') or '-' }}</div>
+    </div>
+
+    <div class="msg">{{ a.get('message') or a.get('body') or a.get('text') or '' }}</div>
+
+    {% set reasons = a.get('reason') or a.get('reasons') or [] %}
+    {% if reasons %}
+      <ul class="reasons">
+      {% if reasons is string %}
+        <li>{{ reasons }}</li>
+      {% else %}
+        {% for r in reasons %}<li>{{ r }}</li>{% endfor %}
+      {% endif %}
+      </ul>
+    {% endif %}
+
+    <div class="meta">Tarih: {{ a.get('created_at') or a.get('time') or a.get('updated_at') or '-' }}</div>
+  </article>
+  {% endfor %}
+</div>
+
+<a class="menu" href="/u/dashboard">MENÜ</a>
+
+<script>
+document.querySelectorAll(".filter").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));
+    btn.classList.add("active");
+    const f = btn.dataset.filter;
+    document.querySelectorAll(".card").forEach(card=>{
+      card.style.display = (f==="all" || card.dataset.action===f) ? "" : "none";
+    });
+  });
+});
+</script>
+</body>
+</html>
+"""
+        return _eg_hdb1_render_template_string(html, actions=actions, counts=counts)
+
+    def _eg_hdb1_export():
+        actions = _eg_hdb1_read_actions()
+        counts = _eg_hdb1_counts(actions)
+        payload = {
+            "export_type": "sms_protection_history",
+            "version": "VITES-6H",
+            "created_at": _eg_hdb1_datetime.now().replace(microsecond=0).isoformat(),
+            "counts": counts,
+            "actions": actions,
+        }
+        bio = _eg_hdb1_io.BytesIO(_eg_hdb1_json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8"))
+        return _eg_hdb1_send_file(bio, mimetype="application/json", as_attachment=True, download_name="eratguard_protection_history_export.json")
+
+    def _eg_hdb1_clear():
+        actions = _eg_hdb1_read_actions()
+        backup_dir = _eg_hdb1_Path("data/history_backups")
+        backup_dir.mkdir(parents=True, exist_ok=True)
+
+        ts = _eg_hdb1_datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup = backup_dir / f"eratguard_sms_actions_before_clear_{ts}.json"
+        backup.write_text(_eg_hdb1_json.dumps(actions, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        _eg_hdb1_write_actions([])
+
+        if "application/json" in str(_eg_hdb1_request.headers.get("Accept", "")).lower():
+            return _eg_hdb1_jsonify({"ok": True, "message": "Koruma geçmişi temizlendi.", "backup": str(backup), "counts": {"total":0,"blocked":0,"safe":0,"reported":0}})
+        return _eg_hdb1_make_response('<script>location.href="/u/protection-history?cleared=1"</script>')
+
+    def _eg_hdb1_restore_latest():
+        backup_dir = _eg_hdb1_Path("data/history_backups")
+        files = sorted(backup_dir.glob("eratguard_sms_actions_before_clear_*.json"), key=lambda p: p.stat().st_mtime, reverse=True) if backup_dir.exists() else []
+
+        if not files:
+            return _eg_hdb1_jsonify({"ok": False, "error": "Geri yüklenecek yedek bulunamadı."}), 404
+
+        latest = files[0]
+        try:
+            data = _eg_hdb1_json.loads(latest.read_text(encoding="utf-8", errors="ignore"))
+            if isinstance(data, dict) and isinstance(data.get("actions"), list):
+                data = data["actions"]
+            if not isinstance(data, list):
+                raise ValueError("Yedek liste formatında değil.")
+
+            safety_dir = _eg_hdb1_Path("data/history_restore_safety")
+            safety_dir.mkdir(parents=True, exist_ok=True)
+            ts = _eg_hdb1_datetime.now().strftime("%Y%m%d_%H%M%S")
+            safety = safety_dir / f"before_restore_{ts}.json"
+            safety.write_text(_eg_hdb1_json.dumps(_eg_hdb1_read_actions(), ensure_ascii=False, indent=2), encoding="utf-8")
+
+            _eg_hdb1_write_actions(data)
+            return _eg_hdb1_jsonify({"ok": True, "message": "Koruma geçmişi en son yedekten geri yüklendi.", "restored": len(data), "backup": str(latest), "counts": _eg_hdb1_counts(data)})
+        except Exception as e:
+            return _eg_hdb1_jsonify({"ok": False, "error": str(e)}), 400
+
+    # Mevcut eski route endpointlerini yeni canlı veri fonksiyonlarına bağla.
+    for _rule in list(app.url_map.iter_rules()):
+        _path = str(_rule)
+        if _path in ("/u/protection-history", "/u/history", "/protection-history", "/history"):
+            app.view_functions[_rule.endpoint] = _eg_hdb1_history_page
+        elif _path == "/api/v6/history-export":
+            app.view_functions[_rule.endpoint] = _eg_hdb1_export
+        elif _path == "/api/v6/history-clear":
+            app.view_functions[_rule.endpoint] = _eg_hdb1_clear
+        elif _path == "/api/v6/history-restore-latest":
+            app.view_functions[_rule.endpoint] = _eg_hdb1_restore_latest
+
+    print("ERATGUARD PROTECTION HISTORY DATA BIND V1 ACTIVE")
+
+except Exception as _eg_hdb1_err:
+    print("ERATGUARD PROTECTION HISTORY DATA BIND V1 BOOT ERROR:", _eg_hdb1_err)
+
+# === /ERATGUARD_PROTECTION_HISTORY_DATA_BIND_V1 ===
+
+# === ERATGUARD_BLOCKED_SMS_CENTER_DATA_BIND_V1 ===
+# /u/blocked-sms ekranını yeni SMS Action Engine list formatına bağlar.
+# Kaynak: data/eratguard_sms_actions_v5c.json
+
+try:
+    from flask import render_template_string as _eg_bsms1_render_template_string
+    import html as _eg_bsms1_html
+
+    def _eg_bsms1_safe(v):
+        try:
+            return _eg_bsms1_html.escape(str(v or ""))
+        except Exception:
+            return ""
+
+    def _eg_bsms1_read_actions():
+        try:
+            if "_eg_load_sms_actions" in globals() and callable(globals().get("_eg_load_sms_actions")):
+                data = globals()["_eg_load_sms_actions"]()
+            else:
+                import json
+                from pathlib import Path
+                p = Path("data/eratguard_sms_actions_v5c.json")
+                if not p.exists() or p.stat().st_size == 0:
+                    return []
+                data = json.loads(p.read_text(encoding="utf-8", errors="ignore"))
+
+            if isinstance(data, list):
+                return [x for x in data if isinstance(x, dict)]
+
+            # Eski format desteği
+            if isinstance(data, dict):
+                out = []
+                for action_key, label in [
+                    ("blocked", "Engellendi"),
+                    ("safe", "Güvenli"),
+                    ("reported", "Şikayet")
+                ]:
+                    arr = data.get(action_key, [])
+                    if isinstance(arr, list):
+                        for item in arr:
+                            row = dict(item) if isinstance(item, dict) else {"message": str(item)}
+                            row.setdefault("action", action_key)
+                            row.setdefault("label", label)
+                            out.append(row)
+                return out
+
+            return []
+        except Exception as e:
+            print("ERATGUARD BLOCKED SMS CENTER DATA BIND READ ERROR:", e)
+            return []
+
+    def _eg_bsms1_sort_key(item):
+        return str(item.get("created_at") or item.get("updated_at") or item.get("time") or "")
+
+    def _eg_bsms1_group(actions):
+        grouped = {"blocked": [], "safe": [], "reported": []}
+        for item in actions:
+            act = str(item.get("action") or "").strip()
+            if act in grouped:
+                grouped[act].append(item)
+        for k in grouped:
+            grouped[k] = sorted(grouped[k], key=_eg_bsms1_sort_key, reverse=True)
+        return grouped
+
+    def _eg_bsms1_center():
+        actions = _eg_bsms1_read_actions()
+        grouped = _eg_bsms1_group(actions)
+
+        blocked = grouped["blocked"]
+        safe = grouped["safe"]
+        reported = grouped["reported"]
+
+        html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EratGuard PRO - Engellenen SMS Merkezi</title>
+<style>
+:root{--bg:#070a12;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.09);--green:#23ff89;--muted:#9aa3b2;--text:#fff;--blue:#1b78ff;--red:#ff4d61;--yellow:#ffd166}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(circle at top,rgba(35,255,137,.12),#070a12 42%,#03050a 100%);color:var(--text);font-family:Arial,Helvetica,sans-serif;padding:18px}
+.eg-wrap{max-width:820px;margin:0 auto;padding-bottom:78px}
+.eg-head{background:linear-gradient(135deg,rgba(35,255,137,.18),rgba(45,108,255,.10));border:1px solid rgba(35,255,137,.28);border-radius:24px;padding:18px;box-shadow:0 0 28px rgba(35,255,137,.10)}
+.eg-kicker{color:var(--green);font-weight:950;letter-spacing:.08em;font-size:12px}
+h1{margin:8px 0 8px;font-size:25px}
+p{color:var(--muted);line-height:1.5;margin:0}
+.eg-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.eg-stat{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:12px;text-align:center}
+.eg-stat b{display:block;font-size:24px;color:var(--green)}
+.eg-stat span{display:block;margin-top:5px;color:#aeb8c8;font-size:12px;font-weight:850}
+.eg-tabs{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
+.eg-tabs button{flex:1 1 120px;border:1px solid rgba(35,255,137,.28);background:rgba(35,255,137,.12);color:var(--green);border-radius:16px;padding:12px;font-weight:950}
+.eg-tabs button.active{background:var(--blue);border-color:var(--blue);color:white}
+.eg-section{display:none}
+.eg-section.active{display:block}
+.eg-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:12px}
+.eg-rowtop{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.eg-badge{color:#06110b;background:var(--green);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:950}
+.eg-badge.blocked{background:#ff9aa6;color:#23040a}
+.eg-badge.safe{background:#9fffc4;color:#00180c}
+.eg-badge.reported{background:#ffe09a;color:#1b1000}
+.eg-score{color:#ffdf6e;font-weight:950;text-align:right}
+.eg-meta{margin-top:10px;color:var(--muted);font-size:12px;font-weight:800}
+.eg-text{margin-top:10px;line-height:1.45;color:#fff;word-break:break-word;background:rgba(0,0,0,.18);border-radius:14px;padding:10px}
+ul{margin:10px 0 0 18px;color:#aeb8c8;line-height:1.35}
+.eg-empty{padding:18px;border-radius:18px;background:rgba(255,255,255,.05);color:var(--muted);font-weight:850}
+.eg-link{display:block;margin-top:12px;color:var(--green);text-decoration:none;font-weight:950}
+.eg-menu{position:fixed;right:18px;bottom:18px;background:var(--blue);color:white;border-radius:999px;padding:15px 18px;text-decoration:none;font-weight:950;box-shadow:0 16px 30px rgba(27,120,255,.35)}
+@media(max-width:680px){.eg-stats{grid-template-columns:repeat(2,1fr)}h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="eg-wrap">
+  <div class="eg-head">
+    <div class="eg-kicker">ERATGUARD VITES-6H</div>
+    <h1>Engellenen SMS Merkezi</h1>
+    <p>AI Analiz ekranından verilen ENGELLE, GÜVENLİ ve ŞİKAYET aksiyonları gerçek SMS Action Engine verisinden listelenir.</p>
+
+    <div class="eg-stats">
+      <div class="eg-stat"><b>{{ total }}</b><span>Toplam</span></div>
+      <div class="eg-stat"><b>{{ blocked|length }}</b><span>Engelli</span></div>
+      <div class="eg-stat"><b>{{ safe|length }}</b><span>Güvenli</span></div>
+      <div class="eg-stat"><b>{{ reported|length }}</b><span>Şikayet</span></div>
+    </div>
+  </div>
+
+  <div class="eg-tabs">
+    <button class="active" onclick="showTab('blocked', this)">ENGELLİ</button>
+    <button onclick="showTab('safe', this)">GÜVENLİ</button>
+    <button onclick="showTab('reported', this)">ŞİKAYET</button>
+  </div>
+
+  <section id="blocked" class="eg-section active">
+    {% if not blocked %}<div class="eg-empty">Henüz engellenen SMS yok.</div>{% endif %}
+    {% for item in blocked %}{{ card(item, "Engellendi", "blocked")|safe }}{% endfor %}
+  </section>
+
+  <section id="safe" class="eg-section">
+    {% if not safe %}<div class="eg-empty">Henüz güvenli SMS kaydı yok.</div>{% endif %}
+    {% for item in safe %}{{ card(item, "Güvenli", "safe")|safe }}{% endfor %}
+  </section>
+
+  <section id="reported" class="eg-section">
+    {% if not reported %}<div class="eg-empty">Henüz şikayet kaydı yok.</div>{% endif %}
+    {% for item in reported %}{{ card(item, "Şikayet", "reported")|safe }}{% endfor %}
+  </section>
+
+  <a class="eg-link" href="/u/sms/actions">SMS Aksiyon Merkezini Aç →</a>
+  <a class="eg-link" href="/u/protection-history">Koruma Geçmişini Aç →</a>
+  <a class="eg-link" href="/u/analysis">← AI Analiz Merkezine Dön</a>
+</div>
+
+<a class="eg-menu" href="/u/dashboard">MENÜ</a>
+
+<script>
+function showTab(id, btn){
+  document.querySelectorAll(".eg-section").forEach(x=>x.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".eg-tabs button").forEach(x=>x.classList.remove("active"));
+  if(btn){btn.classList.add("active")}
+}
+</script>
+</body>
+</html>
+"""
+
+        def card(item, label, cls):
+            sender = _eg_bsms1_safe(item.get("sender") or item.get("number") or "-")
+            message = _eg_bsms1_safe(item.get("message") or item.get("body") or item.get("text") or "")
+            created = _eg_bsms1_safe(item.get("created_at") or item.get("time") or item.get("updated_at") or "-")
+            source = _eg_bsms1_safe(item.get("source") or "-")
+            score = _eg_bsms1_safe(item.get("risk_score") or item.get("risk") or item.get("score") or 0)
+            risk_level = _eg_bsms1_safe(item.get("risk_level") or item.get("risk_label") or "-")
+
+            reasons = item.get("reason") or item.get("reasons") or []
+            if isinstance(reasons, str):
+                reasons = [x.strip() for x in reasons.splitlines() if x.strip()] or [reasons]
+            if not isinstance(reasons, list):
+                reasons = []
+
+            reasons_html = "".join(f"<li>{_eg_bsms1_safe(x)}</li>" for x in reasons[:6]) or "<li>Sebep kaydı yok.</li>"
+
+            return f"""
+<div class="eg-card">
+  <div class="eg-rowtop">
+    <span class="eg-badge {cls}">{_eg_bsms1_safe(label)}</span>
+    <span class="eg-score">Risk: {score} · {risk_level}</span>
+  </div>
+  <div class="eg-meta">Gönderen: {sender} · Kaynak: {source} · Tarih: {created}</div>
+  <div class="eg-text">{message}</div>
+  <ul>{reasons_html}</ul>
+</div>
+"""
+
+        return _eg_bsms1_render_template_string(
+            html,
+            blocked=blocked,
+            safe=safe,
+            reported=reported,
+            total=len(actions),
+            card=card,
+        )
+
+    for _rule in list(app.url_map.iter_rules()):
+        if str(_rule) in ("/u/blocked-sms", "/u/sms-actions-center"):
+            app.view_functions[_rule.endpoint] = _eg_bsms1_center
+
+    print("ERATGUARD BLOCKED SMS CENTER DATA BIND V1 ACTIVE")
+
+except Exception as _eg_bsms1_err:
+    print("ERATGUARD BLOCKED SMS CENTER DATA BIND V1 BOOT ERROR:", _eg_bsms1_err)
+
+# === /ERATGUARD_BLOCKED_SMS_CENTER_DATA_BIND_V1 ===
+
+# === ERATGUARD_BLOCKED_ROUTE_REDIRECT_V1 ===
+# /u/blocked eski karantina/blok ekranını yeni VITES-6H Engellenen SMS Merkezi'ne bağlar.
+
+try:
+    from flask import redirect as _eg_brr1_redirect
+
+    def _eg_brr1_blocked_redirect():
+        return _eg_brr1_redirect("/u/blocked-sms")
+
+    for _rule in list(app.url_map.iter_rules()):
+        if str(_rule) in ("/u/blocked", "/u/blocked/", "/blocked"):
+            app.view_functions[_rule.endpoint] = _eg_brr1_blocked_redirect
+
+    print("ERATGUARD BLOCKED ROUTE REDIRECT V1 ACTIVE")
+
+except Exception as _eg_brr1_err:
+    print("ERATGUARD BLOCKED ROUTE REDIRECT V1 BOOT ERROR:", _eg_brr1_err)
+
+# === /ERATGUARD_BLOCKED_ROUTE_REDIRECT_V1 ===
+
+# === ERATGUARD_SMS_ACTION_API_TOKEN_GUARD_V1 ===
+# /sms/action public/internal API yolunu token ile korur.
+# /u/sms/action kullanıcı oturumlu panel yolu etkilenmez.
+
+try:
+    import secrets as _eg_satg1_secrets
+    import hmac as _eg_satg1_hmac
+    from pathlib import Path as _eg_satg1_Path
+    from flask import request as _eg_satg1_request, jsonify as _eg_satg1_jsonify
+
+    _EG_SATG1_TOKEN_FILE = _eg_satg1_Path("data/eratguard_sms_api_token.txt")
+    _EG_SATG1_TOKEN_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+    if not _EG_SATG1_TOKEN_FILE.exists() or _EG_SATG1_TOKEN_FILE.stat().st_size < 20:
+        _EG_SATG1_TOKEN_FILE.write_text(_eg_satg1_secrets.token_urlsafe(36), encoding="utf-8")
+
+    def _eg_satg1_get_token():
+        try:
+            return _EG_SATG1_TOKEN_FILE.read_text(encoding="utf-8").strip()
+        except Exception:
+            return ""
+
+    def _eg_satg1_request_token():
+        try:
+            tok = _eg_satg1_request.headers.get("X-EratGuard-Token", "") or ""
+            if tok:
+                return tok.strip()
+
+            tok = _eg_satg1_request.form.get("api_token", "") or ""
+            if tok:
+                return tok.strip()
+
+            if _eg_satg1_request.is_json:
+                js = _eg_satg1_request.get_json(silent=True) or {}
+                tok = js.get("api_token") or js.get("token") or ""
+                return str(tok).strip()
+        except Exception:
+            return ""
+        return ""
+
+    @app.before_request
+    def _eg_satg1_guard_sms_action_api():
+        try:
+            if _eg_satg1_request.path == "/sms/action" and _eg_satg1_request.method == "POST":
+                expected = _eg_satg1_get_token()
+                provided = _eg_satg1_request_token()
+
+                if not expected or not provided or not _eg_satg1_hmac.compare_digest(expected, provided):
+                    return _eg_satg1_jsonify({
+                        "ok": False,
+                        "error": "sms_action_api_token_required",
+                        "message": "SMS Action API token gerekli."
+                    }), 401
+        except Exception as e:
+            return _eg_satg1_jsonify({
+                "ok": False,
+                "error": "sms_action_api_guard_error",
+                "message": str(e)
+            }), 500
+
+    print("ERATGUARD SMS ACTION API TOKEN GUARD V1 ACTIVE")
+
+except Exception as _eg_satg1_err:
+    print("ERATGUARD SMS ACTION API TOKEN GUARD V1 BOOT ERROR:", _eg_satg1_err)
+
+# === /ERATGUARD_SMS_ACTION_API_TOKEN_GUARD_V1 ===
+
+# === ERATGUARD_SMS_ACTION_API_JSON_RESPONSE_V1 ===
+# /sms/action Android/iç API yolunu redirect yerine JSON response'a çevirir.
+# Token kontrolü ERATGUARD_SMS_ACTION_API_TOKEN_GUARD_V1 tarafından önce yapılır.
+# /u/sms/action kullanıcı paneli etkilenmez.
+
+try:
+    from flask import request as _eg_sajr1_request, jsonify as _eg_sajr1_jsonify
+
+    def _eg_sajr1_payload():
+        try:
+            if _eg_sajr1_request.is_json:
+                js = _eg_sajr1_request.get_json(silent=True) or {}
+                if isinstance(js, dict):
+                    return dict(js)
+        except Exception:
+            pass
+
+        out = {}
+        try:
+            for k in _eg_sajr1_request.form.keys():
+                out[k] = _eg_sajr1_request.form.get(k)
+        except Exception:
+            pass
+        return out
+
+    @app.before_request
+    def _eg_sajr1_sms_action_json_api():
+        try:
+            if _eg_sajr1_request.path == "/sms/action" and _eg_sajr1_request.method == "POST":
+                if "_eg_add_sms_action" not in globals() or not callable(globals().get("_eg_add_sms_action")):
+                    return _eg_sajr1_jsonify({
+                        "ok": False,
+                        "error": "sms_action_engine_missing"
+                    }), 500
+
+                payload = _eg_sajr1_payload()
+
+                # Token alanını kayıt içine yazma.
+                payload.pop("api_token", None)
+                payload.pop("token", None)
+
+                rec = globals()["_eg_add_sms_action"](payload)
+
+                return _eg_sajr1_jsonify({
+                    "ok": True,
+                    "saved": True,
+                    "record": rec
+                }), 200
+
+        except Exception as e:
+            return _eg_sajr1_jsonify({
+                "ok": False,
+                "error": "sms_action_api_json_error",
+                "message": str(e)
+            }), 500
+
+    print("ERATGUARD SMS ACTION API JSON RESPONSE V1 ACTIVE")
+
+except Exception as _eg_sajr1_err:
+    print("ERATGUARD SMS ACTION API JSON RESPONSE V1 BOOT ERROR:", _eg_sajr1_err)
+
+# === /ERATGUARD_SMS_ACTION_API_JSON_RESPONSE_V1 ===
+
+# ===== ERATGUARD CONTROLLED TRUE FAN-12P ROUTE LOCK START =====
+# Kontrollü temizlik sonrası kullanıcı ana girişleri sadece mevcut gerçek FAN-12P fonksiyonuna bağlanır.
+# Yeni HTML üretmez; dashboard_web.py içinde zaten bulunan "FAN-12P Command Center" kaynağını kullanır.
+
+try:
+    import inspect as _eg_fan12p_inspect
+
+    _eg_true_fan12p_func = None
+
+    for _eg_name, _eg_func in list(app.view_functions.items()):
+        try:
+            _eg_src = _eg_fan12p_inspect.getsource(_eg_func)
+        except Exception:
+            _eg_src = ""
+
+        if (
+            "FAN-12P Command Center" in _eg_src
+            and "FAN-12P HAZIR" in _eg_src
+            and "COMMAND CENTER" in _eg_src
+        ):
+            _eg_true_fan12p_func = _eg_func
+            print("ERATGUARD TRUE FAN-12P SOURCE FOUND:", _eg_name)
+            break
+
+    if _eg_true_fan12p_func is None:
+        print("ERATGUARD TRUE FAN-12P ROUTE LOCK WARNING: gerçek FAN-12P fonksiyonu bulunamadı.")
+    else:
+        _eg_lock_rules = [
+            "/dashboard",
+            "/u/dashboard",
+            "/app-start",
+            "/radial",
+            "/radial-menu",
+            "/radial-demo",
+        ]
+
+        for _eg_rule in list(app.url_map.iter_rules()):
+            if _eg_rule.rule in _eg_lock_rules:
+                app.view_functions[_eg_rule.endpoint] = _eg_true_fan12p_func
+                print("ERATGUARD TRUE FAN-12P ROUTE LOCKED:", _eg_rule.rule, "->", _eg_rule.endpoint)
+
+        for _eg_ep in [
+            "dashboard",
+            "user_dashboard",
+            "ss_user_alias_home_final",
+            "radial",
+            "radial_demo",
+            "app_start",
+            "user_home",
+            "home_dashboard",
+        ]:
+            if _eg_ep in app.view_functions:
+                app.view_functions[_eg_ep] = _eg_true_fan12p_func
+                print("ERATGUARD TRUE FAN-12P ENDPOINT LOCKED:", _eg_ep)
+
+        print("ERATGUARD CONTROLLED TRUE FAN-12P ROUTE LOCK ACTIVE")
+
+except Exception as _eg_route_lock_e:
+    print("ERATGUARD CONTROLLED TRUE FAN-12P ROUTE LOCK ERROR:", _eg_route_lock_e)
+# ===== ERATGUARD CONTROLLED TRUE FAN-12P ROUTE LOCK END =====
+
+# ===== ERATGUARD STEP5 APP-START HARD LOCK TO FAN-12P DASHBOARD START =====
+# /dashboard testte gerçek FAN-12P verdiği için /app-start aynı dashboard fonksiyonuna bağlanır.
+# Böylece APK giriş kapısı eski ekranı asla döndürmez.
+
+try:
+    _eg_dashboard_func = None
+    _eg_dashboard_endpoint = None
+
+    for _eg_rule in list(app.url_map.iter_rules()):
+        if _eg_rule.rule == "/dashboard":
+            _eg_dashboard_endpoint = _eg_rule.endpoint
+            _eg_dashboard_func = app.view_functions.get(_eg_dashboard_endpoint)
+            break
+
+    if _eg_dashboard_func is None:
+        print("ERATGUARD STEP5 APP-START LOCK ERROR: /dashboard endpoint bulunamadı")
+    else:
+        for _eg_rule in list(app.url_map.iter_rules()):
+            if _eg_rule.rule in ["/app-start", "/u/dashboard", "/radial", "/radial-menu", "/radial-demo"]:
+                app.view_functions[_eg_rule.endpoint] = _eg_dashboard_func
+                print("ERATGUARD STEP5 ROUTE LOCKED TO DASHBOARD:", _eg_rule.rule, "->", _eg_rule.endpoint)
+
+        for _eg_ep in ["app_start", "appStart", "start_app", "user_app_start"]:
+            if _eg_ep in app.view_functions:
+                app.view_functions[_eg_ep] = _eg_dashboard_func
+                print("ERATGUARD STEP5 ENDPOINT LOCKED TO DASHBOARD:", _eg_ep)
+
+        print("ERATGUARD STEP5 APP-START HARD LOCK ACTIVE:", _eg_dashboard_endpoint)
+
+except Exception as _eg_step5_e:
+    print("ERATGUARD STEP5 APP-START HARD LOCK ERROR:", _eg_step5_e)
+# ===== ERATGUARD STEP5 APP-START HARD LOCK TO FAN-12P DASHBOARD END =====

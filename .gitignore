@@ -6,17 +6,14 @@
 __pycache__/
 *.pyc
 *.pyo
-
 # logs/runtime
 logs/
 *.log
 *.pid
 daemon.out
-
 # database / runtime data
 *.db
 spamshield.db
-
 # sensitive/runtime data
 data/users.json
 data/licenses.json
@@ -29,7 +26,6 @@ data/admin_actions.json
 data/client_alert.json
 data/community_feed.json
 data/inbox.json
-
 # backups / old copies / locks
 backup*/
 backups/
@@ -53,24 +49,20 @@ LOCKED_*/
 *.FINAL_LOCK*
 *.PRICE_FIXED_LOCKED_FINAL
 *.DAMAT_FINAL_LOCKED
-
 # archives
 *.tar.gz
 *.zip
 *.sha256
-
 # local generated
 AKTIF_DOSYALAR.txt
 radial_menu.html
 index.html
-
 # ===== SPAMSHIELD LOCAL / BUILD / ARCHIVE IGNORE START =====
 APK_OUTPUTS/
 SATURDAY_SAFE_ARCHIVE_*/
 SATURDAY_FINAL_CLEANUP_*/
 CUMARTESI_TEMIZLIK_HAZIRLIK_*.txt
 LIVE_BUTTON_AUDIT_*.txt
-
 android_user_app_build/.gradle/
 android_user_app_build/build/
 android_admin_app_build/.gradle/
@@ -78,13 +70,11 @@ android_admin_app_build/build/
 android_webview_wrapper/.gradle/
 android_webview_wrapper/build/
 android_webview_wrapper/app/build/
-
 *.bak
 *.backup
 *.LOCKED*
 *.FINAL*
 *.moved
-
 cookies.txt
 probe_live.html
 radial_live.html
@@ -93,27 +83,21 @@ login_after_post.html
 forgot_live.html
 u_protection.html
 u_protection_auth.html
-
 data/.spamshield_secret_key
 static/uploads/
 # ===== SPAMSHIELD LOCAL / BUILD / ARCHIVE IGNORE END =====
-
 # ===== SPAMSHIELD EXTRA LOCAL UNTRACKED IGNORE START =====
 .git_remove_bad_files.txt
-
 _stage1_archive_sms/
 android_user_app/
 android_admin_app/
 android_user_app_build/
 android_admin_app_build/
-
 android_webview_wrapper/app/src/main/res/mipmap-*/
 android_webview_wrapper/gradle.properties
 android_webview_wrapper/keystore/
-
 assets/
 windows_icon/
-
 data/*.LOCKED*
 data/*.ADMIN_*
 data/*.ACTIVATION_*
@@ -121,36 +105,28 @@ data/safe_list.json
 data/user_block_list.json
 data/user_notification_settings.json
 data/user_settings.json
-
 sms_ai_reader_FINAL_*.py
 sms_alert_test.py
 spam_ai_FINAL_*.py
 spamshield_daemon_FINAL_LOCK.py
 spamshield_original.html
-
 test_all_buttons_live.py
 test_radial.py
 test_server.py
 # ===== SPAMSHIELD EXTRA LOCAL UNTRACKED IGNORE END =====
-
 # local audit reports
 USER_MODULE_LINK_AUDIT_*.txt
 USER_MODULE_LINK_AUDIT_V2_*.txt
-
 # local release reports
 SPAMSHIELD_TITANIUM_RELEASE_REPORT_*.txt
-
 # local brand audit reports
 ERATGUARD_BRAND_AUDIT_*.txt
 ERATGUARD_ACTIVE_BRAND_AUDIT_*.txt
-
 # local secret audit reports
 ERATGUARD_SECRET_AUDIT_*.txt
-
 # EratGuard local secret key
 data/.eratguard_secret_key
 data/reset_tokens.json
-
 # EratGuard PRO runtime/user data - do not commit
 data/archive_root_json/
 data/generated_licenses.json
@@ -162,7 +138,6 @@ data/user_quarantine.json
 data/user_titanium_events.json
 data/whitelist.json
 data/feedback.json
-data/payment_requests.json
 ERATGUARD_DEEP_PROBE_*.json
 ERATGUARD_DEEP_PROBE_*.md
 ERATGUARD_SECURITY_PROBE_*.json
@@ -180,3 +155,31 @@ sessizlikdenizi
 data/user_sessions.json
 data/audit_logs.json
 data/login_attempts.json
+# === ERATGUARD RELEASE SECRET / BACKUP EXCLUDES ===
+data/eratguard_sms_api_token.txt
+data/*token*
+data/*secret*
+data/release_clean_backups/
+data/sms_action_backups/
+data/history_backups/
+data/history_restore_safety/
+*.bak_*
+*.old
+ERATGUARD_BACKUPS/
+ERATGUARD_ZERO_INBOX_SMS_CORE*/
+ERATGUARD_CORE5E_FIX*/
+# === /ERATGUARD RELEASE SECRET / BACKUP EXCLUDES ===
+# ===== ERATGUARD LOCAL BACKUP / BUILD / SECRET SAFETY =====
+ERATGUARD_*/
+APK_*/
+*.apk
+*.aab
+*.jks
+*.keystore
+*.tmp
+android_user_app_build/app/build/
+android_admin_app_build/app/build/
+ERATGUARD_SECRETS/
+.env.*
+# ===== ERATGUARD LOCAL BACKUP / BUILD / SECRET SAFETY END =====
+data/ai_memory.json
