@@ -26869,3 +26869,329 @@ try:
 except Exception as _eg_step5_e:
     print("ERATGUARD STEP5 APP-START HARD LOCK ERROR:", _eg_step5_e)
 # ===== ERATGUARD STEP5 APP-START HARD LOCK TO FAN-12P DASHBOARD END =====
+
+# ===== ERATGUARD FAN-12P FINAL POLISH 12 SLICE START =====
+# Final polish:
+# - Eski üst bar "Koruma Geçmişi" dashboard içinde görünmez.
+# - VITES-5G etiketi FAN-12P olarak tekleştirilir.
+# - FAN-12P menüsü 8 dilimden 12 dilime tamamlanır.
+
+try:
+    import re as _eg_f12p_re
+    from flask import request as _eg_f12p_request
+    from flask import make_response as _eg_f12p_make_response
+
+    def _eg_fan12p_final_polish_response(response):
+        try:
+            path = (_eg_f12p_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "FAN-12P" not in html and "COMMAND CENTER" not in html:
+                return response
+
+            # 1) Yanlış üst başlık düzeltmesi.
+            html = html.replace("Koruma Geçmişi", "FAN-12P Command Center")
+
+            # 2) VITES görünür etiketlerini tekleştir.
+            html = html.replace("ERATGUARD VITES-5G", "ERATGUARD FAN-12P")
+            html = html.replace("ERATGUARD VITES-6A", "ERATGUARD FAN-12P")
+            html = html.replace("VITES-6A", "FAN-12P")
+            html = html.replace("VITES-5G", "FAN-12P")
+
+            # 3) 9-12 dilimleri yoksa ekle.
+            if "SMS Özet" not in html and "eg-user-fan3-panel" in html:
+                extra_items = """
+    <a class="eg-user-fan3-item i9" href="/u/sms-summary">
+      <b>📩</b><span><strong>SMS Özet</strong><small>Koruma özeti</small></span><em>09</em>
+    </a>
+    <a class="eg-user-fan3-item i10" href="/u/blocked-sms">
+      <b>🚫</b><span><strong>Blok SMS</strong><small>Engellenen merkez</small></span><em>10</em>
+    </a>
+    <a class="eg-user-fan3-item i11" href="/u/history">
+      <b>🕘</b><span><strong>Geçmiş</strong><small>Koruma geçmişi</small></span><em>11</em>
+    </a>
+    <a class="eg-user-fan3-item i12" href="/u/pro">
+      <b>⭐</b><span><strong>PRO</strong><small>Final özellikleri</small></span><em>12</em>
+    </a>
+"""
+                html = _eg_f12p_re.sub(
+                    r'(</nav>\s*<!-- ERATGUARD FAN-12P INTRO DIRECT START -->)',
+                    extra_items + r'\1',
+                    html,
+                    count=1,
+                    flags=_eg_f12p_re.S
+                )
+
+            # 4) Yeni 12 dilim için pozisyon CSS'i.
+            if "ERATGUARD FAN-12P FINAL 12 SLICE CSS" not in html:
+                css = """
+<style id="eg-fan12p-final-12-slice-css">
+/* ERATGUARD FAN-12P FINAL 12 SLICE CSS */
+.eg-user-fan3.open .i9{transform:translateX(-28px) translateY(-318px) rotate(34deg)}
+.eg-user-fan3.open .i10{transform:translateX(-28px) translateY(318px) rotate(-34deg)}
+.eg-user-fan3.open .i11{transform:translateX(-122px) translateY(-292px) rotate(43deg)}
+.eg-user-fan3.open .i12{transform:translateX(-122px) translateY(292px) rotate(-43deg)}
+@media(max-width:420px){
+  .eg-user-fan3.open .i9{transform:translateX(-18px) translateY(-292px) rotate(34deg)}
+  .eg-user-fan3.open .i10{transform:translateX(-18px) translateY(292px) rotate(-34deg)}
+  .eg-user-fan3.open .i11{transform:translateX(-104px) translateY(-268px) rotate(43deg)}
+  .eg-user-fan3.open .i12{transform:translateX(-104px) translateY(268px) rotate(-43deg)}
+}
+</style>
+"""
+                html = html.replace("</head>", css + "\n</head>", 1)
+
+            # 5) Intro bilgi haritasına 9-12 ekle.
+            if '"/u/sms-summary"' not in html and "var infoMap" in html:
+                html = html.replace(
+                    '"/u/settings": {icon:"⚙️", title:"Ayarlar", text:"Uygulama tercihleri, güvenlik bildirimleri ve kullanıcı deneyimi ayarlarını düzenler."}',
+                    '"/u/settings": {icon:"⚙️", title:"Ayarlar", text:"Uygulama tercihleri, güvenlik bildirimleri ve kullanıcı deneyimi ayarlarını düzenler."},\n'
+                    '    "/u/sms-summary": {icon:"📩", title:"SMS Koruma Özeti", text:"SMS risk motoru, analiz özeti ve son koruma durumunu gösterir."},\n'
+                    '    "/u/blocked-sms": {icon:"🚫", title:"Engellenen SMS Merkezi", text:"Engellenen mesajlar, blok kayıtları ve güvenlik aksiyonlarını yönetir."},\n'
+                    '    "/u/history": {icon:"🕘", title:"Koruma Geçmişi", text:"Koruma geçmişi, analiz kayıtları ve aksiyon geçmişini listeler."},\n'
+                    '    "/u/pro": {icon:"⭐", title:"PRO Merkezi", text:"Final özellikleri, premium erişim ve gelişmiş koruma seçeneklerini gösterir."}'
+                )
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_polish_inner_e:
+            print("ERATGUARD FAN-12P FINAL POLISH INNER ERROR:", _eg_f12p_polish_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_final_polish_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_final_polish_response"]
+        _eg_after_list.insert(0, _eg_fan12p_final_polish_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P FINAL POLISH 12 SLICE ACTIVE")
+
+except Exception as _eg_f12p_polish_e:
+    print("ERATGUARD FAN-12P FINAL POLISH 12 SLICE ERROR:", _eg_f12p_polish_e)
+# ===== ERATGUARD FAN-12P FINAL POLISH 12 SLICE END =====
+
+# ===== ERATGUARD FAN-12P FINAL POLISH V2 FORCE 12 ITEMS START =====
+# V1 CSS ekledi ama bazı canlı HTML varyantlarında 9-12 linkleri nav içine girmedi.
+# V2, eg-user-fan3-panel içindeki nav kapanışına 9-12 linklerini zorunlu ekler.
+
+try:
+    import re as _eg_f12p_v2_re
+    from flask import request as _eg_f12p_v2_request
+
+    def _eg_fan12p_final_polish_v2_response(response):
+        try:
+            path = (_eg_f12p_v2_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "eg-user-fan3-panel" not in html:
+                return response
+
+            html = html.replace("Koruma Geçmişi", "FAN-12P Command Center")
+            html = html.replace("ERATGUARD VITES-5G", "ERATGUARD FAN-12P")
+            html = html.replace("VITES-5G", "FAN-12P")
+
+            extra_items = """
+    <a class="eg-user-fan3-item i9" href="/u/sms-summary">
+      <b>📩</b><span><strong>SMS Özet</strong><small>Koruma özeti</small></span><em>09</em>
+    </a>
+    <a class="eg-user-fan3-item i10" href="/u/blocked-sms">
+      <b>🚫</b><span><strong>Blok SMS</strong><small>Engellenen merkez</small></span><em>10</em>
+    </a>
+    <a class="eg-user-fan3-item i11" href="/u/history">
+      <b>🕘</b><span><strong>Geçmiş</strong><small>Koruma geçmişi</small></span><em>11</em>
+    </a>
+    <a class="eg-user-fan3-item i12" href="/u/pro">
+      <b>⭐</b><span><strong>PRO</strong><small>Final özellikleri</small></span><em>12</em>
+    </a>
+"""
+
+            if "SMS Özet" not in html:
+                panel_pat = r'(<nav[^>]*class="[^"]*eg-user-fan3-panel[^"]*"[^>]*>)(.*?)(</nav>)'
+
+                def _eg_add_items(match):
+                    open_nav, body, close_nav = match.group(1), match.group(2), match.group(3)
+                    if "SMS Özet" in body or "i9" in body:
+                        return match.group(0)
+                    return open_nav + body + extra_items + close_nav
+
+                html, changed = _eg_f12p_v2_re.subn(
+                    panel_pat,
+                    _eg_add_items,
+                    html,
+                    count=1,
+                    flags=_eg_f12p_v2_re.S | _eg_f12p_v2_re.I
+                )
+
+                if changed == 0:
+                    html = html.replace("</nav>", extra_items + "</nav>", 1)
+
+            if "ERATGUARD FAN-12P FINAL 12 SLICE CSS V2" not in html:
+                css = """
+<style id="eg-fan12p-final-12-slice-css-v2">
+/* ERATGUARD FAN-12P FINAL 12 SLICE CSS V2 */
+.eg-user-fan3.open .i9{transform:translateX(-24px) translateY(-318px) rotate(34deg)!important}
+.eg-user-fan3.open .i10{transform:translateX(-24px) translateY(318px) rotate(-34deg)!important}
+.eg-user-fan3.open .i11{transform:translateX(-122px) translateY(-292px) rotate(43deg)!important}
+.eg-user-fan3.open .i12{transform:translateX(-122px) translateY(292px) rotate(-43deg)!important}
+@media(max-width:420px){
+  .eg-user-fan3.open .i9{transform:translateX(-16px) translateY(-292px) rotate(34deg)!important}
+  .eg-user-fan3.open .i10{transform:translateX(-16px) translateY(292px) rotate(-34deg)!important}
+  .eg-user-fan3.open .i11{transform:translateX(-104px) translateY(-268px) rotate(43deg)!important}
+  .eg-user-fan3.open .i12{transform:translateX(-104px) translateY(268px) rotate(-43deg)!important}
+}
+</style>
+"""
+                html = html.replace("</head>", css + "\n</head>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v2_inner_e:
+            print("ERATGUARD FAN-12P FINAL POLISH V2 INNER ERROR:", _eg_f12p_v2_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_final_polish_v2_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_final_polish_v2_response"]
+        _eg_after_list.insert(0, _eg_fan12p_final_polish_v2_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P FINAL POLISH V2 FORCE 12 ITEMS ACTIVE")
+
+except Exception as _eg_f12p_v2_e:
+    print("ERATGUARD FAN-12P FINAL POLISH V2 ERROR:", _eg_f12p_v2_e)
+# ===== ERATGUARD FAN-12P FINAL POLISH V2 FORCE 12 ITEMS END =====
+
+# ===== ERATGUARD FAN-12P FINAL POLISH V3 APP-START 12 ITEMS FIX START =====
+# /app-start HTML varyantında eg-user-fan3-panel sınıfı görünmediği için V2 bazı metinleri ekleyemedi.
+# V3, FAN-12P HTML içinde ilk nav kapanışına 9-12 dilimleri güvenli şekilde ekler.
+
+try:
+    from flask import request as _eg_f12p_v3_request
+
+    def _eg_fan12p_final_polish_v3_response(response):
+        try:
+            path = (_eg_f12p_v3_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+
+            if "FAN-12P" not in html and "COMMAND CENTER" not in html:
+                return response
+
+            html = html.replace("Koruma Geçmişi", "FAN-12P Command Center")
+            html = html.replace("ERATGUARD VITES-5G", "ERATGUARD FAN-12P")
+            html = html.replace("ERATGUARD VITES-6A", "ERATGUARD FAN-12P")
+            html = html.replace("VITES-5G", "FAN-12P")
+            html = html.replace("VITES-6A", "FAN-12P")
+
+            extra_items = """
+    <a class="eg-user-fan3-item i9" href="/u/sms-summary">
+      <b>📩</b><span><strong>SMS Özet</strong><small>Koruma özeti</small></span><em>09</em>
+    </a>
+    <a class="eg-user-fan3-item i10" href="/u/blocked-sms">
+      <b>🚫</b><span><strong>Blok SMS</strong><small>Engellenen merkez</small></span><em>10</em>
+    </a>
+    <a class="eg-user-fan3-item i11" href="/u/history">
+      <b>🕘</b><span><strong>Geçmiş</strong><small>Koruma geçmişi</small></span><em>11</em>
+    </a>
+    <a class="eg-user-fan3-item i12" href="/u/pro">
+      <b>⭐</b><span><strong>PRO</strong><small>Final özellikleri</small></span><em>12</em>
+    </a>
+"""
+
+            if "SMS Özet" not in html:
+                if "</nav>" in html:
+                    html = html.replace("</nav>", extra_items + "\n</nav>", 1)
+                elif "</body>" in html:
+                    html = html.replace("</body>", "<nav class=\"eg-user-fan3-panel\">" + extra_items + "</nav></body>", 1)
+
+            if "ERATGUARD FAN-12P FINAL 12 SLICE CSS V3" not in html:
+                css = """
+<style id="eg-fan12p-final-12-slice-css-v3">
+/* ERATGUARD FAN-12P FINAL 12 SLICE CSS V3 */
+.eg-user-fan3-item.i9,.eg-user-fan3-item.i10,.eg-user-fan3-item.i11,.eg-user-fan3-item.i12{
+  opacity:0;
+  pointer-events:none;
+}
+.eg-user-fan3.open .i9{
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:translateX(-24px) translateY(-318px) rotate(34deg)!important;
+}
+.eg-user-fan3.open .i10{
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:translateX(-24px) translateY(318px) rotate(-34deg)!important;
+}
+.eg-user-fan3.open .i11{
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:translateX(-122px) translateY(-292px) rotate(43deg)!important;
+}
+.eg-user-fan3.open .i12{
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:translateX(-122px) translateY(292px) rotate(-43deg)!important;
+}
+@media(max-width:420px){
+  .eg-user-fan3.open .i9{transform:translateX(-16px) translateY(-292px) rotate(34deg)!important}
+  .eg-user-fan3.open .i10{transform:translateX(-16px) translateY(292px) rotate(-34deg)!important}
+  .eg-user-fan3.open .i11{transform:translateX(-104px) translateY(-268px) rotate(43deg)!important}
+  .eg-user-fan3.open .i12{transform:translateX(-104px) translateY(268px) rotate(-43deg)!important}
+}
+</style>
+"""
+                html = html.replace("</head>", css + "\n</head>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v3_inner_e:
+            print("ERATGUARD FAN-12P FINAL POLISH V3 INNER ERROR:", _eg_f12p_v3_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_final_polish_v3_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_final_polish_v3_response"]
+        _eg_after_list.insert(0, _eg_fan12p_final_polish_v3_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P FINAL POLISH V3 APP-START 12 ITEMS ACTIVE")
+
+except Exception as _eg_f12p_v3_e:
+    print("ERATGUARD FAN-12P FINAL POLISH V3 ERROR:", _eg_f12p_v3_e)
+# ===== ERATGUARD FAN-12P FINAL POLISH V3 APP-START 12 ITEMS FIX END =====
