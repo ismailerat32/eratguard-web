@@ -27303,3 +27303,230 @@ try:
 except Exception as _eg_f12p_v4_e:
     print("ERATGUARD FAN-12P FINAL POLISH V4 ERROR:", _eg_f12p_v4_e)
 # ===== ERATGUARD FAN-12P FINAL POLISH V4 MOBILE 9-12 ALIGN END =====
+
+# ===== ERATGUARD FAN-12P V6 PAPATYA CENTER LAYOUT START =====
+# Hedef imza tasarım:
+# Menü açılınca sağ yelpaze değil, merkezde papatya yaprakları gibi 12 dilim görünür.
+
+try:
+    from flask import request as _eg_f12p_v6_request
+
+    def _eg_fan12p_v6_papatya_response(response):
+        try:
+            path = (_eg_f12p_v6_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "FAN-12P" not in html or "eg-user-fan3" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P V6 PAPATYA CENTER LAYOUT CSS" not in html:
+                css = """
+<style id="eg-fan12p-v6-papatya-center-layout">
+/* ERATGUARD FAN-12P V6 PAPATYA CENTER LAYOUT CSS */
+
+/* Kapalı durumda mevcut menü butonu korunur. Açılınca merkez papatya düzenine geçer. */
+.eg-user-fan3.open{
+  position:fixed!important;
+  left:50%!important;
+  top:68%!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:1px!important;
+  height:1px!important;
+  transform:translate(-50%,-50%)!important;
+  z-index:9999!important;
+  overflow:visible!important;
+}
+
+/* Merkez MENÜ butonu */
+.eg-user-fan3.open .eg-user-fan3-toggle,
+.eg-user-fan3.open .menu-toggle,
+.eg-user-fan3.open button,
+.eg-user-fan3.open .fan-handle{
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  transform:translate(-50%,-50%)!important;
+  z-index:10020!important;
+}
+
+/* Tüm yapraklar ortak final ölçü */
+.eg-user-fan3.open .eg-user-fan3-item{
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  width:132px!important;
+  min-width:132px!important;
+  max-width:132px!important;
+  height:58px!important;
+  min-height:58px!important;
+  max-height:58px!important;
+  padding:7px 10px!important;
+  border-radius:22px!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform-origin:center center!important;
+  z-index:10000!important;
+  box-sizing:border-box!important;
+}
+
+/* Yazıların kompakt ve okunur kalması */
+.eg-user-fan3.open .eg-user-fan3-item strong{
+  font-size:12px!important;
+  line-height:1.05!important;
+  white-space:normal!important;
+}
+.eg-user-fan3.open .eg-user-fan3-item small{
+  font-size:8.5px!important;
+  line-height:1!important;
+  white-space:normal!important;
+}
+.eg-user-fan3.open .eg-user-fan3-item em{
+  font-size:11px!important;
+}
+
+/* 12 yaprak papatya koordinatları */
+.eg-user-fan3.open .i12{
+  transform:translate(-50%,-50%) translate(0px,-170px) rotate(90deg)!important;
+}
+.eg-user-fan3.open .i1{
+  transform:translate(-50%,-50%) translate(84px,-146px) rotate(60deg)!important;
+}
+.eg-user-fan3.open .i2{
+  transform:translate(-50%,-50%) translate(146px,-84px) rotate(30deg)!important;
+}
+.eg-user-fan3.open .i3{
+  transform:translate(-50%,-50%) translate(170px,0px) rotate(0deg)!important;
+}
+.eg-user-fan3.open .i4{
+  transform:translate(-50%,-50%) translate(146px,84px) rotate(-30deg)!important;
+}
+.eg-user-fan3.open .i5{
+  transform:translate(-50%,-50%) translate(84px,146px) rotate(-60deg)!important;
+}
+.eg-user-fan3.open .i6{
+  transform:translate(-50%,-50%) translate(0px,170px) rotate(-90deg)!important;
+}
+.eg-user-fan3.open .i7{
+  transform:translate(-50%,-50%) translate(-84px,146px) rotate(60deg)!important;
+}
+.eg-user-fan3.open .i8{
+  transform:translate(-50%,-50%) translate(-146px,84px) rotate(30deg)!important;
+}
+.eg-user-fan3.open .i9{
+  transform:translate(-50%,-50%) translate(-170px,0px) rotate(0deg)!important;
+}
+.eg-user-fan3.open .i10{
+  transform:translate(-50%,-50%) translate(-146px,-84px) rotate(-30deg)!important;
+}
+.eg-user-fan3.open .i11{
+  transform:translate(-50%,-50%) translate(-84px,-146px) rotate(-60deg)!important;
+}
+
+/* Android genişliği için biraz daha kompakt */
+@media(max-width:420px){
+  .eg-user-fan3.open{
+    top:68%!important;
+  }
+
+  .eg-user-fan3.open .eg-user-fan3-item{
+    width:120px!important;
+    min-width:120px!important;
+    max-width:120px!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-height:54px!important;
+    padding:6px 9px!important;
+    border-radius:20px!important;
+  }
+
+  .eg-user-fan3.open .eg-user-fan3-item strong{
+    font-size:11px!important;
+  }
+  .eg-user-fan3.open .eg-user-fan3-item small{
+    font-size:8px!important;
+  }
+
+  .eg-user-fan3.open .i12{transform:translate(-50%,-50%) translate(0px,-150px) rotate(90deg)!important}
+  .eg-user-fan3.open .i1{transform:translate(-50%,-50%) translate(75px,-130px) rotate(60deg)!important}
+  .eg-user-fan3.open .i2{transform:translate(-50%,-50%) translate(130px,-75px) rotate(30deg)!important}
+  .eg-user-fan3.open .i3{transform:translate(-50%,-50%) translate(150px,0px) rotate(0deg)!important}
+  .eg-user-fan3.open .i4{transform:translate(-50%,-50%) translate(130px,75px) rotate(-30deg)!important}
+  .eg-user-fan3.open .i5{transform:translate(-50%,-50%) translate(75px,130px) rotate(-60deg)!important}
+  .eg-user-fan3.open .i6{transform:translate(-50%,-50%) translate(0px,150px) rotate(-90deg)!important}
+  .eg-user-fan3.open .i7{transform:translate(-50%,-50%) translate(-75px,130px) rotate(60deg)!important}
+  .eg-user-fan3.open .i8{transform:translate(-50%,-50%) translate(-130px,75px) rotate(30deg)!important}
+  .eg-user-fan3.open .i9{transform:translate(-50%,-50%) translate(-150px,0px) rotate(0deg)!important}
+  .eg-user-fan3.open .i10{transform:translate(-50%,-50%) translate(-130px,-75px) rotate(-30deg)!important}
+  .eg-user-fan3.open .i11{transform:translate(-50%,-50%) translate(-75px,-130px) rotate(-60deg)!important}
+}
+
+/* Çok dar cihazlarda hedef görsel gibi sıkı papatya */
+@media(max-width:380px){
+  .eg-user-fan3.open{
+    top:69%!important;
+  }
+
+  .eg-user-fan3.open .eg-user-fan3-item{
+    width:108px!important;
+    min-width:108px!important;
+    max-width:108px!important;
+    height:50px!important;
+    min-height:50px!important;
+    max-height:50px!important;
+    padding:5px 8px!important;
+  }
+
+  .eg-user-fan3.open .eg-user-fan3-item strong{
+    font-size:10px!important;
+  }
+  .eg-user-fan3.open .eg-user-fan3-item small{
+    font-size:7.5px!important;
+  }
+
+  .eg-user-fan3.open .i12{transform:translate(-50%,-50%) translate(0px,-136px) rotate(90deg)!important}
+  .eg-user-fan3.open .i1{transform:translate(-50%,-50%) translate(68px,-118px) rotate(60deg)!important}
+  .eg-user-fan3.open .i2{transform:translate(-50%,-50%) translate(118px,-68px) rotate(30deg)!important}
+  .eg-user-fan3.open .i3{transform:translate(-50%,-50%) translate(136px,0px) rotate(0deg)!important}
+  .eg-user-fan3.open .i4{transform:translate(-50%,-50%) translate(118px,68px) rotate(-30deg)!important}
+  .eg-user-fan3.open .i5{transform:translate(-50%,-50%) translate(68px,118px) rotate(-60deg)!important}
+  .eg-user-fan3.open .i6{transform:translate(-50%,-50%) translate(0px,136px) rotate(-90deg)!important}
+  .eg-user-fan3.open .i7{transform:translate(-50%,-50%) translate(-68px,118px) rotate(60deg)!important}
+  .eg-user-fan3.open .i8{transform:translate(-50%,-50%) translate(-118px,68px) rotate(30deg)!important}
+  .eg-user-fan3.open .i9{transform:translate(-50%,-50%) translate(-136px,0px) rotate(0deg)!important}
+  .eg-user-fan3.open .i10{transform:translate(-50%,-50%) translate(-118px,-68px) rotate(-30deg)!important}
+  .eg-user-fan3.open .i11{transform:translate(-50%,-50%) translate(-68px,-118px) rotate(-60deg)!important}
+}
+</style>
+"""
+                html = html.replace("</head>", css + "\n</head>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v6_inner_e:
+            print("ERATGUARD FAN-12P V6 PAPATYA INNER ERROR:", _eg_f12p_v6_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v6_papatya_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v6_papatya_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v6_papatya_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V6 PAPATYA CENTER LAYOUT ACTIVE")
+
+except Exception as _eg_f12p_v6_e:
+    print("ERATGUARD FAN-12P V6 PAPATYA CENTER LAYOUT ERROR:", _eg_f12p_v6_e)
+# ===== ERATGUARD FAN-12P V6 PAPATYA CENTER LAYOUT END =====
