@@ -28442,3 +28442,341 @@ body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) 
 except Exception as _eg_f12p_v10_e:
     print("ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX ERROR:", _eg_f12p_v10_e)
 # ===== ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX END =====
+
+# ===== ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU START =====
+# V11: Çalışan V10 gerçek butonu korunur; yapraklar gerçek papatya/petal formuna alınır.
+
+try:
+    from flask import request as _eg_f12p_v11_request
+
+    def _eg_fan12p_v11_true_petal_response(response):
+        try:
+            path = (_eg_f12p_v11_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "FAN-12P" not in html or "eg-user-fan3-panel" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU" not in html:
+                inject = """
+<style id="eg-fan12p-v11-true-petal-css">
+/* ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU */
+
+/* V11 merkez ayarı */
+body.eg-fan12p-v10-open .eg-user-fan3-panel{
+  position:fixed!important;
+  left:50%!important;
+  top:68.5%!important;
+  width:0!important;
+  height:0!important;
+  transform:translate(-50%,-50%)!important;
+  overflow:visible!important;
+  contain:none!important;
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  z-index:2147482500!important;
+}
+
+/* Gerçek MENÜ butonu V11 merkez */
+#eg-fan12p-real-menu-btn{
+  width:88px!important;
+  height:88px!important;
+  right:18px!important;
+  top:50%!important;
+  border-radius:999px!important;
+  border:1px solid rgba(106,210,255,.95)!important;
+  background:
+    radial-gradient(circle at 34% 24%, rgba(157,228,255,.98), rgba(28,124,210,.96) 38%, rgba(3,24,70,.99) 78%)!important;
+  box-shadow:
+    0 0 0 2px rgba(35,255,137,.26),
+    0 0 18px rgba(62,177,255,.85),
+    0 0 30px rgba(26,255,144,.42)!important;
+  z-index:2147483600!important;
+}
+
+body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
+  left:50%!important;
+  top:68.5%!important;
+  right:auto!important;
+  transform:translate(-50%,-50%)!important;
+}
+
+#eg-fan12p-real-menu-btn .eg-v10-e{
+  width:48px!important;
+  height:48px!important;
+  font-size:28px!important;
+  border:2px solid rgba(166,229,255,.82)!important;
+  background:rgba(255,255,255,.09)!important;
+}
+
+#eg-fan12p-real-menu-btn .eg-v10-label{
+  font-size:11px!important;
+  letter-spacing:.11em!important;
+}
+
+/* Kapalıyken yapraklar tamamen kapalı */
+body:not(.eg-fan12p-v10-open) .eg-user-fan3-panel .eg-user-fan3-item{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transform:translate(-50%,-50%) scale(.2)!important;
+}
+
+/* V11 gerçek yaprak gövdesi */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+
+  width:72px!important;
+  min-width:72px!important;
+  max-width:72px!important;
+  height:148px!important;
+  min-height:148px!important;
+  max-height:148px!important;
+
+  padding:10px 7px 12px!important;
+  box-sizing:border-box!important;
+  border-radius:42px 42px 34px 34px!important;
+
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:4px!important;
+
+  overflow:hidden!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  z-index:2147482600!important;
+  transform-origin:center center!important;
+
+  background:
+    radial-gradient(circle at 50% 8%, rgba(38,255,151,.20), transparent 24%),
+    linear-gradient(180deg, rgba(8,39,84,.98), rgba(3,18,49,.98))!important;
+
+  border:1px solid rgba(29,244,151,.82)!important;
+  box-shadow:
+    inset 0 0 18px rgba(54,174,255,.22),
+    0 0 9px rgba(33,255,151,.75),
+    0 0 18px rgba(43,167,255,.44)!important;
+
+  color:#fff!important;
+  text-decoration:none!important;
+}
+
+/* Yaprak içi ikon ve metin */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item em{
+  order:2!important;
+  width:34px!important;
+  height:34px!important;
+  min-width:34px!important;
+  min-height:34px!important;
+  border-radius:999px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-style:normal!important;
+  font-size:22px!important;
+  line-height:1!important;
+  margin:6px 0 2px!important;
+  background:rgba(34,81,156,.72)!important;
+  box-shadow:0 0 10px rgba(50,171,255,.38)!important;
+}
+
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
+  order:3!important;
+  display:block!important;
+  width:100%!important;
+  text-align:center!important;
+  font-size:10.5px!important;
+  font-weight:900!important;
+  line-height:1.05!important;
+  color:#ffffff!important;
+  text-shadow:0 1px 5px rgba(0,0,0,.55)!important;
+  margin:1px 0 0!important;
+}
+
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
+  order:4!important;
+  display:block!important;
+  width:100%!important;
+  text-align:center!important;
+  font-size:7.4px!important;
+  font-weight:700!important;
+  line-height:1.05!important;
+  color:rgba(222,239,255,.88)!important;
+  margin:0!important;
+}
+
+/* Dış uç numarası */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::before{
+  content:""!important;
+  order:1!important;
+  width:30px!important;
+  height:30px!important;
+  border-radius:999px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  letter-spacing:.02em!important;
+  color:#2cff92!important;
+  border:1px solid rgba(46,255,146,.75)!important;
+  background:rgba(2,30,44,.86)!important;
+  box-shadow:0 0 9px rgba(46,255,146,.42)!important;
+}
+
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i1::before{content:"01"!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i2::before{content:"02"!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i3::before{content:"03"!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i4::before{content:"04"!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i5::before{content:"05"!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i6::before{content:"06"!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i7::before{content:"07"!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i8::before{content:"08"!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i9::before{content:"09"!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i10::before{content:"10"!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i11::before{content:"11"!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i12::before{content:"12"!important}
+
+/* V11 papatya koordinatları: uzun yaprak, merkezden dışarı */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-122px) rotate(0deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(61px,-106px) rotate(30deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(106px,-61px) rotate(60deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(122px,0px) rotate(90deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(106px,61px) rotate(120deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(61px,106px) rotate(150deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,122px) rotate(180deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-61px,106px) rotate(210deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-106px,61px) rotate(240deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-122px,0px) rotate(270deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-106px,-61px) rotate(300deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-61px,-106px) rotate(330deg)!important}
+
+/* Bağlantı çizgisi hissi */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::after{
+  content:""!important;
+  position:absolute!important;
+  left:50%!important;
+  bottom:-16px!important;
+  width:2px!important;
+  height:18px!important;
+  transform:translateX(-50%)!important;
+  background:linear-gradient(180deg, rgba(45,255,153,.7), rgba(58,183,255,.2))!important;
+  box-shadow:0 0 8px rgba(45,255,153,.7)!important;
+}
+
+/* Küçük ekranlar için daha kompakt */
+@media(max-width:390px){
+  body.eg-fan12p-v10-open .eg-user-fan3-panel,
+  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
+    top:69%!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
+    width:66px!important;
+    min-width:66px!important;
+    max-width:66px!important;
+    height:136px!important;
+    min-height:136px!important;
+    max-height:136px!important;
+    padding:8px 6px 10px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item em{
+    width:30px!important;
+    height:30px!important;
+    min-width:30px!important;
+    min-height:30px!important;
+    font-size:19px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
+    font-size:9.4px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
+    font-size:6.8px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::before{
+    width:26px!important;
+    height:26px!important;
+    font-size:10px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-112px) rotate(0deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(56px,-97px) rotate(30deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(97px,-56px) rotate(60deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(112px,0px) rotate(90deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(97px,56px) rotate(120deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(56px,97px) rotate(150deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,112px) rotate(180deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-56px,97px) rotate(210deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-97px,56px) rotate(240deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-112px,0px) rotate(270deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-97px,-56px) rotate(300deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-56px,-97px) rotate(330deg)!important}
+}
+</style>
+
+<script id="eg-fan12p-v11-true-petal-js">
+/* ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU */
+(function(){
+  if(window.__EG_FAN12P_V11_TRUE_PETAL_READY__) return;
+  window.__EG_FAN12P_V11_TRUE_PETAL_READY__ = true;
+
+  function ensureV11(){
+    var btn = document.getElementById("eg-fan12p-real-menu-btn");
+    if(btn){
+      btn.setAttribute("data-fan12p-v11", "true");
+    }
+
+    var panel = document.querySelector(".eg-user-fan3-panel");
+    if(panel){
+      panel.setAttribute("data-fan12p-v11", "true");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", ensureV11);
+  document.addEventListener("click", ensureV11, true);
+  setInterval(ensureV11, 900);
+})();
+</script>
+"""
+                html = html.replace("</body>", inject + "\n</body>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v11_inner_e:
+            print("ERATGUARD FAN-12P V11 TRUE PETAL INNER ERROR:", _eg_f12p_v11_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v11_true_petal_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v11_true_petal_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v11_true_petal_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU ACTIVE")
+
+except Exception as _eg_f12p_v11_e:
+    print("ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU ERROR:", _eg_f12p_v11_e)
+# ===== ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU END =====
