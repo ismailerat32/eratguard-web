@@ -27712,3 +27712,232 @@ try:
 except Exception as _eg_f12p_v7_e:
     print("ERATGUARD FAN-12P V7 PAPATYA PANEL UNCLIP ERROR:", _eg_f12p_v7_e)
 # ===== ERATGUARD FAN-12P V7 PAPATYA PANEL UNCLIP FIX END =====
+
+# ===== ERATGUARD FAN-12P V8 PAPATYA INLINE POSITION FORCE START =====
+# V7'de merkez doğru; bazı yapraklar eski CSS transformlarından etkilenip kümeleniyor.
+# V8, menü açılınca JS ile 12 yaprağı inline style olarak papatya koordinatlarına zorlar.
+
+try:
+    from flask import request as _eg_f12p_v8_request
+
+    def _eg_fan12p_v8_papatya_inline_response(response):
+        try:
+            path = (_eg_f12p_v8_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "FAN-12P" not in html or "eg-user-fan3" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P V8 PAPATYA INLINE FORCE" not in html:
+                inject = """
+<style id="eg-fan12p-v8-papatya-inline-force-css">
+/* ERATGUARD FAN-12P V8 PAPATYA INLINE FORCE */
+.eg-user-fan3.open{
+  position:fixed!important;
+  left:50%!important;
+  top:67%!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:0!important;
+  height:0!important;
+  transform:translate(-50%,-50%)!important;
+  overflow:visible!important;
+  contain:none!important;
+  z-index:999999!important;
+}
+.eg-user-fan3.open nav,
+.eg-user-fan3.open .eg-user-fan3-panel{
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  width:0!important;
+  height:0!important;
+  overflow:visible!important;
+  contain:none!important;
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transform:none!important;
+}
+.eg-user-fan3.open .eg-user-fan3-item{
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  width:112px!important;
+  min-width:112px!important;
+  max-width:112px!important;
+  height:52px!important;
+  min-height:52px!important;
+  max-height:52px!important;
+  padding:5px 7px!important;
+  border-radius:21px!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  box-sizing:border-box!important;
+  z-index:100100!important;
+}
+.eg-user-fan3.open .eg-user-fan3-item strong{
+  font-size:10px!important;
+  line-height:1.05!important;
+}
+.eg-user-fan3.open .eg-user-fan3-item small{
+  font-size:7.2px!important;
+  line-height:1!important;
+}
+.eg-user-fan3.open .eg-user-fan3-item em{
+  font-size:10px!important;
+}
+</style>
+
+<script id="eg-fan12p-v8-papatya-inline-force-js">
+/* ERATGUARD FAN-12P V8 PAPATYA INLINE FORCE */
+(function(){
+  function q(sel, root){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
+
+  var coords = {
+    12:{x:0,y:-126,r:90},
+    1:{x:63,y:-109,r:60},
+    2:{x:109,y:-63,r:30},
+    3:{x:126,y:0,r:0},
+    4:{x:109,y:63,r:-30},
+    5:{x:63,y:109,r:-60},
+    6:{x:0,y:126,r:-90},
+    7:{x:-63,y:109,r:60},
+    8:{x:-109,y:63,r:30},
+    9:{x:-126,y:0,r:0},
+    10:{x:-109,y:-63,r:-30},
+    11:{x:-63,y:-109,r:-60}
+  };
+
+  function numOf(el, fallback){
+    var txt = (el.innerText || el.textContent || "");
+    var m = txt.match(/\\b(0?[1-9]|10|11|12)\\b/);
+    if(m){
+      var n = parseInt(m[1],10);
+      if(n >= 1 && n <= 12) return n;
+    }
+    var cls = el.className || "";
+    m = cls.match(/(?:^|\\s)i0?([1-9]|10|11|12)(?:\\s|$)/);
+    if(m){
+      var n2 = parseInt(m[1],10);
+      if(n2 >= 1 && n2 <= 12) return n2;
+    }
+    return fallback;
+  }
+
+  function applyPapatya(){
+    var root = document.querySelector(".eg-user-fan3");
+    if(!root || !root.classList.contains("open")) return;
+
+    root.style.setProperty("position","fixed","important");
+    root.style.setProperty("left","50%","important");
+    root.style.setProperty("top","67%","important");
+    root.style.setProperty("right","auto","important");
+    root.style.setProperty("bottom","auto","important");
+    root.style.setProperty("width","0","important");
+    root.style.setProperty("height","0","important");
+    root.style.setProperty("transform","translate(-50%,-50%)","important");
+    root.style.setProperty("overflow","visible","important");
+    root.style.setProperty("contain","none","important");
+    root.style.setProperty("z-index","999999","important");
+
+    q("nav,.eg-user-fan3-panel", root).forEach(function(panel){
+      panel.style.setProperty("position","absolute","important");
+      panel.style.setProperty("left","0","important");
+      panel.style.setProperty("top","0","important");
+      panel.style.setProperty("width","0","important");
+      panel.style.setProperty("height","0","important");
+      panel.style.setProperty("overflow","visible","important");
+      panel.style.setProperty("contain","none","important");
+      panel.style.setProperty("display","block","important");
+      panel.style.setProperty("opacity","1","important");
+      panel.style.setProperty("visibility","visible","important");
+      panel.style.setProperty("transform","none","important");
+      panel.style.setProperty("z-index","100000","important");
+    });
+
+    var items = q(".eg-user-fan3-item", root);
+    items.forEach(function(el, idx){
+      var n = numOf(el, idx + 1);
+      var c = coords[n] || coords[idx + 1];
+      if(!c) return;
+
+      el.classList.add("eg-papatya-v8-item");
+      el.style.setProperty("position","absolute","important");
+      el.style.setProperty("left","0","important");
+      el.style.setProperty("top","0","important");
+      el.style.setProperty("width","112px","important");
+      el.style.setProperty("min-width","112px","important");
+      el.style.setProperty("max-width","112px","important");
+      el.style.setProperty("height","52px","important");
+      el.style.setProperty("min-height","52px","important");
+      el.style.setProperty("max-height","52px","important");
+      el.style.setProperty("opacity","1","important");
+      el.style.setProperty("visibility","visible","important");
+      el.style.setProperty("pointer-events","auto","important");
+      el.style.setProperty("z-index","100100","important");
+      el.style.setProperty("transform-origin","center center","important");
+      el.style.setProperty(
+        "transform",
+        "translate(-50%,-50%) translate("+c.x+"px,"+c.y+"px) rotate("+c.r+"deg)",
+        "important"
+      );
+    });
+  }
+
+  function loopApply(){
+    applyPapatya();
+    setTimeout(applyPapatya, 40);
+    setTimeout(applyPapatya, 120);
+    setTimeout(applyPapatya, 260);
+  }
+
+  document.addEventListener("click", function(){
+    setTimeout(loopApply, 20);
+  }, true);
+
+  document.addEventListener("DOMContentLoaded", function(){
+    loopApply();
+    var root = document.querySelector(".eg-user-fan3");
+    if(root && window.MutationObserver){
+      new MutationObserver(loopApply).observe(root, {attributes:true, attributeFilter:["class","style"], subtree:true});
+    }
+  });
+
+  setInterval(applyPapatya, 900);
+})();
+</script>
+"""
+                html = html.replace("</body>", inject + "\n</body>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v8_inner_e:
+            print("ERATGUARD FAN-12P V8 PAPATYA INNER ERROR:", _eg_f12p_v8_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v8_papatya_inline_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v8_papatya_inline_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v8_papatya_inline_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V8 PAPATYA INLINE POSITION FORCE ACTIVE")
+
+except Exception as _eg_f12p_v8_e:
+    print("ERATGUARD FAN-12P V8 PAPATYA INLINE POSITION FORCE ERROR:", _eg_f12p_v8_e)
+# ===== ERATGUARD FAN-12P V8 PAPATYA INLINE POSITION FORCE END =====
