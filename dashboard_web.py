@@ -27195,3 +27195,111 @@ try:
 except Exception as _eg_f12p_v3_e:
     print("ERATGUARD FAN-12P FINAL POLISH V3 ERROR:", _eg_f12p_v3_e)
 # ===== ERATGUARD FAN-12P FINAL POLISH V3 APP-START 12 ITEMS FIX END =====
+
+# ===== ERATGUARD FAN-12P FINAL POLISH V4 MOBILE 9-12 ALIGN START =====
+# 09/11 üst bara, 10/12 alt kısma taşmasın diye 9-12 dilimleri mobilde merkez fan çevresine alınır.
+
+try:
+    from flask import request as _eg_f12p_v4_request
+
+    def _eg_fan12p_final_polish_v4_response(response):
+        try:
+            path = (_eg_f12p_v4_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "FAN-12P" not in html or "eg-user-fan3" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P FINAL 12 SLICE CSS V4 MOBILE ALIGN" not in html:
+                css = """
+<style id="eg-fan12p-final-12-slice-css-v4-mobile-align">
+/* ERATGUARD FAN-12P FINAL 12 SLICE CSS V4 MOBILE ALIGN */
+
+/* V3'te üst/alt taşan 09-12 dilimleri ekran içine alınır. */
+.eg-user-fan3.open .i9{
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:translateX(-148px) translateY(-210px) rotate(28deg)!important;
+  z-index:39!important;
+}
+.eg-user-fan3.open .i10{
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:translateX(-148px) translateY(210px) rotate(-28deg)!important;
+  z-index:39!important;
+}
+.eg-user-fan3.open .i11{
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:translateX(-228px) translateY(-150px) rotate(38deg)!important;
+  z-index:38!important;
+}
+.eg-user-fan3.open .i12{
+  opacity:1!important;
+  pointer-events:auto!important;
+  transform:translateX(-228px) translateY(150px) rotate(-38deg)!important;
+  z-index:38!important;
+}
+
+@media(max-width:420px){
+  .eg-user-fan3.open .i9{
+    transform:translateX(-132px) translateY(-198px) rotate(28deg)!important;
+  }
+  .eg-user-fan3.open .i10{
+    transform:translateX(-132px) translateY(198px) rotate(-28deg)!important;
+  }
+  .eg-user-fan3.open .i11{
+    transform:translateX(-202px) translateY(-138px) rotate(38deg)!important;
+  }
+  .eg-user-fan3.open .i12{
+    transform:translateX(-202px) translateY(138px) rotate(-38deg)!important;
+  }
+}
+
+@media(max-width:380px){
+  .eg-user-fan3.open .i9{
+    transform:translateX(-118px) translateY(-188px) rotate(28deg)!important;
+  }
+  .eg-user-fan3.open .i10{
+    transform:translateX(-118px) translateY(188px) rotate(-28deg)!important;
+  }
+  .eg-user-fan3.open .i11{
+    transform:translateX(-186px) translateY(-130px) rotate(38deg)!important;
+  }
+  .eg-user-fan3.open .i12{
+    transform:translateX(-186px) translateY(130px) rotate(-38deg)!important;
+  }
+}
+</style>
+"""
+                html = html.replace("</head>", css + "\n</head>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v4_inner_e:
+            print("ERATGUARD FAN-12P FINAL POLISH V4 INNER ERROR:", _eg_f12p_v4_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_final_polish_v4_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_final_polish_v4_response"]
+        _eg_after_list.insert(0, _eg_fan12p_final_polish_v4_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P FINAL POLISH V4 MOBILE 9-12 ALIGN ACTIVE")
+
+except Exception as _eg_f12p_v4_e:
+    print("ERATGUARD FAN-12P FINAL POLISH V4 ERROR:", _eg_f12p_v4_e)
+# ===== ERATGUARD FAN-12P FINAL POLISH V4 MOBILE 9-12 ALIGN END =====
