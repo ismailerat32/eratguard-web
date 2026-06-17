@@ -27941,3 +27941,273 @@ try:
 except Exception as _eg_f12p_v8_e:
     print("ERATGUARD FAN-12P V8 PAPATYA INLINE POSITION FORCE ERROR:", _eg_f12p_v8_e)
 # ===== ERATGUARD FAN-12P V8 PAPATYA INLINE POSITION FORCE END =====
+
+# ===== ERATGUARD FAN-12P V9 TAP TOGGLE FIX START =====
+# V8 sonrası bazı WebView cihazlarda MENÜ butonu görünüyor ama click/touch çalışmıyor.
+# V9, merkez/sağ MENÜ butonuna doğrudan touchstart + click toggle bağlar.
+
+try:
+    from flask import request as _eg_f12p_v9_request
+
+    def _eg_fan12p_v9_tap_toggle_response(response):
+        try:
+            path = (_eg_f12p_v9_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "FAN-12P" not in html or "eg-user-fan3" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P V9 TAP TOGGLE FIX" not in html:
+                inject = """
+<style id="eg-fan12p-v9-tap-toggle-css">
+/* ERATGUARD FAN-12P V9 TAP TOGGLE FIX */
+.eg-user-fan3,
+.eg-user-fan3 *,
+.eg-user-fan3-toggle,
+.menu-toggle,
+.fan-handle{
+  touch-action:manipulation!important;
+}
+
+.eg-user-fan3:not(.open){
+  pointer-events:auto!important;
+  z-index:99999!important;
+}
+
+.eg-user-fan3:not(.open) .eg-user-fan3-toggle,
+.eg-user-fan3:not(.open) .menu-toggle,
+.eg-user-fan3:not(.open) .fan-handle,
+.eg-user-fan3:not(.open) button{
+  pointer-events:auto!important;
+  cursor:pointer!important;
+  z-index:100500!important;
+}
+
+.eg-user-fan3.open{
+  pointer-events:auto!important;
+}
+
+.eg-user-fan3.open .eg-user-fan3-toggle,
+.eg-user-fan3.open .menu-toggle,
+.eg-user-fan3.open .fan-handle,
+.eg-user-fan3.open button{
+  pointer-events:auto!important;
+  cursor:pointer!important;
+}
+</style>
+
+<script id="eg-fan12p-v9-tap-toggle-js">
+/* ERATGUARD FAN-12P V9 TAP TOGGLE FIX */
+(function(){
+  if(window.__EG_FAN12P_V9_TAP_READY__) return;
+  window.__EG_FAN12P_V9_TAP_READY__ = true;
+
+  function qs(sel, root){ return (root || document).querySelector(sel); }
+  function qsa(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+  var coords = {
+    12:{x:0,y:-126,r:90},
+    1:{x:63,y:-109,r:60},
+    2:{x:109,y:-63,r:30},
+    3:{x:126,y:0,r:0},
+    4:{x:109,y:63,r:-30},
+    5:{x:63,y:109,r:-60},
+    6:{x:0,y:126,r:-90},
+    7:{x:-63,y:109,r:60},
+    8:{x:-109,y:63,r:30},
+    9:{x:-126,y:0,r:0},
+    10:{x:-109,y:-63,r:-30},
+    11:{x:-63,y:-109,r:-60}
+  };
+
+  function getRoot(){
+    return qs(".eg-user-fan3");
+  }
+
+  function getToggle(root){
+    if(!root) return null;
+    return qs(".eg-user-fan3-toggle", root) ||
+           qs(".menu-toggle", root) ||
+           qs(".fan-handle", root) ||
+           qs("button", root);
+  }
+
+  function numOf(el, fallback){
+    var txt = (el.innerText || el.textContent || "");
+    var m = txt.match(/\\b(0?[1-9]|10|11|12)\\b/);
+    if(m){
+      var n = parseInt(m[1],10);
+      if(n >= 1 && n <= 12) return n;
+    }
+    var cls = el.className || "";
+    m = cls.match(/(?:^|\\s)i0?([1-9]|10|11|12)(?:\\s|$)/);
+    if(m){
+      var n2 = parseInt(m[1],10);
+      if(n2 >= 1 && n2 <= 12) return n2;
+    }
+    return fallback;
+  }
+
+  function forcePapatya(){
+    var root = getRoot();
+    if(!root || !root.classList.contains("open")) return;
+
+    root.style.setProperty("position","fixed","important");
+    root.style.setProperty("left","50%","important");
+    root.style.setProperty("top","67%","important");
+    root.style.setProperty("right","auto","important");
+    root.style.setProperty("bottom","auto","important");
+    root.style.setProperty("width","0","important");
+    root.style.setProperty("height","0","important");
+    root.style.setProperty("transform","translate(-50%,-50%)","important");
+    root.style.setProperty("overflow","visible","important");
+    root.style.setProperty("contain","none","important");
+    root.style.setProperty("pointer-events","auto","important");
+    root.style.setProperty("z-index","999999","important");
+
+    qsa("nav,.eg-user-fan3-panel,.fan-panel,.menu-panel", root).forEach(function(panel){
+      panel.style.setProperty("position","absolute","important");
+      panel.style.setProperty("left","0","important");
+      panel.style.setProperty("top","0","important");
+      panel.style.setProperty("width","0","important");
+      panel.style.setProperty("height","0","important");
+      panel.style.setProperty("overflow","visible","important");
+      panel.style.setProperty("contain","none","important");
+      panel.style.setProperty("display","block","important");
+      panel.style.setProperty("opacity","1","important");
+      panel.style.setProperty("visibility","visible","important");
+      panel.style.setProperty("pointer-events","auto","important");
+      panel.style.setProperty("transform","none","important");
+      panel.style.setProperty("z-index","100000","important");
+    });
+
+    qsa(".eg-user-fan3-item", root).forEach(function(el, idx){
+      var n = numOf(el, idx + 1);
+      var c = coords[n] || coords[idx + 1];
+      if(!c) return;
+
+      el.style.setProperty("position","absolute","important");
+      el.style.setProperty("left","0","important");
+      el.style.setProperty("top","0","important");
+      el.style.setProperty("width","112px","important");
+      el.style.setProperty("min-width","112px","important");
+      el.style.setProperty("max-width","112px","important");
+      el.style.setProperty("height","52px","important");
+      el.style.setProperty("min-height","52px","important");
+      el.style.setProperty("max-height","52px","important");
+      el.style.setProperty("opacity","1","important");
+      el.style.setProperty("visibility","visible","important");
+      el.style.setProperty("pointer-events","auto","important");
+      el.style.setProperty("z-index","100100","important");
+      el.style.setProperty("transform-origin","center center","important");
+      el.style.setProperty(
+        "transform",
+        "translate(-50%,-50%) translate("+c.x+"px,"+c.y+"px) rotate("+c.r+"deg)",
+        "important"
+      );
+    });
+
+    var toggle = getToggle(root);
+    if(toggle){
+      toggle.style.setProperty("pointer-events","auto","important");
+      toggle.style.setProperty("z-index","100500","important");
+    }
+  }
+
+  function toggleMenu(ev){
+    var root = getRoot();
+    if(!root) return;
+
+    if(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+    }
+
+    root.classList.toggle("open");
+
+    setTimeout(forcePapatya, 0);
+    setTimeout(forcePapatya, 40);
+    setTimeout(forcePapatya, 120);
+    setTimeout(forcePapatya, 260);
+  }
+
+  function bind(){
+    var root = getRoot();
+    if(!root) return false;
+
+    var toggle = getToggle(root);
+    if(!toggle) return false;
+
+    if(toggle.__EG_FAN12P_V9_BOUND__) return true;
+    toggle.__EG_FAN12P_V9_BOUND__ = true;
+
+    toggle.addEventListener("click", toggleMenu, true);
+    toggle.addEventListener("touchstart", toggleMenu, {capture:true, passive:false});
+
+    toggle.style.setProperty("pointer-events","auto","important");
+    toggle.style.setProperty("cursor","pointer","important");
+    toggle.style.setProperty("z-index","100500","important");
+
+    return true;
+  }
+
+  function boot(){
+    bind();
+    forcePapatya();
+
+    var root = getRoot();
+    if(root && window.MutationObserver && !root.__EG_FAN12P_V9_OBS__){
+      root.__EG_FAN12P_V9_OBS__ = true;
+      new MutationObserver(function(){
+        bind();
+        forcePapatya();
+      }).observe(root, {attributes:true, subtree:true, childList:true});
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", boot);
+  document.addEventListener("click", function(ev){
+    var root = getRoot();
+    if(!root) return;
+    var toggle = getToggle(root);
+    if(toggle && (ev.target === toggle || toggle.contains(ev.target))){
+      toggleMenu(ev);
+    }
+  }, true);
+
+  setInterval(boot, 700);
+})();
+</script>
+"""
+                html = html.replace("</body>", inject + "\n</body>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v9_inner_e:
+            print("ERATGUARD FAN-12P V9 TAP TOGGLE INNER ERROR:", _eg_f12p_v9_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v9_tap_toggle_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v9_tap_toggle_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v9_tap_toggle_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V9 TAP TOGGLE FIX ACTIVE")
+
+except Exception as _eg_f12p_v9_e:
+    print("ERATGUARD FAN-12P V9 TAP TOGGLE FIX ERROR:", _eg_f12p_v9_e)
+# ===== ERATGUARD FAN-12P V9 TAP TOGGLE FIX END =====
