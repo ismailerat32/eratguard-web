@@ -28780,3 +28780,268 @@ body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::after{
 except Exception as _eg_f12p_v11_e:
     print("ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU ERROR:", _eg_f12p_v11_e)
 # ===== ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU END =====
+
+# ===== ERATGUARD FAN-12P V12 PETAL POLISH FIX START =====
+# V12: V11'de em numaraları ikon gibi büyümüştü. em küçük numara yapılır, b ikon yapılır, çift numara kapatılır.
+
+try:
+    from flask import request as _eg_f12p_v12_request
+
+    def _eg_fan12p_v12_petal_polish_response(response):
+        try:
+            path = (_eg_f12p_v12_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "FAN-12P" not in html or "eg-user-fan3-panel" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P V12 PETAL POLISH FIX" not in html:
+                inject = """
+<style id="eg-fan12p-v12-petal-polish-css">
+/* ERATGUARD FAN-12P V12 PETAL POLISH FIX */
+
+/* Merkez biraz aşağı, daha kompakt */
+body.eg-fan12p-v10-open .eg-user-fan3-panel{
+  top:71%!important;
+}
+
+body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
+  top:71%!important;
+  width:82px!important;
+  height:82px!important;
+}
+
+#eg-fan12p-real-menu-btn .eg-v10-e{
+  width:44px!important;
+  height:44px!important;
+  font-size:26px!important;
+}
+
+#eg-fan12p-real-menu-btn .eg-v10-label{
+  font-size:10.5px!important;
+}
+
+/* V11 çift numara pseudo balonu kapat */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::before{
+  display:none!important;
+  content:none!important;
+}
+
+/* Yaprakları daha küçük ve temiz hale getir */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
+  width:62px!important;
+  min-width:62px!important;
+  max-width:62px!important;
+  height:126px!important;
+  min-height:126px!important;
+  max-height:126px!important;
+  padding:7px 5px 9px!important;
+  border-radius:36px 36px 30px 30px!important;
+  gap:3px!important;
+  overflow:hidden!important;
+}
+
+/* HTML içindeki gerçek ikon: <b> */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item b{
+  order:2!important;
+  width:30px!important;
+  height:30px!important;
+  min-width:30px!important;
+  min-height:30px!important;
+  border-radius:999px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-size:19px!important;
+  font-weight:400!important;
+  line-height:1!important;
+  font-style:normal!important;
+  margin:4px 0 2px!important;
+  background:rgba(34,81,156,.72)!important;
+  box-shadow:0 0 10px rgba(50,171,255,.36)!important;
+}
+
+/* HTML içindeki gerçek numara: <em> */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item em{
+  order:1!important;
+  width:28px!important;
+  height:28px!important;
+  min-width:28px!important;
+  min-height:28px!important;
+  border-radius:999px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-style:normal!important;
+  font-size:10.5px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  color:#2cff92!important;
+  border:1px solid rgba(46,255,146,.78)!important;
+  background:rgba(2,30,44,.90)!important;
+  box-shadow:0 0 9px rgba(46,255,146,.46)!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+/* Yazı bloğu */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item span{
+  order:3!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
+  display:block!important;
+  width:100%!important;
+  text-align:center!important;
+  font-size:9.3px!important;
+  font-weight:900!important;
+  line-height:1.02!important;
+  color:#ffffff!important;
+  margin:0!important;
+}
+
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
+  display:block!important;
+  width:100%!important;
+  text-align:center!important;
+  font-size:6.5px!important;
+  font-weight:700!important;
+  line-height:1.02!important;
+  color:rgba(222,239,255,.86)!important;
+  margin:1px 0 0!important;
+}
+
+/* Daha dar papatya koordinatları */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-102px) rotate(0deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(51px,-88px) rotate(30deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(88px,-51px) rotate(60deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(102px,0px) rotate(90deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(88px,51px) rotate(120deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(51px,88px) rotate(150deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,102px) rotate(180deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-51px,88px) rotate(210deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-88px,51px) rotate(240deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-102px,0px) rotate(270deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-88px,-51px) rotate(300deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-51px,-88px) rotate(330deg)!important}
+
+/* Bağlantı çizgisi daha kısa */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::after{
+  bottom:-10px!important;
+  height:12px!important;
+}
+
+/* Küçük ekran ekstra sıkı */
+@media(max-width:390px){
+  body.eg-fan12p-v10-open .eg-user-fan3-panel,
+  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
+    top:72%!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
+    width:58px!important;
+    min-width:58px!important;
+    max-width:58px!important;
+    height:118px!important;
+    min-height:118px!important;
+    max-height:118px!important;
+    padding:6px 4px 8px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item b{
+    width:28px!important;
+    height:28px!important;
+    min-width:28px!important;
+    min-height:28px!important;
+    font-size:18px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item em{
+    width:25px!important;
+    height:25px!important;
+    min-width:25px!important;
+    min-height:25px!important;
+    font-size:9.8px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
+    font-size:8.6px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
+    font-size:6px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-94px) rotate(0deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(47px,-81px) rotate(30deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(81px,-47px) rotate(60deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(94px,0px) rotate(90deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(81px,47px) rotate(120deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(47px,81px) rotate(150deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,94px) rotate(180deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-47px,81px) rotate(210deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-81px,47px) rotate(240deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-94px,0px) rotate(270deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-81px,-47px) rotate(300deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-47px,-81px) rotate(330deg)!important}
+}
+</style>
+
+<script id="eg-fan12p-v12-petal-polish-js">
+/* ERATGUARD FAN-12P V12 PETAL POLISH FIX */
+(function(){
+  if(window.__EG_FAN12P_V12_POLISH_READY__) return;
+  window.__EG_FAN12P_V12_POLISH_READY__ = true;
+
+  function mark(){
+    var panel = document.querySelector(".eg-user-fan3-panel");
+    if(panel) panel.setAttribute("data-fan12p-v12", "true");
+    var btn = document.getElementById("eg-fan12p-real-menu-btn");
+    if(btn) btn.setAttribute("data-fan12p-v12", "true");
+  }
+
+  document.addEventListener("DOMContentLoaded", mark);
+  document.addEventListener("click", mark, true);
+  setInterval(mark, 900);
+})();
+</script>
+"""
+                html = html.replace("</body>", inject + "\n</body>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v12_inner_e:
+            print("ERATGUARD FAN-12P V12 PETAL POLISH INNER ERROR:", _eg_f12p_v12_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v12_petal_polish_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v12_petal_polish_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v12_petal_polish_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V12 PETAL POLISH FIX ACTIVE")
+
+except Exception as _eg_f12p_v12_e:
+    print("ERATGUARD FAN-12P V12 PETAL POLISH FIX ERROR:", _eg_f12p_v12_e)
+# ===== ERATGUARD FAN-12P V12 PETAL POLISH FIX END =====
