@@ -29045,3 +29045,344 @@ body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::after{
 except Exception as _eg_f12p_v12_e:
     print("ERATGUARD FAN-12P V12 PETAL POLISH FIX ERROR:", _eg_f12p_v12_e)
 # ===== ERATGUARD FAN-12P V12 PETAL POLISH FIX END =====
+
+# ===== ERATGUARD FAN-12P V13 FINAL LOCK MENU START =====
+# V13 FINAL: Eski hayalet menü görseli kapatılır, sadece gerçek V10 butonu kalır.
+# Yapraklar mini-final ölçüye alınır; taşma ve kart bindirme azaltılır.
+
+try:
+    from flask import request as _eg_f12p_v13_request
+
+    def _eg_fan12p_v13_final_lock_response(response):
+        try:
+            path = (_eg_f12p_v13_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "FAN-12P" not in html or "eg-user-fan3-panel" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P V13 FINAL LOCK MENU" not in html:
+                inject = """
+<style id="eg-fan12p-v13-final-lock-css">
+/* ERATGUARD FAN-12P V13 FINAL LOCK MENU */
+
+/* Eski hayalet menü / sağdaki eski E görüntüsünü nötrle */
+.eg-user-fan3{
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+  pointer-events:none!important;
+}
+
+.eg-user-fan3::before,
+.eg-user-fan3::after{
+  display:none!important;
+  content:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+}
+
+.eg-user-fan3 > :not(.eg-user-fan3-panel){
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* Panel açıkken sadece yaprak paneli aktif */
+body.eg-fan12p-v10-open .eg-user-fan3-panel{
+  position:fixed!important;
+  left:50%!important;
+  top:73%!important;
+  width:0!important;
+  height:0!important;
+  transform:translate(-50%,-50%)!important;
+  overflow:visible!important;
+  contain:none!important;
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  z-index:2147482500!important;
+}
+
+/* Gerçek merkez buton: tek merkez */
+#eg-fan12p-real-menu-btn{
+  width:78px!important;
+  height:78px!important;
+  right:18px!important;
+  top:50%!important;
+  border-radius:999px!important;
+  border:1px solid rgba(121,222,255,.95)!important;
+  background:
+    radial-gradient(circle at 35% 22%, rgba(165,232,255,.98), rgba(25,121,210,.96) 38%, rgba(3,21,64,.99) 78%)!important;
+  box-shadow:
+    0 0 0 2px rgba(36,255,142,.24),
+    0 0 16px rgba(64,178,255,.82),
+    0 0 26px rgba(33,255,148,.38)!important;
+  z-index:2147483600!important;
+  pointer-events:auto!important;
+}
+
+body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
+  left:50%!important;
+  top:73%!important;
+  right:auto!important;
+  transform:translate(-50%,-50%)!important;
+}
+
+#eg-fan12p-real-menu-btn .eg-v10-e{
+  width:41px!important;
+  height:41px!important;
+  font-size:24px!important;
+}
+
+#eg-fan12p-real-menu-btn .eg-v10-label{
+  font-size:10px!important;
+  letter-spacing:.10em!important;
+}
+
+/* Kapalıyken yapraklar kesin kapalı */
+body:not(.eg-fan12p-v10-open) .eg-user-fan3-panel .eg-user-fan3-item{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* Final mini yaprak */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+
+  width:54px!important;
+  min-width:54px!important;
+  max-width:54px!important;
+  height:108px!important;
+  min-height:108px!important;
+  max-height:108px!important;
+
+  padding:5px 4px 7px!important;
+  border-radius:32px 32px 27px 27px!important;
+  box-sizing:border-box!important;
+
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:2px!important;
+
+  overflow:hidden!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  z-index:2147482600!important;
+  transform-origin:center center!important;
+
+  background:
+    radial-gradient(circle at 50% 8%, rgba(39,255,153,.18), transparent 24%),
+    linear-gradient(180deg, rgba(8,39,84,.98), rgba(3,18,49,.98))!important;
+
+  border:1px solid rgba(34,255,154,.82)!important;
+  box-shadow:
+    inset 0 0 15px rgba(54,174,255,.20),
+    0 0 8px rgba(33,255,151,.70),
+    0 0 15px rgba(43,167,255,.38)!important;
+
+  color:#fff!important;
+  text-decoration:none!important;
+}
+
+/* Çift numara yok */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::before{
+  display:none!important;
+  content:none!important;
+}
+
+/* Bağ çizgisi kısa */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::after{
+  bottom:-8px!important;
+  height:10px!important;
+}
+
+/* İkon: <b> */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item b{
+  order:2!important;
+  width:25px!important;
+  height:25px!important;
+  min-width:25px!important;
+  min-height:25px!important;
+  border-radius:999px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-size:16px!important;
+  font-weight:400!important;
+  line-height:1!important;
+  font-style:normal!important;
+  margin:3px 0 1px!important;
+  background:rgba(34,81,156,.72)!important;
+  box-shadow:0 0 8px rgba(50,171,255,.34)!important;
+}
+
+/* Numara: <em> */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item em{
+  order:1!important;
+  width:23px!important;
+  height:23px!important;
+  min-width:23px!important;
+  min-height:23px!important;
+  border-radius:999px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-style:normal!important;
+  font-size:9px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  color:#2cff92!important;
+  border:1px solid rgba(46,255,146,.78)!important;
+  background:rgba(2,30,44,.90)!important;
+  box-shadow:0 0 8px rgba(46,255,146,.44)!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+/* Metin */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item span{
+  order:3!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
+  display:block!important;
+  width:100%!important;
+  text-align:center!important;
+  font-size:8px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  color:#ffffff!important;
+  margin:0!important;
+}
+
+body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
+  display:block!important;
+  width:100%!important;
+  text-align:center!important;
+  font-size:5.6px!important;
+  font-weight:700!important;
+  line-height:1!important;
+  color:rgba(222,239,255,.84)!important;
+  margin:1px 0 0!important;
+}
+
+/* Final dar çap koordinatları */
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-84px) rotate(0deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(42px,-73px) rotate(30deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(73px,-42px) rotate(60deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(84px,0px) rotate(90deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(73px,42px) rotate(120deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(42px,73px) rotate(150deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,84px) rotate(180deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-42px,73px) rotate(210deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-73px,42px) rotate(240deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-84px,0px) rotate(270deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-73px,-42px) rotate(300deg)!important}
+body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-42px,-73px) rotate(330deg)!important}
+
+/* Çok küçük ekran */
+@media(max-width:390px){
+  body.eg-fan12p-v10-open .eg-user-fan3-panel,
+  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
+    top:74%!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
+    width:50px!important;
+    min-width:50px!important;
+    max-width:50px!important;
+    height:100px!important;
+    min-height:100px!important;
+    max-height:100px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
+    font-size:7.4px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
+    font-size:5.2px!important;
+  }
+
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-78px) rotate(0deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(39px,-68px) rotate(30deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(68px,-39px) rotate(60deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(78px,0px) rotate(90deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(68px,39px) rotate(120deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(39px,68px) rotate(150deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,78px) rotate(180deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-39px,68px) rotate(210deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-68px,39px) rotate(240deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-78px,0px) rotate(270deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-68px,-39px) rotate(300deg)!important}
+  body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-39px,-68px) rotate(330deg)!important}
+}
+</style>
+
+<script id="eg-fan12p-v13-final-lock-js">
+/* ERATGUARD FAN-12P V13 FINAL LOCK MENU */
+(function(){
+  if(window.__EG_FAN12P_V13_FINAL_LOCK_READY__) return;
+  window.__EG_FAN12P_V13_FINAL_LOCK_READY__ = true;
+
+  function mark(){
+    var panel = document.querySelector(".eg-user-fan3-panel");
+    if(panel) panel.setAttribute("data-fan12p-v13", "true");
+    var btn = document.getElementById("eg-fan12p-real-menu-btn");
+    if(btn) btn.setAttribute("data-fan12p-v13", "true");
+  }
+
+  document.addEventListener("DOMContentLoaded", mark);
+  document.addEventListener("click", mark, true);
+  setInterval(mark, 900);
+})();
+</script>
+"""
+                html = html.replace("</body>", inject + "\n</body>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v13_inner_e:
+            print("ERATGUARD FAN-12P V13 FINAL LOCK INNER ERROR:", _eg_f12p_v13_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v13_final_lock_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v13_final_lock_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v13_final_lock_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V13 FINAL LOCK MENU ACTIVE")
+
+except Exception as _eg_f12p_v13_e:
+    print("ERATGUARD FAN-12P V13 FINAL LOCK MENU ERROR:", _eg_f12p_v13_e)
+# ===== ERATGUARD FAN-12P V13 FINAL LOCK MENU END =====
