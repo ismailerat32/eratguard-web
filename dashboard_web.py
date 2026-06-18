@@ -31517,3 +31517,133 @@ body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
 except Exception as _eg_f12p_v21_e:
     print("ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX ERROR:", _eg_f12p_v21_e)
 # ===== ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX END =====
+
+# ===== ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL START =====
+# V22: Kapalı durumdaki E MENÜ butonu SMS Merkezi butonundan tamamen ayrılır.
+# Sadece kapalı pozisyon düzeltilir; bottom sheet açık hali korunur.
+
+try:
+    from flask import request as _eg_f12p_v22_request
+
+    def _eg_fan12p_v22_button_position_response(response):
+        try:
+            path = (_eg_f12p_v22_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "FAN-12P" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL" not in html:
+                inject = """
+<style id="eg-fan12p-v22-button-position-css">
+/* ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL */
+
+/* Kapalı durumda E MENÜ karttan ayrılır, sağ-alt boş alana iner */
+body:not(.eg-fan12p-v10-open) #eg-fan12p-real-menu-btn{
+  position:fixed!important;
+  right:24px!important;
+  top:auto!important;
+  bottom:245px!important;
+  left:auto!important;
+  transform:translate3d(0,0,0)!important;
+  width:72px!important;
+  height:72px!important;
+  z-index:2147483600!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+
+/* Açık durumda V20/V21 bottom sheet üst merkez davranışı aynen korunur */
+body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
+  left:50%!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:calc(70vh - 38px)!important;
+  transform:translate3d(-50%,0,0)!important;
+  width:78px!important;
+  height:78px!important;
+  z-index:2147483700!important;
+}
+
+/* İç yazı kompakt */
+#eg-fan12p-real-menu-btn .eg-v10-e{
+  width:39px!important;
+  height:39px!important;
+  font-size:23px!important;
+}
+
+#eg-fan12p-real-menu-btn .eg-v10-label{
+  font-size:9px!important;
+  letter-spacing:.08em!important;
+}
+
+/* Küçük ekran */
+@media(max-width:390px){
+  body:not(.eg-fan12p-v10-open) #eg-fan12p-real-menu-btn{
+    right:22px!important;
+    bottom:230px!important;
+    width:70px!important;
+    height:70px!important;
+  }
+
+  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
+    bottom:calc(72vh - 37px)!important;
+    width:74px!important;
+    height:74px!important;
+  }
+}
+</style>
+
+<script id="eg-fan12p-v22-button-position-js">
+/* ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL */
+(function(){
+  if(window.__EG_FAN12P_V22_BUTTON_POSITION_READY__) return;
+  window.__EG_FAN12P_V22_BUTTON_POSITION_READY__ = true;
+
+  function mark(){
+    var btn = document.getElementById("eg-fan12p-real-menu-btn");
+    if(btn) btn.setAttribute("data-fan12p-v22", "closed-position-final");
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", mark, {once:true});
+  }else{
+    mark();
+  }
+
+  document.addEventListener("click", mark, true);
+})();
+</script>
+"""
+                html = html.replace("</body>", inject + "\n</body>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v22_inner_e:
+            print("ERATGUARD FAN-12P V22 BUTTON POSITION INNER ERROR:", _eg_f12p_v22_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v22_button_position_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v22_button_position_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v22_button_position_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL ACTIVE")
+
+except Exception as _eg_f12p_v22_e:
+    print("ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL ERROR:", _eg_f12p_v22_e)
+# ===== ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL END =====
