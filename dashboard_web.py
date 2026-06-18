@@ -31359,3 +31359,161 @@ body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
 except Exception as _eg_f12p_v20_e:
     print("ERATGUARD FAN-12P V20 BOTTOM SHEET PERFORMANCE LOCK ERROR:", _eg_f12p_v20_e)
 # ===== ERATGUARD FAN-12P V20 BOTTOM SHEET PERFORMANCE LOCK END =====
+
+# ===== ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX START =====
+# V21: Kapalı menü butonu kart içinden çıkarılır. Logo/header sıkışması azaltılır.
+
+try:
+    from flask import request as _eg_f12p_v21_request
+
+    def _eg_fan12p_v21_position_fix_response(response):
+        try:
+            path = (_eg_f12p_v21_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "FAN-12P" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX" not in html:
+                inject = """
+<style id="eg-fan12p-v21-position-fix-css">
+/* ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX */
+
+/* Üst logo alanını başlık çubuğundan biraz uzaklaştır */
+.eg-shell,
+.eg-page,
+.eg-user-page,
+.eg-dashboard,
+.eg-user-dashboard,
+.eg-fan12p-page,
+body{
+  scroll-behavior:auto!important;
+}
+
+/* Logonun olduğu üst bölüm sıkışmasın */
+.eg-brand,
+.eg-logo-block,
+.eg-hero-brand,
+.eg-user-brand,
+.eg-fan12p-brand,
+.header-brand,
+.brand-block{
+  margin-top:18px!important;
+}
+
+/* Üstteki EratGuard logo/title bloğu için genel güvenli alan */
+body:not(.eg-fan12p-v10-open) .eg-logo,
+body:not(.eg-fan12p-v10-open) .logo,
+body:not(.eg-fan12p-v10-open) .app-logo{
+  margin-top:8px!important;
+}
+
+/* Kapalıyken E MENÜ kartın üstünden çıkarılıp boş sağ-alt alana alınır */
+body:not(.eg-fan12p-v10-open) #eg-fan12p-real-menu-btn{
+  position:fixed!important;
+  right:28px!important;
+  top:auto!important;
+  bottom:185px!important;
+  left:auto!important;
+  transform:translate3d(0,0,0)!important;
+  width:76px!important;
+  height:76px!important;
+  z-index:2147483600!important;
+}
+
+/* Açıkken yine bottom sheet üst merkezine otursun */
+body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
+  left:50%!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:calc(70vh - 38px)!important;
+  transform:translate3d(-50%,0,0)!important;
+  width:78px!important;
+  height:78px!important;
+  z-index:2147483700!important;
+}
+
+/* Buton içi biraz kompakt */
+#eg-fan12p-real-menu-btn .eg-v10-e{
+  width:40px!important;
+  height:40px!important;
+  font-size:24px!important;
+}
+
+#eg-fan12p-real-menu-btn .eg-v10-label{
+  font-size:9.5px!important;
+  letter-spacing:.08em!important;
+}
+
+/* Küçük ekranlarda daha yukarıda dursun, alt status bar'a binmesin */
+@media(max-width:390px){
+  body:not(.eg-fan12p-v10-open) #eg-fan12p-real-menu-btn{
+    right:24px!important;
+    bottom:170px!important;
+    width:72px!important;
+    height:72px!important;
+  }
+
+  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
+    bottom:calc(72vh - 37px)!important;
+    width:74px!important;
+    height:74px!important;
+  }
+}
+</style>
+
+<script id="eg-fan12p-v21-position-fix-js">
+/* ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX */
+(function(){
+  if(window.__EG_FAN12P_V21_POSITION_FIX_READY__) return;
+  window.__EG_FAN12P_V21_POSITION_FIX_READY__ = true;
+
+  function mark(){
+    var btn = document.getElementById("eg-fan12p-real-menu-btn");
+    if(btn) btn.setAttribute("data-fan12p-v21", "position-fixed");
+
+    var sheet = document.getElementById("eg-fan12p-command-sheet");
+    if(sheet) sheet.setAttribute("data-fan12p-v21", "position-fixed");
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", mark, {once:true});
+  }else{
+    mark();
+  }
+
+  document.addEventListener("click", mark, true);
+})();
+</script>
+"""
+                html = html.replace("</body>", inject + "\n</body>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v21_inner_e:
+            print("ERATGUARD FAN-12P V21 POSITION FIX INNER ERROR:", _eg_f12p_v21_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v21_position_fix_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v21_position_fix_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v21_position_fix_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX ACTIVE")
+
+except Exception as _eg_f12p_v21_e:
+    print("ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX ERROR:", _eg_f12p_v21_e)
+# ===== ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX END =====
