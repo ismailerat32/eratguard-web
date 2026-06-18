@@ -29386,3 +29386,407 @@ body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) 
 except Exception as _eg_f12p_v13_e:
     print("ERATGUARD FAN-12P V13 FINAL LOCK MENU ERROR:", _eg_f12p_v13_e)
 # ===== ERATGUARD FAN-12P V13 FINAL LOCK MENU END =====
+
+# ===== ERATGUARD FAN-12P V14 SAFE ACCORDION MENU START =====
+# V14: Başarısız papatya panel kapatılır. MENÜ butonu soldan sağa açılan stabil akordion menüye bağlanır.
+
+try:
+    from flask import request as _eg_f12p_v14_request
+
+    def _eg_fan12p_v14_safe_accordion_response(response):
+        try:
+            path = (_eg_f12p_v14_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "FAN-12P" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P V14 SAFE ACCORDION MENU" not in html:
+                inject = """
+<style id="eg-fan12p-v14-safe-accordion-css">
+/* ERATGUARD FAN-12P V14 SAFE ACCORDION MENU */
+
+/* Eski papatya/yaprak panel tamamen kapalı */
+.eg-user-fan3,
+.eg-user-fan3-panel,
+.eg-user-fan3-item{
+  display:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* Gerçek MENÜ butonu tekrar sade sağda */
+#eg-fan12p-real-menu-btn{
+  position:fixed!important;
+  right:18px!important;
+  top:50%!important;
+  left:auto!important;
+  transform:translateY(-50%)!important;
+  width:84px!important;
+  height:84px!important;
+  border-radius:999px!important;
+  border:1px solid rgba(118,220,255,.95)!important;
+  background:
+    radial-gradient(circle at 35% 22%, rgba(165,232,255,.98), rgba(25,121,210,.96) 38%, rgba(3,21,64,.99) 78%)!important;
+  box-shadow:
+    0 0 0 2px rgba(36,255,142,.22),
+    0 0 16px rgba(64,178,255,.75),
+    0 0 26px rgba(33,255,148,.34)!important;
+  z-index:2147483600!important;
+  pointer-events:auto!important;
+  cursor:pointer!important;
+}
+
+body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
+  right:18px!important;
+  top:50%!important;
+  left:auto!important;
+  transform:translateY(-50%)!important;
+}
+
+#eg-fan12p-real-menu-btn .eg-v10-e{
+  width:44px!important;
+  height:44px!important;
+  font-size:26px!important;
+}
+
+#eg-fan12p-real-menu-btn .eg-v10-label{
+  font-size:10px!important;
+}
+
+/* Arka karartma */
+#eg-fan12p-accordion-backdrop{
+  position:fixed!important;
+  inset:0!important;
+  background:rgba(0,0,0,.46)!important;
+  backdrop-filter:blur(3px)!important;
+  -webkit-backdrop-filter:blur(3px)!important;
+  z-index:2147482500!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transition:opacity .22s ease, visibility .22s ease!important;
+}
+
+body.eg-fan12p-v10-open #eg-fan12p-accordion-backdrop{
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+
+/* Soldan sağa açılan akordion panel */
+#eg-fan12p-accordion-drawer{
+  position:fixed!important;
+  left:0!important;
+  top:0!important;
+  bottom:0!important;
+  width:min(86vw, 370px)!important;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(32,255,143,.18), transparent 30%),
+    linear-gradient(180deg, rgba(2,22,22,.98), rgba(0,8,13,.98))!important;
+  border-right:1px solid rgba(37,255,145,.62)!important;
+  box-shadow:
+    18px 0 44px rgba(0,0,0,.58),
+    0 0 24px rgba(31,255,145,.22)!important;
+  z-index:2147483000!important;
+  transform:translateX(-105%)!important;
+  transition:transform .28s cubic-bezier(.2,.9,.2,1)!important;
+  pointer-events:auto!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  padding:20px 16px 24px!important;
+  box-sizing:border-box!important;
+}
+
+body.eg-fan12p-v10-open #eg-fan12p-accordion-drawer{
+  transform:translateX(0)!important;
+}
+
+.eg-fan12p-acc-head{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  margin-bottom:16px!important;
+}
+
+.eg-fan12p-acc-title{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:3px!important;
+}
+
+.eg-fan12p-acc-title strong{
+  color:#2cff92!important;
+  font-size:18px!important;
+  font-weight:900!important;
+  letter-spacing:.04em!important;
+}
+
+.eg-fan12p-acc-title small{
+  color:#44dfff!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  letter-spacing:.22em!important;
+}
+
+#eg-fan12p-accordion-close{
+  width:42px!important;
+  height:42px!important;
+  border-radius:999px!important;
+  border:1px solid rgba(45,255,150,.55)!important;
+  background:rgba(7,35,32,.86)!important;
+  color:#fff!important;
+  font-size:26px!important;
+  line-height:1!important;
+  cursor:pointer!important;
+}
+
+.eg-fan12p-acc-list{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:9px!important;
+}
+
+.eg-fan12p-acc-item{
+  display:grid!important;
+  grid-template-columns:34px 1fr 32px!important;
+  align-items:center!important;
+  gap:10px!important;
+  min-height:58px!important;
+  padding:9px 10px!important;
+  box-sizing:border-box!important;
+  border-radius:18px!important;
+  text-decoration:none!important;
+  color:#fff!important;
+  background:
+    linear-gradient(135deg, rgba(9,65,47,.92), rgba(5,22,45,.96))!important;
+  border:1px solid rgba(37,255,145,.38)!important;
+  box-shadow:
+    inset 0 0 16px rgba(57,170,255,.10),
+    0 0 10px rgba(30,255,144,.12)!important;
+}
+
+.eg-fan12p-acc-item:active{
+  transform:scale(.985)!important;
+}
+
+.eg-fan12p-acc-icon{
+  width:34px!important;
+  height:34px!important;
+  border-radius:12px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:rgba(35,92,165,.70)!important;
+  box-shadow:0 0 10px rgba(43,173,255,.24)!important;
+  font-size:20px!important;
+}
+
+.eg-fan12p-acc-text{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:2px!important;
+  min-width:0!important;
+}
+
+.eg-fan12p-acc-text strong{
+  color:#fff!important;
+  font-size:13.5px!important;
+  font-weight:900!important;
+  line-height:1.05!important;
+}
+
+.eg-fan12p-acc-text small{
+  color:rgba(221,238,255,.76)!important;
+  font-size:10.5px!important;
+  font-weight:700!important;
+  line-height:1.05!important;
+}
+
+.eg-fan12p-acc-no{
+  width:30px!important;
+  height:30px!important;
+  border-radius:999px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  color:#2cff92!important;
+  border:1px solid rgba(46,255,146,.72)!important;
+  background:rgba(2,30,44,.85)!important;
+  font-size:10px!important;
+  font-weight:900!important;
+}
+
+.eg-fan12p-acc-foot{
+  margin-top:16px!important;
+  padding:12px 13px!important;
+  border-radius:18px!important;
+  border:1px solid rgba(37,255,145,.36)!important;
+  color:#2cff92!important;
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  letter-spacing:.16em!important;
+}
+
+.eg-fan12p-acc-foot span:last-child{
+  color:#44dfff!important;
+}
+
+@media(max-width:390px){
+  #eg-fan12p-accordion-drawer{
+    width:88vw!important;
+    padding:18px 13px 22px!important;
+  }
+
+  .eg-fan12p-acc-item{
+    min-height:54px!important;
+    grid-template-columns:32px 1fr 30px!important;
+  }
+
+  .eg-fan12p-acc-text strong{
+    font-size:12.6px!important;
+  }
+
+  .eg-fan12p-acc-text small{
+    font-size:9.8px!important;
+  }
+}
+</style>
+
+<script id="eg-fan12p-v14-safe-accordion-js">
+/* ERATGUARD FAN-12P V14 SAFE ACCORDION MENU */
+(function(){
+  if(window.__EG_FAN12P_V14_ACCORDION_READY__) return;
+  window.__EG_FAN12P_V14_ACCORDION_READY__ = true;
+
+  var items = [
+    ["01","🏠","Ana Sayfa","Kontrol merkezi","/dashboard"],
+    ["02","🛡️","Koruma","SMS güvenlik motoru","/u/protection"],
+    ["03","🧠","AI Analiz","Risk taraması","/u/ai-analysis"],
+    ["04","📈","Raporlar","Güvenlik özetleri","/u/reports"],
+    ["05","🔔","Bildirimler","Güvenlik akışı","/u/notifications"],
+    ["06","🔑","Lisans","Hesap durumu","/u/license"],
+    ["07","👥","Topluluk","Geri bildirim","/u/community"],
+    ["08","⚙️","Ayarlar","Tercihler","/u/settings"],
+    ["09","📩","SMS Özet","Koruma özeti","/u/sms-summary"],
+    ["10","🚫","Blok SMS","Engellenen merkez","/u/blocked-sms"],
+    ["11","🕘","Geçmiş","Koruma geçmişi","/u/history"],
+    ["12","⭐","PRO","Final özellikleri","/u/pro"]
+  ];
+
+  function closeMenu(){
+    document.body.classList.remove("eg-fan12p-v10-open");
+  }
+
+  function ensureButton(){
+    var btn = document.getElementById("eg-fan12p-real-menu-btn");
+    if(!btn){
+      btn = document.createElement("button");
+      btn.id = "eg-fan12p-real-menu-btn";
+      btn.type = "button";
+      btn.setAttribute("aria-label", "FAN-12P Menü");
+      btn.innerHTML = '<span class="eg-v10-e">E</span><span class="eg-v10-label">MENÜ</span>';
+      document.body.appendChild(btn);
+    }
+
+    if(!btn.__EG_FAN12P_V14_BOUND__){
+      btn.__EG_FAN12P_V14_BOUND__ = true;
+      function toggle(ev){
+        if(ev){
+          ev.preventDefault();
+          ev.stopPropagation();
+          if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
+        }
+        document.body.classList.toggle("eg-fan12p-v10-open");
+      }
+      btn.addEventListener("click", toggle, true);
+      btn.addEventListener("touchstart", toggle, {capture:true, passive:false});
+    }
+  }
+
+  function ensureDrawer(){
+    if(!document.getElementById("eg-fan12p-accordion-backdrop")){
+      var back = document.createElement("div");
+      back.id = "eg-fan12p-accordion-backdrop";
+      document.body.appendChild(back);
+      back.addEventListener("click", closeMenu, true);
+      back.addEventListener("touchstart", function(ev){ ev.preventDefault(); closeMenu(); }, {capture:true, passive:false});
+    }
+
+    if(!document.getElementById("eg-fan12p-accordion-drawer")){
+      var drawer = document.createElement("aside");
+      drawer.id = "eg-fan12p-accordion-drawer";
+      drawer.setAttribute("aria-label", "FAN-12P Akordion Menü");
+
+      var list = items.map(function(it){
+        return '<a class="eg-fan12p-acc-item" href="'+it[4]+'">' +
+          '<span class="eg-fan12p-acc-icon">'+it[1]+'</span>' +
+          '<span class="eg-fan12p-acc-text"><strong>'+it[2]+'</strong><small>'+it[3]+'</small></span>' +
+          '<span class="eg-fan12p-acc-no">'+it[0]+'</span>' +
+        '</a>';
+      }).join("");
+
+      drawer.innerHTML =
+        '<div class="eg-fan12p-acc-head">' +
+          '<div class="eg-fan12p-acc-title"><strong>FAN-12P MENÜ</strong><small>COMMAND CENTER</small></div>' +
+          '<button id="eg-fan12p-accordion-close" type="button" aria-label="Menüyü kapat">×</button>' +
+        '</div>' +
+        '<nav class="eg-fan12p-acc-list">' + list + '</nav>' +
+        '<div class="eg-fan12p-acc-foot"><span>● KORUMA AKTİF</span><span>FAN-12P</span></div>';
+
+      document.body.appendChild(drawer);
+
+      var close = document.getElementById("eg-fan12p-accordion-close");
+      if(close){
+        close.addEventListener("click", function(ev){ ev.preventDefault(); closeMenu(); }, true);
+        close.addEventListener("touchstart", function(ev){ ev.preventDefault(); closeMenu(); }, {capture:true, passive:false});
+      }
+    }
+  }
+
+  function boot(){
+    ensureButton();
+    ensureDrawer();
+  }
+
+  document.addEventListener("DOMContentLoaded", boot);
+  setInterval(boot, 800);
+})();
+</script>
+"""
+                html = html.replace("</body>", inject + "\n</body>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            return response
+
+        except Exception as _eg_f12p_v14_inner_e:
+            print("ERATGUARD FAN-12P V14 ACCORDION INNER ERROR:", _eg_f12p_v14_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v14_safe_accordion_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v14_safe_accordion_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v14_safe_accordion_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V14 SAFE ACCORDION MENU ACTIVE")
+
+except Exception as _eg_f12p_v14_e:
+    print("ERATGUARD FAN-12P V14 SAFE ACCORDION MENU ERROR:", _eg_f12p_v14_e)
+# ===== ERATGUARD FAN-12P V14 SAFE ACCORDION MENU END =====
