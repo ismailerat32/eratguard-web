@@ -31647,3 +31647,611 @@ body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
 except Exception as _eg_f12p_v22_e:
     print("ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL ERROR:", _eg_f12p_v22_e)
 # ===== ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL END =====
+
+# ===== ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL START =====
+# V23: Eski V6-V22 yamalı DOM tamamen bypass edilir.
+# Dashboard + bottom command sheet tek temiz HTML olarak döndürülür.
+
+try:
+    from flask import request as _eg_f12p_v23_request
+
+    def _eg_fan12p_v23_clean_html():
+        return r'''<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EratGuard PRO - FAN-12P Command Center</title>
+<style>
+/* ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL */
+:root{
+  --bg:#020b08;
+  --panel:#041b17;
+  --panel2:#05233a;
+  --green:#25ff8f;
+  --cyan:#46dfff;
+  --text:#f4fff9;
+  --muted:rgba(230,244,255,.66);
+  --line:rgba(37,255,143,.42);
+  --blue:#1778e8;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#000;color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+body{
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at 82% 38%, rgba(21,255,122,.16), transparent 34%),
+    radial-gradient(circle at 20% 12%, rgba(45,220,255,.08), transparent 28%),
+    linear-gradient(180deg,#00110c 0%,#000906 55%,#000704 100%);
+}
+
+.eg-app{
+  position:relative;
+  min-height:100dvh;
+  padding:90px 30px 34px;
+  overflow:hidden;
+}
+
+.eg-top-pill{
+  position:absolute;
+  left:0;
+  right:0;
+  top:24px;
+  height:78px;
+  border-radius:34px;
+  background:linear-gradient(90deg,#19f884,#28ff95);
+  color:#061008;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:950;
+  font-size:26px;
+  letter-spacing:.01em;
+  box-shadow:0 0 32px rgba(37,255,143,.24);
+}
+
+.eg-brand{
+  position:relative;
+  z-index:1;
+  margin-top:28px;
+  margin-bottom:92px;
+}
+
+.eg-logo{
+  width:112px;
+  height:112px;
+  border-radius:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:66px;
+  line-height:1;
+  font-weight:950;
+  color:#020b08;
+  background:linear-gradient(135deg,#1ff587 0%,#39dfff 52%,#336dff 100%);
+  box-shadow:0 0 28px rgba(49,218,255,.32);
+  margin-bottom:24px;
+}
+
+.eg-brand h1{
+  margin:0;
+  font-size:41px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-.05em;
+}
+.eg-brand h1 span{color:var(--green)}
+.eg-brand small{
+  display:block;
+  margin-top:22px;
+  color:var(--cyan);
+  font-size:15px;
+  font-weight:950;
+  letter-spacing:.34em;
+  line-height:1.55;
+}
+
+.eg-card{
+  position:relative;
+  z-index:1;
+  border:1px solid rgba(37,255,143,.35);
+  border-radius:28px;
+  padding:28px 28px 26px;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(31,255,133,.12), transparent 38%),
+    linear-gradient(180deg,rgba(4,46,32,.74),rgba(3,20,17,.78));
+  box-shadow:0 0 30px rgba(37,255,143,.08), inset 0 0 24px rgba(22,255,126,.04);
+}
+
+.eg-card-kicker{
+  color:var(--green);
+  font-size:20px;
+  font-weight:950;
+  letter-spacing:.08em;
+  margin-bottom:12px;
+}
+.eg-card h2{
+  margin:0 0 12px;
+  font-size:36px;
+  line-height:1.05;
+  font-weight:950;
+}
+.eg-card p{
+  margin:0 0 26px;
+  color:rgba(230,244,255,.68);
+  font-size:25px;
+  line-height:1.25;
+}
+
+.eg-stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  margin-bottom:24px;
+}
+.eg-stat{
+  min-height:94px;
+  border-radius:22px;
+  background:rgba(13,54,37,.62);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+.eg-stat strong{
+  color:var(--green);
+  font-size:38px;
+  font-weight:950;
+  line-height:1;
+}
+.eg-stat span{
+  margin-top:10px;
+  color:rgba(230,244,255,.75);
+  font-size:18px;
+  font-weight:850;
+}
+
+.eg-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.eg-actions a{
+  min-height:78px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  font-size:25px;
+  font-weight:950;
+}
+.eg-actions a:first-child{
+  background:linear-gradient(90deg,#25ff8f,#25ff94);
+  color:#061008;
+}
+.eg-actions a:last-child{
+  border:1px solid rgba(37,255,143,.42);
+  color:var(--green);
+  background:rgba(6,42,28,.45);
+}
+
+.eg-menu-slot{
+  position:relative;
+  z-index:3;
+  display:flex;
+  justify-content:flex-end;
+  padding-right:18px;
+  margin-top:22px;
+  margin-bottom:170px;
+}
+
+#eg-fan12p-real-menu-btn{
+  appearance:none;
+  border:1px solid rgba(128,224,255,.92);
+  width:78px;
+  height:78px;
+  border-radius:999px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  color:#fff;
+  cursor:pointer;
+  background:radial-gradient(circle at 35% 22%,rgba(174,237,255,.98),rgba(30,124,224,.96) 39%,rgba(2,20,64,.98) 78%);
+  box-shadow:0 0 0 2px rgba(37,255,143,.20),0 0 24px rgba(65,188,255,.74),0 0 34px rgba(37,255,143,.22);
+  z-index:20;
+  padding:0;
+}
+#eg-fan12p-real-menu-btn .e{
+  width:42px;
+  height:42px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid rgba(235,255,255,.45);
+  font-size:27px;
+  font-weight:950;
+}
+#eg-fan12p-real-menu-btn .label{
+  font-size:10px;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+
+.eg-status{
+  position:relative;
+  z-index:1;
+  width:min(396px,100%);
+  margin-left:10px;
+  border:1px solid rgba(37,255,143,.28);
+  border-radius:999px;
+  min-height:72px;
+  padding:0 22px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  color:#fff;
+  background:rgba(2,24,18,.48);
+  box-shadow:0 0 18px rgba(37,255,143,.05);
+}
+.eg-status .dot{
+  width:17px;
+  height:17px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 15px rgba(37,255,143,.64);
+}
+.eg-status strong{
+  font-size:16px;
+  letter-spacing:.22em;
+  font-weight:950;
+}
+.eg-status span{
+  color:var(--cyan);
+  font-size:14px;
+  letter-spacing:.13em;
+  font-weight:950;
+}
+
+/* Bottom sheet */
+.eg-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.38);
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .14s linear;
+  z-index:1000;
+}
+
+.eg-sheet{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  height:70dvh;
+  border-radius:30px 30px 0 0;
+  padding:42px 30px 14px;
+  background:
+    radial-gradient(circle at 50% 0%,rgba(37,255,143,.20),transparent 27%),
+    linear-gradient(180deg,rgba(4,61,53,.98),rgba(1,11,18,.99));
+  border:1px solid rgba(37,255,143,.66);
+  border-bottom:0;
+  box-shadow:0 -16px 38px rgba(0,0,0,.55);
+  transform:translate3d(0,110%,0);
+  transition:transform .18s cubic-bezier(.2,.85,.25,1);
+  will-change:transform;
+  z-index:1100;
+  display:flex;
+  flex-direction:column;
+  contain:layout paint style;
+}
+.eg-sheet::before{
+  content:"";
+  position:absolute;
+  top:13px;
+  left:50%;
+  width:78px;
+  height:6px;
+  transform:translateX(-50%);
+  border-radius:999px;
+  background:rgba(235,255,255,.84);
+}
+
+body.eg-open .eg-backdrop{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+body.eg-open .eg-sheet{
+  transform:translate3d(0,0,0);
+}
+body.eg-open #eg-fan12p-real-menu-btn{
+  position:fixed;
+  left:50%;
+  right:auto;
+  bottom:calc(70dvh - 39px);
+  transform:translateX(-50%);
+  z-index:1200;
+}
+
+.eg-sheet-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+  flex:0 0 auto;
+}
+.eg-sheet-head strong{
+  display:block;
+  color:var(--green);
+  font-size:19px;
+  line-height:1.05;
+  font-weight:950;
+}
+.eg-sheet-head small{
+  display:block;
+  color:var(--cyan);
+  font-size:11px;
+  margin-top:6px;
+  letter-spacing:.26em;
+  font-weight:950;
+}
+.eg-close{
+  appearance:none;
+  width:42px;
+  height:42px;
+  border-radius:999px;
+  border:1px solid rgba(37,255,143,.58);
+  color:#fff;
+  background:rgba(4,35,32,.78);
+  font-size:31px;
+  line-height:1;
+  cursor:pointer;
+}
+
+.eg-grid{
+  flex:1 1 auto;
+  min-height:0;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-auto-rows:74px;
+  gap:9px;
+  overflow-y:auto;
+  padding-bottom:8px;
+  -webkit-overflow-scrolling:touch;
+}
+.eg-tile{
+  position:relative;
+  border:1px solid rgba(37,255,143,.42);
+  border-radius:15px;
+  background:linear-gradient(135deg,rgba(8,65,50,.92),rgba(5,25,50,.97));
+  color:#fff;
+  text-decoration:none;
+  padding:8px 8px 6px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.eg-icon{
+  width:27px;
+  height:27px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:10px;
+  background:rgba(35,92,165,.72);
+  font-size:17px;
+  margin-bottom:2px;
+}
+.eg-tile strong{
+  font-size:11px;
+  line-height:1;
+  font-weight:950;
+}
+.eg-tile small{
+  color:rgba(221,238,255,.78);
+  font-size:7.6px;
+  line-height:1.05;
+  font-weight:750;
+}
+.eg-no{
+  position:absolute;
+  right:7px;
+  top:7px;
+  min-width:25px;
+  height:21px;
+  border-radius:999px;
+  border:1px solid rgba(37,255,143,.70);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--green);
+  background:rgba(2,30,44,.85);
+  font-size:8.6px;
+  font-weight:950;
+}
+
+.eg-sheet-foot{
+  flex:0 0 auto;
+  height:32px;
+  border:1px solid rgba(37,255,143,.42);
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 13px;
+  color:var(--green);
+  font-size:9.3px;
+  font-weight:950;
+  letter-spacing:.10em;
+}
+.eg-sheet-foot span:last-child{color:var(--cyan)}
+
+@media(max-width:420px){
+  .eg-app{padding-left:29px;padding-right:29px}
+  .eg-top-pill{height:78px;font-size:24px}
+  .eg-card{padding:28px 28px 26px}
+  .eg-card h2{font-size:35px}
+  .eg-card p{font-size:24px}
+}
+@media(max-width:390px){
+  .eg-app{padding-left:24px;padding-right:24px}
+  .eg-brand{margin-bottom:72px}
+  .eg-logo{width:104px;height:104px;font-size:60px}
+  .eg-brand h1{font-size:38px}
+  .eg-card h2{font-size:31px}
+  .eg-card p{font-size:21px}
+  .eg-actions a{font-size:22px}
+  .eg-menu-slot{margin-bottom:145px}
+  #eg-fan12p-real-menu-btn{width:72px;height:72px}
+  .eg-status{min-height:64px}
+  .eg-sheet{height:72dvh;padding:40px 24px 12px}
+  body.eg-open #eg-fan12p-real-menu-btn{bottom:calc(72dvh - 37px)}
+  .eg-grid{grid-auto-rows:70px;gap:8px}
+  .eg-tile{padding:7px 7px 6px}
+  .eg-icon{width:25px;height:25px;font-size:16px}
+  .eg-tile strong{font-size:10.2px}
+  .eg-tile small{font-size:7.1px}
+}
+</style>
+</head>
+<body>
+<div class="eg-app">
+  <div class="eg-top-pill">FAN-12P Command Center</div>
+
+  <section class="eg-brand">
+    <div class="eg-logo">E</div>
+    <h1>Erat<span>Guard</span></h1>
+    <small>FAN-12P<br>COMMAND CENTER</small>
+  </section>
+
+  <section class="eg-card">
+    <div class="eg-card-kicker">ERATGUARD FAN-12P</div>
+    <h2>SMS Koruma Özeti</h2>
+    <p>SMS risk motoru hazır, yeni analizleri bekliyor.</p>
+
+    <div class="eg-stats">
+      <div class="eg-stat"><strong>HAZIR</strong><span>Durum</span></div>
+      <div class="eg-stat"><strong>0</strong><span>Toplam Aksiyon</span></div>
+      <div class="eg-stat"><strong>0</strong><span>Engellenen</span></div>
+      <div class="eg-stat"><strong>0</strong><span>Şikayet</span></div>
+    </div>
+
+    <div class="eg-actions">
+      <a href="/u/ai-analysis">AI Analiz Aç</a>
+      <a href="/u/sms-summary">SMS Merkezi</a>
+    </div>
+  </section>
+
+  <div class="eg-menu-slot">
+    <button id="eg-fan12p-real-menu-btn" type="button" aria-label="FAN-12P Menü">
+      <span class="e">E</span>
+      <span class="label">MENÜ</span>
+    </button>
+  </div>
+
+  <section class="eg-status">
+    <span class="dot"></span>
+    <strong>KORUMA AKTİF</strong>
+    <span>FAN-12P HAZIR</span>
+  </section>
+</div>
+
+<div class="eg-backdrop" id="eg-fan12p-sheet-backdrop"></div>
+
+<section class="eg-sheet" id="eg-fan12p-command-sheet" aria-label="FAN-12P Komut Merkezi">
+  <div class="eg-sheet-head">
+    <div>
+      <strong>FAN-12P KOMUT MERKEZİ</strong>
+      <small>COMMAND CENTER</small>
+    </div>
+    <button class="eg-close" id="eg-fan12p-sheet-close" type="button">×</button>
+  </div>
+
+  <nav class="eg-grid">
+    <a class="eg-tile" href="/dashboard"><span class="eg-no">01</span><span class="eg-icon">🏠</span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></a>
+    <a class="eg-tile" href="/u/protection"><span class="eg-no">02</span><span class="eg-icon">🛡️</span><strong>Koruma</strong><small>SMS güvenlik motoru</small></a>
+    <a class="eg-tile" href="/u/ai-analysis"><span class="eg-no">03</span><span class="eg-icon">🧠</span><strong>AI Analiz</strong><small>Risk taraması</small></a>
+    <a class="eg-tile" href="/u/reports"><span class="eg-no">04</span><span class="eg-icon">📈</span><strong>Raporlar</strong><small>Güvenlik özetleri</small></a>
+    <a class="eg-tile" href="/u/notifications"><span class="eg-no">05</span><span class="eg-icon">🔔</span><strong>Bildirimler</strong><small>Güvenlik akışı</small></a>
+    <a class="eg-tile" href="/u/license"><span class="eg-no">06</span><span class="eg-icon">🔑</span><strong>Lisans</strong><small>Hesap durumu</small></a>
+    <a class="eg-tile" href="/u/community"><span class="eg-no">07</span><span class="eg-icon">👥</span><strong>Topluluk</strong><small>Geri bildirim</small></a>
+    <a class="eg-tile" href="/u/settings"><span class="eg-no">08</span><span class="eg-icon">⚙️</span><strong>Ayarlar</strong><small>Tercihler</small></a>
+    <a class="eg-tile" href="/u/sms-summary"><span class="eg-no">09</span><span class="eg-icon">📩</span><strong>SMS Özet</strong><small>Koruma özeti</small></a>
+    <a class="eg-tile" href="/u/blocked-sms"><span class="eg-no">10</span><span class="eg-icon">🚫</span><strong>Blok SMS</strong><small>Engellenen merkez</small></a>
+    <a class="eg-tile" href="/u/history"><span class="eg-no">11</span><span class="eg-icon">🕘</span><strong>Geçmiş</strong><small>Koruma geçmişi</small></a>
+    <a class="eg-tile" href="/u/pro"><span class="eg-no">12</span><span class="eg-icon">⭐</span><strong>PRO</strong><small>Final özellikleri</small></a>
+  </nav>
+
+  <div class="eg-sheet-foot">
+    <span>● KORUMA AKTİF</span>
+    <span>FAN-12P HAZIR</span>
+  </div>
+</section>
+
+<script>
+/* ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL */
+(function(){
+  var body = document.body;
+  var btn = document.getElementById("eg-fan12p-real-menu-btn");
+  var close = document.getElementById("eg-fan12p-sheet-close");
+  var back = document.getElementById("eg-fan12p-sheet-backdrop");
+
+  function openMenu(ev){
+    if(ev){ev.preventDefault();ev.stopPropagation();}
+    body.classList.toggle("eg-open");
+  }
+  function closeMenu(ev){
+    if(ev){ev.preventDefault();ev.stopPropagation();}
+    body.classList.remove("eg-open");
+  }
+
+  if(btn){btn.addEventListener("click",openMenu,{passive:false});}
+  if(close){close.addEventListener("click",closeMenu,{passive:false});}
+  if(back){back.addEventListener("click",closeMenu,{passive:false});}
+})();
+</script>
+</body>
+</html>'''
+
+    def _eg_fan12p_v23_clean_shell_response(response):
+        try:
+            path = (_eg_f12p_v23_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            html = _eg_fan12p_v23_clean_html()
+            response.set_data(html)
+            response.headers["Content-Type"] = "text/html; charset=utf-8"
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
+
+        except Exception as _eg_f12p_v23_inner_e:
+            print("ERATGUARD FAN-12P V23 CLEAN SHELL INNER ERROR:", _eg_f12p_v23_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v23_clean_shell_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v23_clean_shell_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v23_clean_shell_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL ACTIVE")
+
+except Exception as _eg_f12p_v23_e:
+    print("ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL ERROR:", _eg_f12p_v23_e)
+# ===== ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL END =====
