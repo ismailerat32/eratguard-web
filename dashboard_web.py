@@ -32255,3 +32255,471 @@ body.eg-open #eg-fan12p-real-menu-btn{
 except Exception as _eg_f12p_v23_e:
     print("ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL ERROR:", _eg_f12p_v23_e)
 # ===== ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL END =====
+
+# ===== ERATGUARD FAN-12P V24 CLEAN RADIAL SIGNATURE PANEL START =====
+# V24: Kullanıcının istediği imza paneli: temiz FAN-12P radial/papatya komut merkezi.
+# Eski V6-V22 yamalı panel değil; V23 temiz shell üstüne sıfırdan clean radial layout.
+
+try:
+    from flask import request as _eg_f12p_v24_request
+
+    def _eg_fan12p_v24_radial_html():
+        return r'''<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EratGuard PRO - FAN-12P Radial Command Center</title>
+<style>
+/* ERATGUARD FAN-12P V24 CLEAN RADIAL SIGNATURE PANEL */
+:root{
+  --green:#25ff8f;
+  --cyan:#42dcff;
+  --bg:#020b08;
+  --text:#f4fff9;
+  --muted:rgba(230,244,255,.70);
+  --line:rgba(37,255,143,.44);
+  --blue:#1979e9;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  min-height:100%;
+  background:#000;
+  color:var(--text);
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+body{
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at 78% 32%,rgba(37,255,143,.14),transparent 34%),
+    radial-gradient(circle at 18% 12%,rgba(66,220,255,.08),transparent 28%),
+    linear-gradient(180deg,#000b08 0%,#000806 52%,#000503 100%);
+}
+.eg-app{
+  width:100%;
+  min-height:100dvh;
+  padding:88px 36px 34px;
+  position:relative;
+}
+.eg-top-pill{
+  position:absolute;
+  left:35px;
+  right:35px;
+  top:34px;
+  height:50px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#19f884,#28ff95);
+  color:#061008;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:950;
+  font-size:22px;
+  box-shadow:0 0 28px rgba(37,255,143,.24);
+}
+.eg-brand{
+  margin-top:18px;
+  margin-left:18px;
+  margin-bottom:18px;
+}
+.eg-logo{
+  width:84px;
+  height:84px;
+  border-radius:23px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:54px;
+  font-weight:950;
+  color:#020b08;
+  background:linear-gradient(135deg,#1ff587 0%,#39dfff 52%,#336dff 100%);
+  box-shadow:0 0 28px rgba(49,218,255,.32);
+  margin-bottom:10px;
+}
+.eg-brand h1{
+  margin:0;
+  font-size:32px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-.06em;
+}
+.eg-brand h1 span{color:var(--green)}
+.eg-brand small{
+  display:block;
+  margin-top:10px;
+  color:var(--cyan);
+  font-size:13px;
+  font-weight:950;
+  letter-spacing:.28em;
+  line-height:1.35;
+}
+.eg-card{
+  border:1px solid rgba(37,255,143,.34);
+  border-radius:26px;
+  padding:20px 20px 18px;
+  background:
+    radial-gradient(circle at 88% 8%,rgba(31,255,133,.11),transparent 38%),
+    linear-gradient(180deg,rgba(4,46,32,.72),rgba(3,20,17,.77));
+  box-shadow:0 0 30px rgba(37,255,143,.07), inset 0 0 24px rgba(22,255,126,.04);
+}
+.eg-kicker{
+  color:var(--green);
+  font-size:16px;
+  font-weight:950;
+  letter-spacing:.12em;
+  margin-bottom:10px;
+}
+.eg-card h2{
+  margin:0 0 8px;
+  font-size:29px;
+  line-height:1.05;
+  font-weight:950;
+}
+.eg-card p{
+  margin:0 0 14px;
+  color:rgba(230,244,255,.70);
+  font-size:16px;
+  line-height:1.25;
+}
+.eg-stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px 14px;
+  margin-bottom:14px;
+}
+.eg-stat{
+  min-height:68px;
+  border-radius:18px;
+  border:1px solid rgba(37,255,143,.16);
+  background:rgba(13,54,37,.62);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+.eg-stat strong{
+  color:var(--green);
+  font-size:28px;
+  font-weight:950;
+  line-height:1;
+}
+.eg-stat span{
+  margin-top:7px;
+  color:rgba(230,244,255,.75);
+  font-size:14px;
+  font-weight:850;
+}
+.eg-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.eg-actions a{
+  height:54px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  font-size:20px;
+  font-weight:950;
+}
+.eg-actions a:first-child{
+  background:linear-gradient(90deg,#25ff8f,#25ff94);
+  color:#061008;
+}
+.eg-actions a:last-child{
+  border:1px solid rgba(37,255,143,.42);
+  color:var(--green);
+  background:rgba(6,42,28,.45);
+}
+
+/* RADIAL SIGNATURE PANEL */
+.eg-radial-wrap{
+  position:relative;
+  width:min(620px,100%);
+  height:520px;
+  margin:8px auto 10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.eg-radial{
+  position:relative;
+  width:430px;
+  height:430px;
+}
+.eg-center{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:116px;
+  height:116px;
+  transform:translate(-50%,-50%);
+  border-radius:999px;
+  border:3px solid rgba(37,255,143,.92);
+  background:radial-gradient(circle at 35% 22%,rgba(174,237,255,.98),rgba(30,124,224,.96) 40%,rgba(2,20,64,.98) 78%);
+  box-shadow:
+    0 0 0 2px rgba(66,220,255,.30),
+    0 0 25px rgba(66,220,255,.78),
+    0 0 40px rgba(37,255,143,.36);
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:10;
+  text-decoration:none;
+}
+.eg-center b{
+  width:58px;
+  height:58px;
+  border-radius:999px;
+  border:2px solid rgba(235,255,255,.46);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:38px;
+  line-height:1;
+}
+.eg-center span{
+  margin-top:6px;
+  font-size:14px;
+  font-weight:950;
+  letter-spacing:.06em;
+}
+
+.eg-petal{
+  --a:0deg;
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:94px;
+  height:176px;
+  margin-left:-47px;
+  margin-top:-88px;
+  transform:rotate(var(--a)) translateY(-165px);
+  transform-origin:center center;
+  border-radius:48px;
+  border:1px solid rgba(37,255,143,.58);
+  background:
+    radial-gradient(circle at 50% 16%,rgba(37,255,143,.20),transparent 28%),
+    linear-gradient(180deg,rgba(8,44,83,.98),rgba(2,12,38,.97));
+  box-shadow:
+    inset 0 0 20px rgba(40,120,255,.22),
+    0 0 16px rgba(37,255,143,.30);
+  color:#fff;
+  text-decoration:none;
+  z-index:4;
+  overflow:hidden;
+}
+.eg-petal::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  bottom:-12px;
+  width:2px;
+  height:70px;
+  transform:translateX(-50%);
+  background:linear-gradient(180deg,rgba(37,255,143,.9),rgba(60,145,255,.12));
+  opacity:.75;
+}
+.eg-petal-in{
+  width:100%;
+  height:100%;
+  transform:rotate(calc(-1 * var(--a)));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:12px 8px 14px;
+  position:relative;
+  z-index:2;
+}
+.eg-no{
+  position:absolute;
+  top:9px;
+  left:9px;
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  border:1px solid rgba(37,255,143,.85);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--green);
+  background:rgba(2,30,44,.85);
+  font-size:11px;
+  font-weight:950;
+}
+.eg-ico{
+  font-size:30px;
+  line-height:1;
+  margin-top:20px;
+  margin-bottom:8px;
+  filter:drop-shadow(0 0 6px rgba(66,220,255,.35));
+}
+.eg-petal strong{
+  display:block;
+  font-size:12px;
+  line-height:1.05;
+  font-weight:950;
+}
+.eg-petal small{
+  display:block;
+  margin-top:6px;
+  color:rgba(230,244,255,.78);
+  font-size:9px;
+  line-height:1.15;
+  font-weight:750;
+}
+
+.eg-status{
+  width:min(360px,100%);
+  margin:0 auto;
+  border:1px solid rgba(37,255,143,.28);
+  border-radius:999px;
+  min-height:56px;
+  padding:0 20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:13px;
+  background:rgba(2,24,18,.48);
+}
+.eg-dot{
+  width:15px;
+  height:15px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 15px rgba(37,255,143,.64);
+}
+.eg-status strong{
+  font-size:14px;
+  letter-spacing:.20em;
+  font-weight:950;
+}
+.eg-status span{
+  color:var(--cyan);
+  font-size:13px;
+  letter-spacing:.11em;
+  font-weight:950;
+}
+
+@media(max-width:430px){
+  .eg-app{padding:88px 28px 32px}
+  .eg-top-pill{left:36px;right:36px;height:50px;font-size:20px}
+  .eg-brand{margin-left:18px}
+  .eg-logo{width:82px;height:82px;font-size:52px}
+  .eg-brand h1{font-size:31px}
+  .eg-card{padding:18px 20px}
+  .eg-card h2{font-size:28px}
+  .eg-card p{font-size:16px}
+  .eg-radial-wrap{height:510px;margin-top:4px}
+  .eg-radial{width:396px;height:396px;transform:scale(.92)}
+}
+@media(max-width:390px){
+  .eg-app{padding-left:22px;padding-right:22px}
+  .eg-top-pill{left:28px;right:28px;font-size:18px}
+  .eg-card h2{font-size:25px}
+  .eg-actions a{font-size:18px}
+  .eg-radial-wrap{height:480px;margin-top:0}
+  .eg-radial{transform:scale(.84)}
+  .eg-status{min-height:52px}
+  .eg-status strong{font-size:12px}
+  .eg-status span{font-size:11px}
+}
+</style>
+</head>
+<body>
+<div class="eg-app">
+  <div class="eg-top-pill">FAN-12P Command Center</div>
+
+  <section class="eg-brand">
+    <div class="eg-logo">E</div>
+    <h1>Erat<span>Guard</span></h1>
+    <small>FAN-12P<br>COMMAND CENTER</small>
+  </section>
+
+  <section class="eg-card">
+    <div class="eg-kicker">ERATGUARD FAN-12P</div>
+    <h2>SMS Koruma Özeti</h2>
+    <p>SMS risk motoru hazır, yeni analizleri bekliyor.</p>
+
+    <div class="eg-stats">
+      <div class="eg-stat"><strong>HAZIR</strong><span>Durum</span></div>
+      <div class="eg-stat"><strong>0</strong><span>Toplam Aksiyon</span></div>
+      <div class="eg-stat"><strong>0</strong><span>Engellenen</span></div>
+      <div class="eg-stat"><strong>0</strong><span>Şikayet</span></div>
+    </div>
+
+    <div class="eg-actions">
+      <a href="/u/ai-analysis">AI Analiz Aç</a>
+      <a href="/u/sms-summary">SMS Merkezi</a>
+    </div>
+  </section>
+
+  <section class="eg-radial-wrap" aria-label="FAN-12P Radial Menü">
+    <div class="eg-radial">
+      <a class="eg-center" href="/dashboard"><b>E</b><span>MENÜ</span></a>
+
+      <a class="eg-petal" style="--a:0deg" href="/u/pro"><span class="eg-petal-in"><span class="eg-no">12</span><span class="eg-ico">⭐</span><strong>PRO</strong><small>Final özellikleri</small></span></a>
+      <a class="eg-petal" style="--a:30deg" href="/dashboard"><span class="eg-petal-in"><span class="eg-no">01</span><span class="eg-ico">🏠</span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></span></a>
+      <a class="eg-petal" style="--a:60deg" href="/u/protection"><span class="eg-petal-in"><span class="eg-no">02</span><span class="eg-ico">🛡️</span><strong>Koruma</strong><small>SMS güvenlik motoru</small></span></a>
+      <a class="eg-petal" style="--a:90deg" href="/u/ai-analysis"><span class="eg-petal-in"><span class="eg-no">03</span><span class="eg-ico">🧠</span><strong>AI Analiz</strong><small>Risk taraması</small></span></a>
+      <a class="eg-petal" style="--a:120deg" href="/u/reports"><span class="eg-petal-in"><span class="eg-no">04</span><span class="eg-ico">📈</span><strong>Raporlar</strong><small>Güvenlik özetleri</small></span></a>
+      <a class="eg-petal" style="--a:150deg" href="/u/notifications"><span class="eg-petal-in"><span class="eg-no">05</span><span class="eg-ico">🔔</span><strong>Bildirimler</strong><small>Güvenlik akışı</small></span></a>
+      <a class="eg-petal" style="--a:180deg" href="/u/license"><span class="eg-petal-in"><span class="eg-no">06</span><span class="eg-ico">🔑</span><strong>Lisans</strong><small>Hesap durumu</small></span></a>
+      <a class="eg-petal" style="--a:210deg" href="/u/community"><span class="eg-petal-in"><span class="eg-no">07</span><span class="eg-ico">👥</span><strong>Topluluk</strong><small>Geri bildirim</small></span></a>
+      <a class="eg-petal" style="--a:240deg" href="/u/settings"><span class="eg-petal-in"><span class="eg-no">08</span><span class="eg-ico">⚙️</span><strong>Ayarlar</strong><small>Tercihler</small></span></a>
+      <a class="eg-petal" style="--a:270deg" href="/u/sms-summary"><span class="eg-petal-in"><span class="eg-no">09</span><span class="eg-ico">✉️</span><strong>SMS Özet</strong><small>Koruma özeti</small></span></a>
+      <a class="eg-petal" style="--a:300deg" href="/u/blocked-sms"><span class="eg-petal-in"><span class="eg-no">10</span><span class="eg-ico">🚫</span><strong>Blok SMS</strong><small>Engellenen merkez</small></span></a>
+      <a class="eg-petal" style="--a:330deg" href="/u/history"><span class="eg-petal-in"><span class="eg-no">11</span><span class="eg-ico">🕘</span><strong>Geçmiş</strong><small>Koruma geçmişi</small></span></a>
+    </div>
+  </section>
+
+  <section class="eg-status">
+    <span class="eg-dot"></span>
+    <strong>KORUMA AKTİF</strong>
+    <span>FAN-12P HAZIR</span>
+  </section>
+</div>
+</body>
+</html>'''
+
+    def _eg_fan12p_v24_radial_signature_response(response):
+        try:
+            path = (_eg_f12p_v24_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            html = _eg_fan12p_v24_radial_html()
+            response.set_data(html)
+            response.headers["Content-Type"] = "text/html; charset=utf-8"
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
+
+        except Exception as _eg_f12p_v24_inner_e:
+            print("ERATGUARD FAN-12P V24 RADIAL SIGNATURE INNER ERROR:", _eg_f12p_v24_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v24_radial_signature_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v24_radial_signature_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v24_radial_signature_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V24 CLEAN RADIAL SIGNATURE PANEL ACTIVE")
+
+except Exception as _eg_f12p_v24_e:
+    print("ERATGUARD FAN-12P V24 CLEAN RADIAL SIGNATURE PANEL ERROR:", _eg_f12p_v24_e)
+# ===== ERATGUARD FAN-12P V24 CLEAN RADIAL SIGNATURE PANEL END =====
