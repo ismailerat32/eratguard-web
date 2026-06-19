@@ -33188,3 +33188,366 @@ try:
 except Exception as _eg_f12p_v26_e:
     print("ERATGUARD FAN-12P V26 RADIAL READABILITY POLISH ERROR:", _eg_f12p_v26_e)
 # ===== ERATGUARD FAN-12P V26 RADIAL READABILITY POLISH END =====
+
+# ===== ERATGUARD FAN-12P V28 RADIAL FINAL LOCK START =====
+# V28: FAN-12P imza panel final ölçü kilidi.
+# Amaç: hedef görseldeki radial paneli korumak; karttan sonra büyük, dengeli, taşmadan göstermek.
+
+try:
+    from flask import request as _eg_f12p_v28_request
+
+    def _eg_fan12p_v28_radial_final_lock_response(response):
+        try:
+            path = (_eg_f12p_v28_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "ERATGUARD FAN-12P V24 CLEAN RADIAL SIGNATURE PANEL" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P V28 RADIAL FINAL LOCK" not in html:
+                inject = """
+<style id="eg-fan12p-v28-radial-final-lock-css">
+/* ERATGUARD FAN-12P V28 RADIAL FINAL LOCK */
+
+/* Sayfanın tamamı hedef görsele göre sıkılaştırılır */
+.eg-app{
+  padding-top:82px!important;
+  padding-left:30px!important;
+  padding-right:30px!important;
+  padding-bottom:28px!important;
+}
+
+.eg-top-pill{
+  top:30px!important;
+  left:34px!important;
+  right:34px!important;
+  height:46px!important;
+  font-size:20px!important;
+  border-radius:999px!important;
+}
+
+.eg-brand{
+  margin-top:12px!important;
+  margin-left:18px!important;
+  margin-bottom:16px!important;
+}
+
+.eg-logo{
+  width:80px!important;
+  height:80px!important;
+  border-radius:22px!important;
+  font-size:52px!important;
+  margin-bottom:10px!important;
+}
+
+.eg-brand h1{
+  font-size:31px!important;
+}
+
+.eg-brand small{
+  margin-top:9px!important;
+  font-size:12px!important;
+  letter-spacing:.27em!important;
+  line-height:1.32!important;
+}
+
+/* Kart hedef görsel gibi kompakt */
+.eg-card{
+  padding:18px 20px 18px!important;
+  margin-bottom:12px!important;
+  border-radius:25px!important;
+}
+
+.eg-kicker{
+  font-size:15px!important;
+  margin-bottom:9px!important;
+}
+
+.eg-card h2{
+  font-size:28px!important;
+  margin-bottom:8px!important;
+}
+
+.eg-card p{
+  font-size:15px!important;
+  margin-bottom:13px!important;
+  line-height:1.23!important;
+}
+
+.eg-stats{
+  gap:10px 14px!important;
+  margin-bottom:13px!important;
+}
+
+.eg-stat{
+  min-height:62px!important;
+  border-radius:17px!important;
+}
+
+.eg-stat strong{
+  font-size:27px!important;
+}
+
+.eg-stat span{
+  font-size:13px!important;
+  margin-top:6px!important;
+}
+
+.eg-actions{
+  gap:14px!important;
+}
+
+.eg-actions a{
+  height:50px!important;
+  border-radius:17px!important;
+  font-size:19px!important;
+}
+
+/* Radial hedef: büyük, kartın hemen altında, taşmadan */
+.eg-radial-wrap{
+  width:100%!important;
+  height:470px!important;
+  margin:0 auto 10px!important;
+  overflow:visible!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+
+.eg-radial{
+  width:390px!important;
+  height:390px!important;
+  transform:scale(.84)!important;
+  transform-origin:center center!important;
+}
+
+/* Merkez imza butonu */
+.eg-center{
+  width:106px!important;
+  height:106px!important;
+}
+
+.eg-center b{
+  width:54px!important;
+  height:54px!important;
+  font-size:35px!important;
+}
+
+.eg-center span{
+  font-size:13px!important;
+  margin-top:6px!important;
+}
+
+/* Yapraklar hedef görsel ölçüsüne getirildi */
+.eg-petal{
+  width:80px!important;
+  height:150px!important;
+  margin-left:-40px!important;
+  margin-top:-75px!important;
+  transform:rotate(var(--a)) translateY(-136px)!important;
+  border-radius:43px!important;
+}
+
+.eg-petal-in{
+  padding:9px 6px 11px!important;
+}
+
+.eg-no{
+  width:25px!important;
+  height:25px!important;
+  top:7px!important;
+  left:7px!important;
+  font-size:10px!important;
+}
+
+.eg-ico{
+  font-size:26px!important;
+  margin-top:18px!important;
+  margin-bottom:6px!important;
+}
+
+.eg-petal strong{
+  font-size:10.5px!important;
+  line-height:1.05!important;
+  max-width:70px!important;
+  white-space:normal!important;
+}
+
+.eg-petal small{
+  font-size:7.4px!important;
+  line-height:1.08!important;
+  margin-top:5px!important;
+  max-width:70px!important;
+  opacity:.88!important;
+}
+
+.eg-petal::after{
+  height:62px!important;
+  opacity:.58!important;
+}
+
+/* Alt bar hedef görseldeki gibi radialın hemen altında */
+.eg-status{
+  width:min(360px,100%)!important;
+  min-height:54px!important;
+  margin-top:0!important;
+  margin-bottom:18px!important;
+}
+
+.eg-status strong{
+  font-size:13px!important;
+}
+
+.eg-status span{
+  font-size:12px!important;
+}
+
+/* 430px telefonlar */
+@media(max-width:430px){
+  .eg-app{
+    padding-top:82px!important;
+    padding-left:24px!important;
+    padding-right:24px!important;
+  }
+
+  .eg-top-pill{
+    left:32px!important;
+    right:32px!important;
+    height:46px!important;
+    font-size:19px!important;
+  }
+
+  .eg-card{
+    margin-bottom:10px!important;
+  }
+
+  .eg-radial-wrap{
+    height:458px!important;
+    margin-bottom:8px!important;
+  }
+
+  .eg-radial{
+    width:382px!important;
+    height:382px!important;
+    transform:scale(.82)!important;
+  }
+
+  .eg-petal{
+    width:78px!important;
+    height:146px!important;
+    margin-left:-39px!important;
+    margin-top:-73px!important;
+    transform:rotate(var(--a)) translateY(-132px)!important;
+  }
+}
+
+/* Dar ekran final güvenlik */
+@media(max-width:390px){
+  .eg-app{
+    padding-left:18px!important;
+    padding-right:18px!important;
+  }
+
+  .eg-top-pill{
+    left:24px!important;
+    right:24px!important;
+    font-size:18px!important;
+  }
+
+  .eg-brand{
+    margin-left:14px!important;
+    margin-bottom:14px!important;
+  }
+
+  .eg-card{
+    padding:16px 18px 16px!important;
+    margin-bottom:8px!important;
+  }
+
+  .eg-card h2{
+    font-size:25px!important;
+  }
+
+  .eg-card p{
+    font-size:14px!important;
+  }
+
+  .eg-actions a{
+    font-size:17px!important;
+    height:48px!important;
+  }
+
+  .eg-radial-wrap{
+    height:438px!important;
+    margin-bottom:6px!important;
+  }
+
+  .eg-radial{
+    width:370px!important;
+    height:370px!important;
+    transform:scale(.78)!important;
+  }
+
+  .eg-petal{
+    width:76px!important;
+    height:142px!important;
+    margin-left:-38px!important;
+    margin-top:-71px!important;
+    transform:rotate(var(--a)) translateY(-128px)!important;
+  }
+
+  .eg-center{
+    width:100px!important;
+    height:100px!important;
+  }
+
+  .eg-center b{
+    width:50px!important;
+    height:50px!important;
+    font-size:33px!important;
+  }
+
+  .eg-petal strong{
+    font-size:9.8px!important;
+  }
+
+  .eg-petal small{
+    font-size:7px!important;
+  }
+}
+</style>
+"""
+                html = html.replace("</head>", inject + "\n</head>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
+
+        except Exception as _eg_f12p_v28_inner_e:
+            print("ERATGUARD FAN-12P V28 RADIAL FINAL LOCK INNER ERROR:", _eg_f12p_v28_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v28_radial_final_lock_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v28_radial_final_lock_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v28_radial_final_lock_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V28 RADIAL FINAL LOCK ACTIVE")
+
+except Exception as _eg_f12p_v28_e:
+    print("ERATGUARD FAN-12P V28 RADIAL FINAL LOCK ERROR:", _eg_f12p_v28_e)
+# ===== ERATGUARD FAN-12P V28 RADIAL FINAL LOCK END =====
