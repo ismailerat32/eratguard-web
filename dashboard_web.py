@@ -32946,3 +32946,245 @@ try:
 except Exception as _eg_f12p_v25_e:
     print("ERATGUARD FAN-12P V25 RADIAL FIT FINAL ERROR:", _eg_f12p_v25_e)
 # ===== ERATGUARD FAN-12P V25 RADIAL FIT FINAL END =====
+
+# ===== ERATGUARD FAN-12P V26 RADIAL READABILITY POLISH START =====
+# V26: V24/V25 imza radial panel korunur. Yaprak çakışması ve yazı sıkışması azaltılır.
+
+try:
+    from flask import request as _eg_f12p_v26_request
+
+    def _eg_fan12p_v26_radial_polish_response(response):
+        try:
+            path = (_eg_f12p_v26_request.path or "").strip()
+            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
+                return response
+
+            ctype = (response.headers.get("Content-Type") or "").lower()
+            if "text/html" not in ctype:
+                return response
+
+            html = response.get_data(as_text=True)
+            if "ERATGUARD FAN-12P V24 CLEAN RADIAL SIGNATURE PANEL" not in html:
+                return response
+
+            if "ERATGUARD FAN-12P V26 RADIAL READABILITY POLISH" not in html:
+                inject = """
+<style id="eg-fan12p-v26-radial-readability-css">
+/* ERATGUARD FAN-12P V26 RADIAL READABILITY POLISH */
+
+/* Karttan sonra radial nefes alanı */
+.eg-card{
+  margin-bottom:42px!important;
+}
+
+/* Panel genel yüksekliği kontrollü */
+.eg-radial-wrap{
+  height:405px!important;
+  margin-top:0!important;
+  margin-bottom:28px!important;
+  overflow:visible!important;
+}
+
+/* Radial artık daha kompakt ve dengeli */
+.eg-radial{
+  width:342px!important;
+  height:342px!important;
+  transform:scale(.80)!important;
+  transform-origin:center center!important;
+}
+
+/* Merkez buton güçlü ama yaprakları boğmayacak ölçüde */
+.eg-center{
+  width:98px!important;
+  height:98px!important;
+}
+
+.eg-center b{
+  width:49px!important;
+  height:49px!important;
+  font-size:32px!important;
+}
+
+.eg-center span{
+  font-size:12px!important;
+  margin-top:5px!important;
+}
+
+/* Yapraklar daha kısa + merkezden biraz daha dışarıda.
+   Ama genişlik küçük tutularak sağ-sol taşma engellenir. */
+.eg-petal{
+  width:72px!important;
+  height:130px!important;
+  margin-left:-36px!important;
+  margin-top:-65px!important;
+  transform:rotate(var(--a)) translateY(-124px)!important;
+  border-radius:38px!important;
+}
+
+/* Yaprak içeriği okunurluk için yeniden dengelendi */
+.eg-petal-in{
+  padding:8px 5px 10px!important;
+}
+
+.eg-no{
+  width:23px!important;
+  height:23px!important;
+  top:6px!important;
+  left:6px!important;
+  font-size:9px!important;
+  z-index:5!important;
+}
+
+.eg-ico{
+  font-size:23px!important;
+  margin-top:17px!important;
+  margin-bottom:5px!important;
+}
+
+.eg-petal strong{
+  font-size:10px!important;
+  line-height:1.03!important;
+  max-width:64px!important;
+  white-space:normal!important;
+}
+
+.eg-petal small{
+  font-size:7.2px!important;
+  line-height:1.06!important;
+  margin-top:4px!important;
+  max-width:64px!important;
+  opacity:.86!important;
+}
+
+/* Bağlantı çizgileri daha ince; yazı üstüne binmesin */
+.eg-petal::after{
+  height:58px!important;
+  opacity:.55!important;
+}
+
+/* Status bar ile radial arası güvenli */
+.eg-status{
+  margin-top:0!important;
+  margin-bottom:22px!important;
+}
+
+/* 430px ve altı */
+@media(max-width:430px){
+  .eg-app{
+    padding-left:24px!important;
+    padding-right:24px!important;
+  }
+
+  .eg-card{
+    margin-bottom:38px!important;
+  }
+
+  .eg-radial-wrap{
+    height:398px!important;
+    margin-bottom:26px!important;
+  }
+
+  .eg-radial{
+    width:338px!important;
+    height:338px!important;
+    transform:scale(.78)!important;
+  }
+
+  .eg-petal{
+    width:71px!important;
+    height:128px!important;
+    margin-left:-35.5px!important;
+    margin-top:-64px!important;
+    transform:rotate(var(--a)) translateY(-122px)!important;
+  }
+}
+
+/* 390px ve altı dar cihaz final */
+@media(max-width:390px){
+  .eg-app{
+    padding-left:18px!important;
+    padding-right:18px!important;
+  }
+
+  .eg-top-pill{
+    left:24px!important;
+    right:24px!important;
+  }
+
+  .eg-card{
+    margin-bottom:34px!important;
+  }
+
+  .eg-radial-wrap{
+    height:374px!important;
+    margin-bottom:20px!important;
+  }
+
+  .eg-radial{
+    width:326px!important;
+    height:326px!important;
+    transform:scale(.72)!important;
+  }
+
+  .eg-petal{
+    width:70px!important;
+    height:124px!important;
+    margin-left:-35px!important;
+    margin-top:-62px!important;
+    transform:rotate(var(--a)) translateY(-118px)!important;
+  }
+
+  .eg-ico{
+    font-size:21px!important;
+    margin-top:16px!important;
+  }
+
+  .eg-petal strong{
+    font-size:9.3px!important;
+  }
+
+  .eg-petal small{
+    font-size:6.8px!important;
+  }
+
+  .eg-center{
+    width:92px!important;
+    height:92px!important;
+  }
+
+  .eg-center b{
+    width:46px!important;
+    height:46px!important;
+    font-size:30px!important;
+  }
+}
+</style>
+"""
+                html = html.replace("</head>", inject + "\n</head>", 1)
+
+            response.set_data(html)
+            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+            return response
+
+        except Exception as _eg_f12p_v26_inner_e:
+            print("ERATGUARD FAN-12P V26 RADIAL POLISH INNER ERROR:", _eg_f12p_v26_inner_e)
+            return response
+
+    app.after_request(_eg_fan12p_v26_radial_polish_response)
+
+    try:
+        _eg_after_list = app.after_request_funcs.get(None, [])
+        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v26_radial_polish_response"]
+        _eg_after_list.insert(0, _eg_fan12p_v26_radial_polish_response)
+        app.after_request_funcs[None] = _eg_after_list
+    except Exception:
+        pass
+
+    print("ERATGUARD FAN-12P V26 RADIAL READABILITY POLISH ACTIVE")
+
+except Exception as _eg_f12p_v26_e:
+    print("ERATGUARD FAN-12P V26 RADIAL READABILITY POLISH ERROR:", _eg_f12p_v26_e)
+# ===== ERATGUARD FAN-12P V26 RADIAL READABILITY POLISH END =====
