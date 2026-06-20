@@ -159,6 +159,11 @@
       font-size:12.5px;
       letter-spacing:.2px;
     }
+    .slice .ico{
+      font-size:17px;
+      opacity:.92;
+      filter:drop-shadow(0 0 8px rgba(53,255,154,.55));
+    }
     .center{cursor:pointer}
     .core{
       fill:url(#coreGrad);
@@ -207,6 +212,7 @@
       .radial{width:min(97vw,430px);max-height:calc(100dvh - 178px)}
       .slice .label{font-size:10.8px}
       .slice .num{font-size:9.4px}
+      .slice .ico{font-size:14px}
       .ctitle{font-size:28px}
       .brand h1{font-size:13px}
       .pill{font-size:9px;padding:7px 8px}
@@ -267,18 +273,18 @@
 
   <script>
     const modules = [
-      ["01","Ana Sayfa","/radial"],
-      ["02","Koruma","/u/protection"],
-      ["03","AI Analiz","/u/analysis"],
-      ["04","Raporlar","/u/reports"],
-      ["05","Bildirimler","/u/notifications"],
-      ["06","Lisans","/u/license"],
-      ["07","Topluluk","/u/community"],
-      ["08","Ayarlar","/u/settings"],
-      ["09","SMS Özet","/u/sms-actions-center"],
-      ["10","Blok SMS","/u/blocked-sms"],
-      ["11","Geçmiş","/u/history"],
-      ["12","PRO","/u/pricing"]
+      ["01","Ana Sayfa","/radial","🏠"],
+      ["02","Koruma","/u/protection","🛡️"],
+      ["03","AI Analiz","/u/analysis","🧠"],
+      ["04","Raporlar","/u/reports","📈"],
+      ["05","Bildirimler","/u/notifications","🔔"],
+      ["06","Lisans","/u/license","🔑"],
+      ["07","Topluluk","/u/community","👥"],
+      ["08","Ayarlar","/u/settings","⚙️"],
+      ["09","SMS Özet","/u/sms-actions-center","✉️"],
+      ["10","Blok SMS","/u/blocked-sms","🚫"],
+      ["11","Geçmiş","/u/history","🕘"],
+      ["12","PRO","/u/pricing","⭐"]
     ];
 
     const cx = 300, cy = 300, outer = 270, inner = 104;
@@ -318,19 +324,26 @@
       const p = document.createElementNS("http://www.w3.org/2000/svg","path");
       p.setAttribute("d",pathFor(a0,a1));
 
+      const ico = document.createElementNS("http://www.w3.org/2000/svg","text");
+      ico.setAttribute("class","ico");
+      ico.setAttribute("x",label[0].toFixed(1));
+      ico.setAttribute("y",(label[1]-30).toFixed(1));
+      ico.textContent = m[3];
+
       const n = document.createElementNS("http://www.w3.org/2000/svg","text");
       n.setAttribute("class","num");
       n.setAttribute("x",label[0].toFixed(1));
-      n.setAttribute("y",(label[1]-17).toFixed(1));
+      n.setAttribute("y",(label[1]-12).toFixed(1));
       n.textContent = m[0];
 
       const t = document.createElementNS("http://www.w3.org/2000/svg","text");
       t.setAttribute("class","label");
       t.setAttribute("x",label[0].toFixed(1));
-      t.setAttribute("y",(label[1]+5).toFixed(1));
+      t.setAttribute("y",(label[1]+10).toFixed(1));
       t.textContent = m[1];
 
       g.appendChild(p);
+      g.appendChild(ico);
       g.appendChild(n);
       g.appendChild(t);
       a.appendChild(g);
