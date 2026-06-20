@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>EratGuard PRO • Signature Radial</title>
+  <title>EratGuard PRO • Galaxy Radial</title>
   <style>
     :root{
-      --green:#35ff9a;
-      --green2:#9cff67;
-      --cyan:#2fe8ff;
-      --bg:#020805;
-      --text:#eafff4;
-      --muted:rgba(234,255,244,.68);
+      --green:#7dff62;
+      --green2:#34ff9a;
+      --line:rgba(132,255,96,.82);
+      --soft:rgba(132,255,96,.28);
+      --text:#eaffdf;
+      --muted:rgba(234,255,223,.72);
     }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{margin:0;height:100%;overflow:hidden}
@@ -19,335 +19,316 @@
       font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
       color:var(--text);
       background:
-        radial-gradient(circle at 50% 30%,rgba(53,255,154,.20),transparent 27%),
-        radial-gradient(circle at 18% 12%,rgba(47,232,255,.13),transparent 24%),
-        radial-gradient(circle at 86% 82%,rgba(156,255,103,.12),transparent 30%),
-        linear-gradient(180deg,#06140e 0%,#020805 58%,#000 100%);
+        radial-gradient(circle at 50% 33%, rgba(94,255,70,.24), transparent 34%),
+        radial-gradient(circle at 50% 78%, rgba(90,255,120,.20), transparent 35%),
+        linear-gradient(180deg,#020704 0%,#06170d 44%,#020503 100%);
     }
     body:before{
       content:"";
       position:fixed;
       inset:0;
-      pointer-events:none;
-      opacity:.18;
       background-image:
-        radial-gradient(circle,rgba(255,255,255,.8) 0 1px,transparent 1.4px),
-        radial-gradient(circle,rgba(53,255,154,.6) 0 1px,transparent 1.5px);
-      background-size:76px 76px,126px 126px;
-      background-position:0 0,30px 42px;
+        radial-gradient(circle,rgba(255,255,255,.85) 0 1px,transparent 1.5px),
+        radial-gradient(circle,rgba(124,255,98,.72) 0 1px,transparent 1.8px),
+        radial-gradient(circle,rgba(255,255,255,.35) 0 1px,transparent 1.4px);
+      background-size:72px 72px,119px 119px,171px 171px;
+      background-position:0 0,24px 36px,55px 80px;
+      opacity:.34;
+      pointer-events:none;
+    }
+    body:after{
+      content:"";
+      position:fixed;
+      inset:-15%;
+      background:
+        radial-gradient(circle at 50% 32%, transparent 0 26%, rgba(125,255,98,.10) 27%, transparent 28%),
+        radial-gradient(circle at 50% 32%, transparent 0 42%, rgba(125,255,98,.08) 43%, transparent 44%);
+      filter:blur(.2px);
+      opacity:.8;
+      pointer-events:none;
     }
     .page{
       position:relative;
       z-index:1;
       height:100vh;
       height:100dvh;
+      padding:calc(18px + env(safe-area-inset-top)) 0 calc(10px + env(safe-area-inset-bottom));
       display:flex;
       flex-direction:column;
-      padding:calc(14px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom));
-    }
-    .top{
-      display:flex;
       align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:10px 12px;
-      border:1px solid rgba(53,255,154,.34);
-      border-radius:20px;
-      background:linear-gradient(135deg,rgba(4,34,19,.88),rgba(0,0,0,.54));
-      box-shadow:0 0 24px rgba(53,255,154,.18),inset 0 0 18px rgba(53,255,154,.08);
+      justify-content:flex-start;
     }
-    .brand{display:flex;align-items:center;gap:10px;min-width:0}
-    .logo{
-      width:42px;height:42px;border-radius:50%;
-      display:grid;place-items:center;
-      font-weight:1000;font-size:24px;
-      color:#03120a;
-      background:radial-gradient(circle,#effff7 0%,#35ff9a 48%,#06935a 100%);
-      box-shadow:0 0 24px rgba(53,255,154,.78);
-      flex:0 0 auto;
-    }
-    .brand h1{
-      margin:0;
-      font-size:15px;
-      line-height:1.05;
-      letter-spacing:.7px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .brand span{
-      display:block;
-      margin-top:3px;
-      font-size:10px;
-      color:var(--muted);
-      letter-spacing:1.6px;
-      text-transform:uppercase;
-    }
-    .pill{
-      flex:0 0 auto;
-      border:1px solid rgba(156,255,103,.42);
-      border-radius:999px;
-      padding:8px 10px;
-      font-size:10px;
-      font-weight:1000;
-      color:#baffd7;
-      background:rgba(5,34,20,.74);
-      box-shadow:0 0 18px rgba(53,255,154,.15);
-      letter-spacing:.8px;
-      white-space:nowrap;
-    }
-    .summary{
-      margin:12px 0 8px;
-      text-align:center;
-      padding:10px 12px;
-      border-radius:18px;
-      border:1px solid rgba(53,255,154,.22);
-      background:rgba(0,0,0,.34);
-    }
-    .summary b{display:block;font-size:14px;letter-spacing:.6px}
-    .summary span{display:block;margin-top:4px;font-size:11px;color:var(--muted)}
-    .stage{
-      flex:1;
-      min-height:0;
-      display:grid;
-      place-items:center;
-    }
-    .radial{
-      width:min(94vw,520px);
+    .radial-wrap{
+      position:relative;
+      width:min(126vw,760px);
       aspect-ratio:1/1;
-      max-height:calc(100dvh - 190px);
-      filter:drop-shadow(0 0 30px rgba(53,255,154,.30));
+      margin-top:34px;
+      transform:translateY(-22px);
+      filter:
+        drop-shadow(0 0 22px rgba(125,255,98,.48))
+        drop-shadow(0 0 54px rgba(125,255,98,.22));
     }
-    svg{display:block;width:100%;height:100%;overflow:visible}
-    .ring{
-      fill:none;
-      stroke:rgba(53,255,154,.28);
-      stroke-width:1.2;
-    }
-    .ring.strong{
-      stroke:rgba(53,255,154,.68);
-      stroke-width:1.8;
-      filter:drop-shadow(0 0 9px rgba(53,255,154,.75));
+    svg{
+      width:100%;
+      height:100%;
+      display:block;
+      overflow:visible;
     }
     .slice path{
-      fill:rgba(4,48,27,.88);
-      stroke:rgba(130,255,184,.86);
-      stroke-width:1.55;
+      fill:rgba(7,28,15,.56);
+      stroke:var(--line);
+      stroke-width:2.05;
+      filter:drop-shadow(0 0 7px rgba(125,255,98,.42));
       cursor:pointer;
-      transition:.15s ease;
-      filter:drop-shadow(0 0 5px rgba(53,255,154,.22));
+      transition:.14s ease;
     }
-    .slice:hover path,.slice:active path{
-      fill:rgba(53,255,154,.25);
-      filter:drop-shadow(0 0 12px rgba(53,255,154,.86));
+    .slice:hover path,
+    .slice:active path{
+      fill:rgba(95,255,80,.19);
+      stroke:rgba(176,255,132,.96);
+      filter:drop-shadow(0 0 16px rgba(125,255,98,.95));
+    }
+    .inner path{
+      fill:rgba(7,28,15,.22);
+      stroke:rgba(125,255,98,.28);
+      stroke-width:1.25;
     }
     .slice text{
-      pointer-events:none;
       text-anchor:middle;
       dominant-baseline:middle;
-      fill:#eafff4;
-      font-weight:1000;
-      text-shadow:0 0 8px rgba(53,255,154,.95),0 1px 1px #000;
-    }
-    .slice .num{
-      fill:#9cff67;
-      font-size:10.5px;
-      letter-spacing:1px;
-      opacity:.96;
-    }
-    .slice .label{
-      font-size:12.5px;
-      letter-spacing:.2px;
+      pointer-events:none;
+      fill:var(--text);
+      text-shadow:0 0 10px rgba(125,255,98,.88),0 2px 2px #000;
     }
     .slice .ico{
-      font-size:17px;
-      opacity:.92;
-      filter:drop-shadow(0 0 8px rgba(53,255,154,.55));
+      font-size:30px;
+      opacity:.86;
+      filter:drop-shadow(0 0 10px rgba(125,255,98,.78));
     }
-    .center{cursor:pointer}
-    .core{
-      fill:url(#coreGrad);
-      stroke:rgba(230,255,244,.95);
-      stroke-width:2.4;
-      filter:drop-shadow(0 0 26px rgba(53,255,154,.96));
+    .slice .label{
+      font-size:24px;
+      font-weight:500;
+      letter-spacing:.2px;
     }
-    .ctitle{
-      fill:#03120a;
+    .slice .small{
+      font-size:18px;
+      font-weight:500;
+    }
+    .outer-ring{
+      fill:none;
+      stroke:rgba(132,255,96,.65);
+      stroke-width:1.7;
+      filter:drop-shadow(0 0 14px rgba(125,255,98,.86));
+    }
+    .glow-ring{
+      fill:none;
+      stroke:rgba(132,255,96,.20);
+      stroke-width:13;
+      filter:blur(3px);
+    }
+    .center-a{cursor:pointer}
+    .center-outer{
+      fill:rgba(3,15,7,.82);
+      stroke:rgba(154,255,114,.88);
+      stroke-width:3;
+      filter:
+        drop-shadow(0 0 12px rgba(125,255,98,.82))
+        drop-shadow(0 0 34px rgba(125,255,98,.45));
+    }
+    .center-inner{
+      fill:radial-gradient(circle,#16341c,#061409);
+      stroke:rgba(176,255,132,.76);
+      stroke-width:1.4;
+    }
+    .center-title{
+      fill:rgba(230,255,215,.88);
+      font-size:48px;
+      font-weight:900;
+      letter-spacing:1px;
       text-anchor:middle;
       dominant-baseline:middle;
-      font-size:32px;
-      font-weight:1000;
+      text-shadow:0 0 14px rgba(125,255,98,.92);
     }
-    .csub{
-      fill:#062314;
-      text-anchor:middle;
-      dominant-baseline:middle;
-      font-size:11px;
-      font-weight:1000;
-      letter-spacing:1.8px;
-    }
-    .bottom{
-      margin-top:8px;
+    .brand{
+      position:absolute;
+      right:34px;
+      bottom:82px;
       display:flex;
+      flex-direction:column;
       align-items:center;
-      justify-content:center;
       gap:8px;
-      flex-wrap:wrap;
-      padding:9px 10px;
-      border:1px solid rgba(53,255,154,.26);
-      border-radius:18px;
-      background:rgba(0,0,0,.42);
-      color:#baffd7;
-      font-size:11px;
-      font-weight:1000;
-      letter-spacing:.8px;
+      opacity:.98;
     }
-    .dot{
-      width:8px;height:8px;border-radius:50%;
-      background:#35ff9a;
-      box-shadow:0 0 12px #35ff9a;
+    .appicon{
+      width:58px;
+      height:58px;
+      border-radius:10px;
+      display:grid;
+      place-items:center;
+      background:
+        radial-gradient(circle at 50% 35%,rgba(124,255,98,.24),rgba(0,0,0,.88) 64%),
+        linear-gradient(135deg,#06170d,#000);
+      border:1px solid rgba(125,255,98,.40);
+      box-shadow:0 0 18px rgba(125,255,98,.35);
+      font-size:30px;
     }
-    @media(max-width:390px){
-      .page{padding-left:10px;padding-right:10px}
-      .radial{width:min(97vw,430px);max-height:calc(100dvh - 178px)}
-      .slice .label{font-size:10.8px}
-      .slice .num{font-size:9.4px}
-      .slice .ico{font-size:14px}
-      .ctitle{font-size:28px}
-      .brand h1{font-size:13px}
-      .pill{font-size:9px;padding:7px 8px}
+    .brand span{
+      font-size:17px;
+      color:#fff;
+      text-shadow:0 2px 4px #000;
+    }
+    .hint{
+      position:absolute;
+      left:50%;
+      bottom:35px;
+      transform:translateX(-50%);
+      color:rgba(255,255,255,.92);
+      font-size:26px;
+      line-height:1;
+      text-shadow:0 0 12px rgba(255,255,255,.5);
+    }
+    @media(max-width:430px){
+      .radial-wrap{
+        width:132vw;
+        margin-top:26px;
+        transform:translateY(-18px);
+      }
+      .slice .ico{font-size:26px}
+      .slice .label{font-size:21px}
+      .slice .small{font-size:16px}
+      .center-title{font-size:44px}
+      .brand{right:28px;bottom:76px}
+      .appicon{width:54px;height:54px;font-size:28px}
+      .brand span{font-size:16px}
+    }
+    @media(max-width:380px){
+      .radial-wrap{
+        width:138vw;
+        margin-top:22px;
+      }
+      .slice .ico{font-size:24px}
+      .slice .label{font-size:19px}
+      .slice .small{font-size:15px}
     }
   </style>
 </head>
 <body>
   <main class="page">
-    <header class="top">
-      <div class="brand">
-        <div class="logo">E</div>
-        <div>
-          <h1>EratGuard PRO</h1>
-          <span>Signature Radial Panel</span>
-        </div>
-      </div>
-      <div class="pill">PRO AKTİF</div>
-    </header>
+    <section class="radial-wrap" aria-label="EratGuard Galaxy PRO Radial">
+      <svg viewBox="0 0 760 760" role="img">
+        <defs>
+          <radialGradient id="centerGrad" cx="50%" cy="42%" r="65%">
+            <stop offset="0%" stop-color="#193d20"/>
+            <stop offset="65%" stop-color="#07170b"/>
+            <stop offset="100%" stop-color="#020703"/>
+          </radialGradient>
+        </defs>
 
-    <section class="summary">
-      <b>SMS Güvenlik Komut Merkezi</b>
-      <span>Temiz kullanıcı paneli • tek ana menü • 12 güvenlik modülü</span>
+        <circle class="glow-ring" cx="380" cy="380" r="304"></circle>
+        <circle class="outer-ring" cx="380" cy="380" r="306"></circle>
+        <circle class="outer-ring" cx="380" cy="380" r="172" style="opacity:.38;stroke-width:1.2"></circle>
+
+        <g id="innerSlices" class="inner"></g>
+        <g id="slices"></g>
+
+        <a class="center-a" href="/u/pricing" aria-label="PRO">
+          <circle class="center-outer" cx="380" cy="380" r="92" fill="url(#centerGrad)"></circle>
+          <circle class="center-inner" cx="380" cy="380" r="72" fill="url(#centerGrad)"></circle>
+          <text class="center-title" x="380" y="382">PRO</text>
+        </a>
+      </svg>
     </section>
 
-    <section class="stage">
-      <div class="radial">
-        <svg viewBox="0 0 600 600" aria-label="EratGuard Signature Radial V1">
-          <defs>
-            <radialGradient id="coreGrad" cx="50%" cy="42%" r="66%">
-              <stop offset="0%" stop-color="#effff7"/>
-              <stop offset="48%" stop-color="#35ff9a"/>
-              <stop offset="100%" stop-color="#078b55"/>
-            </radialGradient>
-          </defs>
+    <div class="brand">
+      <div class="appicon">🛡️</div>
+      <span>EratGuard</span>
+    </div>
 
-          <circle class="ring" cx="300" cy="300" r="270"></circle>
-          <circle class="ring strong" cx="300" cy="300" r="232"></circle>
-          <circle class="ring" cx="300" cy="300" r="104"></circle>
-
-          <g id="slices"></g>
-
-          <a class="center" href="/radial" aria-label="Ana menü">
-            <circle class="core" cx="300" cy="300" r="84"></circle>
-            <text class="ctitle" x="300" y="289">E</text>
-            <text class="csub" x="300" y="323">MENÜ</text>
-          </a>
-        </svg>
-      </div>
-    </section>
-
-    <footer class="bottom">
-      <span class="dot"></span>
-      <span>KORUMA AKTİF</span>
-      <span>•</span>
-      <span>SIGNATURE RADIAL V1</span>
-    </footer>
+    <div class="hint">⌃</div>
   </main>
 
   <script>
     const modules = [
-      ["01","Ana Sayfa","/radial","🏠"],
-      ["02","Koruma","/u/protection","🛡️"],
-      ["03","AI Analiz","/u/analysis","🧠"],
-      ["04","Raporlar","/u/reports","📈"],
-      ["05","Bildirimler","/u/notifications","🔔"],
-      ["06","Lisans","/u/license","🔑"],
-      ["07","Topluluk","/u/community","👥"],
-      ["08","Ayarlar","/u/settings","⚙️"],
-      ["09","SMS Özet","/u/sms-actions-center","✉️"],
-      ["10","Blok SMS","/u/blocked-sms","🚫"],
-      ["11","Geçmiş","/u/history","🕘"],
-      ["12","PRO","/u/pricing","⭐"]
+      ["Topluluk","/u/community","💬"],
+      ["Analiz","/u/analysis","✉️"],
+      ["Engellenenler","/u/blocked-sms","✉️"],
+      ["Bildirimler","/u/notifications","🔔"],
+      ["Ayarlar","/u/settings","⚙️"],
+      ["Engellenen","/u/sms-actions-center","🖼️"],
+      ["Raporlar","/u/reports","✅"],
+      ["Lisans","/u/license","🛡️"],
+      ["Koruma","/u/protection","📊"],
+      ["Topluluk","/u/community","💬"]
     ];
 
-    const cx = 300, cy = 300, outer = 270, inner = 104;
-    const start = -105;
+    const cx = 380, cy = 380;
+    const outer = 306, inner = 112, innerRingOuter = 172;
+    const start = -18;
     const step = 360 / modules.length;
-    const gap = 1.1;
-    const root = document.getElementById("slices");
+    const gap = 2.0;
+
+    const slices = document.getElementById("slices");
+    const innerSlices = document.getElementById("innerSlices");
 
     function polar(r, deg){
       const a = (deg - 90) * Math.PI / 180;
       return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
     }
 
-    function pathFor(a0,a1){
-      const p1 = polar(outer,a0), p2 = polar(outer,a1), p3 = polar(inner,a1), p4 = polar(inner,a0);
+    function sectorPath(rOuter, rInner, a0, a1){
+      const p1 = polar(rOuter, a0);
+      const p2 = polar(rOuter, a1);
+      const p3 = polar(rInner, a1);
+      const p4 = polar(rInner, a0);
       const large = (a1-a0)>180 ? 1 : 0;
-      return `M ${p1[0].toFixed(2)} ${p1[1].toFixed(2)}
-              A ${outer} ${outer} 0 ${large} 1 ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}
-              L ${p3[0].toFixed(2)} ${p3[1].toFixed(2)}
-              A ${inner} ${inner} 0 ${large} 0 ${p4[0].toFixed(2)} ${p4[1].toFixed(2)}
-              Z`;
+      return [
+        `M ${p1[0].toFixed(2)} ${p1[1].toFixed(2)}`,
+        `A ${rOuter} ${rOuter} 0 ${large} 1 ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`,
+        `L ${p3[0].toFixed(2)} ${p3[1].toFixed(2)}`,
+        `A ${rInner} ${rInner} 0 ${large} 0 ${p4[0].toFixed(2)} ${p4[1].toFixed(2)}`,
+        "Z"
+      ].join(" ");
     }
 
     modules.forEach((m,i)=>{
       const a0 = start + i*step + gap;
       const a1 = start + (i+1)*step - gap;
       const mid = (a0+a1)/2;
-      const label = polar(188,mid);
+
+      const innerPath = document.createElementNS("http://www.w3.org/2000/svg","path");
+      innerPath.setAttribute("d",sectorPath(innerRingOuter, inner, a0, a1));
+      innerSlices.appendChild(innerPath);
 
       const a = document.createElementNS("http://www.w3.org/2000/svg","a");
-      a.setAttribute("href",m[2]);
-      a.setAttribute("aria-label",m[1]);
+      a.setAttribute("href",m[1]);
+      a.setAttribute("aria-label",m[0]);
 
       const g = document.createElementNS("http://www.w3.org/2000/svg","g");
       g.setAttribute("class","slice");
 
       const p = document.createElementNS("http://www.w3.org/2000/svg","path");
-      p.setAttribute("d",pathFor(a0,a1));
+      p.setAttribute("d",sectorPath(outer, innerRingOuter, a0, a1));
+
+      const iconPos = polar(248,mid);
+      const labelPos = polar(224,mid);
 
       const ico = document.createElementNS("http://www.w3.org/2000/svg","text");
       ico.setAttribute("class","ico");
-      ico.setAttribute("x",label[0].toFixed(1));
-      ico.setAttribute("y",(label[1]-30).toFixed(1));
-      ico.textContent = m[3];
+      ico.setAttribute("x",iconPos[0].toFixed(1));
+      ico.setAttribute("y",iconPos[1].toFixed(1));
+      ico.textContent = m[2];
 
-      const n = document.createElementNS("http://www.w3.org/2000/svg","text");
-      n.setAttribute("class","num");
-      n.setAttribute("x",label[0].toFixed(1));
-      n.setAttribute("y",(label[1]-12).toFixed(1));
-      n.textContent = m[0];
-
-      const t = document.createElementNS("http://www.w3.org/2000/svg","text");
-      t.setAttribute("class","label");
-      t.setAttribute("x",label[0].toFixed(1));
-      t.setAttribute("y",(label[1]+10).toFixed(1));
-      t.textContent = m[1];
+      const label = document.createElementNS("http://www.w3.org/2000/svg","text");
+      label.setAttribute("class",m[0].length > 9 ? "small" : "label");
+      label.setAttribute("x",labelPos[0].toFixed(1));
+      label.setAttribute("y",(labelPos[1]+28).toFixed(1));
+      label.textContent = m[0];
 
       g.appendChild(p);
       g.appendChild(ico);
-      g.appendChild(n);
-      g.appendChild(t);
+      g.appendChild(label);
       a.appendChild(g);
-      root.appendChild(a);
+      slices.appendChild(a);
     });
   </script>
 </body>
