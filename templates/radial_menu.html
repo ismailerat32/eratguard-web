@@ -130,11 +130,12 @@
       filter:drop-shadow(0 0 9px rgba(53,255,154,.75));
     }
     .slice path{
-      fill:rgba(3,38,21,.80);
-      stroke:rgba(118,255,176,.72);
-      stroke-width:1.25;
+      fill:rgba(4,48,27,.88);
+      stroke:rgba(130,255,184,.86);
+      stroke-width:1.55;
       cursor:pointer;
       transition:.15s ease;
+      filter:drop-shadow(0 0 5px rgba(53,255,154,.22));
     }
     .slice:hover path,.slice:active path{
       fill:rgba(53,255,154,.25);
@@ -148,14 +149,22 @@
       font-weight:1000;
       text-shadow:0 0 8px rgba(53,255,154,.95),0 1px 1px #000;
     }
-    .slice .num{fill:#9cff67;font-size:11px;letter-spacing:1px}
-    .slice .label{font-size:13px;letter-spacing:.25px}
+    .slice .num{
+      fill:#9cff67;
+      font-size:10.5px;
+      letter-spacing:1px;
+      opacity:.96;
+    }
+    .slice .label{
+      font-size:12.5px;
+      letter-spacing:.2px;
+    }
     .center{cursor:pointer}
     .core{
       fill:url(#coreGrad);
-      stroke:rgba(230,255,244,.9);
-      stroke-width:2.1;
-      filter:drop-shadow(0 0 20px rgba(53,255,154,.9));
+      stroke:rgba(230,255,244,.95);
+      stroke-width:2.4;
+      filter:drop-shadow(0 0 26px rgba(53,255,154,.96));
     }
     .ctitle{
       fill:#03120a;
@@ -196,8 +205,8 @@
     @media(max-width:390px){
       .page{padding-left:10px;padding-right:10px}
       .radial{width:min(97vw,430px);max-height:calc(100dvh - 178px)}
-      .slice .label{font-size:11.4px}
-      .slice .num{font-size:10px}
+      .slice .label{font-size:10.8px}
+      .slice .num{font-size:9.4px}
       .ctitle{font-size:28px}
       .brand h1{font-size:13px}
       .pill{font-size:9px;padding:7px 8px}
@@ -262,7 +271,7 @@
       ["02","Koruma","/u/protection"],
       ["03","AI Analiz","/u/analysis"],
       ["04","Raporlar","/u/reports"],
-      ["05","Bildirim","/u/notifications"],
+      ["05","Bildirimler","/u/notifications"],
       ["06","Lisans","/u/license"],
       ["07","Topluluk","/u/community"],
       ["08","Ayarlar","/u/settings"],
@@ -298,7 +307,6 @@
       const a1 = start + (i+1)*step - gap;
       const mid = (a0+a1)/2;
       const label = polar(188,mid);
-      const num = polar(222,mid);
 
       const a = document.createElementNS("http://www.w3.org/2000/svg","a");
       a.setAttribute("href",m[2]);
@@ -312,14 +320,14 @@
 
       const n = document.createElementNS("http://www.w3.org/2000/svg","text");
       n.setAttribute("class","num");
-      n.setAttribute("x",num[0].toFixed(1));
-      n.setAttribute("y",num[1].toFixed(1));
+      n.setAttribute("x",label[0].toFixed(1));
+      n.setAttribute("y",(label[1]-17).toFixed(1));
       n.textContent = m[0];
 
       const t = document.createElementNS("http://www.w3.org/2000/svg","text");
       t.setAttribute("class","label");
       t.setAttribute("x",label[0].toFixed(1));
-      t.setAttribute("y",label[1].toFixed(1));
+      t.setAttribute("y",(label[1]+5).toFixed(1));
       t.textContent = m[1];
 
       g.appendChild(p);
