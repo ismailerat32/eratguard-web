@@ -2047,6 +2047,20 @@ def radial():
     return render_template("radial_menu.html")
 
 
+# ===== ERATGUARD USER PANEL CLEAN RESET V1 REDIRECT START =====
+# Eski kullanıcı dashboard varyasyonları kafa karıştırmasın:
+# tek ana kullanıcı paneli /radial Signature Radial V1 olarak kilitlenir.
+@app.before_request
+def _eg_user_panel_clean_reset_v1_redirect():
+    try:
+        path = request.path or ""
+        if path in ("/dashboard", "/u/dashboard"):
+            return redirect("/radial")
+    except Exception:
+        return None
+# ===== ERATGUARD USER PANEL CLEAN RESET V1 REDIRECT END =====
+
+
 USER_MODULES = {
     "protection": {
         "icon": "🛡️",

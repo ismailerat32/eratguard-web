@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>EratGuard PRO • Signature Radial</title>
+  <style>
+    :root{
+      --green:#35ff9a;
+      --green2:#9cff67;
+      --cyan:#2fe8ff;
+      --bg:#020805;
+      --text:#eafff4;
+      --muted:rgba(234,255,244,.68);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;height:100%;overflow:hidden}
+    body{
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 50% 30%,rgba(53,255,154,.20),transparent 27%),
+        radial-gradient(circle at 18% 12%,rgba(47,232,255,.13),transparent 24%),
+        radial-gradient(circle at 86% 82%,rgba(156,255,103,.12),transparent 30%),
+        linear-gradient(180deg,#06140e 0%,#020805 58%,#000 100%);
+    }
+    body:before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.18;
+      background-image:
+        radial-gradient(circle,rgba(255,255,255,.8) 0 1px,transparent 1.4px),
+        radial-gradient(circle,rgba(53,255,154,.6) 0 1px,transparent 1.5px);
+      background-size:76px 76px,126px 126px;
+      background-position:0 0,30px 42px;
+    }
+    .page{
+      position:relative;
+      z-index:1;
+      height:100vh;
+      height:100dvh;
+      display:flex;
+      flex-direction:column;
+      padding:calc(14px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom));
+    }
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border:1px solid rgba(53,255,154,.34);
+      border-radius:20px;
+      background:linear-gradient(135deg,rgba(4,34,19,.88),rgba(0,0,0,.54));
+      box-shadow:0 0 24px rgba(53,255,154,.18),inset 0 0 18px rgba(53,255,154,.08);
+    }
+    .brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .logo{
+      width:42px;height:42px;border-radius:50%;
+      display:grid;place-items:center;
+      font-weight:1000;font-size:24px;
+      color:#03120a;
+      background:radial-gradient(circle,#effff7 0%,#35ff9a 48%,#06935a 100%);
+      box-shadow:0 0 24px rgba(53,255,154,.78);
+      flex:0 0 auto;
+    }
+    .brand h1{
+      margin:0;
+      font-size:15px;
+      line-height:1.05;
+      letter-spacing:.7px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand span{
+      display:block;
+      margin-top:3px;
+      font-size:10px;
+      color:var(--muted);
+      letter-spacing:1.6px;
+      text-transform:uppercase;
+    }
+    .pill{
+      flex:0 0 auto;
+      border:1px solid rgba(156,255,103,.42);
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:10px;
+      font-weight:1000;
+      color:#baffd7;
+      background:rgba(5,34,20,.74);
+      box-shadow:0 0 18px rgba(53,255,154,.15);
+      letter-spacing:.8px;
+      white-space:nowrap;
+    }
+    .summary{
+      margin:12px 0 8px;
+      text-align:center;
+      padding:10px 12px;
+      border-radius:18px;
+      border:1px solid rgba(53,255,154,.22);
+      background:rgba(0,0,0,.34);
+    }
+    .summary b{display:block;font-size:14px;letter-spacing:.6px}
+    .summary span{display:block;margin-top:4px;font-size:11px;color:var(--muted)}
+    .stage{
+      flex:1;
+      min-height:0;
+      display:grid;
+      place-items:center;
+    }
+    .radial{
+      width:min(94vw,520px);
+      aspect-ratio:1/1;
+      max-height:calc(100dvh - 190px);
+      filter:drop-shadow(0 0 30px rgba(53,255,154,.30));
+    }
+    svg{display:block;width:100%;height:100%;overflow:visible}
+    .ring{
+      fill:none;
+      stroke:rgba(53,255,154,.28);
+      stroke-width:1.2;
+    }
+    .ring.strong{
+      stroke:rgba(53,255,154,.68);
+      stroke-width:1.8;
+      filter:drop-shadow(0 0 9px rgba(53,255,154,.75));
+    }
+    .slice path{
+      fill:rgba(3,38,21,.80);
+      stroke:rgba(118,255,176,.72);
+      stroke-width:1.25;
+      cursor:pointer;
+      transition:.15s ease;
+    }
+    .slice:hover path,.slice:active path{
+      fill:rgba(53,255,154,.25);
+      filter:drop-shadow(0 0 12px rgba(53,255,154,.86));
+    }
+    .slice text{
+      pointer-events:none;
+      text-anchor:middle;
+      dominant-baseline:middle;
+      fill:#eafff4;
+      font-weight:1000;
+      text-shadow:0 0 8px rgba(53,255,154,.95),0 1px 1px #000;
+    }
+    .slice .num{fill:#9cff67;font-size:11px;letter-spacing:1px}
+    .slice .label{font-size:13px;letter-spacing:.25px}
+    .center{cursor:pointer}
+    .core{
+      fill:url(#coreGrad);
+      stroke:rgba(230,255,244,.9);
+      stroke-width:2.1;
+      filter:drop-shadow(0 0 20px rgba(53,255,154,.9));
+    }
+    .ctitle{
+      fill:#03120a;
+      text-anchor:middle;
+      dominant-baseline:middle;
+      font-size:32px;
+      font-weight:1000;
+    }
+    .csub{
+      fill:#062314;
+      text-anchor:middle;
+      dominant-baseline:middle;
+      font-size:11px;
+      font-weight:1000;
+      letter-spacing:1.8px;
+    }
+    .bottom{
+      margin-top:8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      flex-wrap:wrap;
+      padding:9px 10px;
+      border:1px solid rgba(53,255,154,.26);
+      border-radius:18px;
+      background:rgba(0,0,0,.42);
+      color:#baffd7;
+      font-size:11px;
+      font-weight:1000;
+      letter-spacing:.8px;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:#35ff9a;
+      box-shadow:0 0 12px #35ff9a;
+    }
+    @media(max-width:390px){
+      .page{padding-left:10px;padding-right:10px}
+      .radial{width:min(97vw,430px);max-height:calc(100dvh - 178px)}
+      .slice .label{font-size:11.4px}
+      .slice .num{font-size:10px}
+      .ctitle{font-size:28px}
+      .brand h1{font-size:13px}
+      .pill{font-size:9px;padding:7px 8px}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="top">
+      <div class="brand">
+        <div class="logo">E</div>
+        <div>
+          <h1>EratGuard PRO</h1>
+          <span>Signature Radial Panel</span>
+        </div>
+      </div>
+      <div class="pill">PRO AKTİF</div>
+    </header>
+
+    <section class="summary">
+      <b>SMS Güvenlik Komut Merkezi</b>
+      <span>Temiz kullanıcı paneli • tek ana menü • 12 güvenlik modülü</span>
+    </section>
+
+    <section class="stage">
+      <div class="radial">
+        <svg viewBox="0 0 600 600" aria-label="EratGuard Signature Radial V1">
+          <defs>
+            <radialGradient id="coreGrad" cx="50%" cy="42%" r="66%">
+              <stop offset="0%" stop-color="#effff7"/>
+              <stop offset="48%" stop-color="#35ff9a"/>
+              <stop offset="100%" stop-color="#078b55"/>
+            </radialGradient>
+          </defs>
+
+          <circle class="ring" cx="300" cy="300" r="270"></circle>
+          <circle class="ring strong" cx="300" cy="300" r="232"></circle>
+          <circle class="ring" cx="300" cy="300" r="104"></circle>
+
+          <g id="slices"></g>
+
+          <a class="center" href="/radial" aria-label="Ana menü">
+            <circle class="core" cx="300" cy="300" r="84"></circle>
+            <text class="ctitle" x="300" y="289">E</text>
+            <text class="csub" x="300" y="323">MENÜ</text>
+          </a>
+        </svg>
+      </div>
+    </section>
+
+    <footer class="bottom">
+      <span class="dot"></span>
+      <span>KORUMA AKTİF</span>
+      <span>•</span>
+      <span>SIGNATURE RADIAL V1</span>
+    </footer>
+  </main>
+
+  <script>
+    const modules = [
+      ["01","Ana Sayfa","/radial"],
+      ["02","Koruma","/u/protection"],
+      ["03","AI Analiz","/u/analysis"],
+      ["04","Raporlar","/u/reports"],
+      ["05","Bildirim","/u/notifications"],
+      ["06","Lisans","/u/license"],
+      ["07","Topluluk","/u/community"],
+      ["08","Ayarlar","/u/settings"],
+      ["09","SMS Özet","/u/sms-actions-center"],
+      ["10","Blok SMS","/u/blocked-sms"],
+      ["11","Geçmiş","/u/history"],
+      ["12","PRO","/u/pricing"]
+    ];
+
+    const cx = 300, cy = 300, outer = 270, inner = 104;
+    const start = -105;
+    const step = 360 / modules.length;
+    const gap = 1.1;
+    const root = document.getElementById("slices");
+
+    function polar(r, deg){
+      const a = (deg - 90) * Math.PI / 180;
+      return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+    }
+
+    function pathFor(a0,a1){
+      const p1 = polar(outer,a0), p2 = polar(outer,a1), p3 = polar(inner,a1), p4 = polar(inner,a0);
+      const large = (a1-a0)>180 ? 1 : 0;
+      return `M ${p1[0].toFixed(2)} ${p1[1].toFixed(2)}
+              A ${outer} ${outer} 0 ${large} 1 ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}
+              L ${p3[0].toFixed(2)} ${p3[1].toFixed(2)}
+              A ${inner} ${inner} 0 ${large} 0 ${p4[0].toFixed(2)} ${p4[1].toFixed(2)}
+              Z`;
+    }
+
+    modules.forEach((m,i)=>{
+      const a0 = start + i*step + gap;
+      const a1 = start + (i+1)*step - gap;
+      const mid = (a0+a1)/2;
+      const label = polar(188,mid);
+      const num = polar(222,mid);
+
+      const a = document.createElementNS("http://www.w3.org/2000/svg","a");
+      a.setAttribute("href",m[2]);
+      a.setAttribute("aria-label",m[1]);
+
+      const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+      g.setAttribute("class","slice");
+
+      const p = document.createElementNS("http://www.w3.org/2000/svg","path");
+      p.setAttribute("d",pathFor(a0,a1));
+
+      const n = document.createElementNS("http://www.w3.org/2000/svg","text");
+      n.setAttribute("class","num");
+      n.setAttribute("x",num[0].toFixed(1));
+      n.setAttribute("y",num[1].toFixed(1));
+      n.textContent = m[0];
+
+      const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+      t.setAttribute("class","label");
+      t.setAttribute("x",label[0].toFixed(1));
+      t.setAttribute("y",label[1].toFixed(1));
+      t.textContent = m[1];
+
+      g.appendChild(p);
+      g.appendChild(n);
+      g.appendChild(t);
+      a.appendChild(g);
+      root.appendChild(a);
+    });
+  </script>
+</body>
+</html>
