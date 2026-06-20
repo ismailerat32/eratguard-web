@@ -22,7 +22,7 @@ public class MainActivity extends Activity {
     private WebView webView;
 
     // ERATGUARD SIGNATURE RADIAL WEB DASHBOARD
-    private static final String APP_URL = "https://app.eratguard.com/radial";
+    private static final String APP_URL = "https://app.eratguard.com/signature-radial";
     private static final String ALLOWED_HOST_1 = "app.eratguard.com";
     private static final String ALLOWED_HOST_2 = "eratguard.com";
 
@@ -36,11 +36,6 @@ public class MainActivity extends Activity {
     private void requestProtectionPermissions() {
         if (Build.VERSION.SDK_INT >= 23) {
             java.util.ArrayList<String> permissions = new java.util.ArrayList<>();
-
-            if (checkSelfPermission(Manifest.permission.RECEIVE_SMS) != PackageManager.PERMISSION_GRANTED) {
-                permissions.add(Manifest.permission.RECEIVE_SMS);
-            }
-
             if (Build.VERSION.SDK_INT >= 33 &&
                     checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 permissions.add(Manifest.permission.POST_NOTIFICATIONS);

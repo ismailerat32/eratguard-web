@@ -2061,6 +2061,18 @@ def _eg_user_panel_clean_reset_v1_redirect():
 # ===== ERATGUARD USER PANEL CLEAN RESET V1 REDIRECT END =====
 
 
+
+# ===== ERATGUARD SIGNATURE RADIAL HARD ROUTE START =====
+# Eski /radial ve /dashboard FAN-12P kalıntılarıyla karışmaması için
+# yeni temiz kullanıcı imza paneli ayrı route üzerinden açılır.
+@app.route("/signature-radial")
+def eg_signature_radial_hard_route():
+    if not login_required():
+        return redirect(url_for("login"))
+    return render_template("radial_menu.html")
+# ===== ERATGUARD SIGNATURE RADIAL HARD ROUTE END =====
+
+
 USER_MODULES = {
     "protection": {
         "icon": "🛡️",
