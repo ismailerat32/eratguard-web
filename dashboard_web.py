@@ -19841,17 +19841,10 @@ try:
 """
 
     def _eg_user_fan3_should_inject():
-        try:
-            path = str(getattr(_eg_user_fan3_request, "path", "") or "")
-            if path.startswith("/admin"):
-                return False
-            if path in ("/dashboard", "/u/dashboard"):
-                return True
-            if path.startswith("/u/"):
-                return True
-            return False
-        except Exception:
-            return False
+        # SIGNATURE GALAXY FINAL:
+        # Eski sağdan-sola FAN/papatya overlay artık kullanıcı sayfalarına bindirilmez.
+        # /signature-radial image-map ana panel olarak kalır.
+        return False
 
     def _eg_user_fan3_inject_html(html):
         if not html or _EG_USER_FAN3_MARKER in html:
