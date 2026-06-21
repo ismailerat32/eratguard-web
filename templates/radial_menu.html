@@ -3,333 +3,95 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>EratGuard PRO • Galaxy Radial</title>
+  <title>EratGuard PRO • Signature Galaxy</title>
   <style>
-    :root{
-      --green:#7dff62;
-      --green2:#34ff9a;
-      --line:rgba(132,255,96,.82);
-      --soft:rgba(132,255,96,.28);
-      --text:#eaffdf;
-      --muted:rgba(234,255,223,.72);
-    }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;height:100%;overflow:hidden}
-    body{
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background:#000;
       font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at 50% 33%, rgba(94,255,70,.24), transparent 34%),
-        radial-gradient(circle at 50% 78%, rgba(90,255,120,.20), transparent 35%),
-        linear-gradient(180deg,#020704 0%,#06170d 44%,#020503 100%);
-    }
-    body:before{
-      content:"";
-      position:fixed;
-      inset:0;
-      background-image:
-        radial-gradient(circle,rgba(255,255,255,.85) 0 1px,transparent 1.5px),
-        radial-gradient(circle,rgba(124,255,98,.72) 0 1px,transparent 1.8px),
-        radial-gradient(circle,rgba(255,255,255,.35) 0 1px,transparent 1.4px);
-      background-size:72px 72px,119px 119px,171px 171px;
-      background-position:0 0,24px 36px,55px 80px;
-      opacity:.34;
-      pointer-events:none;
-    }
-    body:after{
-      content:"";
-      position:fixed;
-      inset:-15%;
-      background:
-        radial-gradient(circle at 50% 32%, transparent 0 26%, rgba(125,255,98,.10) 27%, transparent 28%),
-        radial-gradient(circle at 50% 32%, transparent 0 42%, rgba(125,255,98,.08) 43%, transparent 44%);
-      filter:blur(.2px);
-      opacity:.8;
-      pointer-events:none;
     }
     .page{
       position:relative;
-      z-index:1;
+      width:100vw;
       height:100vh;
       height:100dvh;
-      padding:calc(18px + env(safe-area-inset-top)) 0 calc(10px + env(safe-area-inset-bottom));
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:flex-start;
+      overflow:hidden;
+      background:#000;
     }
-    .radial-wrap{
-      position:relative;
-      width:min(126vw,760px);
-      aspect-ratio:1/1;
-      margin-top:34px;
-      transform:translateY(-22px);
-      filter:
-        drop-shadow(0 0 22px rgba(125,255,98,.48))
-        drop-shadow(0 0 54px rgba(125,255,98,.22));
-    }
-    svg{
+    .bg{
+      position:absolute;
+      inset:0;
       width:100%;
       height:100%;
-      display:block;
-      overflow:visible;
-    }
-    .slice path{
-      fill:rgba(7,28,15,.56);
-      stroke:var(--line);
-      stroke-width:2.05;
-      filter:drop-shadow(0 0 7px rgba(125,255,98,.42));
-      cursor:pointer;
-      transition:.14s ease;
-    }
-    .slice:hover path,
-    .slice:active path{
-      fill:rgba(95,255,80,.19);
-      stroke:rgba(176,255,132,.96);
-      filter:drop-shadow(0 0 16px rgba(125,255,98,.95));
-    }
-    .inner path{
-      fill:rgba(7,28,15,.22);
-      stroke:rgba(125,255,98,.28);
-      stroke-width:1.25;
-    }
-    .slice text{
-      text-anchor:middle;
-      dominant-baseline:middle;
+      object-fit:cover;
+      object-position:center center;
+      user-select:none;
       pointer-events:none;
-      fill:var(--text);
-      text-shadow:0 0 10px rgba(125,255,98,.88),0 2px 2px #000;
     }
-    .slice .ico{
-      font-size:30px;
-      opacity:.86;
-      filter:drop-shadow(0 0 10px rgba(125,255,98,.78));
-    }
-    .slice .label{
-      font-size:24px;
-      font-weight:500;
-      letter-spacing:.2px;
-    }
-    .slice .small{
-      font-size:18px;
-      font-weight:500;
-    }
-    .outer-ring{
-      fill:none;
-      stroke:rgba(132,255,96,.65);
-      stroke-width:1.7;
-      filter:drop-shadow(0 0 14px rgba(125,255,98,.86));
-    }
-    .glow-ring{
-      fill:none;
-      stroke:rgba(132,255,96,.20);
-      stroke-width:13;
-      filter:blur(3px);
-    }
-    .center-a{cursor:pointer}
-    .center-outer{
-      fill:rgba(3,15,7,.82);
-      stroke:rgba(154,255,114,.88);
-      stroke-width:3;
-      filter:
-        drop-shadow(0 0 12px rgba(125,255,98,.82))
-        drop-shadow(0 0 34px rgba(125,255,98,.45));
-    }
-    .center-inner{
-      fill:radial-gradient(circle,#16341c,#061409);
-      stroke:rgba(176,255,132,.76);
-      stroke-width:1.4;
-    }
-    .center-title{
-      fill:rgba(230,255,215,.88);
-      font-size:48px;
-      font-weight:900;
-      letter-spacing:1px;
-      text-anchor:middle;
-      dominant-baseline:middle;
-      text-shadow:0 0 14px rgba(125,255,98,.92);
-    }
-    .brand{
+    .tap{
       position:absolute;
-      right:34px;
-      bottom:82px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:8px;
-      opacity:.98;
+      display:block;
+      border-radius:18px;
+      text-decoration:none;
+      background:rgba(0,255,120,0);
+      z-index:3;
     }
-    .appicon{
-      width:58px;
-      height:58px;
-      border-radius:10px;
-      display:grid;
-      place-items:center;
-      background:
-        radial-gradient(circle at 50% 35%,rgba(124,255,98,.24),rgba(0,0,0,.88) 64%),
-        linear-gradient(135deg,#06170d,#000);
-      border:1px solid rgba(125,255,98,.40);
-      box-shadow:0 0 18px rgba(125,255,98,.35);
-      font-size:30px;
+    .tap:active{
+      background:rgba(90,255,120,.16);
+      box-shadow:0 0 24px rgba(90,255,120,.42);
     }
-    .brand span{
-      font-size:17px;
-      color:#fff;
-      text-shadow:0 2px 4px #000;
-    }
-    .hint{
-      position:absolute;
-      left:50%;
-      bottom:35px;
-      transform:translateX(-50%);
-      color:rgba(255,255,255,.92);
-      font-size:26px;
-      line-height:1;
-      text-shadow:0 0 12px rgba(255,255,255,.5);
-    }
-    @media(max-width:430px){
-      .radial-wrap{
-        width:132vw;
-        margin-top:26px;
-        transform:translateY(-18px);
-      }
-      .slice .ico{font-size:26px}
-      .slice .label{font-size:21px}
-      .slice .small{font-size:16px}
-      .center-title{font-size:44px}
-      .brand{right:28px;bottom:76px}
-      .appicon{width:54px;height:54px;font-size:28px}
-      .brand span{font-size:16px}
-    }
-    @media(max-width:380px){
-      .radial-wrap{
-        width:138vw;
-        margin-top:22px;
-      }
-      .slice .ico{font-size:24px}
-      .slice .label{font-size:19px}
-      .slice .small{font-size:15px}
+
+    /*
+      IMAGE-MAP alanları:
+      Yüzdeler 9:16 dikey ekran için ayarlandı.
+      Görünmez tıklama bölgeleri final görseldeki dilimlerin üzerine oturur.
+    */
+
+    .istatistik{left:14%; top:21%; width:22%; height:14%;}
+    .topluluk{left:39%; top:18%; width:22%; height:14%;}
+    .analiz{left:64%; top:21%; width:22%; height:14%;}
+
+    .koruma{left:0%; top:36%; width:28%; height:13%;}
+    .engellenenler{left:72%; top:36%; width:28%; height:13%;}
+
+    .lisans{left:3%; top:50%; width:27%; height:13%;}
+    .bildirimler{left:72%; top:50%; width:28%; height:13%;}
+
+    .raporlar{left:18%; top:63%; width:24%; height:13%;}
+    .engellenen{left:40%; top:65%; width:22%; height:12%;}
+    .ayarlar{left:61%; top:63%; width:24%; height:13%;}
+
+    .pro{left:39%; top:39%; width:22%; height:14%; border-radius:999px;}
+
+    .debug .tap{
+      background:rgba(0,255,120,.08);
+      outline:1px solid rgba(80,255,130,.45);
     }
   </style>
 </head>
 <body>
-  <main class="page">
-    <section class="radial-wrap" aria-label="EratGuard Galaxy PRO Radial">
-      <svg viewBox="0 0 760 760" role="img">
-        <defs>
-          <radialGradient id="centerGrad" cx="50%" cy="42%" r="65%">
-            <stop offset="0%" stop-color="#193d20"/>
-            <stop offset="65%" stop-color="#07170b"/>
-            <stop offset="100%" stop-color="#020703"/>
-          </radialGradient>
-        </defs>
+  <main class="page" aria-label="EratGuard Signature Galaxy PRO Radial">
+    <img class="bg" src="/static/eratguard/signature_galaxy_pro_radial.png" alt="EratGuard Signature Galaxy PRO Radial">
 
-        <circle class="glow-ring" cx="380" cy="380" r="304"></circle>
-        <circle class="outer-ring" cx="380" cy="380" r="306"></circle>
-        <circle class="outer-ring" cx="380" cy="380" r="172" style="opacity:.38;stroke-width:1.2"></circle>
+    <a class="tap istatistik" href="/u/reports" aria-label="İstatistik"></a>
+    <a class="tap topluluk" href="/u/community" aria-label="Topluluk"></a>
+    <a class="tap analiz" href="/u/analysis" aria-label="Analiz"></a>
 
-        <g id="innerSlices" class="inner"></g>
-        <g id="slices"></g>
+    <a class="tap koruma" href="/u/protection" aria-label="Koruma"></a>
+    <a class="tap engellenenler" href="/u/blocked-sms" aria-label="Engellenenler"></a>
 
-        <a class="center-a" href="/u/pricing" aria-label="PRO">
-          <circle class="center-outer" cx="380" cy="380" r="92" fill="url(#centerGrad)"></circle>
-          <circle class="center-inner" cx="380" cy="380" r="72" fill="url(#centerGrad)"></circle>
-          <text class="center-title" x="380" y="382">PRO</text>
-        </a>
-      </svg>
-    </section>
+    <a class="tap lisans" href="/u/license" aria-label="Lisans"></a>
+    <a class="tap bildirimler" href="/u/notifications" aria-label="Bildirimler"></a>
 
-    <div class="brand">
-      <div class="appicon">🛡️</div>
-      <span>EratGuard</span>
-    </div>
+    <a class="tap raporlar" href="/u/reports" aria-label="Raporlar"></a>
+    <a class="tap engellenen" href="/u/sms-actions-center" aria-label="Engellenen"></a>
+    <a class="tap ayarlar" href="/u/settings" aria-label="Ayarlar"></a>
 
-    <div class="hint">⌃</div>
+    <a class="tap pro" href="/u/pricing" aria-label="PRO"></a>
   </main>
-
-  <script>
-    const modules = [
-      ["Topluluk","/u/community","💬"],
-      ["Analiz","/u/analysis","✉️"],
-      ["Engellenenler","/u/blocked-sms","✉️"],
-      ["Bildirimler","/u/notifications","🔔"],
-      ["Ayarlar","/u/settings","⚙️"],
-      ["Engellenen","/u/sms-actions-center","🖼️"],
-      ["Raporlar","/u/reports","✅"],
-      ["Lisans","/u/license","🛡️"],
-      ["Koruma","/u/protection","📊"],
-      ["Topluluk","/u/community","💬"]
-    ];
-
-    const cx = 380, cy = 380;
-    const outer = 306, inner = 112, innerRingOuter = 172;
-    const start = -18;
-    const step = 360 / modules.length;
-    const gap = 2.0;
-
-    const slices = document.getElementById("slices");
-    const innerSlices = document.getElementById("innerSlices");
-
-    function polar(r, deg){
-      const a = (deg - 90) * Math.PI / 180;
-      return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
-    }
-
-    function sectorPath(rOuter, rInner, a0, a1){
-      const p1 = polar(rOuter, a0);
-      const p2 = polar(rOuter, a1);
-      const p3 = polar(rInner, a1);
-      const p4 = polar(rInner, a0);
-      const large = (a1-a0)>180 ? 1 : 0;
-      return [
-        `M ${p1[0].toFixed(2)} ${p1[1].toFixed(2)}`,
-        `A ${rOuter} ${rOuter} 0 ${large} 1 ${p2[0].toFixed(2)} ${p2[1].toFixed(2)}`,
-        `L ${p3[0].toFixed(2)} ${p3[1].toFixed(2)}`,
-        `A ${rInner} ${rInner} 0 ${large} 0 ${p4[0].toFixed(2)} ${p4[1].toFixed(2)}`,
-        "Z"
-      ].join(" ");
-    }
-
-    modules.forEach((m,i)=>{
-      const a0 = start + i*step + gap;
-      const a1 = start + (i+1)*step - gap;
-      const mid = (a0+a1)/2;
-
-      const innerPath = document.createElementNS("http://www.w3.org/2000/svg","path");
-      innerPath.setAttribute("d",sectorPath(innerRingOuter, inner, a0, a1));
-      innerSlices.appendChild(innerPath);
-
-      const a = document.createElementNS("http://www.w3.org/2000/svg","a");
-      a.setAttribute("href",m[1]);
-      a.setAttribute("aria-label",m[0]);
-
-      const g = document.createElementNS("http://www.w3.org/2000/svg","g");
-      g.setAttribute("class","slice");
-
-      const p = document.createElementNS("http://www.w3.org/2000/svg","path");
-      p.setAttribute("d",sectorPath(outer, innerRingOuter, a0, a1));
-
-      const iconPos = polar(248,mid);
-      const labelPos = polar(224,mid);
-
-      const ico = document.createElementNS("http://www.w3.org/2000/svg","text");
-      ico.setAttribute("class","ico");
-      ico.setAttribute("x",iconPos[0].toFixed(1));
-      ico.setAttribute("y",iconPos[1].toFixed(1));
-      ico.textContent = m[2];
-
-      const label = document.createElementNS("http://www.w3.org/2000/svg","text");
-      label.setAttribute("class",m[0].length > 9 ? "small" : "label");
-      label.setAttribute("x",labelPos[0].toFixed(1));
-      label.setAttribute("y",(labelPos[1]+28).toFixed(1));
-      label.textContent = m[0];
-
-      g.appendChild(p);
-      g.appendChild(ico);
-      g.appendChild(label);
-      a.appendChild(g);
-      slices.appendChild(a);
-    });
-  </script>
 </body>
 </html>
