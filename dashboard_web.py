@@ -1554,6 +1554,21 @@ def _eg_reset_page(error=None, message=None, token="", code_mode=False):
     .err {{ margin-top:14px; color:#ff7b7b; }}
     a {{ color:#a9c8ff; text-decoration:none; display:block; margin-top:18px; text-align:center; }}
   </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
   <form class="card" method="post" action="{action}">
@@ -1741,6 +1756,21 @@ button{{border:0;background:linear-gradient(90deg,#00d66f,#18c6e8);color:white;f
 pre{{white-space:pre-wrap;background:#000;padding:16px;border-radius:14px;color:#9f9}}
 a{{color:#a9c8ff}}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="card">
@@ -2061,6 +2091,17 @@ def _eg_user_panel_clean_reset_v1_redirect():
 # ===== ERATGUARD USER PANEL CLEAN RESET V1 REDIRECT END =====
 
 
+
+
+# ===== ERATGUARD SIGNATURE GALAXY OVERRIDE START =====
+# Yeni imza panel image-map olduğu için eski kullanıcı FAN overlay /u/* üzerinde kapatılır.
+@app.before_request
+def _eg_signature_galaxy_disable_old_user_fan_overlay():
+    try:
+        request.environ["EG_DISABLE_OLD_USER_FAN_OVERLAY"] = "1"
+    except Exception:
+        pass
+# ===== ERATGUARD SIGNATURE GALAXY OVERRIDE END =====
 
 # ===== ERATGUARD SIGNATURE RADIAL HARD ROUTE START =====
 # Eski /radial ve /dashboard FAN-12P kalıntılarıyla karışmaması için
@@ -3376,7 +3417,22 @@ def ss_live_admin_access():
         return render_template("admin_login.html", error="")
     except Exception:
         return """
-        <html><head><meta charset="UTF-8"><title>EratGuard Admin</title></head>
+        <html><head><meta charset="UTF-8"><title>EratGuard Admin</title>
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>
         <body style="background:#020806;color:white;font-family:Arial;padding:24px;">
           <h2>EratGuard ADMIN</h2>
           <form method="post">
@@ -3496,7 +3552,22 @@ def ss_live_admin_all_slice_catchall(anything):
         return render_template(tpl, **ctx)
     except Exception as e:
         return f"""
-        <html><head><meta charset="UTF-8"><title>EratGuard ADMIN</title></head>
+        <html><head><meta charset="UTF-8"><title>EratGuard ADMIN</title>
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>
         <body style="background:#020806;color:white;font-family:Arial;padding:24px;">
           <h2>EratGuard ADMIN</h2>
           <p>Bu admin bölümü hazırlanıyor: <b>{slug}</b></p>
@@ -4764,7 +4835,22 @@ def _ss_admin_access_cookie_override():
         return render_template("admin_login.html", error="")
     except Exception:
         return """
-        <html><head><meta charset="UTF-8"><title>EratGuard Admin</title></head>
+        <html><head><meta charset="UTF-8"><title>EratGuard Admin</title>
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>
         <body style="background:#020806;color:white;font-family:Arial;padding:24px;">
           <h2>EratGuard ADMIN</h2>
           <form method="post">
@@ -4919,7 +5005,22 @@ def _ss_admin_radial_home_final():
         resp = render_template("admin_dashboard.html")
     except Exception as e:
         return f"""
-        <html><head><meta charset="UTF-8"><title>EratGuard ADMIN</title></head>
+        <html><head><meta charset="UTF-8"><title>EratGuard ADMIN</title>
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>
         <body style="background:#020806;color:white;font-family:Arial;padding:24px;">
           <h2>EratGuard ADMIN</h2>
           <p>Admin radial dashboard yüklenemedi.</p>
@@ -5194,6 +5295,21 @@ def _ss_user_protection_compact_final():
       font-size:12px;
     }
   </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
   <div class="top">
@@ -5530,6 +5646,21 @@ def _ss_user_analysis_compact_final():
       font-size:12px;
     }
   </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
   <div class="top">
@@ -5839,6 +5970,21 @@ def _ss_user_blocked_compact_final():
     }
     .foot{text-align:center;color:rgba(245,255,248,.38);font-weight:800;padding:22px 0 8px;font-size:12px}
   </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
   <div class="top">
@@ -7178,6 +7324,21 @@ def _ss_user_reports_titanium_summary_page_final():
     .report-empty p{{margin:0;color:rgba(245,255,248,.66);font-weight:800;font-size:12px;line-height:1.4}}
     .foot{{text-align:center;color:rgba(245,255,248,.38);font-weight:800;padding:22px 0 8px;font-size:12px}}
   </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
   <div class="top">
@@ -7495,6 +7656,21 @@ def _ss_user_notifications_titanium_events_page_final():
     .notify-empty p{{margin:0;color:rgba(245,255,248,.66);font-weight:800;font-size:12px;line-height:1.4}}
     .foot{{text-align:center;color:rgba(245,255,248,.38);font-weight:800;padding:22px 0 8px;font-size:12px}}
   </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
   <div class="top">
@@ -7859,6 +8035,21 @@ def _ss_user_settings_titanium_preferences_page_final():
     .saved span{{display:block;color:rgba(245,255,248,.68);font-weight:800;font-size:12px;margin-top:4px}}
     .foot{{text-align:center;color:rgba(245,255,248,.38);font-weight:800;padding:22px 0 8px;font-size:12px}}
   </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
   <div class="top">
@@ -8173,6 +8364,21 @@ def _ss_user_license_titanium_center_page_final():
     .feature p{{margin:0;color:rgba(245,255,248,.66);font-weight:800;font-size:12px;line-height:1.38}}
     .foot{{text-align:center;color:rgba(245,255,248,.38);font-weight:800;padding:22px 0 8px;font-size:12px}}
   </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
   <div class="top">
@@ -8581,6 +8787,21 @@ def _ss_user_community_titanium_feedback_page_final():
     .feedback-empty p{{margin:0;color:rgba(245,255,248,.66);font-weight:800;font-size:12px;line-height:1.4}}
     .foot{{text-align:center;color:rgba(245,255,248,.38);font-weight:800;padding:22px 0 8px;font-size:12px}}
   </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
   <div class="top">
@@ -8763,6 +8984,21 @@ def _ss_public_legal_page(title, subtitle, body_html):
       .nav a{{margin-left:0;margin-right:10px;display:inline-block;margin-top:6px}}
     }}
   </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
   <div class="wrap">
@@ -9837,6 +10073,21 @@ body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:c
 .card{max-width:520px;border:1px solid rgba(140,255,90,.18);background:#06170f;border-radius:24px;padding:24px;text-align:center}
 a{color:#9cff5d;font-weight:900}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="card">
@@ -10058,6 +10309,21 @@ body{{
   .event em{{white-space:normal}}
 }}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <main class="wrap">
@@ -10155,7 +10421,22 @@ try:
         except Exception as e:
             return (
                 "<!doctype html><html><head><meta charset='UTF-8'>"
-                "<title>EratGuard PRO Admin</title></head><body>"
+                "<title>EratGuard PRO Admin</title>
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head><body>"
                 "<h2>EratGuard PRO Admin</h2>"
                 "<p>Dashboard template yüklenemedi.</p>"
                 "<pre>" + str(e) + "</pre>"
@@ -10174,7 +10455,22 @@ try:
         except Exception as e:
             return (
                 "<!doctype html><html><head><meta charset='UTF-8'>"
-                "<title>EratGuard PRO System</title></head><body>"
+                "<title>EratGuard PRO System</title>
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head><body>"
                 "<h2>EratGuard PRO System</h2>"
                 "<p>Sistem sayfası güvenli fallback ile açıldı.</p>"
                 "<pre>" + str(e) + "</pre>"
@@ -10261,7 +10557,22 @@ try:
             return (
                 "<!doctype html><html><head><meta charset='UTF-8'>"
                 "<meta http-equiv='refresh' content='0;url=/admin/dashboard'>"
-                "<title>EratGuard PRO Admin</title></head><body>"
+                "<title>EratGuard PRO Admin</title>
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head><body>"
                 "<h2>EratGuard PRO Admin</h2>"
                 "<p>Dashboard'a yönlendiriliyorsunuz...</p>"
                 "<p><a href='/admin/dashboard'>Admin Dashboard</a></p>"
@@ -10533,7 +10844,22 @@ try:
                     ".hero{border:1px solid rgba(141,255,63,.25);border-radius:24px;padding:20px;background:linear-gradient(180deg,#081421,#05070d)}"
                     "h1{margin:0;font-size:32px}.muted{color:#a6b8c8}.card{margin-top:16px;border:1px solid rgba(80,145,255,.22);border-radius:18px;padding:16px;background:#0b1628}"
                     ".btn{display:inline-block;margin-top:14px;padding:10px 14px;border-radius:999px;background:rgba(141,255,63,.12);border:1px solid rgba(141,255,63,.28);color:#d9ffc7;text-decoration:none;font-weight:900}"
-                    "</style></head><body><div class='wrap'>"
+                    "</style>
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head><body><div class='wrap'>"
                     "<section class='hero'><h1>💳 EratGuard ADMIN Lisans Merkezi</h1>"
                     "<p class='muted'>Lisans yönetimi güvenli fallback ile açıldı. Template hata detayı arşive alınmadan canlı kullanıcıya gösterilmez.</p>"
                     "<a class='btn' href='/admin/dashboard'>← Admin Dashboard</a></section>"
@@ -10878,7 +11204,22 @@ try:
             return (
                 "<!doctype html><html lang='tr'><head><meta charset='UTF-8'>"
                 "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-                "<title>EratGuard PRO Bildirimler</title></head><body>"
+                "<title>EratGuard PRO Bildirimler</title>
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head><body>"
                 "<h1>EratGuard PRO Bildirimler</h1>"
                 "<p>Bildirim sayfası güvenli fallback ile açıldı.</p>"
                 "<p><a href='/dashboard'>Kullanıcı Paneli</a></p>"
@@ -11639,7 +11980,22 @@ try:
             return (
                 "<!doctype html><html lang='tr'><head><meta charset='UTF-8'>"
                 "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-                "<title>EratGuard Claude Panel Preview</title></head><body>"
+                "<title>EratGuard Claude Panel Preview</title>
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head><body>"
                 "<h1>EratGuard Claude Panel Preview</h1>"
                 f"<p>Preview yüklenemedi: {_eg4u_err}</p>"
                 "<pre style='white-space:pre-wrap;background:#111;color:#eee;padding:12px;border-radius:12px;'>"
@@ -11736,6 +12092,21 @@ label{display:block;margin-top:14px;color:#91a8c2;font-weight:800}
 input{width:100%;box-sizing:border-box;margin-top:7px;padding:13px;border-radius:13px;border:1px solid #203555;background:#050810;color:#e8f4ff}
 button{width:100%;margin-top:18px;padding:14px;border:0;border-radius:14px;background:#00c8f0;color:#031018;font-weight:1000}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <form class="card" method="post" action="/admin/login">
@@ -13372,6 +13743,21 @@ body{padding:18px 14px 28px}
 .row span{font-weight:900;color:var(--muted);font-size:15px}.row b{color:#9fffc4;font-size:15px}
 .foot{text-align:center;margin:22px 0 0;color:rgba(245,255,248,.42);font-weight:800}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -13758,6 +14144,21 @@ body{padding:16px 14px 24px}
   .perms{grid-template-columns:1fr}
 }
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -14133,6 +14534,21 @@ body{padding:16px 14px 24px}
   .features{grid-template-columns:1fr}
 }
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -14380,6 +14796,21 @@ body{{padding:16px 14px 24px}}
 .btn.secondary{{background:rgba(255,255,255,.075);color:var(--text)}}
 .foot{{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -14758,6 +15189,21 @@ body{{padding:16px 14px 24px}}
 .btn.secondary{{background:rgba(255,255,255,.075);color:var(--text)}}
 .foot{{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -15080,6 +15526,21 @@ body{padding:16px 14px 24px}
 .row:last-child{border-bottom:0}.row span{font-size:15px;font-weight:900}.row b{color:#9fffc4;font-size:15px;font-weight:950}
 .foot{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -15346,6 +15807,21 @@ body{padding:16px 14px 24px}
 .empty{padding:18px;color:var(--muted);font-weight:850;text-align:center}
 .foot{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -15654,6 +16130,21 @@ body{padding:16px 14px 24px}
 .empty{padding:18px;color:var(--muted);font-weight:850;text-align:center}
 .foot{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -15907,6 +16398,21 @@ body{padding:16px 14px 24px}
 .empty{padding:18px;color:var(--muted);font-weight:850;text-align:center}
 .foot{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -16194,7 +16700,22 @@ try:
                 return resp
 
             lower = html.lower()
-            i = lower.rfind("</head>")
+            i = lower.rfind("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>")
 
             if i != -1:
                 html = html[:i] + _EG_SLD2_CSS + html[i:]
@@ -16492,6 +17013,21 @@ body{padding:12px 11px 18px}
 .empty{padding:14px;color:var(--muted);font-weight:850;text-align:center;font-size:13px}
 .foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -16760,6 +17296,21 @@ body{padding:12px 11px 18px}
 .empty{padding:14px;color:var(--muted);font-weight:850;text-align:center;font-size:13px}
 .foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -17030,6 +17581,21 @@ body{padding:12px 11px 18px}
 .empty{padding:14px;color:var(--muted);font-weight:850;text-align:center;font-size:13px}
 .foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -17123,6 +17689,21 @@ body{padding:12px 11px 18px}
 .secondary{background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09);color:var(--text)}
 .foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -17545,6 +18126,21 @@ body{padding:12px 11px 18px}
 .saved{margin:0 0 10px;padding:11px 13px;border:1px solid rgba(35,255,137,.25);background:rgba(35,255,137,.10);border-radius:14px;color:#9fffc4;font-weight:950;font-size:13px}
 .foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -17956,6 +18552,21 @@ body{padding:12px 11px 18px}
 .empty{padding:14px;color:var(--muted);font-weight:850;text-align:center;font-size:13px}
 .foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -18343,6 +18954,21 @@ p{color:var(--muted);font-size:19px;line-height:1.48;font-weight:700}
   .card{padding:22px;border-radius:24px}
 }
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -18434,6 +19060,21 @@ h1{{margin:0;font-size:28px}} h1 span{{color:var(--green)}}
 .secondary{{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);color:var(--text)}}
 @media(max-width:520px){{.actions{{grid-template-columns:1fr}}.hero h2{{font-size:32px}}}}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -18880,6 +19521,21 @@ html,body{margin:0;width:100%;min-height:100%;overflow:hidden;color:var(--text);
 /* ===== ERATGUARD VITES-2A PREMIUM STATUS END ===== */
 
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
   <div class="eg-clean7c-brand">
@@ -18905,6 +19561,21 @@ html,body{margin:0;width:100%;min-height:100%;overflow:hidden;color:var(--text);
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>EratGuard PRO - Bildirim Komuta Merkezi</title>
 <style>{_eg1c_base_css()}</style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -18966,6 +19637,21 @@ html,body{margin:0;width:100%;min-height:100%;overflow:hidden;color:var(--text);
 .secondary{{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13)}}
 @media(max-width:520px){{.actions{{grid-template-columns:1fr}}}}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -20126,6 +20812,21 @@ html,body{
   .eg-clean7b-hint{left:22px;bottom:28px;font-size:11px;max-width:220px}
 }
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
   <div class="eg-clean7b-brand">
@@ -20271,6 +20972,21 @@ html,body{{
 
 
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="eg-wrap">
@@ -20505,6 +21221,21 @@ textarea::placeholder{color:rgba(242,255,246,.38)}
 
 
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="eg-wrap">
@@ -20887,6 +21618,21 @@ html,body{{
   .eg-card .v{{font-size:25px}}
 }}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="eg-wrap">
@@ -21177,6 +21923,21 @@ html,body{{
   .eg-card{{padding:13px;border-radius:21px}}
 }}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="eg-wrap">
@@ -21377,6 +22138,21 @@ html,body{{
   .eg-hero h1{{font-size:28px}}
 }}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="eg-wrap">
@@ -21594,6 +22370,21 @@ html,body{{
   .eg-card{{padding:13px;border-radius:21px}}
 }}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="eg-wrap">
@@ -21811,6 +22602,21 @@ html,body{{
   .eg-card{{padding:13px;border-radius:21px}}
 }}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="eg-wrap">
@@ -22583,6 +23389,21 @@ ul{{
   font-weight:900;
 }}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="eg-wrap">
@@ -22921,6 +23742,21 @@ button{width:100%;margin-top:14px;border:0;border-radius:18px;background:#23ff89
 .result{margin-top:16px;background:#0d1320;border-radius:18px;padding:14px;white-space:pre-wrap;color:#dce7f3}
 .back{display:block;margin-top:16px;color:#23ff89;text-decoration:none;font-weight:800}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="card">
@@ -23635,6 +24471,21 @@ body{
 /* ===== ERATGUARD VITES-6H HISTORY PREMIUM POLISH END ===== */
 
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -24371,6 +25222,21 @@ def eg_sms_actions_center():
 .menu{position:fixed;right:18px;bottom:18px;background:var(--blue);color:white;border-radius:999px;padding:16px 18px;text-decoration:none;font-weight:900;box-shadow:0 16px 30px rgba(27,120,255,.35)}
 @media(max-width:680px){.grid{grid-template-columns:repeat(2,1fr)}.title{font-size:19px}}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -24753,6 +25619,21 @@ body{padding:16px 14px 24px}
 .foot{text-align:center;margin:20px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:13px}
 @media(max-width:560px){.action-grid{grid-template-columns:1fr}.brand h1{font-size:23px}.section-title{letter-spacing:5px}}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top">
@@ -25071,8 +25952,53 @@ try:
             if "eratguard-admin-command-tree-slim-6k-force" in body:
                 return resp
 
-            if "</head>" in body:
-                body = body.replace("</head>", _EG6K_SLIM_ADMIN_CSS + "\n</head>", 1)
+            if "
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>" in body:
+                body = body.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", _EG6K_SLIM_ADMIN_CSS + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
             elif "</body>" in body:
                 body = body.replace("</body>", _EG6K_SLIM_ADMIN_CSS + "\n</body>", 1)
             else:
@@ -25224,7 +26150,22 @@ try:
                 html = _eg6k12_render_template("admin_dashboard.html", admin_stats=_eg_default_admin_stats(), users=load_users(), recent_logins=_eg_recent_audit_logs(5), recent_actions=_eg_recent_audit_logs(5))
             except Exception as _tpl_err:
                 print("ERATGUARD STAGE6K DIRECT DASHBOARD TEMPLATE ERROR:", _tpl_err)
-                html = """<!doctype html><html><head><meta charset="utf-8"><title>EratGuard Admin</title></head>
+                html = """<!doctype html><html><head><meta charset="utf-8"><title>EratGuard Admin</title>
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>
 <body style="background:#020806;color:#f4fff3;font-family:Arial;padding:24px">
 <h1>EratGuard Admin Dashboard</h1>
 <p>Admin oturumu aktif. Dashboard template yüklenemedi.</p>
@@ -25711,8 +26652,53 @@ try:
             if "eratguard-admin-ultra-slim-fit-6k15" in body:
                 return resp
 
-            if "</head>" in body:
-                body = body.replace("</head>", _EG6K15_ULTRA_SLIM_CSS + "\n</head>", 1)
+            if "
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>" in body:
+                body = body.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", _EG6K15_ULTRA_SLIM_CSS + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
             elif "</body>" in body:
                 body = body.replace("</body>", _EG6K15_ULTRA_SLIM_CSS + "\n</body>", 1)
             else:
@@ -25931,6 +26917,21 @@ border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;box-shadow
   .eg-card .v{{font-size:15px}}
 }}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="eg-wrap">
@@ -26128,8 +27129,53 @@ try:
 </div>
 """
 
-            if "</head>" in html:
-                html = html.replace("</head>", css + "\n</head>", 1)
+            if "
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>" in html:
+                html = html.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", css + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
 
             # En temiz yer: SONUÇ bölümünden sonra DURUM bölümünden önce.
             if "DURUM" in html:
@@ -26275,6 +27321,21 @@ body{margin:0;background:radial-gradient(circle at top,#143b2b 0,#061018 45%,#03
 .menu{position:fixed;right:18px;bottom:18px;background:var(--blue);color:white;border-radius:999px;padding:15px 18px;text-decoration:none;font-weight:950;box-shadow:0 16px 30px rgba(27,120,255,.35)}
 @media(max-width:680px){.grid{grid-template-columns:repeat(2,1fr)}.brand h1{font-size:22px}}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="wrap">
@@ -26548,6 +27609,21 @@ ul{margin:10px 0 0 18px;color:#aeb8c8;line-height:1.35}
 .eg-menu{position:fixed;right:18px;bottom:18px;background:var(--blue);color:white;border-radius:999px;padding:15px 18px;text-decoration:none;font-weight:950;box-shadow:0 16px 30px rgba(27,120,255,.35)}
 @media(max-width:680px){.eg-stats{grid-template-columns:repeat(2,1fr)}h1{font-size:22px}}
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="eg-wrap">
@@ -26971,7 +28047,37 @@ try:
 }
 </style>
 """
-                html = html.replace("</head>", css + "\n</head>", 1)
+                html = html.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", css + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
 
             # 5) Intro bilgi haritasına 9-12 ekle.
             if '"/u/sms-summary"' not in html and "var infoMap" in html:
@@ -27085,7 +28191,37 @@ try:
 }
 </style>
 """
-                html = html.replace("</head>", css + "\n</head>", 1)
+                html = html.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", css + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
 
             response.set_data(html)
             response.headers["Content-Length"] = str(len(html.encode("utf-8")))
@@ -27196,7 +28332,37 @@ try:
 }
 </style>
 """
-                html = html.replace("</head>", css + "\n</head>", 1)
+                html = html.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", css + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
 
             response.set_data(html)
             response.headers["Content-Length"] = str(len(html.encode("utf-8")))
@@ -27304,7 +28470,37 @@ try:
 }
 </style>
 """
-                html = html.replace("</head>", css + "\n</head>", 1)
+                html = html.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", css + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
 
             response.set_data(html)
             response.headers["Content-Length"] = str(len(html.encode("utf-8")))
@@ -27531,7 +28727,37 @@ try:
 }
 </style>
 """
-                html = html.replace("</head>", css + "\n</head>", 1)
+                html = html.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", css + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
 
             response.set_data(html)
             response.headers["Content-Length"] = str(len(html.encode("utf-8")))
@@ -27713,7 +28939,37 @@ try:
 }
 </style>
 """
-                html = html.replace("</head>", css + "\n</head>", 1)
+                html = html.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", css + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
 
             response.set_data(html)
             response.headers["Content-Length"] = str(len(html.encode("utf-8")))
@@ -30987,8 +32243,53 @@ window.__EG_FAN12P_V18_BOTTOM_SHEET_FIT_READY__ = true;
 window.__EG_FAN12P_V19_HARD_KILL_READY__ = true;
 </script>
 """
-                if "</head>" in html:
-                    html = html.replace("</head>", early + "\n</head>", 1)
+                if "
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>" in html:
+                    html = html.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", early + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
                 else:
                     html = html.replace("</body>", early + "\n</body>", 1)
 
@@ -32147,6 +33448,21 @@ body.eg-open #eg-fan12p-real-menu-btn{
   .eg-tile small{font-size:7.1px}
 }
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="eg-app">
@@ -32658,6 +33974,21 @@ body{
   .eg-status span{font-size:11px}
 }
 </style>
+
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
 </head>
 <body>
 <div class="eg-app">
@@ -32944,7 +34275,37 @@ try:
 }
 </style>
 """
-                html = html.replace("</head>", inject + "\n</head>", 1)
+                html = html.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", inject + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
 
             response.set_data(html)
             response.headers["Content-Length"] = str(len(html.encode("utf-8")))
@@ -33186,7 +34547,37 @@ try:
 }
 </style>
 """
-                html = html.replace("</head>", inject + "\n</head>", 1)
+                html = html.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", inject + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
 
             response.set_data(html)
             response.headers["Content-Length"] = str(len(html.encode("utf-8")))
@@ -33549,7 +34940,37 @@ try:
 }
 </style>
 """
-                html = html.replace("</head>", inject + "\n</head>", 1)
+                html = html.replace("
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", inject + "\n
+<style id="eg-signature-kill-old-fan">
+.eg-user-fan3,
+.eg-user-fan3-root,
+.eg-user-fan,
+.eg-fan12p,
+.fan12p,
+.fan-menu,
+.radial-fan-overlay{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+</style>
+
+</head>", 1)
 
             response.set_data(html)
             response.headers["Content-Length"] = str(len(html.encode("utf-8")))
