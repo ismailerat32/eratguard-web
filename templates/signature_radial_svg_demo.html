@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>EratGuard Signature SVG Radial Demo</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background:#020806;
+      font-family:Arial,Helvetica,sans-serif;
+      color:#dfffea;
+    }
+    body{
+      background:
+        radial-gradient(circle at 50% 42%, rgba(35,255,120,.18), transparent 28%),
+        radial-gradient(circle at 18% 16%, rgba(0,255,130,.16), transparent 20%),
+        radial-gradient(circle at 80% 72%, rgba(0,255,170,.11), transparent 24%),
+        linear-gradient(180deg,#04110b 0%,#010504 52%,#000 100%);
+    }
+    .stars{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background-image:
+        radial-gradient(circle, rgba(220,255,230,.95) 0 1px, transparent 1.6px),
+        radial-gradient(circle, rgba(83,255,154,.75) 0 1px, transparent 1.8px);
+      background-size:73px 73px,119px 119px;
+      opacity:.34;
+      filter:blur(.2px);
+    }
+    .wrap{
+      position:relative;
+      width:100vw;
+      height:100dvh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+    }
+    .radial{
+      width:min(112vw,92dvh);
+      height:min(112vw,92dvh);
+      max-width:1080px;
+      max-height:1080px;
+      overflow:visible;
+      filter:drop-shadow(0 0 18px rgba(0,255,100,.55));
+    }
+    .outer-ring{
+      fill:none;
+      stroke:rgba(84,255,136,.95);
+      stroke-width:8;
+      filter:url(#strongGlow);
+    }
+    .mid-ring{
+      fill:none;
+      stroke:rgba(185,255,205,.64);
+      stroke-width:2.5;
+      stroke-dasharray:8 12;
+      filter:url(#softGlow);
+    }
+    .slice{
+      fill:url(#sliceGrad);
+      stroke:rgba(175,255,195,.94);
+      stroke-width:2.8;
+      filter:url(#sliceGlow);
+      transition:transform .16s ease, fill .16s ease, opacity .16s ease;
+      transform-origin:500px 500px;
+      cursor:pointer;
+    }
+    .slice-link:active .slice,
+    .slice-link:hover .slice{
+      fill:url(#sliceHot);
+      transform:scale(1.025);
+      opacity:1;
+    }
+    .slice-label{
+      fill:#eaffef;
+      font-size:25px;
+      font-weight:900;
+      letter-spacing:1.6px;
+      text-anchor:middle;
+      dominant-baseline:middle;
+      paint-order:stroke;
+      stroke:rgba(0,0,0,.84);
+      stroke-width:6px;
+      filter:url(#textGlow);
+      pointer-events:none;
+    }
+    .center-core{
+      fill:url(#coreGrad);
+      stroke:rgba(210,255,220,.98);
+      stroke-width:5;
+      filter:url(#strongGlow);
+    }
+    .center-pro{
+      fill:#f2fff5;
+      font-size:88px;
+      font-weight:1000;
+      text-anchor:middle;
+      dominant-baseline:middle;
+      letter-spacing:5px;
+      paint-order:stroke;
+      stroke:rgba(0,0,0,.82);
+      stroke-width:10px;
+      filter:url(#textGlow);
+      pointer-events:none;
+    }
+    .core-sub{
+      fill:rgba(220,255,230,.88);
+      font-size:20px;
+      font-weight:800;
+      text-anchor:middle;
+      letter-spacing:2px;
+      pointer-events:none;
+    }
+    .title{
+      position:absolute;
+      top:calc(env(safe-area-inset-top) + 18px);
+      left:0;
+      width:100%;
+      text-align:center;
+      font-weight:900;
+      letter-spacing:2px;
+      font-size:13px;
+      color:rgba(220,255,230,.80);
+      text-shadow:0 0 12px rgba(0,255,100,.8);
+      pointer-events:none;
+    }
+    .demo-badge{
+      position:absolute;
+      right:14px;
+      bottom:calc(env(safe-area-inset-bottom) + 14px);
+      padding:7px 10px;
+      border:1px solid rgba(115,255,160,.35);
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      color:rgba(220,255,230,.72);
+      background:rgba(0,0,0,.28);
+      backdrop-filter:blur(8px);
+      pointer-events:none;
+    }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <div class="wrap">
+    <div class="title">ERATGUARD SIGNATURE RADIAL · SVG DEMO V1</div>
+
+    <svg class="radial" viewBox="0 0 1000 1000" role="img" aria-label="EratGuard Signature SVG Radial Demo">
+      <defs>
+        <radialGradient id="sliceGrad" cx="42%" cy="36%" r="72%">
+          <stop offset="0%" stop-color="rgba(196,255,205,.94)"/>
+          <stop offset="38%" stop-color="rgba(30,255,110,.82)"/>
+          <stop offset="72%" stop-color="rgba(0,120,48,.74)"/>
+          <stop offset="100%" stop-color="rgba(0,45,24,.90)"/>
+        </radialGradient>
+
+        <radialGradient id="sliceHot" cx="45%" cy="35%" r="75%">
+          <stop offset="0%" stop-color="rgba(255,255,255,1)"/>
+          <stop offset="35%" stop-color="rgba(135,255,160,.96)"/>
+          <stop offset="72%" stop-color="rgba(0,190,78,.90)"/>
+          <stop offset="100%" stop-color="rgba(0,76,35,.95)"/>
+        </radialGradient>
+
+        <radialGradient id="coreGrad" cx="44%" cy="34%" r="70%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="28%" stop-color="#9dffb5"/>
+          <stop offset="62%" stop-color="#16d85d"/>
+          <stop offset="100%" stop-color="#013817"/>
+        </radialGradient>
+
+        <filter id="sliceGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feColorMatrix in="blur" type="matrix"
+            values="0 0 0 0 0
+                    0 1 0 0 1
+                    0 0 0 0 .25
+                    0 0 0 .72 0" result="glow"/>
+          <feMerge>
+            <feMergeNode in="glow"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+
+        <filter id="strongGlow" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="7" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+
+        <filter id="softGlow" x="-25%" y="-25%" width="150%" height="150%">
+          <feGaussianBlur stdDeviation="2.2" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+
+        <filter id="textGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <circle cx="500" cy="500" r="426" class="outer-ring"/>
+      <circle cx="500" cy="500" r="370" class="mid-ring"/>
+      <circle cx="500" cy="500" r="218" class="mid-ring"/>
+
+      
+        <a href="/u/reports" class="slice-link" aria-label="İSTATİSTİK">
+          <path class="slice slice-1" d="M 412.34 104.60 A 405 405 0 0 1 587.66 104.60 L 527.70 375.03 A 128 128 0 0 0 472.30 375.03 Z"></path>
+        </a>
+    
+        <a href="/u/community" class="slice-link" aria-label="TOPLULUK">
+          <path class="slice slice-2" d="M 621.79 113.74 A 405 405 0 0 1 773.61 201.40 L 586.48 405.63 A 128 128 0 0 0 538.49 377.92 Z"></path>
+        </a>
+    
+        <a href="/u/analysis" class="slice-link" aria-label="ANALİZ">
+          <path class="slice slice-3" d="M 798.60 226.39 A 405 405 0 0 1 886.26 378.21 L 622.08 461.51 A 128 128 0 0 0 594.37 413.52 Z"></path>
+        </a>
+    
+        <a href="/u/protection" class="slice-link" aria-label="KORUMA">
+          <path class="slice slice-4" d="M 895.40 412.34 A 405 405 0 0 1 895.40 587.66 L 624.97 527.70 A 128 128 0 0 0 624.97 472.30 Z"></path>
+        </a>
+    
+        <a href="/u/blocked-sms" class="slice-link" aria-label="ENGELLENENLER">
+          <path class="slice slice-5" d="M 886.26 621.79 A 405 405 0 0 1 798.60 773.61 L 594.37 586.48 A 128 128 0 0 0 622.08 538.49 Z"></path>
+        </a>
+    
+        <a href="/u/notifications" class="slice-link" aria-label="BİLDİRİMLER">
+          <path class="slice slice-6" d="M 773.61 798.60 A 405 405 0 0 1 621.79 886.26 L 538.49 622.08 A 128 128 0 0 0 586.48 594.37 Z"></path>
+        </a>
+    
+        <a href="/u/settings" class="slice-link" aria-label="AYARLAR">
+          <path class="slice slice-7" d="M 587.66 895.40 A 405 405 0 0 1 412.34 895.40 L 472.30 624.97 A 128 128 0 0 0 527.70 624.97 Z"></path>
+        </a>
+    
+        <a href="/u/license" class="slice-link" aria-label="LİSANS">
+          <path class="slice slice-8" d="M 378.21 886.26 A 405 405 0 0 1 226.39 798.60 L 413.52 594.37 A 128 128 0 0 0 461.51 622.08 Z"></path>
+        </a>
+    
+        <a href="/u/reports" class="slice-link" aria-label="RAPORLAR">
+          <path class="slice slice-9" d="M 201.40 773.61 A 405 405 0 0 1 113.74 621.79 L 377.92 538.49 A 128 128 0 0 0 405.63 586.48 Z"></path>
+        </a>
+    
+        <a href="/u/sms-actions-center" class="slice-link" aria-label="ENGELLENEN">
+          <path class="slice slice-10" d="M 104.60 587.66 A 405 405 0 0 1 104.60 412.34 L 375.03 472.30 A 128 128 0 0 0 375.03 527.70 Z"></path>
+        </a>
+    
+        <a href="/u/history" class="slice-link" aria-label="GEÇMİŞ">
+          <path class="slice slice-11" d="M 113.74 378.21 A 405 405 0 0 1 201.40 226.39 L 405.63 413.52 A 128 128 0 0 0 377.92 461.51 Z"></path>
+        </a>
+    
+        <a href="/u/pricing" class="slice-link" aria-label="PRO">
+          <path class="slice slice-12" d="M 226.39 201.40 A 405 405 0 0 1 378.21 113.74 L 461.51 377.92 A 128 128 0 0 0 413.52 405.63 Z"></path>
+        </a>
+    
+
+      <circle cx="500" cy="500" r="122" class="center-core"/>
+      <a href="/u/pricing" aria-label="PRO">
+        <circle cx="500" cy="500" r="112" fill="transparent"/>
+      </a>
+      <text x="500" y="488" class="center-pro">PRO</text>
+      <text x="500" y="555" class="core-sub">COMMAND CENTER</text>
+
+      
+        <a href="/u/reports" class="label-link" aria-label="İSTATİSTİK">
+          <text class="slice-label" x="500.00" y="218.00" transform="rotate(-90.00 500.00 218.00)">İSTATİSTİK</text>
+        </a>
+    
+        <a href="/u/community" class="label-link" aria-label="TOPLULUK">
+          <text class="slice-label" x="641.00" y="255.78" transform="rotate(-60.00 641.00 255.78)">TOPLULUK</text>
+        </a>
+    
+        <a href="/u/analysis" class="label-link" aria-label="ANALİZ">
+          <text class="slice-label" x="744.22" y="359.00" transform="rotate(-30.00 744.22 359.00)">ANALİZ</text>
+        </a>
+    
+        <a href="/u/protection" class="label-link" aria-label="KORUMA">
+          <text class="slice-label" x="782.00" y="500.00" transform="rotate(0.00 782.00 500.00)">KORUMA</text>
+        </a>
+    
+        <a href="/u/blocked-sms" class="label-link" aria-label="ENGELLENENLER">
+          <text class="slice-label" x="744.22" y="641.00" transform="rotate(30.00 744.22 641.00)">ENGELLENENLER</text>
+        </a>
+    
+        <a href="/u/notifications" class="label-link" aria-label="BİLDİRİMLER">
+          <text class="slice-label" x="641.00" y="744.22" transform="rotate(60.00 641.00 744.22)">BİLDİRİMLER</text>
+        </a>
+    
+        <a href="/u/settings" class="label-link" aria-label="AYARLAR">
+          <text class="slice-label" x="500.00" y="782.00" transform="rotate(90.00 500.00 782.00)">AYARLAR</text>
+        </a>
+    
+        <a href="/u/license" class="label-link" aria-label="LİSANS">
+          <text class="slice-label" x="359.00" y="744.22" transform="rotate(300.00 359.00 744.22)">LİSANS</text>
+        </a>
+    
+        <a href="/u/reports" class="label-link" aria-label="RAPORLAR">
+          <text class="slice-label" x="255.78" y="641.00" transform="rotate(330.00 255.78 641.00)">RAPORLAR</text>
+        </a>
+    
+        <a href="/u/sms-actions-center" class="label-link" aria-label="ENGELLENEN">
+          <text class="slice-label" x="218.00" y="500.00" transform="rotate(360.00 218.00 500.00)">ENGELLENEN</text>
+        </a>
+    
+        <a href="/u/history" class="label-link" aria-label="GEÇMİŞ">
+          <text class="slice-label" x="255.78" y="359.00" transform="rotate(390.00 255.78 359.00)">GEÇMİŞ</text>
+        </a>
+    
+        <a href="/u/pricing" class="label-link" aria-label="PRO">
+          <text class="slice-label" x="359.00" y="255.78" transform="rotate(420.00 359.00 255.78)">PRO</text>
+        </a>
+    
+    </svg>
+
+    <div class="demo-badge">SVG DEMO · ANA PANELE BAĞLI DEĞİL</div>
+  </div>
+</body>
+</html>

@@ -33570,3 +33570,11 @@ try:
 except Exception as _eg_f12p_v28_e:
     print("ERATGUARD FAN-12P V28 RADIAL FINAL LOCK ERROR:", _eg_f12p_v28_e)
 # ===== ERATGUARD FAN-12P V28 RADIAL FINAL LOCK END =====
+
+
+# ===== ERATGUARD SIGNATURE SVG RADIAL DEMO ROUTE START =====
+@app.route("/signature-radial-svg-demo")
+def eratguard_signature_radial_svg_demo():
+    return render_template("signature_radial_svg_demo.html")
+# ===== ERATGUARD SIGNATURE SVG RADIAL DEMO ROUTE END =====
+
