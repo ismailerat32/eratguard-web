@@ -62,19 +62,19 @@
       filter:
         drop-shadow(0 0 7px rgba(120,255,160,.42))
         drop-shadow(0 0 20px rgba(0,150,85,.22));
-      transform:translateY(-.6dvh);
+      transform:translateY(.4dvh);
     }
     .slice{
       fill:url(#sliceGrad);
-      stroke:rgba(205,235,214,.58);
-      stroke-width:2.4;
-      filter:url(#softGlow);
+      stroke:rgba(220,240,225,.50);
+      stroke-width:2.1;
+      filter:url(#sliceDepth);
       transform-origin:500px 500px;
       transition:transform .16s ease, opacity .16s ease, fill .16s ease;
     }
     .slice-link:active .slice,
     .slice-link:hover .slice{
-      transform:scale(1.018);
+      transform:scale(1.012);
       fill:url(#sliceHot);
     }
     .bevel{
@@ -86,14 +86,14 @@
     }
     .outer-ring{
       fill:none;
-      stroke:rgba(120,230,155,.70);
-      stroke-width:5.5;
-      filter:url(#strongGlow);
+      stroke:rgba(190,225,200,.48);
+      stroke-width:5.2;
+      filter:url(#ringGlow);
     }
     .inner-ring{
       fill:none;
-      stroke:rgba(185,225,198,.42);
-      stroke-width:2.4;
+      stroke:rgba(210,235,218,.36);
+      stroke-width:2.2;
       filter:url(#softGlow);
     }
     .core{
@@ -104,13 +104,13 @@
     }
     .core2{
       fill:none;
-      stroke:rgba(120,230,155,.52);
-      stroke-width:6;
-      filter:url(#strongGlow);
+      stroke:rgba(200,230,210,.42);
+      stroke-width:5.4;
+      filter:url(#ringGlow);
     }
     .pro{
       fill:#f4f7f4;
-      font-size:90px;
+      font-size:86px;
       font-weight:1000;
       text-anchor:middle;
       dominant-baseline:middle;
@@ -126,13 +126,13 @@
     }
     .label{
       fill:#f1f4f1;
-      font-size:30px;
+      font-size:27px;
       font-weight:800;
       text-anchor:middle;
       dominant-baseline:middle;
       paint-order:stroke;
       stroke:rgba(0,0,0,.78);
-      stroke-width:4px;
+      stroke-width:3px;
       filter:url(#textGlow);
       pointer-events:none;
     }
@@ -155,12 +155,12 @@
     }
     .slice{
       stroke:rgba(205,235,214,.48) !important;
-      stroke-width:2.2 !important;
+      stroke-width:2.1 !important;
       filter:url(#softGlow) !important;
     }
     .outer-ring{
       stroke:rgba(178,220,190,.42) !important;
-      stroke-width:4.4 !important;
+      stroke-width:5.2 !important;
     }
     .inner-ring{
       stroke:rgba(190,220,200,.34) !important;
@@ -168,7 +168,7 @@
     }
     .core2{
       stroke:rgba(135,210,160,.34) !important;
-      stroke-width:4.5 !important;
+      stroke-width:5.4 !important;
     }
     .core{
       stroke:rgba(210,230,215,.50) !important;
@@ -208,6 +208,24 @@
           <stop offset="66%" stop-color="#07140c"/>
           <stop offset="100%" stop-color="#000101"/>
         </radialGradient>
+        
+        <filter id="sliceDepth" x="-35%" y="-35%" width="170%" height="170%">
+          <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000000" flood-opacity=".72"/>
+          <feDropShadow dx="0" dy="-2" stdDeviation="2" flood-color="#dfffe6" flood-opacity=".18"/>
+          <feGaussianBlur stdDeviation=".35" result="microBlur"/>
+          <feMerge>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+
+        <filter id="ringGlow" x="-35%" y="-35%" width="170%" height="170%">
+          <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#c8ffd3" flood-opacity=".28"/>
+          <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000000" flood-opacity=".60"/>
+          <feMerge>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+
         <filter id="sliceGlow" x="-35%" y="-35%" width="170%" height="170%">
           <feGaussianBlur stdDeviation="2.8" result="blur"/>
           <feMerge>
@@ -239,6 +257,11 @@
       </defs>
 
       <circle cx="500" cy="500" r="444" class="outer-ring"/>
+      <circle cx="500" cy="500" r="432" class="inner-ring"/>
+      <circle cx="500" cy="500" r="410" class="inner-ring"/>
+      <circle cx="500" cy="500" r="196" class="inner-ring"/>
+      <circle cx="500" cy="500" r="162" class="inner-ring"/>
+
       
       <a href="/u/community" class="slice-link" aria-label="Topluluk">
         <path class="slice slice-1" d="M 385.64 95.87 A 420 420 0 0 1 614.36 95.87 L 548.47 328.73 A 178 178 0 0 0 451.53 328.73 Z"></path>
@@ -282,6 +305,7 @@
     
       <circle cx="500" cy="500" r="444" class="bevel"/>
       <circle cx="500" cy="500" r="184" class="inner-ring"/>
+      <circle cx="500" cy="500" r="146" class="inner-ring"/>
       <circle cx="500" cy="500" r="133" class="core2"/>
       <a href="/u/pricing" aria-label="PRO">
         <circle cx="500" cy="500" r="128" class="core"/>
