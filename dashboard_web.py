@@ -936,6 +936,90 @@ EratGuard
     return redirect(url_for("users"))
 
 
+
+# ===== ERATGUARD DEMO USER LIVE ENSURE START =====
+def _eg_ensure_demo_user_live():
+    """
+    Canlı ortam KV/users verisi data/users.json'u ezebildiği için
+    demo kullanıcıyı login öncesi aktif kullanıcı deposuna garanti ekler.
+    """
+    try:
+        from datetime import datetime
+        username = "demo"
+        plain_password = "Demo12345!"
+        license_key = "ERATGUARD-DEMO-PRO-2026"
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        users = load_users()
+        if not isinstance(users, dict):
+            users = {}
+
+        demo = users.get(username)
+        needs_write = False
+
+        if not isinstance(demo, dict):
+            demo = {}
+            needs_write = True
+
+        # Şifre yoksa veya bozuksa yeniden hashle.
+        try:
+            pw_ok = check_password_hash(str(demo.get("password", "")), plain_password)
+        except Exception:
+            pw_ok = False
+
+        if not pw_ok:
+            ph = generate_password_hash(plain_password)
+            demo["password"] = ph
+            demo["password_hash"] = ph
+            needs_write = True
+
+        required = {
+            "username": username,
+            "email": "demo@eratguard.com",
+            "role": "user",
+            "active": True,
+            "is_admin": False,
+            "is_active": True,
+            "license_key": license_key,
+            "license_type": "pro",
+            "license_mode": "active",
+            "license_expiry": "2099-12-31",
+            "expires_at": "2099-12-31",
+            "plan": "pro",
+            "license_name": "EratGuard PRO",
+            "license_label": "PRO",
+            "premium": True,
+            "is_premium": True,
+            "license_status": "active",
+            "demo_account": True,
+            "note": "Internal demo user for EratGuard PRO testing",
+        }
+
+        for k, v in required.items():
+            if demo.get(k) != v:
+                demo[k] = v
+                needs_write = True
+
+        if not demo.get("created_at"):
+            demo["created_at"] = now
+            needs_write = True
+
+        demo["updated_at"] = now
+        users[username] = demo
+
+        if needs_write:
+            save_users(users)
+
+        return users
+    except Exception as e:
+        try:
+            print("DEMO_USER_LIVE_ENSURE_WARN:", repr(e), flush=True)
+        except Exception:
+            pass
+        return load_users()
+# ===== ERATGUARD DEMO USER LIVE ENSURE END =====
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     ensure_default_user()
@@ -946,7 +1030,7 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
-        users = load_users()
+        users = _eg_ensure_demo_user_live()
         user = users.get(username)
 
         locked, remaining = _eg_login_lock_status(username)

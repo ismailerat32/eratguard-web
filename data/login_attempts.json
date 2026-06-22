@@ -1,0 +1,8 @@
+{
+  "testuser|127.0.0.1": {
+    "count": 1,
+    "last_failed": "2026-06-09T08:39:49",
+    "username": "testuser",
+    "ip": "127.0.0.1"
+  }
+}
