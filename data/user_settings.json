@@ -1,0 +1,26 @@
+{
+  "liveprobe": {
+    "security_alerts": true,
+    "license_alerts": true,
+    "admin_announcements": true,
+    "auto_quarantine": true,
+    "compact_mode": true,
+    "high_sensitivity": true,
+    "theme": "green_dark",
+    "language": "tr",
+    "updated_at": "2026-06-07 09:46:59",
+    "probe_account": true
+  },
+  "demo": {
+    "security_alerts": true,
+    "license_alerts": true,
+    "admin_announcements": true,
+    "auto_quarantine": true,
+    "compact_mode": true,
+    "high_sensitivity": true,
+    "theme": "green_dark",
+    "language": "tr",
+    "updated_at": "2026-06-22 11:47:12",
+    "demo_account": true
+  }
+}
