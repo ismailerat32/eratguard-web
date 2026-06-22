@@ -54,20 +54,20 @@
       padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
     }
     .radial{
-      width:min(116vw,91dvh);
-      height:min(116vw,91dvh);
+      width:min(118vw,92dvh);
+      height:min(118vw,92dvh);
       max-width:1180px;
       max-height:1180px;
       overflow:visible;
       filter:
         drop-shadow(0 0 7px rgba(120,255,160,.42))
         drop-shadow(0 0 20px rgba(0,150,85,.22));
-      transform:translateY(.4dvh);
+      transform:translateY(1.4dvh);
     }
     .slice{
       fill:url(#sliceGrad);
-      stroke:rgba(220,240,225,.50);
-      stroke-width:2.1;
+      stroke:rgba(225,242,230,.56);
+      stroke-width:2.25;
       filter:url(#sliceDepth);
       transform-origin:500px 500px;
       transition:transform .16s ease, opacity .16s ease, fill .16s ease;
@@ -86,14 +86,14 @@
     }
     .outer-ring{
       fill:none;
-      stroke:rgba(190,225,200,.48);
-      stroke-width:5.2;
+      stroke:rgba(205,235,214,.56);
+      stroke-width:5.8;
       filter:url(#ringGlow);
     }
     .inner-ring{
       fill:none;
-      stroke:rgba(210,235,218,.36);
-      stroke-width:2.2;
+      stroke:rgba(215,240,222,.40);
+      stroke-width:2.4;
       filter:url(#softGlow);
     }
     .core{
@@ -110,7 +110,7 @@
     }
     .pro{
       fill:#f4f7f4;
-      font-size:86px;
+      font-size:88px;
       font-weight:1000;
       text-anchor:middle;
       dominant-baseline:middle;
@@ -126,13 +126,13 @@
     }
     .label{
       fill:#f1f4f1;
-      font-size:27px;
+      font-size:29px;
       font-weight:800;
       text-anchor:middle;
       dominant-baseline:middle;
       paint-order:stroke;
       stroke:rgba(0,0,0,.78);
-      stroke-width:3px;
+      stroke-width:3.4px;
       filter:url(#textGlow);
       pointer-events:none;
     }
@@ -145,7 +145,7 @@
         linear-gradient(180deg,#010302 0%,#000 72%,#000 100%) !important;
     }
     .nebula{
-      opacity:.24 !important;
+      opacity:.18 !important;
       filter:blur(26px) !important;
     }
     .radial{
@@ -155,12 +155,12 @@
     }
     .slice{
       stroke:rgba(205,235,214,.48) !important;
-      stroke-width:2.1 !important;
+      stroke-width:2.25 !important;
       filter:url(#softGlow) !important;
     }
     .outer-ring{
       stroke:rgba(178,220,190,.42) !important;
-      stroke-width:5.2 !important;
+      stroke-width:5.8 !important;
     }
     .inner-ring{
       stroke:rgba(190,220,200,.34) !important;
@@ -168,7 +168,7 @@
     }
     .core2{
       stroke:rgba(135,210,160,.34) !important;
-      stroke-width:5.4 !important;
+      stroke-width:5.8 !important;
     }
     .core{
       stroke:rgba(210,230,215,.50) !important;
@@ -186,20 +186,20 @@
   <div class="wrap">
     <svg class="radial" viewBox="0 0 1000 1000" role="img" aria-label="EratGuard Signature SVG Radial Demo V2">
       <defs>
-        <radialGradient id="sliceGrad" cx="32%" cy="20%" r="88%">
-          <stop offset="0%" stop-color="#e9fff0"/>
-          <stop offset="8%" stop-color="#60796a"/>
-          <stop offset="22%" stop-color="#23382b"/>
-          <stop offset="52%" stop-color="#09140d"/>
-          <stop offset="78%" stop-color="#020604"/>
-          <stop offset="100%" stop-color="#000101"/>
+        <radialGradient id="sliceGrad" cx="30%" cy="18%" r="90%">
+          <stop offset="0%" stop-color="#f1fff4"/>
+          <stop offset="7%" stop-color="#6f8175"/>
+          <stop offset="19%" stop-color="#293b30"/>
+          <stop offset="48%" stop-color="#07120b"/>
+          <stop offset="76%" stop-color="#010503"/>
+          <stop offset="100%" stop-color="#000000"/>
         </radialGradient>
-        <radialGradient id="sliceHot" cx="32%" cy="20%" r="88%">
+        <radialGradient id="sliceHot" cx="30%" cy="18%" r="90%">
           <stop offset="0%" stop-color="#ffffff"/>
-          <stop offset="12%" stop-color="#8ba894"/>
-          <stop offset="34%" stop-color="#213d2b"/>
-          <stop offset="62%" stop-color="#09170f"/>
-          <stop offset="100%" stop-color="#000101"/>
+          <stop offset="10%" stop-color="#9cb1a0"/>
+          <stop offset="30%" stop-color="#263f2f"/>
+          <stop offset="62%" stop-color="#07140c"/>
+          <stop offset="100%" stop-color="#000000"/>
         </radialGradient>
         <radialGradient id="coreGrad" cx="34%" cy="20%" r="82%">
           <stop offset="0%" stop-color="#ffffff"/>
@@ -257,10 +257,10 @@
       </defs>
 
       <circle cx="500" cy="500" r="444" class="outer-ring"/>
-      <circle cx="500" cy="500" r="432" class="inner-ring"/>
-      <circle cx="500" cy="500" r="410" class="inner-ring"/>
-      <circle cx="500" cy="500" r="196" class="inner-ring"/>
-      <circle cx="500" cy="500" r="162" class="inner-ring"/>
+      <circle cx="500" cy="500" r="436" class="inner-ring"/>
+      <circle cx="500" cy="500" r="418" class="inner-ring"/>
+      <circle cx="500" cy="500" r="205" class="inner-ring"/>
+      <circle cx="500" cy="500" r="171" class="inner-ring"/>
 
       
       <a href="/u/community" class="slice-link" aria-label="Topluluk">
@@ -305,8 +305,8 @@
     
       <circle cx="500" cy="500" r="444" class="bevel"/>
       <circle cx="500" cy="500" r="184" class="inner-ring"/>
-      <circle cx="500" cy="500" r="146" class="inner-ring"/>
-      <circle cx="500" cy="500" r="133" class="core2"/>
+      <circle cx="500" cy="500" r="150" class="inner-ring"/>
+      <circle cx="500" cy="500" r="136" class="core2"/>
       <a href="/u/pricing" aria-label="PRO">
         <circle cx="500" cy="500" r="128" class="core"/>
       </a>
