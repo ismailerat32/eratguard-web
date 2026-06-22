@@ -135,6 +135,45 @@ public class SmsControlActivity extends Activity {
         }
     }
 
+
+    private void requestSmsPermissionsThenDefaultRole() {
+        try {
+            if (Build.VERSION.SDK_INT >= 23) {
+                java.util.ArrayList<String> permissions = new java.util.ArrayList<>();
+
+                if (!hasPermission(Manifest.permission.RECEIVE_SMS)) {
+                    permissions.add(Manifest.permission.RECEIVE_SMS);
+                }
+                if (!hasPermission(Manifest.permission.READ_SMS)) {
+                    permissions.add(Manifest.permission.READ_SMS);
+                }
+                if (!hasPermission(Manifest.permission.SEND_SMS)) {
+                    permissions.add(Manifest.permission.SEND_SMS);
+                }
+                if (Build.VERSION.SDK_INT >= 33 && !hasPermission(Manifest.permission.POST_NOTIFICATIONS)) {
+                    permissions.add(Manifest.permission.POST_NOTIFICATIONS);
+                }
+
+                if (!permissions.isEmpty()) {
+                    requestPermissions(permissions.toArray(new String[0]), 703);
+                    return;
+                }
+            }
+
+            requestDefaultSmsRole();
+        } catch (Exception ignored) {
+            render();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 703) {
+            requestDefaultSmsRole();
+        }
+    }
+
     private boolean isDefaultSmsApp() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
