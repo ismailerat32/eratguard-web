@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>EratGuard Signature SVG Radial Demo V2</title>
+  <title>EratGuard Signature SVG Radial Demo V9</title>
   <style>
     *{box-sizing:border-box}
     html,body{
@@ -13,36 +13,23 @@
       overflow:hidden;
       background:#000;
       font-family:Arial,Helvetica,sans-serif;
-      color:#eaffef;
+      color:#f3f7f3;
     }
     body{
       background:
-        radial-gradient(circle at 50% 42%, rgba(70,255,140,.075), transparent 22%),
-        radial-gradient(circle at 16% 70%, rgba(0,130,72,.09), transparent 24%),
-        radial-gradient(circle at 84% 24%, rgba(0,110,80,.07), transparent 25%),
-        linear-gradient(180deg,#020504 0%,#000 68%,#000 100%);
+        radial-gradient(circle at 50% 43%, rgba(125,190,145,.045), transparent 25%),
+        radial-gradient(circle at 22% 72%, rgba(0,90,65,.05), transparent 28%),
+        linear-gradient(180deg,#010302 0%,#000 72%,#000 100%);
     }
     .stars{
       position:fixed;
       inset:0;
       pointer-events:none;
       background-image:
-        radial-gradient(circle, rgba(236,255,239,.95) 0 1px, transparent 1.7px),
-        radial-gradient(circle, rgba(65,255,135,.55) 0 1px, transparent 1.9px),
-        radial-gradient(circle, rgba(255,255,255,.42) 0 1px, transparent 1.6px);
-      background-size:82px 82px,137px 137px,211px 211px;
-      opacity:.45;
-    }
-    .nebula{
-      position:fixed;
-      inset:-15%;
-      pointer-events:none;
-      background:
-        radial-gradient(ellipse at 25% 68%, rgba(0,120,68,.13), transparent 32%),
-        radial-gradient(ellipse at 78% 24%, rgba(0,95,72,.10), transparent 30%),
-        radial-gradient(ellipse at 45% 52%, rgba(130,255,170,.055), transparent 35%);
-      filter:blur(20px);
-      opacity:.55;
+        radial-gradient(circle, rgba(230,235,232,.78) 0 1px, transparent 1.7px),
+        radial-gradient(circle, rgba(70,130,95,.42) 0 1px, transparent 1.8px);
+      background-size:112px 112px,181px 181px;
+      opacity:.48;
     }
     .wrap{
       position:relative;
@@ -59,53 +46,59 @@
       max-width:1180px;
       max-height:1180px;
       overflow:visible;
+      transform:translateY(1dvh);
       filter:
-        drop-shadow(0 0 7px rgba(120,255,160,.42))
-        drop-shadow(0 0 20px rgba(0,150,85,.22));
-      transform:translateY(1.0dvh);
+        drop-shadow(0 0 5px rgba(190,230,205,.26))
+        drop-shadow(0 0 14px rgba(0,95,70,.18));
+    }
+    .slice-shadow{
+      fill:rgba(0,0,0,.48);
+      transform:translate(0,10px);
+      filter:url(#shadowBlur);
+      pointer-events:none;
     }
     .slice{
       fill:url(#sliceGrad);
-      stroke:rgba(232,244,236,.66);
+      stroke:rgba(225,240,230,.62);
       stroke-width:2.35;
       filter:url(#sliceBlock3d);
       transform-origin:500px 500px;
-      transition:transform .16s ease, opacity .16s ease, fill .16s ease;
+      transition:transform .16s ease, fill .16s ease;
+    }
+    .slice-face{
+      fill:url(#faceGrad);
+      stroke:rgba(255,255,255,.14);
+      stroke-width:1.3;
+      filter:url(#faceInset);
+      pointer-events:none;
     }
     .slice-link:active .slice,
     .slice-link:hover .slice{
       transform:scale(1.01);
       fill:url(#sliceHot);
     }
-    .bevel{
-      fill:none;
-      stroke:rgba(245,255,248,.24);
-      stroke-width:1.8;
-      filter:url(#softGlow);
-      pointer-events:none;
-    }
     .outer-ring{
       fill:none;
-      stroke:rgba(218,240,225,.62);
+      stroke:rgba(218,238,224,.62);
       stroke-width:5.7;
       filter:url(#ringGlow);
     }
     .inner-ring{
       fill:none;
-      stroke:rgba(215,240,222,.38);
-      stroke-width:2.2;
+      stroke:rgba(218,238,224,.38);
+      stroke-width:2.3;
       filter:url(#softGlow);
     }
     .core{
       fill:url(#coreGrad);
-      stroke:rgba(210,235,218,.72);
-      stroke-width:4;
-      filter:url(#strongGlow);
+      stroke:rgba(225,240,230,.60);
+      stroke-width:4.2;
+      filter:url(#coreDepth);
     }
     .core2{
       fill:none;
-      stroke:rgba(220,242,226,.50);
-      stroke-width:6.0;
+      stroke:rgba(225,240,230,.56);
+      stroke-width:6;
       filter:url(#ringGlow);
     }
     .pro{
@@ -116,75 +109,44 @@
       dominant-baseline:middle;
       letter-spacing:5px;
       paint-order:stroke;
-      stroke:rgba(0,0,0,.78);
+      stroke:rgba(0,0,0,.82);
       stroke-width:6px;
       filter:url(#textGlow);
       pointer-events:none;
     }
-    .icon{
-      display:none;
-    }
     .label{
       fill:#f1f4f1;
-      font-size:28px;
-      font-weight:800;
+      font-size:26px;
+      font-weight:850;
       text-anchor:middle;
       dominant-baseline:middle;
       paint-order:stroke;
-      stroke:rgba(0,0,0,.78);
+      stroke:rgba(0,0,0,.82);
       stroke-width:2.8px;
       filter:url(#textGlow);
       pointer-events:none;
     }
-  
-    /* === V3.1 HARD DARK OVERRIDE START === */
-    body{
-      background:
-        radial-gradient(circle at 50% 43%, rgba(85,180,120,.055), transparent 24%),
-        radial-gradient(circle at 20% 70%, rgba(0,90,65,.06), transparent 28%),
-        linear-gradient(180deg,#010302 0%,#000 72%,#000 100%) !important;
+    .line-icon{
+      fill:none;
+      stroke:#edf6ef;
+      stroke-width:5.2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      paint-order:stroke;
+      filter:url(#iconGlow);
+      pointer-events:none;
     }
-    .nebula{
-      opacity:.18 !important;
-      filter:blur(26px) !important;
+    .line-icon rect,
+    .line-icon circle,
+    .line-icon path{
+      vector-effect:non-scaling-stroke;
     }
-    .radial{
-      filter:
-        drop-shadow(0 0 5px rgba(125,220,155,.28))
-        drop-shadow(0 0 14px rgba(0,120,80,.16)) !important;
-    }
-    .slice{
-      stroke:rgba(205,235,214,.48) !important;
-      stroke-width:2.35 !important;
-      filter:url(#softGlow) !important;
-    }
-    .outer-ring{
-      stroke:rgba(178,220,190,.42) !important;
-      stroke-width:5.7 !important;
-    }
-    .inner-ring{
-      stroke:rgba(190,220,200,.34) !important;
-      stroke-width:2 !important;
-    }
-    .core2{
-      stroke:rgba(135,210,160,.34) !important;
-      stroke-width:5.7 !important;
-    }
-    .core{
-      stroke:rgba(210,230,215,.50) !important;
-    }
-    .label,.icon,.pro{
-      filter:url(#textGlow) !important;
-    }
-    /* === V3.1 HARD DARK OVERRIDE END === */
-
   </style>
 </head>
 <body>
   <div class="stars"></div>
-  <div class="nebula"></div>
   <div class="wrap">
-    <svg class="radial" viewBox="0 0 1000 1000" role="img" aria-label="EratGuard Signature SVG Radial Demo V2">
+    <svg class="radial" viewBox="0 0 1000 1000" role="img" aria-label="EratGuard Signature SVG Radial Demo V9">
       <defs>
         <radialGradient id="sliceGrad" cx="28%" cy="16%" r="92%">
           <stop offset="0%" stop-color="#f4fff6"/>
@@ -201,6 +163,12 @@
           <stop offset="55%" stop-color="#08140c"/>
           <stop offset="100%" stop-color="#000000"/>
         </radialGradient>
+        <radialGradient id="faceGrad" cx="30%" cy="12%" r="88%">
+          <stop offset="0%" stop-color="rgba(255,255,255,.30)"/>
+          <stop offset="18%" stop-color="rgba(220,240,225,.10)"/>
+          <stop offset="50%" stop-color="rgba(20,55,35,.18)"/>
+          <stop offset="100%" stop-color="rgba(0,0,0,.42)"/>
+        </radialGradient>
         <radialGradient id="coreGrad" cx="30%" cy="18%" r="86%">
           <stop offset="0%" stop-color="#ffffff"/>
           <stop offset="11%" stop-color="#c4d1c6"/>
@@ -208,8 +176,10 @@
           <stop offset="62%" stop-color="#07130b"/>
           <stop offset="100%" stop-color="#000000"/>
         </radialGradient>
-        
-        
+
+        <filter id="shadowBlur" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="6"/>
+        </filter>
         <filter id="sliceBlock3d" x="-45%" y="-45%" width="190%" height="190%">
           <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000000" flood-opacity=".86"/>
           <feDropShadow dx="-2" dy="-3" stdDeviation="2.2" flood-color="#effff3" flood-opacity=".20"/>
@@ -218,158 +188,231 @@
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
-
-        <filter id="sliceDepth" x="-35%" y="-35%" width="170%" height="170%">
-          <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000000" flood-opacity=".72"/>
-          <feDropShadow dx="0" dy="-2" stdDeviation="2" flood-color="#dfffe6" flood-opacity=".18"/>
-          <feGaussianBlur stdDeviation=".35" result="microBlur"/>
+        <filter id="faceInset" x="-35%" y="-35%" width="170%" height="170%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity=".55"/>
+          <feDropShadow dx="0" dy="-2" stdDeviation="1.5" flood-color="#ffffff" flood-opacity=".10"/>
           <feMerge>
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
-
         <filter id="ringGlow" x="-35%" y="-35%" width="170%" height="170%">
-          <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#c8ffd3" flood-opacity=".28"/>
-          <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#000000" flood-opacity=".60"/>
+          <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#d8ffe0" flood-opacity=".22"/>
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#000000" flood-opacity=".62"/>
           <feMerge>
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
-
-        <filter id="sliceGlow" x="-35%" y="-35%" width="170%" height="170%">
-          <feGaussianBlur stdDeviation="2.8" result="blur"/>
+        <filter id="coreDepth" x="-35%" y="-35%" width="170%" height="170%">
+          <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity=".80"/>
+          <feDropShadow dx="-2" dy="-3" stdDeviation="2" flood-color="#ffffff" flood-opacity=".24"/>
           <feMerge>
-            <feMergeNode in="blur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-        <filter id="strongGlow" x="-45%" y="-45%" width="190%" height="190%">
-          <feGaussianBlur stdDeviation="2.8" result="blur"/>
-          <feMerge>
-            <feMergeNode in="blur"/>
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
         <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="1.1" result="blur"/>
+          <feGaussianBlur stdDeviation="1.2" result="blur"/>
           <feMerge>
             <feMergeNode in="blur"/>
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
         <filter id="textGlow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="1.1" result="blur"/>
+          <feGaussianBlur stdDeviation="1.2" result="blur"/>
           <feMerge>
             <feMergeNode in="blur"/>
             <feMergeNode in="SourceGraphic"/>
           </feMerge>
         </filter>
+        <filter id="iconGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity=".80"/>
+          <feDropShadow dx="0" dy="0" stdDeviation="1.8" flood-color="#ffffff" flood-opacity=".18"/>
+          <feMerge>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
       </defs>
 
-      <circle cx="500" cy="500" r="444" class="outer-ring"/>
+      <circle cx="500" cy="500" r="448" class="outer-ring"/>
       <circle cx="500" cy="500" r="436" class="inner-ring"/>
-      <circle cx="500" cy="500" r="418" class="inner-ring"/>
-      <circle cx="500" cy="500" r="205" class="inner-ring"/>
-      <circle cx="500" cy="500" r="171" class="inner-ring"/>
+      <circle cx="500" cy="500" r="416" class="inner-ring"/>
+      <circle cx="500" cy="500" r="206" class="inner-ring"/>
+      <circle cx="500" cy="500" r="174" class="inner-ring"/>
 
       
       <a href="/u/community" class="slice-link" aria-label="Topluluk">
-        <path class="slice slice-1" d="M 385.64 95.87 A 420 420 0 0 1 614.36 95.87 L 548.47 328.73 A 178 178 0 0 0 451.53 328.73 Z"></path>
+        <path class="slice-shadow" d="M 380.92 84.73 A 432 432 0 0 1 619.08 84.73 L 546.86 336.59 A 170 170 0 0 0 453.14 336.59 Z"></path>
+        <path class="slice" d="M 380.92 84.73 A 432 432 0 0 1 619.08 84.73 L 546.86 336.59 A 170 170 0 0 0 453.14 336.59 Z"></path>
+        <path class="slice-face" d="M 405.17 119.64 A 392 392 0 0 1 594.83 119.64 L 551.77 292.36 A 214 214 0 0 0 448.23 292.36 Z"></path>
       </a>
     
       <a href="/u/analysis" class="slice-link" aria-label="Analiz">
-        <path class="slice slice-2" d="M 645.03 105.83 A 420 420 0 0 1 830.06 240.27 L 639.88 389.92 A 178 178 0 0 0 561.46 332.95 Z"></path>
+        <path class="slice-shadow" d="M 647.75 94.05 A 432 432 0 0 1 840.42 234.03 L 633.96 395.34 A 170 170 0 0 0 558.14 340.25 Z"></path>
+        <path class="slice" d="M 647.75 94.05 A 432 432 0 0 1 840.42 234.03 L 633.96 395.34 A 170 170 0 0 0 558.14 340.25 Z"></path>
+        <path class="slice-face" d="M 646.85 136.54 A 392 392 0 0 1 800.29 248.03 L 663.93 362.44 A 214 214 0 0 0 580.17 301.58 Z"></path>
       </a>
     
       <a href="/u/blocked-sms" class="slice-link" aria-label="Engellenenler">
-        <path class="slice slice-3" d="M 849.01 266.36 A 420 420 0 0 1 919.69 483.88 L 677.87 493.17 A 178 178 0 0 0 647.92 400.98 Z"></path>
+        <path class="slice-shadow" d="M 858.14 258.43 A 432 432 0 0 1 931.74 484.92 L 669.90 494.07 A 170 170 0 0 0 640.94 404.94 Z"></path>
+        <path class="slice" d="M 858.14 258.43 A 432 432 0 0 1 931.74 484.92 L 669.90 494.07 A 170 170 0 0 0 640.94 404.94 Z"></path>
+        <path class="slice-face" d="M 832.43 292.27 A 392 392 0 0 1 891.05 472.66 L 713.48 485.07 A 214 214 0 0 0 681.48 386.60 Z"></path>
       </a>
     
       <a href="/u/notifications" class="slice-link" aria-label="Bildirimler">
-        <path class="slice slice-4" d="M 919.69 516.12 A 420 420 0 0 1 849.01 733.64 L 647.92 599.02 A 178 178 0 0 0 677.87 506.83 Z"></path>
+        <path class="slice-shadow" d="M 931.74 515.08 A 432 432 0 0 1 858.14 741.57 L 640.94 595.06 A 170 170 0 0 0 669.90 505.93 Z"></path>
+        <path class="slice" d="M 931.74 515.08 A 432 432 0 0 1 858.14 741.57 L 640.94 595.06 A 170 170 0 0 0 669.90 505.93 Z"></path>
+        <path class="slice-face" d="M 891.05 527.34 A 392 392 0 0 1 832.43 707.73 L 681.48 613.40 A 214 214 0 0 0 713.48 514.93 Z"></path>
       </a>
     
       <a href="/u/settings" class="slice-link" aria-label="Ayarlar">
-        <path class="slice slice-5" d="M 830.06 759.73 A 420 420 0 0 1 645.03 894.17 L 561.46 667.05 A 178 178 0 0 0 639.88 610.08 Z"></path>
+        <path class="slice-shadow" d="M 840.42 765.97 A 432 432 0 0 1 647.75 905.95 L 558.14 659.75 A 170 170 0 0 0 633.96 604.66 Z"></path>
+        <path class="slice" d="M 840.42 765.97 A 432 432 0 0 1 647.75 905.95 L 558.14 659.75 A 170 170 0 0 0 633.96 604.66 Z"></path>
+        <path class="slice-face" d="M 800.29 751.97 A 392 392 0 0 1 646.85 863.46 L 580.17 698.42 A 214 214 0 0 0 663.93 637.56 Z"></path>
       </a>
     
       <a href="/u/sms-actions-center" class="slice-link" aria-label="Engellenen">
-        <path class="slice slice-6" d="M 614.36 904.13 A 420 420 0 0 1 385.64 904.13 L 451.53 671.27 A 178 178 0 0 0 548.47 671.27 Z"></path>
+        <path class="slice-shadow" d="M 619.08 915.27 A 432 432 0 0 1 380.92 915.27 L 453.14 663.41 A 170 170 0 0 0 546.86 663.41 Z"></path>
+        <path class="slice" d="M 619.08 915.27 A 432 432 0 0 1 380.92 915.27 L 453.14 663.41 A 170 170 0 0 0 546.86 663.41 Z"></path>
+        <path class="slice-face" d="M 594.83 880.36 A 392 392 0 0 1 405.17 880.36 L 448.23 707.64 A 214 214 0 0 0 551.77 707.64 Z"></path>
       </a>
     
       <a href="/u/reports" class="slice-link" aria-label="Raporlar">
-        <path class="slice slice-7" d="M 354.97 894.17 A 420 420 0 0 1 169.94 759.73 L 360.12 610.08 A 178 178 0 0 0 438.54 667.05 Z"></path>
+        <path class="slice-shadow" d="M 352.25 905.95 A 432 432 0 0 1 159.58 765.97 L 366.04 604.66 A 170 170 0 0 0 441.86 659.75 Z"></path>
+        <path class="slice" d="M 352.25 905.95 A 432 432 0 0 1 159.58 765.97 L 366.04 604.66 A 170 170 0 0 0 441.86 659.75 Z"></path>
+        <path class="slice-face" d="M 353.15 863.46 A 392 392 0 0 1 199.71 751.97 L 336.07 637.56 A 214 214 0 0 0 419.83 698.42 Z"></path>
       </a>
     
       <a href="/u/license" class="slice-link" aria-label="Lisans">
-        <path class="slice slice-8" d="M 150.99 733.64 A 420 420 0 0 1 80.31 516.12 L 322.13 506.83 A 178 178 0 0 0 352.08 599.02 Z"></path>
+        <path class="slice-shadow" d="M 141.86 741.57 A 432 432 0 0 1 68.26 515.08 L 330.10 505.93 A 170 170 0 0 0 359.06 595.06 Z"></path>
+        <path class="slice" d="M 141.86 741.57 A 432 432 0 0 1 68.26 515.08 L 330.10 505.93 A 170 170 0 0 0 359.06 595.06 Z"></path>
+        <path class="slice-face" d="M 167.57 707.73 A 392 392 0 0 1 108.95 527.34 L 286.52 514.93 A 214 214 0 0 0 318.52 613.40 Z"></path>
       </a>
     
       <a href="/u/protection" class="slice-link" aria-label="Koruma">
-        <path class="slice slice-9" d="M 80.31 483.88 A 420 420 0 0 1 150.99 266.36 L 352.08 400.98 A 178 178 0 0 0 322.13 493.17 Z"></path>
+        <path class="slice-shadow" d="M 68.26 484.92 A 432 432 0 0 1 141.86 258.43 L 359.06 404.94 A 170 170 0 0 0 330.10 494.07 Z"></path>
+        <path class="slice" d="M 68.26 484.92 A 432 432 0 0 1 141.86 258.43 L 359.06 404.94 A 170 170 0 0 0 330.10 494.07 Z"></path>
+        <path class="slice-face" d="M 108.95 472.66 A 392 392 0 0 1 167.57 292.27 L 318.52 386.60 A 214 214 0 0 0 286.52 485.07 Z"></path>
       </a>
     
       <a href="/u/reports" class="slice-link" aria-label="İstatistik">
-        <path class="slice slice-10" d="M 169.94 240.27 A 420 420 0 0 1 354.97 105.83 L 438.54 332.95 A 178 178 0 0 0 360.12 389.92 Z"></path>
+        <path class="slice-shadow" d="M 159.58 234.03 A 432 432 0 0 1 352.25 94.05 L 441.86 340.25 A 170 170 0 0 0 366.04 395.34 Z"></path>
+        <path class="slice" d="M 159.58 234.03 A 432 432 0 0 1 352.25 94.05 L 441.86 340.25 A 170 170 0 0 0 366.04 395.34 Z"></path>
+        <path class="slice-face" d="M 199.71 248.03 A 392 392 0 0 1 353.15 136.54 L 419.83 301.58 A 214 214 0 0 0 336.07 362.44 Z"></path>
       </a>
     
-      <circle cx="500" cy="500" r="444" class="bevel"/>
+
       <circle cx="500" cy="500" r="184" class="inner-ring"/>
-      <circle cx="500" cy="500" r="150" class="inner-ring"/>
-      <circle cx="500" cy="500" r="136" class="core2"/>
+      <circle cx="500" cy="500" r="151" class="inner-ring"/>
+      <circle cx="500" cy="500" r="137" class="core2"/>
       <a href="/u/pricing" aria-label="PRO">
         <circle cx="500" cy="500" r="128" class="core"/>
       </a>
-      <text x="500" y="503" class="pro">PRO</text>
+      <text x="500" y="505" class="pro">PRO</text>
+
       
       <a href="/u/community" class="label-link" aria-label="Topluluk">
-        <text class="icon" x="500.00" y="185.00">☵</text>
-        <text class="label" x="500.00" y="240.56">Topluluk</text>
+        
+          <g class="line-icon">
+            <rect x="474.00" y="167.00" width="34" height="24" rx="8"/>
+            <path d="M 490.00 191.00 L 482.00 202.00 L 483.00 190.00"/>
+            <rect x="500.00" y="177.00" width="34" height="24" rx="8"/>
+            <path d="M 517.00 201.00 L 525.00 212.00 L 523.00 200.00"/>
+          </g>
+        <text class="label" x="500.00" y="230.00">Topluluk</text>
       </a>
     
       <a href="/u/analysis" class="label-link" aria-label="Analiz">
-        <text class="icon" x="685.15" y="245.16">⌕</text>
-        <text class="label" x="652.50" y="290.11">Analiz</text>
+        
+          <g class="line-icon">
+            <circle cx="685.15" cy="241.16" r="19"/>
+            <path d="M 699.15 255.16 L 717.15 273.16"/>
+            <path d="M 677.15 241.16 L 684.15 249.16 L 696.15 235.16"/>
+          </g>
+        <text class="label" x="658.70" y="281.57">Analiz</text>
       </a>
     
       <a href="/u/blocked-sms" class="label-link" aria-label="Engellenenler">
-        <text class="icon" x="799.58" y="402.66">✉</text>
-        <text class="label" x="746.74" y="419.83">Engellenenler</text>
+        
+          <g class="line-icon">
+            <rect x="769.58" y="384.66" width="60" height="38" rx="5"/>
+            <path d="M 772.58 387.66 L 799.58 407.66 L 826.58 387.66"/>
+            <circle cx="827.58" cy="419.66" r="9"/>
+            <path d="M 823.58 415.66 L 831.58 423.66 M 831.58 415.66 L 823.58 423.66"/>
+          </g>
+        <text class="label" x="756.79" y="416.57">Engellenenler</text>
       </a>
     
       <a href="/u/notifications" class="label-link" aria-label="Bildirimler">
-        <text class="icon" x="799.58" y="597.34">🔔</text>
-        <text class="label" x="746.74" y="580.17">Bildirimler</text>
+        
+          <g class="line-icon">
+            <path d="M 777.58 612.34 Q 782.58 577.34 799.58 575.34 Q 816.58 577.34 821.58 612.34 Z"/>
+            <path d="M 771.58 612.34 L 827.58 612.34"/>
+            <path d="M 792.58 619.34 Q 799.58 627.34 806.58 619.34"/>
+            <circle cx="824.58" cy="577.34" r="8"/>
+          </g>
+        <text class="label" x="756.79" y="583.43">Bildirimler</text>
       </a>
     
       <a href="/u/settings" class="label-link" aria-label="Ayarlar">
-        <text class="icon" x="685.15" y="754.84">⚙</text>
-        <text class="label" x="652.50" y="709.89">Ayarlar</text>
+        
+          <g class="line-icon">
+            <circle cx="685.15" cy="754.84" r="18"/>
+            <circle cx="685.15" cy="754.84" r="7"/>
+            <path d="M 685.15 723.84 L 685.15 732.84 M 685.15 776.84 L 685.15 785.84
+                     M 654.15 754.84 L 663.15 754.84 M 707.15 754.84 L 716.15 754.84
+                     M 663.15 732.84 L 669.15 738.84 M 701.15 770.84 L 707.15 776.84
+                     M 707.15 732.84 L 701.15 738.84 M 669.15 770.84 L 663.15 776.84"/>
+          </g>
+        <text class="label" x="658.70" y="718.43">Ayarlar</text>
       </a>
     
       <a href="/u/sms-actions-center" class="label-link" aria-label="Engellenen">
-        <text class="icon" x="500.00" y="815.00">⊗</text>
-        <text class="label" x="500.00" y="759.44">Engellenen</text>
+        
+          <g class="line-icon">
+            <circle cx="500.00" cy="815.00" r="24"/>
+            <path d="M 484.00 799.00 L 516.00 831.00"/>
+            <circle cx="522.00" cy="833.00" r="9"/>
+            <path d="M 518.00 829.00 L 526.00 837.00 M 526.00 829.00 L 518.00 837.00"/>
+          </g>
+        <text class="label" x="500.00" y="770.00">Engellenen</text>
       </a>
     
       <a href="/u/reports" class="label-link" aria-label="Raporlar">
-        <text class="icon" x="314.85" y="754.84">▣</text>
-        <text class="label" x="347.50" y="709.89">Raporlar</text>
+        
+          <g class="line-icon">
+            <rect x="293.85" y="728.84" width="42" height="54" rx="5"/>
+            <path d="M 304.85 743.84 L 326.85 743.84 M 304.85 756.84 L 326.85 756.84 M 304.85 769.84 L 320.85 769.84"/>
+            <circle cx="334.85" cy="778.84" r="10"/>
+            <path d="M 329.85 777.84 L 333.85 782.84 L 341.85 772.84"/>
+          </g>
+        <text class="label" x="341.30" y="718.43">Raporlar</text>
       </a>
     
       <a href="/u/license" class="label-link" aria-label="Lisans">
-        <text class="icon" x="200.42" y="597.34">▱</text>
-        <text class="label" x="253.26" y="580.17">Lisans</text>
+        
+          <g class="line-icon">
+            <path d="M 175.42 619.34 L 225.42 619.34 L 218.42 577.34 L 182.42 577.34 Z"/>
+            <path d="M 187.42 593.34 L 213.42 593.34 M 192.42 605.34 L 208.42 605.34"/>
+          </g>
+        <text class="label" x="243.21" y="583.43">Lisans</text>
       </a>
     
       <a href="/u/protection" class="label-link" aria-label="Koruma">
-        <text class="icon" x="200.42" y="402.66">✓</text>
-        <text class="label" x="253.26" y="419.83">Koruma</text>
+        
+          <g class="line-icon">
+            <path d="M 200.42 371.66 L 227.42 384.66 Q 223.42 420.66 200.42 434.66 Q 177.42 420.66 173.42 384.66 Z"/>
+            <path d="M 188.42 402.66 L 197.42 412.66 L 216.42 390.66"/>
+          </g>
+        <text class="label" x="243.21" y="416.57">Koruma</text>
       </a>
     
       <a href="/u/reports" class="label-link" aria-label="İstatistik">
-        <text class="icon" x="314.85" y="245.16">▮▮▮</text>
-        <text class="label" x="347.50" y="290.11">İstatistik</text>
+        
+          <g class="line-icon">
+            <rect x="289.85" y="252.16" width="8" height="26" rx="2"/>
+            <rect x="306.85" y="237.16" width="8" height="41" rx="2"/>
+            <rect x="323.85" y="220.16" width="8" height="58" rx="2"/>
+          </g>
+        <text class="label" x="341.30" y="281.57">İstatistik</text>
       </a>
     
     </svg>
