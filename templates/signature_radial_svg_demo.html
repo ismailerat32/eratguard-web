@@ -54,21 +54,21 @@
       padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
     }
     .radial{
-      width:min(108vw,86dvh);
-      height:min(108vw,86dvh);
+      width:min(116vw,91dvh);
+      height:min(116vw,91dvh);
       max-width:1180px;
       max-height:1180px;
       overflow:visible;
       filter:
         drop-shadow(0 0 7px rgba(120,255,160,.42))
         drop-shadow(0 0 20px rgba(0,150,85,.22));
-      transform:translateY(-1.5dvh);
+      transform:translateY(-.6dvh);
     }
     .slice{
       fill:url(#sliceGrad);
-      stroke:rgba(170,230,185,.72);
-      stroke-width:2.6;
-      filter:url(#sliceGlow);
+      stroke:rgba(205,235,214,.58);
+      stroke-width:2.4;
+      filter:url(#softGlow);
       transform-origin:500px 500px;
       transition:transform .16s ease, opacity .16s ease, fill .16s ease;
     }
@@ -79,8 +79,8 @@
     }
     .bevel{
       fill:none;
-      stroke:rgba(255,255,255,.30);
-      stroke-width:1.4;
+      stroke:rgba(245,255,248,.24);
+      stroke-width:1.8;
       filter:url(#softGlow);
       pointer-events:none;
     }
@@ -110,38 +110,29 @@
     }
     .pro{
       fill:#f4f7f4;
-      font-size:82px;
+      font-size:90px;
       font-weight:1000;
       text-anchor:middle;
       dominant-baseline:middle;
       letter-spacing:5px;
       paint-order:stroke;
       stroke:rgba(0,0,0,.78);
-      stroke-width:10px;
+      stroke-width:7px;
       filter:url(#textGlow);
       pointer-events:none;
     }
     .icon{
-      fill:#eef7ef;
-      font-size:42px;
-      font-weight:900;
-      text-anchor:middle;
-      dominant-baseline:middle;
-      paint-order:stroke;
-      stroke:rgba(0,0,0,.72);
-      stroke-width:6px;
-      filter:url(#textGlow);
-      pointer-events:none;
+      display:none;
     }
     .label{
       fill:#f1f4f1;
-      font-size:27px;
-      font-weight:900;
+      font-size:30px;
+      font-weight:800;
       text-anchor:middle;
       dominant-baseline:middle;
       paint-order:stroke;
       stroke:rgba(0,0,0,.78);
-      stroke-width:7px;
+      stroke-width:4px;
       filter:url(#textGlow);
       pointer-events:none;
     }
@@ -163,12 +154,12 @@
         drop-shadow(0 0 14px rgba(0,120,80,.16)) !important;
     }
     .slice{
-      stroke:rgba(185,220,195,.55) !important;
+      stroke:rgba(205,235,214,.48) !important;
       stroke-width:2.2 !important;
       filter:url(#softGlow) !important;
     }
     .outer-ring{
-      stroke:rgba(145,220,165,.48) !important;
+      stroke:rgba(178,220,190,.42) !important;
       stroke-width:4.4 !important;
     }
     .inner-ring{
@@ -195,26 +186,27 @@
   <div class="wrap">
     <svg class="radial" viewBox="0 0 1000 1000" role="img" aria-label="EratGuard Signature SVG Radial Demo V2">
       <defs>
-        <radialGradient id="sliceGrad" cx="38%" cy="25%" r="82%">
-          <stop offset="0%" stop-color="#d9ffe1"/>
-          <stop offset="10%" stop-color="#345540"/>
-          <stop offset="34%" stop-color="#102317"/>
-          <stop offset="70%" stop-color="#06100a"/>
-          <stop offset="100%" stop-color="#000201"/>
+        <radialGradient id="sliceGrad" cx="32%" cy="20%" r="88%">
+          <stop offset="0%" stop-color="#e9fff0"/>
+          <stop offset="8%" stop-color="#60796a"/>
+          <stop offset="22%" stop-color="#23382b"/>
+          <stop offset="52%" stop-color="#09140d"/>
+          <stop offset="78%" stop-color="#020604"/>
+          <stop offset="100%" stop-color="#000101"/>
         </radialGradient>
-        <radialGradient id="sliceHot" cx="38%" cy="25%" r="82%">
-          <stop offset="0%" stop-color="#f2fff5"/>
-          <stop offset="14%" stop-color="#57745f"/>
-          <stop offset="42%" stop-color="#132c1b"/>
-          <stop offset="75%" stop-color="#07110b"/>
-          <stop offset="100%" stop-color="#000201"/>
+        <radialGradient id="sliceHot" cx="32%" cy="20%" r="88%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="12%" stop-color="#8ba894"/>
+          <stop offset="34%" stop-color="#213d2b"/>
+          <stop offset="62%" stop-color="#09170f"/>
+          <stop offset="100%" stop-color="#000101"/>
         </radialGradient>
-        <radialGradient id="coreGrad" cx="38%" cy="25%" r="76%">
-          <stop offset="0%" stop-color="#f4fff6"/>
-          <stop offset="16%" stop-color="#77917d"/>
-          <stop offset="48%" stop-color="#16331f"/>
-          <stop offset="78%" stop-color="#07130b"/>
-          <stop offset="100%" stop-color="#000201"/>
+        <radialGradient id="coreGrad" cx="34%" cy="20%" r="82%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="13%" stop-color="#aebcaf"/>
+          <stop offset="36%" stop-color="#31523a"/>
+          <stop offset="66%" stop-color="#07140c"/>
+          <stop offset="100%" stop-color="#000101"/>
         </radialGradient>
         <filter id="sliceGlow" x="-35%" y="-35%" width="170%" height="170%">
           <feGaussianBlur stdDeviation="2.8" result="blur"/>
