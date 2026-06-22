@@ -5,15 +5,15 @@ plugins {
 android {
     signingConfigs {
         release {
-            storeFile file("../keystore/eratguard-release-key.jks")
+            storeFile file("../keystore/eratguard-release-key-v2.jks")
             storePassword System.getenv("ERATGUARD_KEYSTORE_PASSWORD")
-            keyAlias "eratguard"
+            keyAlias "eratguard_v2"
             keyPassword System.getenv("ERATGUARD_KEY_PASSWORD")
         }
     }
 
     namespace 'com.eratguard.app'
-    compileSdk 34
+    compileSdk 35
 
     buildTypes {
         release {
@@ -26,8 +26,8 @@ android {
     defaultConfig {
         applicationId "com.eratguard.app"
         minSdk 23
-        targetSdk 34
-        versionCode 8
-        versionName "1.0.6-beta"
+        targetSdk 35
+        versionCode 16
+        versionName "1.0.14-real-sms-protection-sdk35"
     }
 }
