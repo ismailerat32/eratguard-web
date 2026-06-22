@@ -33662,3 +33662,49 @@ def eratguard_signature_radial_svg_demo():
     return render_template("signature_radial_svg_demo.html")
 # ===== ERATGUARD SIGNATURE SVG RADIAL DEMO ROUTE END =====
 
+
+# ===== ERATGUARD SIGNATURE GALAXY FINAL HOME OVERRIDE START =====
+# Eski FAN-12P route lock blokları /dashboard ve /u/dashboard'u tekrar ele geçiriyordu.
+# Bu final blok en sonda çalışır ve kullanıcı ana girişlerini Signature Galaxy panele zorlar.
+try:
+    from flask import redirect as _eg_sig_final_redirect
+    from flask import request as _eg_sig_final_request
+
+    def _eg_signature_galaxy_home_final():
+        return _eg_sig_final_redirect("/signature-radial")
+
+    def _eg_signature_galaxy_home_before_request():
+        try:
+            path = str(getattr(_eg_sig_final_request, "path", "") or "")
+            if path in ("/dashboard", "/u/dashboard", "/app-start"):
+                return _eg_sig_final_redirect("/signature-radial")
+        except Exception:
+            return None
+        return None
+
+    # Route endpointlerini de son kez override et.
+    try:
+        for _eg_rule in list(app.url_map.iter_rules()):
+            if str(_eg_rule.rule) in ("/dashboard", "/u/dashboard", "/app-start"):
+                app.view_functions[_eg_rule.endpoint] = _eg_signature_galaxy_home_final
+                print("ERATGUARD SIGNATURE HOME OVERRIDE:", _eg_rule.rule, "->", _eg_rule.endpoint, flush=True)
+    except Exception as _eg_sig_route_e:
+        print("ERATGUARD SIGNATURE HOME ROUTE OVERRIDE WARN:", repr(_eg_sig_route_e), flush=True)
+
+    # before_request listesinin en başına koy; eski FAN-12P before_request cevap döndürmeden yakalasın.
+    try:
+        _eg_sig_funcs = app.before_request_funcs.setdefault(None, [])
+        _eg_sig_funcs = [
+            f for f in _eg_sig_funcs
+            if getattr(f, "__name__", "") != "_eg_signature_galaxy_home_before_request"
+        ]
+        _eg_sig_funcs.insert(0, _eg_signature_galaxy_home_before_request)
+        app.before_request_funcs[None] = _eg_sig_funcs
+        print("ERATGUARD SIGNATURE GALAXY FINAL HOME OVERRIDE ACTIVE", flush=True)
+    except Exception as _eg_sig_before_e:
+        print("ERATGUARD SIGNATURE HOME BEFORE OVERRIDE WARN:", repr(_eg_sig_before_e), flush=True)
+
+except Exception as _eg_sig_final_e:
+    print("ERATGUARD SIGNATURE GALAXY FINAL HOME OVERRIDE ERROR:", repr(_eg_sig_final_e), flush=True)
+# ===== ERATGUARD SIGNATURE GALAXY FINAL HOME OVERRIDE END =====
+
