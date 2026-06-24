@@ -1,543 +1,88 @@
 <!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-  <title>EratGuard Signature Radial Panel</title>
-  <style>
-    :root{
-      --bg:#020806;
-      --green:#21ff8a;
-      --green2:#7cffb2;
-      --cyan:#5eeaff;
-      --blue:#0a4f7b;
-      --text:#f1fff8;
-      --muted:#a8ffd2;
-    }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;min-height:100%;background:#010403;color:var(--text);font-family:Arial,Helvetica,sans-serif;overflow-x:hidden}
-    body{
-      background:
-        radial-gradient(circle at 50% 30%, rgba(33,255,138,.16), transparent 28%),
-        radial-gradient(circle at 50% 58%, rgba(94,234,255,.09), transparent 36%),
-        linear-gradient(180deg,#020806 0%,#010604 48%,#000201 100%);
-    }
-    body:before{
-      content:"";
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      background:
-        linear-gradient(60deg, rgba(124,255,178,.06) 1px, transparent 1px),
-        linear-gradient(120deg, rgba(94,234,255,.045) 1px, transparent 1px);
-      background-size:38px 66px;
-      opacity:.22;
-      -webkit-mask-image:radial-gradient(circle at 50% 52%, black 0 62%, transparent 83%);
-      mask-image:radial-gradient(circle at 50% 52%, black 0 62%, transparent 83%);
-    }
-    .app{
-      display:block;
-      visibility:visible;
-      opacity:1;
-      width:100%;
-      max-width:760px;
-      min-height:100vh;
-      margin:0 auto;
-      padding:20px 12px 32px;
-      position:relative;
-    }
-    .hero{
-      border:1px solid rgba(33,255,138,.44);
-      border-radius:28px;
-      background:
-        radial-gradient(circle at 50% 120%, rgba(33,255,138,.14), transparent 42%),
-        linear-gradient(180deg, rgba(8,22,17,.92), rgba(2,9,7,.82));
-      box-shadow:0 0 38px rgba(33,255,138,.14), inset 0 0 35px rgba(33,255,138,.055);
-      padding:26px 12px 24px;
-      text-align:center;
-      margin-bottom:18px;
-    }
-    .brand{
-      font-size:44px;
-      line-height:1;
-      font-weight:1000;
-      color:#fff;
-      text-shadow:0 0 16px rgba(33,255,138,.32);
-    }
-    .brand span{color:var(--green)}
-    .sub{
-      margin-top:14px;
-      color:var(--cyan);
-      font-size:13px;
-      font-weight:1000;
-      letter-spacing:7px;
-    }
-    .pills{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-top:22px;
-    }
-    .pill{
-      min-width:150px;
-      border:1px solid rgba(33,255,138,.55);
-      border-radius:999px;
-      padding:11px 14px;
-      color:var(--green2);
-      background:rgba(3,21,13,.72);
-      box-shadow:inset 0 0 18px rgba(33,255,138,.055),0 0 12px rgba(33,255,138,.10);
-      font-weight:1000;
-      letter-spacing:4px;
-      font-size:13px;
-    }
-    .pill.release{min-width:190px;margin-top:4px}
-    .ringWrap{
-      position:relative;
-      display:block;
-      visibility:visible;
-      opacity:1;
-      width:min(100vw,720px);
-      height:min(100vw,720px);
-      margin:4px auto 24px;
-      perspective:900px;
-      transform-style:preserve-3d;
-    }
-    .ringWrap:before{
-      content:"";
-      position:absolute;
-      inset:6%;
-      border-radius:50%;
-      background:
-        radial-gradient(circle, transparent 0 31%, rgba(33,255,138,.10) 32% 33%, transparent 34% 49%, rgba(94,234,255,.10) 50% 51%, transparent 52%),
-        conic-gradient(from -90deg, rgba(33,255,138,.15), rgba(94,234,255,.07), rgba(33,255,138,.15), rgba(94,234,255,.07), rgba(33,255,138,.15));
-      filter:blur(.1px);
-      opacity:.65;
-      animation:egSpin 28s linear infinite;
-    }
-    .ringWrap:after{
-      content:"";
-      position:absolute;
-      inset:11%;
-      border-radius:50%;
-      border:1px solid rgba(124,255,178,.20);
-      box-shadow:
-        inset 0 0 26px rgba(33,255,138,.09),
-        0 0 32px rgba(33,255,138,.10);
-      opacity:.85;
-      pointer-events:none;
-    }
-    @keyframes egSpin{to{transform:rotate(360deg)}}
-    svg#egRing{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      overflow:visible;
-      filter:drop-shadow(0 0 17px rgba(33,255,138,.22));
-      transform:rotateX(5deg);
-      transform-origin:center;
-    }
-    .segPath{
-      fill:url(#segGrad);
-      stroke:rgba(33,255,138,.78);
-      stroke-width:1.25;
-      vector-effect:non-scaling-stroke;
-      transition:filter .16s ease, transform .16s ease, opacity .16s ease;
-      cursor:pointer;
-    }
-    .segHot:hover .segPath,
-    .segHot:active .segPath{
-      filter:url(#segGlowStrong);
-      opacity:1;
-      transform:scale(1.012);
-      transform-origin:300px 300px;
-    }
-    .segLine{
-      stroke:rgba(124,255,178,.30);
-      stroke-width:1;
-      vector-effect:non-scaling-stroke;
-      opacity:.55;
-    }
-    .segNoCircle{
-      fill:#03140d;
-      stroke:var(--green);
-      stroke-width:1.45;
-      filter:url(#miniGlow);
-    }
-    .segNo{
-      fill:#eafff4;
-      font-size:15px;
-      font-weight:1000;
-      dominant-baseline:middle;
-      text-anchor:middle;
-      letter-spacing:1px;
-    }
-    .segIcon{
-      font-size:29px;
-      dominant-baseline:middle;
-      text-anchor:middle;
-      filter:drop-shadow(0 2px 5px rgba(0,0,0,.7));
-    }
-    .segTitle{
-      fill:#fff;
-      font-size:14px;
-      font-weight:1000;
-      dominant-baseline:middle;
-      text-anchor:middle;
-      letter-spacing:.7px;
-      text-shadow:0 0 10px rgba(0,0,0,.9);
-    }
-    .segHint{
-      fill:#c9ffdf;
-      font-size:8.5px;
-      font-weight:800;
-      dominant-baseline:middle;
-      text-anchor:middle;
-      opacity:.82;
-    }
-    .core{
-      position:absolute;
-      left:50%;
-      top:50%;
-      width:27%;
-      height:27%;
-      transform:translate(-50%,-50%);
-      border-radius:50%;
-      border:4px solid rgba(33,255,138,.94);
-      background:
-        radial-gradient(circle at 36% 25%, rgba(255,255,255,.85), transparent 13%),
-        radial-gradient(circle at 50% 50%, #1d8fff 0%, #08356c 48%, #04120d 73%);
-      box-shadow:
-        0 0 0 8px rgba(33,255,138,.14),
-        0 0 44px rgba(33,255,138,.60),
-        inset 0 0 28px rgba(255,255,255,.15);
-      z-index:5;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-    }
-    .coreE{
-      width:48px;
-      height:48px;
-      border:2px solid rgba(255,255,255,.54);
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:35px;
-      line-height:1;
-      font-weight:1000;
-      color:#fff;
-      margin-bottom:8px;
-    }
-    .coreTitle{
-      font-size:15px;
-      font-weight:1000;
-      letter-spacing:3px;
-      color:#fff;
-    }
-    .coreSub{
-      margin-top:6px;
-      color:var(--green2);
-      font-size:9px;
-      line-height:1.35;
-      font-weight:1000;
-      letter-spacing:2px;
-    }
-    .status{
-      border:1px solid rgba(33,255,138,.46);
-      border-radius:999px;
-      background:rgba(2,10,7,.86);
-      box-shadow:0 0 26px rgba(33,255,138,.12), inset 0 0 20px rgba(33,255,138,.045);
-      padding:19px 15px;
-      text-align:center;
-      font-size:17px;
-      font-weight:1000;
-      letter-spacing:4px;
-      color:#fff;
-    }
-    .dot{
-      display:inline-block;
-      width:28px;
-      height:28px;
-      border-radius:50%;
-      background:var(--green);
-      box-shadow:0 0 25px rgba(33,255,138,.95);
-      vertical-align:-7px;
-      margin-right:15px;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>EratGuard Signature Radial Panel</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#020806;color:#f2fff8;font-family:Arial,Helvetica,sans-serif}
+body{background:radial-gradient(circle at 50% 15%,rgba(33,255,138,.22),transparent 32%),linear-gradient(180deg,#020806,#000302)}
+.app{max-width:760px;margin:0 auto;padding:22px 14px 34px}
+.hero{border:1px solid rgba(33,255,138,.48);border-radius:28px;background:#04100c;padding:30px 14px;text-align:center;box-shadow:0 0 34px rgba(33,255,138,.16)}
+.brand{font-size:42px;font-weight:1000;color:#fff}.brand span{color:#21ff8a}
+.sub{margin-top:14px;color:#5eeaff;font-size:12px;font-weight:1000;letter-spacing:5px}
+.pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+.pill{border:1px solid rgba(33,255,138,.55);border-radius:999px;padding:10px 14px;color:#7cffb2;background:rgba(33,255,138,.08);font-weight:1000;letter-spacing:2px}
+.core{width:150px;height:150px;border-radius:50%;border:4px solid #21ff8a;margin:24px auto 18px;background:radial-gradient(circle,#1d8fff,#06140f 75%);display:flex;flex-direction:column;align-items:center;
+cd ~/eratguard_release || exit 1
 
-    .fallbackMenu{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
-      margin:18px auto 20px;
-      width:100%;
-      max-width:680px;
-    }
-    .fallbackCard{
-      text-decoration:none;
-      border:1px solid rgba(33,255,138,.42);
-      border-radius:18px;
-      background:linear-gradient(135deg,rgba(33,255,138,.16),rgba(9,55,82,.62));
-      color:#fff;
-      padding:13px 10px;
-      min-height:74px;
-      box-shadow:0 0 18px rgba(33,255,138,.10), inset 0 0 14px rgba(94,234,255,.06);
-      display:flex;
-      align-items:center;
-      gap:9px;
-    }
-    .fallbackNo{
-      width:30px;
-      height:30px;
-      border-radius:50%;
-      border:1px solid var(--green);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:var(--green2);
-      font-weight:1000;
-      flex:0 0 auto;
-      background:#03140d;
-    }
-    .fallbackTxt b{
-      display:block;
-      font-size:12px;
-      line-height:1.12;
-      letter-spacing:.5px;
-    }
-    .fallbackTxt small{
-      display:block;
-      margin-top:4px;
-      color:#c9ffdf;
-      font-size:10px;
-      opacity:.84;
-    }
-    body.eg-svg-ready .fallbackMenu{display:none}
-    body.eg-svg-failed .ringWrap{display:none}
+echo "=== ERATGUARD RADIAL MIN SAFE RECOVERY START ==="
 
-    @media(max-width:430px){
-      .app{padding:18px 10px 28px}
-      .hero{padding:24px 10px 22px;margin-bottom:16px}
-      .brand{font-size:40px}
-      .sub{font-size:12px;letter-spacing:5.2px}
-      .pill{min-width:138px;font-size:12px;letter-spacing:3px;padding:10px 12px}
-      .pill.release{min-width:176px}
-      .ringWrap{
-        width:100vw;
-        height:100vw;
-        margin-left:calc(50% - 50vw);
-        margin-top:0;
-        margin-bottom:20px;
-      }
-      .segTitle{font-size:12px;letter-spacing:.35px}
-      .segHint{font-size:7.2px}
-      .segIcon{font-size:24px}
-      .segNo{font-size:13px}
-      .core{width:25.5%;height:25.5%;border-width:3px}
-      .coreE{width:40px;height:40px;font-size:29px;margin-bottom:6px}
-      .coreTitle{font-size:12px;letter-spacing:2.4px}
-      .coreSub{font-size:7.5px;letter-spacing:1.4px}
-      .status{font-size:15px;letter-spacing:3px;padding:18px 10px}
-      .dot{width:24px;height:24px;margin-right:12px}
-    }
-    @media(max-width:380px){
-      .brand{font-size:36px}
-      .sub{font-size:10px;letter-spacing:4.5px}
-      .segTitle{font-size:11px}
-      .segHint{font-size:6.7px}
-      .segIcon{font-size:22px}
-      .coreTitle{font-size:11px}
-      .status{font-size:13px;letter-spacing:2.4px}
-    }
-  </style>
+TS="$(date +%Y%m%d_%H%M%S)"
+TPL="templates/radial_menu.html"
+
+echo
+echo "=== 1) BACKUP BROKEN TEMPLATE ==="
+cp -f "$TPL" "$TPL.before_min_safe_recovery_$TS" 2>/dev/null || true
+
+echo
+echo "=== 2) WRITE MINIMUM SAFE RADIAL PAGE ==="
+cat > "$TPL" <<'HTML'
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>EratGuard Signature Radial Panel</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#020806;color:#f2fff8;font-family:Arial,Helvetica,sans-serif}
+body{background:radial-gradient(circle at 50% 15%,rgba(33,255,138,.22),transparent 32%),linear-gradient(180deg,#020806,#000302)}
+.app{max-width:760px;margin:0 auto;padding:22px 14px 34px}
+.hero{border:1px solid rgba(33,255,138,.48);border-radius:28px;background:#04100c;padding:30px 14px;text-align:center;box-shadow:0 0 34px rgba(33,255,138,.16)}
+.brand{font-size:42px;font-weight:1000;color:#fff}.brand span{color:#21ff8a}
+.sub{margin-top:14px;color:#5eeaff;font-size:12px;font-weight:1000;letter-spacing:5px}
+.pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+.pill{border:1px solid rgba(33,255,138,.55);border-radius:999px;padding:10px 14px;color:#7cffb2;background:rgba(33,255,138,.08);font-weight:1000;letter-spacing:2px}
+.core{width:150px;height:150px;border-radius:50%;border:4px solid #21ff8a;margin:24px auto 18px;background:radial-gradient(circle,#1d8fff,#06140f 75%);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 42px rgba(33,255,138,.45)}
+.coreE{font-size:40px;font-weight:1000}.core b{letter-spacing:3px}.core small{color:#7cffb2;font-weight:900;font-size:9px;text-align:center;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}
+.cmd{text-decoration:none;color:#fff;border:1px solid rgba(33,255,138,.48);border-radius:18px;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78));min-height:76px;padding:10px;display:flex;align-items:center;gap:9px;box-shadow:0 0 18px rgba(33,255,138,.12)}
+.no{width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto}
+.ico{font-size:23px;width:25px;text-align:center}.txt b{font-size:12px;line-height:1.12}.txt small{display:block;color:#c9ffdf;font-size:9px;margin-top:4px}
+.status{margin-top:24px;border:1px solid rgba(33,255,138,.46);border-radius:999px;background:#020a07;padding:18px 12px;text-align:center;font-weight:1000;letter-spacing:3px}
+.dot{display:inline-block;width:24px;height:24px;border-radius:50%;background:#21ff8a;box-shadow:0 0 25px rgba(33,255,138,.95);vertical-align:-6px;margin-right:12px}
+@media(max-width:430px){.app{padding:18px 10px 28px}.brand{font-size:40px}.sub{font-size:11px;letter-spacing:4px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cmd{min-height:72px;padding:9px}.txt b{font-size:11px}}
+</style>
 </head>
 <body>
-  <main class="app">
-    <section class="hero">
-      <div class="brand">Erat<span>Guard</span></div>
-      <div class="sub">SIGNATURE RADIAL PANEL</div>
-      <div class="pills">
-        <div class="pill">PRO AKTİF</div>
-        <div class="pill">CANLI KORUMA</div>
-        <div class="pill release">12P RELEASE</div>
-      </div>
-    </section>
+<main class="app">
+<section class="hero">
+<div class="brand">Erat<span>Guard</span></div>
+<div class="sub">SIGNATURE RADIAL PANEL</div>
+<div class="pills"><div class="pill">PRO AKTİF</div><div class="pill">CANLI KORUMA</div><div class="pill">12P RELEASE</div></div>
+</section>
 
-    <section class="ringWrap" aria-label="EratGuard Signature Radial 12P Ring">
-      <svg id="egRing" viewBox="0 0 600 600" role="img" aria-label="EratGuard Signature Radial Panel">
-        <defs>
-          <radialGradient id="segGrad" cx="34%" cy="20%" r="95%">
-            <stop offset="0%" stop-color="#2dfcc0" stop-opacity=".34"/>
-            <stop offset="38%" stop-color="#0b5d8e" stop-opacity=".67"/>
-            <stop offset="100%" stop-color="#04130f" stop-opacity=".88"/>
-          </radialGradient>
-          <filter id="segGlow" x="-35%" y="-35%" width="170%" height="170%">
-            <feGaussianBlur stdDeviation="3" result="blur"/>
-            <feMerge>
-              <feMergeNode in="blur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-          <filter id="segGlowStrong" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="5" result="blur"/>
-            <feMerge>
-              <feMergeNode in="blur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-          <filter id="miniGlow" x="-70%" y="-70%" width="240%" height="240%">
-            <feGaussianBlur stdDeviation="2" result="blur"/>
-            <feMerge>
-              <feMergeNode in="blur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
+<section aria-label="EratGuard DOME Safe 12P Panel">
+<div class="core"><div class="coreE">E</div><b>ERATGUARD</b><small>PRO AKTİF · CANLI<br>KORUMA</small></div>
+<div class="grid">
+<a class="cmd" href="/u/sms-default" data-native-action="sms-default"><span class="no">01</span><span class="ico">✉️</span><span class="txt"><b>SMS VARSAYILAN</b><small>Yetkilendir</small></span></a>
+<a class="cmd" href="/u/protection"><span class="no">02</span><span class="ico">🛡️</span><span class="txt"><b>PRO KORUMA</b><small>Kalkan</small></span></a>
+<a class="cmd" href="/u/ai"><span class="no">03</span><span class="ico">🧠</span><span class="txt"><b>AI ANALİZ</b><small>Risk motoru</small></span></a>
+<a class="cmd" href="/u/reports"><span class="no">04</span><span class="ico">📈</span><span class="txt"><b>RAPORLAR</b><small>Özetler</small></span></a>
+<a class="cmd" href="/u/blocked"><span class="no">05</span><span class="ico">🚫</span><span class="txt"><b>ENGELLENENLER</b><small>Merkez</small></span></a>
+<a class="cmd" href="/u/notifications"><span class="no">06</span><span class="ico">🔔</span><span class="txt"><b>BİLDİRİMLER</b><small>Akış</small></span></a>
+<a class="cmd" href="/u/license"><span class="no">07</span><span class="ico">🔑</span><span class="txt"><b>LİSANS</b><small>PRO</small></span></a>
+<a class="cmd" href="/u/settings"><span class="no">08</span><span class="ico">⚙️</span><span class="txt"><b>AYARLAR</b><small>Tercihler</small></span></a>
+<a class="cmd" href="/u/community"><span class="no">09</span><span class="ico">👥</span><span class="txt"><b>TOPLULUK</b><small>Geri bildirim</small></span></a>
+<a class="cmd" href="/u/scan"><span class="no">10</span><span class="ico">🔍</span><span class="txt"><b>TARAMA</b><small>Kontrol</small></span></a>
+<a class="cmd" href="/u/security-score"><span class="no">11</span><span class="ico">⭐</span><span class="txt"><b>GÜVENLİK SKORU</b><small>Durum</small></span></a>
+<a class="cmd" href="/u/support"><span class="no">12</span><span class="ico">🛟</span><span class="txt"><b>DESTEK YARDIM</b><small>Yardım</small></span></a>
+</div>
+</section>
 
-        <circle cx="300" cy="300" r="255" fill="none" stroke="rgba(124,255,178,.24)" stroke-width="1"/>
-        <circle cx="300" cy="300" r="215" fill="none" stroke="rgba(94,234,255,.18)" stroke-width="1"/>
-        <circle cx="300" cy="300" r="175" fill="none" stroke="rgba(124,255,178,.14)" stroke-width="1"/>
-        <g id="segments"></g>
-      </svg>
-
-      <div class="core">
-        <div class="coreE">E</div>
-        <div class="coreTitle">ERATGUARD</div>
-        <div class="coreSub">PRO AKTİF · CANLI<br>KORUMA</div>
-      </div>
-    </section>
-
-    <section class="status">
-      <span class="dot"></span>KORUMA AKTİF · 12P HAZIR
-    </section>
-  </main>
-
-  <script>
-    const EG_ITEMS = [
-      {n:"01", icon:"✉️", title:["SMS","VARSAYILAN"], hint:"Yetkilendir", href:"/u/sms-default", native:"sms-default"},
-      {n:"02", icon:"🛡️", title:["PRO","KORUMA"], hint:"Koruma", href:"/u/protection"},
-      {n:"03", icon:"🧠", title:["AI","ANALİZ"], hint:"Risk motoru", href:"/u/ai"},
-      {n:"04", icon:"📈", title:["RAPORLAR"], hint:"Özetler", href:"/u/reports"},
-      {n:"05", icon:"🚫", title:["ENGELLENENLER"], hint:"Merkez", href:"/u/blocked"},
-      {n:"06", icon:"🔔", title:["BİLDİRİMLER"], hint:"Akış", href:"/u/notifications"},
-      {n:"07", icon:"🔑", title:["LİSANS"], hint:"PRO", href:"/u/license"},
-      {n:"08", icon:"⚙️", title:["AYARLAR"], hint:"Tercihler", href:"/u/settings"},
-      {n:"09", icon:"👥", title:["TOPLULUK"], hint:"Geri bildirim", href:"/u/community"},
-      {n:"10", icon:"🔍", title:["TARAMA"], hint:"Kontrol", href:"/u/scan"},
-      {n:"11", icon:"⭐", title:["GÜVENLİK","SKORU"], hint:"Durum", href:"/u/security-score"},
-      {n:"12", icon:"🛟", title:["DESTEK","YARDIM"], hint:"Yardım", href:"/u/support"}
-    ];
-
-    const NS = "http://www.w3.org/2000/svg";
-    const XLINK = "http://www.w3.org/1999/xlink";
-    const C = 300;
-
-    function polar(cx, cy, r, deg){
-      const a = (deg - 90) * Math.PI / 180;
-      return {x: cx + r * Math.cos(a), y: cy + r * Math.sin(a)};
-    }
-
-    function sectorPath(start, end, inner, outer){
-      const p1 = polar(C,C,outer,start);
-      const p2 = polar(C,C,outer,end);
-      const p3 = polar(C,C,inner,end);
-      const p4 = polar(C,C,inner,start);
-      const large = (end - start) > 180 ? 1 : 0;
-      return [
-        `M ${p1.x.toFixed(2)} ${p1.y.toFixed(2)}`,
-        `A ${outer} ${outer} 0 ${large} 1 ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`,
-        `L ${p3.x.toFixed(2)} ${p3.y.toFixed(2)}`,
-        `A ${inner} ${inner} 0 ${large} 0 ${p4.x.toFixed(2)} ${p4.y.toFixed(2)}`,
-        "Z"
-      ].join(" ");
-    }
-
-    function el(name, attrs = {}){
-      const e = document.createElementNS(NS, name);
-      Object.entries(attrs).forEach(([k,v]) => {
-        if(k === "href") e.setAttributeNS(XLINK, "href", v);
-        else e.setAttribute(k, v);
-      });
-      return e;
-    }
-
-    function addText(g, cls, x, y, text){
-      const t = el("text", {class:cls, x, y});
-      t.textContent = text;
-      g.appendChild(t);
-      return t;
-    }
-
-    function build(){
-      const root = document.getElementById("segments");
-      root.innerHTML = "";
-
-      EG_ITEMS.forEach((item, i) => {
-        const mid = i * 30;
-        const start = mid - 12.2;
-        const end = mid + 12.2;
-
-        const a = el("a", {class:"segHot", href:item.href});
-        if(item.native) a.setAttribute("data-native-action", item.native);
-
-        const g = el("g", {filter:"url(#segGlow)"});
-        const p = el("path", {
-          class:"segPath",
-          d:sectorPath(start, end, 126, 278)
-        });
-        g.appendChild(p);
-
-        const lineEnd = polar(C,C,292,mid);
-        const lineStart = polar(C,C,118,mid);
-        g.appendChild(el("line", {
-          class:"segLine",
-          x1:lineStart.x.toFixed(1), y1:lineStart.y.toFixed(1),
-          x2:lineEnd.x.toFixed(1), y2:lineEnd.y.toFixed(1)
-        }));
-
-        const badge = polar(C,C,270,mid - 8);
-        g.appendChild(el("circle", {class:"segNoCircle", cx:badge.x.toFixed(1), cy:badge.y.toFixed(1), r:"17"}));
-        addText(g, "segNo", badge.x.toFixed(1), (badge.y + .5).toFixed(1), item.n);
-
-        const tx = polar(C,C,202,mid);
-        addText(g, "segIcon", tx.x.toFixed(1), (tx.y - 25).toFixed(1), item.icon);
-
-        if(item.title.length === 1){
-          addText(g, "segTitle", tx.x.toFixed(1), (tx.y + 5).toFixed(1), item.title[0]);
-          addText(g, "segHint", tx.x.toFixed(1), (tx.y + 24).toFixed(1), item.hint);
-        }else{
-          addText(g, "segTitle", tx.x.toFixed(1), (tx.y + 0).toFixed(1), item.title[0]);
-          addText(g, "segTitle", tx.x.toFixed(1), (tx.y + 17).toFixed(1), item.title[1]);
-          addText(g, "segHint", tx.x.toFixed(1), (tx.y + 36).toFixed(1), item.hint);
-        }
-
-        a.appendChild(g);
-        root.appendChild(a);
-      });
-    }
-
-    try {
-      build();
-      document.body.classList.add("eg-svg-ready");
-    } catch (e) {
-      document.body.classList.add("eg-svg-failed");
-      console.error("EratGuard SVG ring failed", e);
-    }
-
-    setTimeout(function(){
-      var segs = document.querySelectorAll("#segments .segHot").length;
-      if(segs >= 12){
-        document.body.classList.add("eg-svg-ready");
-      }else{
-        document.body.classList.add("eg-svg-failed");
-      }
-    }, 800);
-  </script>
+<section class="status"><span class="dot"></span>KORUMA AKTİF · 12P HAZIR</section>
+</main>
 </body>
 </html>
