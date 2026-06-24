@@ -6,82 +6,225 @@
 <title>EratGuard Signature Radial Panel</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:#020806;color:#f2fff8;font-family:Arial,Helvetica,sans-serif}
-body{background:radial-gradient(circle at 50% 15%,rgba(33,255,138,.22),transparent 32%),linear-gradient(180deg,#020806,#000302)}
-.app{max-width:760px;margin:0 auto;padding:22px 14px 34px}
-.hero{border:1px solid rgba(33,255,138,.48);border-radius:28px;background:#04100c;padding:30px 14px;text-align:center;box-shadow:0 0 34px rgba(33,255,138,.16)}
-.brand{font-size:42px;font-weight:1000;color:#fff}.brand span{color:#21ff8a}
-.sub{margin-top:14px;color:#5eeaff;font-size:12px;font-weight:1000;letter-spacing:5px}
-.pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+html,body{margin:0;min-height:100%;background:#010604;color:#effff7;font-family:Arial,Helvetica,sans-serif;overflow-x:hidden}
+body{
+  background:
+    radial-gradient(circle at 50% 22%,rgba(33,255,138,.20),transparent 28%),
+    radial-gradient(circle at 50% 60%,rgba(94,234,255,.10),transparent 38%),
+    linear-gradient(180deg,#020806,#000302);
+}
+.app{max-width:760px;margin:0 auto;padding:18px 10px 30px}
+.hero{
+  border:1px solid rgba(33,255,138,.50);
+  border-radius:28px;
+  background:rgba(2,12,9,.88);
+  padding:28px 12px 24px;
+  text-align:center;
+  box-shadow:0 0 34px rgba(33,255,138,.18), inset 0 0 30px rgba(33,255,138,.06);
+}
+.brand{font-size:42px;font-weight:1000;color:#fff;text-shadow:0 0 18px rgba(33,255,138,.35)}
+.brand span{color:#21ff8a}
+.sub{margin-top:12px;color:#5eeaff;font-size:12px;font-weight:1000;letter-spacing:5px}
+.pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:20px}
 .pill{border:1px solid rgba(33,255,138,.55);border-radius:999px;padding:10px 14px;color:#7cffb2;background:rgba(33,255,138,.08);font-weight:1000;letter-spacing:2px}
-.core{width:150px;height:150px;border-radius:50%;border:4px solid #21ff8a;margin:24px auto 18px;background:radial-gradient(circle,#1d8fff,#06140f 75%);display:flex;flex-direction:column;align-items:center;
-cd ~/eratguard_release || exit 1
-
-echo "=== ERATGUARD RADIAL MIN SAFE RECOVERY START ==="
-
-TS="$(date +%Y%m%d_%H%M%S)"
-TPL="templates/radial_menu.html"
-
-echo
-echo "=== 1) BACKUP BROKEN TEMPLATE ==="
-cp -f "$TPL" "$TPL.before_min_safe_recovery_$TS" 2>/dev/null || true
-
-echo
-echo "=== 2) WRITE MINIMUM SAFE RADIAL PAGE ==="
-cat > "$TPL" <<'HTML'
-<!doctype html>
-<html lang="tr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>EratGuard Signature Radial Panel</title>
-<style>
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:#020806;color:#f2fff8;font-family:Arial,Helvetica,sans-serif}
-body{background:radial-gradient(circle at 50% 15%,rgba(33,255,138,.22),transparent 32%),linear-gradient(180deg,#020806,#000302)}
-.app{max-width:760px;margin:0 auto;padding:22px 14px 34px}
-.hero{border:1px solid rgba(33,255,138,.48);border-radius:28px;background:#04100c;padding:30px 14px;text-align:center;box-shadow:0 0 34px rgba(33,255,138,.16)}
-.brand{font-size:42px;font-weight:1000;color:#fff}.brand span{color:#21ff8a}
-.sub{margin-top:14px;color:#5eeaff;font-size:12px;font-weight:1000;letter-spacing:5px}
-.pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px}
-.pill{border:1px solid rgba(33,255,138,.55);border-radius:999px;padding:10px 14px;color:#7cffb2;background:rgba(33,255,138,.08);font-weight:1000;letter-spacing:2px}
-.core{width:150px;height:150px;border-radius:50%;border:4px solid #21ff8a;margin:24px auto 18px;background:radial-gradient(circle,#1d8fff,#06140f 75%);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 42px rgba(33,255,138,.45)}
-.coreE{font-size:40px;font-weight:1000}.core b{letter-spacing:3px}.core small{color:#7cffb2;font-weight:900;font-size:9px;text-align:center;margin-top:6px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}
-.cmd{text-decoration:none;color:#fff;border:1px solid rgba(33,255,138,.48);border-radius:18px;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78));min-height:76px;padding:10px;display:flex;align-items:center;gap:9px;box-shadow:0 0 18px rgba(33,255,138,.12)}
-.no{width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto}
-.ico{font-size:23px;width:25px;text-align:center}.txt b{font-size:12px;line-height:1.12}.txt small{display:block;color:#c9ffdf;font-size:9px;margin-top:4px}
-.status{margin-top:24px;border:1px solid rgba(33,255,138,.46);border-radius:999px;background:#020a07;padding:18px 12px;text-align:center;font-weight:1000;letter-spacing:3px}
+.ringBox{position:relative;width:100%;margin:18px auto 12px}
+svg{width:100%;height:auto;display:block;filter:drop-shadow(0 0 18px rgba(33,255,138,.28))}
+.seg{fill:url(#segGrad);stroke:#21ff8a;stroke-width:1.7;vector-effect:non-scaling-stroke}
+a:active .seg{fill:url(#segGradHot)}
+.ray{stroke:rgba(124,255,178,.32);stroke-width:1;vector-effect:non-scaling-stroke}
+.badge{fill:#020b07;stroke:#21ff8a;stroke-width:1.7;filter:drop-shadow(0 0 7px rgba(33,255,138,.75))}
+.num{fill:#eafff4;font-size:15px;font-weight:1000;text-anchor:middle;dominant-baseline:middle}
+.icon{font-size:28px;text-anchor:middle;dominant-baseline:middle}
+.title{fill:#fff;font-size:14px;font-weight:1000;text-anchor:middle;dominant-baseline:middle;letter-spacing:.5px}
+.hint{fill:#c9ffdf;font-size:8px;font-weight:900;text-anchor:middle;dominant-baseline:middle;opacity:.86}
+.coreOuter{fill:rgba(33,255,138,.10);stroke:#21ff8a;stroke-width:4;filter:drop-shadow(0 0 18px rgba(33,255,138,.70))}
+.coreInner{fill:url(#coreGrad)}
+.coreE{fill:#fff;font-size:52px;font-weight:1000;text-anchor:middle;dominant-baseline:middle}
+.coreText{fill:#fff;font-size:18px;font-weight:1000;text-anchor:middle;dominant-baseline:middle;letter-spacing:4px}
+.coreSub{fill:#7cffb2;font-size:10px;font-weight:1000;text-anchor:middle;dominant-baseline:middle;letter-spacing:2px}
+.status{margin-top:16px;border:1px solid rgba(33,255,138,.46);border-radius:999px;background:rgba(2,10,7,.88);padding:18px 12px;text-align:center;font-size:15px;font-weight:1000;letter-spacing:3px}
 .dot{display:inline-block;width:24px;height:24px;border-radius:50%;background:#21ff8a;box-shadow:0 0 25px rgba(33,255,138,.95);vertical-align:-6px;margin-right:12px}
-@media(max-width:430px){.app{padding:18px 10px 28px}.brand{font-size:40px}.sub{font-size:11px;letter-spacing:4px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cmd{min-height:72px;padding:9px}.txt b{font-size:11px}}
+@media(max-width:430px){
+  .app{padding:18px 6px 28px}
+  .brand{font-size:40px}
+  .sub{font-size:11px;letter-spacing:4px}
+  .pill{font-size:12px}
+  .ringBox{width:108vw;margin-left:calc(50% - 54vw)}
+  .title{font-size:13px}
+  .hint{font-size:7.4px}
+  .icon{font-size:25px}
+}
 </style>
 </head>
 <body>
 <main class="app">
 <section class="hero">
-<div class="brand">Erat<span>Guard</span></div>
-<div class="sub">SIGNATURE RADIAL PANEL</div>
-<div class="pills"><div class="pill">PRO AKTİF</div><div class="pill">CANLI KORUMA</div><div class="pill">12P RELEASE</div></div>
+  <div class="brand">Erat<span>Guard</span></div>
+  <div class="sub">SIGNATURE RADIAL PANEL</div>
+  <div class="pills">
+    <div class="pill">PRO AKTİF</div>
+    <div class="pill">CANLI KORUMA</div>
+    <div class="pill">12P RELEASE</div>
+  </div>
 </section>
 
-<section aria-label="EratGuard DOME Safe 12P Panel">
-<div class="core"><div class="coreE">E</div><b>ERATGUARD</b><small>PRO AKTİF · CANLI<br>KORUMA</small></div>
+<section class="ringBox" aria-label="EratGuard Static DOME WOW Ring">
+<svg viewBox="0 0 720 720" role="img" aria-label="EratGuard Signature Radial 12P">
+<defs>
+  <radialGradient id="segGrad" cx="35%" cy="25%" r="95%">
+    <stop offset="0%" stop-color="#31ffd0" stop-opacity=".42"/>
+    <stop offset="45%" stop-color="#0b6f91" stop-opacity=".76"/>
+    <stop offset="100%" stop-color="#03110d" stop-opacity=".94"/>
+  </radialGradient>
+  <radialGradient id="segGradHot" cx="35%" cy="25%" r="95%">
+    <stop offset="0%" stop-color="#92ffe1" stop-opacity=".70"/>
+    <stop offset="48%" stop-color="#0e95bb" stop-opacity=".85"/>
+    <stop offset="100%" stop-color="#052015" stop-opacity=".98"/>
+  </radialGradient>
+  <radialGradient id="coreGrad" cx="35%" cy="25%" r="80%">
+    <stop offset="0%" stop-color="#ffffff" stop-opacity=".9"/>
+    <stop offset="16%" stop-color="#35a9ff"/>
+    <stop offset="58%" stop-color="#083b73"/>
+    <stop offset="100%" stop-color="#030e0a"/>
+  </radialGradient>
+</defs>
 
-<div class="grid" style="display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:10px !important;margin-top:18px !important;">
-<a href="/u/sms-default" data-native-action="sms-default" style="text-decoration:none !important;color:#fff !important;border:1px solid rgba(33,255,138,.48) !important;border-radius:18px !important;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78)) !important;min-height:76px !important;padding:10px !important;display:flex !important;align-items:center !important;gap:9px !important;"><span style="width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto;">01</span><span style="font-size:23px;width:25px;text-align:center;">✉️</span><span><b style="display:block;font-size:12px;line-height:1.12;">SMS VARSAYILAN</b><small style="display:block;color:#c9ffdf;font-size:9px;margin-top:4px;">Yetkilendir</small></span></a>
-<a href="/u/protection" style="text-decoration:none !important;color:#fff !important;border:1px solid rgba(33,255,138,.48) !important;border-radius:18px !important;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78)) !important;min-height:76px !important;padding:10px !important;display:flex !important;align-items:center !important;gap:9px !important;"><span style="width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto;">02</span><span style="font-size:23px;width:25px;text-align:center;">🛡️</span><span><b style="display:block;font-size:12px;line-height:1.12;">PRO KORUMA</b><small style="display:block;color:#c9ffdf;font-size:9px;margin-top:4px;">Kalkan</small></span></a>
-<a href="/u/ai" style="text-decoration:none !important;color:#fff !important;border:1px solid rgba(33,255,138,.48) !important;border-radius:18px !important;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78)) !important;min-height:76px !important;padding:10px !important;display:flex !important;align-items:center !important;gap:9px !important;"><span style="width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto;">03</span><span style="font-size:23px;width:25px;text-align:center;">🧠</span><span><b style="display:block;font-size:12px;line-height:1.12;">AI ANALİZ</b><small style="display:block;color:#c9ffdf;font-size:9px;margin-top:4px;">Risk motoru</small></span></a>
-<a href="/u/reports" style="text-decoration:none !important;color:#fff !important;border:1px solid rgba(33,255,138,.48) !important;border-radius:18px !important;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78)) !important;min-height:76px !important;padding:10px !important;display:flex !important;align-items:center !important;gap:9px !important;"><span style="width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto;">04</span><span style="font-size:23px;width:25px;text-align:center;">📈</span><span><b style="display:block;font-size:12px;line-height:1.12;">RAPORLAR</b><small style="display:block;color:#c9ffdf;font-size:9px;margin-top:4px;">Özetler</small></span></a>
-<a href="/u/blocked" style="text-decoration:none !important;color:#fff !important;border:1px solid rgba(33,255,138,.48) !important;border-radius:18px !important;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78)) !important;min-height:76px !important;padding:10px !important;display:flex !important;align-items:center !important;gap:9px !important;"><span style="width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto;">05</span><span style="font-size:23px;width:25px;text-align:center;">🚫</span><span><b style="display:block;font-size:12px;line-height:1.12;">ENGELLENENLER</b><small style="display:block;color:#c9ffdf;font-size:9px;margin-top:4px;">Merkez</small></span></a>
-<a href="/u/notifications" style="text-decoration:none !important;color:#fff !important;border:1px solid rgba(33,255,138,.48) !important;border-radius:18px !important;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78)) !important;min-height:76px !important;padding:10px !important;display:flex !important;align-items:center !important;gap:9px !important;"><span style="width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto;">06</span><span style="font-size:23px;width:25px;text-align:center;">🔔</span><span><b style="display:block;font-size:12px;line-height:1.12;">BİLDİRİMLER</b><small style="display:block;color:#c9ffdf;font-size:9px;margin-top:4px;">Akış</small></span></a>
-<a href="/u/license" style="text-decoration:none !important;color:#fff !important;border:1px solid rgba(33,255,138,.48) !important;border-radius:18px !important;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78)) !important;min-height:76px !important;padding:10px !important;display:flex !important;align-items:center !important;gap:9px !important;"><span style="width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto;">07</span><span style="font-size:23px;width:25px;text-align:center;">🔑</span><span><b style="display:block;font-size:12px;line-height:1.12;">LİSANS</b><small style="display:block;color:#c9ffdf;font-size:9px;margin-top:4px;">PRO</small></span></a>
-<a href="/u/settings" style="text-decoration:none !important;color:#fff !important;border:1px solid rgba(33,255,138,.48) !important;border-radius:18px !important;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78)) !important;min-height:76px !important;padding:10px !important;display:flex !important;align-items:center !important;gap:9px !important;"><span style="width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto;">08</span><span style="font-size:23px;width:25px;text-align:center;">⚙️</span><span><b style="display:block;font-size:12px;line-height:1.12;">AYARLAR</b><small style="display:block;color:#c9ffdf;font-size:9px;margin-top:4px;">Tercihler</small></span></a>
-<a href="/u/community" style="text-decoration:none !important;color:#fff !important;border:1px solid rgba(33,255,138,.48) !important;border-radius:18px !important;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78)) !important;min-height:76px !important;padding:10px !important;display:flex !important;align-items:center !important;gap:9px !important;"><span style="width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto;">09</span><span style="font-size:23px;width:25px;text-align:center;">👥</span><span><b style="display:block;font-size:12px;line-height:1.12;">TOPLULUK</b><small style="display:block;color:#c9ffdf;font-size:9px;margin-top:4px;">Geri bildirim</small></span></a>
-<a href="/u/scan" style="text-decoration:none !important;color:#fff !important;border:1px solid rgba(33,255,138,.48) !important;border-radius:18px !important;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78)) !important;min-height:76px !important;padding:10px !important;display:flex !important;align-items:center !important;gap:9px !important;"><span style="width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto;">10</span><span style="font-size:23px;width:25px;text-align:center;">🔍</span><span><b style="display:block;font-size:12px;line-height:1.12;">TARAMA</b><small style="display:block;color:#c9ffdf;font-size:9px;margin-top:4px;">Kontrol</small></span></a>
-<a href="/u/security-score" style="text-decoration:none !important;color:#fff !important;border:1px solid rgba(33,255,138,.48) !important;border-radius:18px !important;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78)) !important;min-height:76px !important;padding:10px !important;display:flex !important;align-items:center !important;gap:9px !important;"><span style="width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto;">11</span><span style="font-size:23px;width:25px;text-align:center;">⭐</span><span><b style="display:block;font-size:12px;line-height:1.12;">GÜVENLİK SKORU</b><small style="display:block;color:#c9ffdf;font-size:9px;margin-top:4px;">Durum</small></span></a>
-<a href="/u/support" style="text-decoration:none !important;color:#fff !important;border:1px solid rgba(33,255,138,.48) !important;border-radius:18px !important;background:linear-gradient(135deg,rgba(33,255,138,.18),rgba(5,38,56,.78)) !important;min-height:76px !important;padding:10px !important;display:flex !important;align-items:center !important;gap:9px !important;"><span style="width:30px;height:30px;border-radius:50%;border:1px solid #21ff8a;color:#7cffb2;display:flex;align-items:center;justify-content:center;font-weight:1000;background:#03140d;flex:0 0 auto;">12</span><span style="font-size:23px;width:25px;text-align:center;">🛟</span><span><b style="display:block;font-size:12px;line-height:1.12;">DESTEK YARDIM</b><small style="display:block;color:#c9ffdf;font-size:9px;margin-top:4px;">Yardım</small></span></a>
-</div>
+<circle cx="360" cy="360" r="338" fill="none" stroke="rgba(33,255,138,.20)" stroke-width="1"/>
+<circle cx="360" cy="360" r="300" fill="none" stroke="rgba(94,234,255,.18)" stroke-width="1"/>
+<circle cx="360" cy="360" r="205" fill="none" stroke="rgba(124,255,178,.18)" stroke-width="1"/>
 
+    <a href="/u/sms-default" data-native-action="sms-default">
+      <path class="seg" d="M 291.2 49.5 A 318 318 0 0 1 428.8 49.5 L 394.2 205.7 A 158 158 0 0 0 325.8 205.7 Z"/>
+      <line class="ray" x1="360.0" y1="220.0" x2="360.0" y2="25.0"/>
+      <circle class="badge" cx="315.0" cy="40.1" r="18"/>
+      <text x="315.0" y="41.1" class="num">01</text>
+      <text x="360.0" y="90.0" class="icon">✉️</text>
+      
+      <text x="360.0" y="128.0" class="title">SMS</text>
+      <text x="360.0" y="147.0" class="title">VARSAYILAN</text>
+      <text x="360.0" y="168.0" class="hint">Yetkilendir</text>
+    </a>
+    <a href="/u/protection">
+      <path class="seg" d="M 455.6 56.7 A 318 318 0 0 1 574.8 125.5 L 466.7 243.5 A 158 158 0 0 0 407.5 209.3 Z"/>
+      <line class="ray" x1="430.0" y1="238.8" x2="527.5" y2="69.9"/>
+      <circle class="badge" cx="481.0" cy="60.5" r="18"/>
+      <text x="481.0" y="61.5" class="num">02</text>
+      <text x="480.0" y="122.2" class="icon">🛡️</text>
+      
+      <text x="480.0" y="160.2" class="title">PRO</text>
+      <text x="480.0" y="179.2" class="title">KORUMA</text>
+      <text x="480.0" y="200.2" class="hint">Kalkan</text>
+    </a>
+    <a href="/u/ai">
+      <path class="seg" d="M 594.5 145.2 A 318 318 0 0 1 663.3 264.4 L 510.7 312.5 A 158 158 0 0 0 476.5 253.3 Z"/>
+      <line class="ray" x1="481.2" y1="290.0" x2="650.1" y2="192.5"/>
+      <circle class="badge" cx="614.5" cy="161.1" r="18"/>
+      <text x="614.5" y="162.1" class="num">03</text>
+      <text x="567.8" y="210.0" class="icon">🧠</text>
+      
+      <text x="567.8" y="248.0" class="title">AI</text>
+      <text x="567.8" y="267.0" class="title">ANALİZ</text>
+      <text x="567.8" y="288.0" class="hint">Risk motoru</text>
+    </a>
+    <a href="/u/reports">
+      <path class="seg" d="M 670.5 291.2 A 318 318 0 0 1 670.5 428.8 L 514.3 394.2 A 158 158 0 0 0 514.3 325.8 Z"/>
+      <line class="ray" x1="500.0" y1="360.0" x2="695.0" y2="360.0"/>
+      <circle class="badge" cx="679.9" cy="315.0" r="18"/>
+      <text x="679.9" y="316.0" class="num">04</text>
+      <text x="600.0" y="330.0" class="icon">📈</text>
+      
+      <text x="600.0" y="378.0" class="title">RAPORLAR</text>
+      <text x="600.0" y="408.0" class="hint">Özetler</text>
+    </a>
+    <a href="/u/blocked">
+      <path class="seg" d="M 663.3 455.6 A 318 318 0 0 1 594.5 574.8 L 476.5 466.7 A 158 158 0 0 0 510.7 407.5 Z"/>
+      <line class="ray" x1="481.2" y1="430.0" x2="650.1" y2="527.5"/>
+      <circle class="badge" cx="659.5" cy="481.0" r="18"/>
+      <text x="659.5" y="482.0" class="num">05</text>
+      <text x="567.8" y="450.0" class="icon">🚫</text>
+      
+      <text x="567.8" y="498.0" class="title">ENGELLENENLER</text>
+      <text x="567.8" y="528.0" class="hint">Merkez</text>
+    </a>
+    <a href="/u/notifications">
+      <path class="seg" d="M 574.8 594.5 A 318 318 0 0 1 455.6 663.3 L 407.5 510.7 A 158 158 0 0 0 466.7 476.5 Z"/>
+      <line class="ray" x1="430.0" y1="481.2" x2="527.5" y2="650.1"/>
+      <circle class="badge" cx="558.9" cy="614.5" r="18"/>
+      <text x="558.9" y="615.5" class="num">06</text>
+      <text x="480.0" y="537.8" class="icon">🔔</text>
+      
+      <text x="480.0" y="585.8" class="title">BİLDİRİMLER</text>
+      <text x="480.0" y="615.8" class="hint">Akış</text>
+    </a>
+    <a href="/u/license">
+      <path class="seg" d="M 428.8 670.5 A 318 318 0 0 1 291.2 670.5 L 325.8 514.3 A 158 158 0 0 0 394.2 514.3 Z"/>
+      <line class="ray" x1="360.0" y1="500.0" x2="360.0" y2="695.0"/>
+      <circle class="badge" cx="405.0" cy="679.9" r="18"/>
+      <text x="405.0" y="680.9" class="num">07</text>
+      <text x="360.0" y="570.0" class="icon">🔑</text>
+      
+      <text x="360.0" y="618.0" class="title">LİSANS</text>
+      <text x="360.0" y="648.0" class="hint">PRO</text>
+    </a>
+    <a href="/u/settings">
+      <path class="seg" d="M 264.4 663.3 A 318 318 0 0 1 145.2 594.5 L 253.3 476.5 A 158 158 0 0 0 312.5 510.7 Z"/>
+      <line class="ray" x1="290.0" y1="481.2" x2="192.5" y2="650.1"/>
+      <circle class="badge" cx="239.0" cy="659.5" r="18"/>
+      <text x="239.0" y="660.5" class="num">08</text>
+      <text x="240.0" y="537.8" class="icon">⚙️</text>
+      
+      <text x="240.0" y="585.8" class="title">AYARLAR</text>
+      <text x="240.0" y="615.8" class="hint">Tercihler</text>
+    </a>
+    <a href="/u/community">
+      <path class="seg" d="M 125.5 574.8 A 318 318 0 0 1 56.7 455.6 L 209.3 407.5 A 158 158 0 0 0 243.5 466.7 Z"/>
+      <line class="ray" x1="238.8" y1="430.0" x2="69.9" y2="527.5"/>
+      <circle class="badge" cx="105.5" cy="558.9" r="18"/>
+      <text x="105.5" y="559.9" class="num">09</text>
+      <text x="152.2" y="450.0" class="icon">👥</text>
+      
+      <text x="152.2" y="498.0" class="title">TOPLULUK</text>
+      <text x="152.2" y="528.0" class="hint">Geri bildirim</text>
+    </a>
+    <a href="/u/scan">
+      <path class="seg" d="M 49.5 428.8 A 318 318 0 0 1 49.5 291.2 L 205.7 325.8 A 158 158 0 0 0 205.7 394.2 Z"/>
+      <line class="ray" x1="220.0" y1="360.0" x2="25.0" y2="360.0"/>
+      <circle class="badge" cx="40.1" cy="405.0" r="18"/>
+      <text x="40.1" y="406.0" class="num">10</text>
+      <text x="120.0" y="330.0" class="icon">🔍</text>
+      
+      <text x="120.0" y="378.0" class="title">TARAMA</text>
+      <text x="120.0" y="408.0" class="hint">Kontrol</text>
+    </a>
+    <a href="/u/security-score">
+      <path class="seg" d="M 56.7 264.4 A 318 318 0 0 1 125.5 145.2 L 243.5 253.3 A 158 158 0 0 0 209.3 312.5 Z"/>
+      <line class="ray" x1="238.8" y1="290.0" x2="69.9" y2="192.5"/>
+      <circle class="badge" cx="60.5" cy="239.0" r="18"/>
+      <text x="60.5" y="240.0" class="num">11</text>
+      <text x="152.2" y="210.0" class="icon">⭐</text>
+      
+      <text x="152.2" y="248.0" class="title">GÜVENLİK</text>
+      <text x="152.2" y="267.0" class="title">SKORU</text>
+      <text x="152.2" y="288.0" class="hint">Durum</text>
+    </a>
+    <a href="/u/support">
+      <path class="seg" d="M 145.2 125.5 A 318 318 0 0 1 264.4 56.7 L 312.5 209.3 A 158 158 0 0 0 253.3 243.5 Z"/>
+      <line class="ray" x1="290.0" y1="238.8" x2="192.5" y2="69.9"/>
+      <circle class="badge" cx="161.1" cy="105.5" r="18"/>
+      <text x="161.1" y="106.5" class="num">12</text>
+      <text x="240.0" y="122.2" class="icon">🛟</text>
+      
+      <text x="240.0" y="160.2" class="title">DESTEK</text>
+      <text x="240.0" y="179.2" class="title">YARDIM</text>
+      <text x="240.0" y="200.2" class="hint">Yardım</text>
+    </a>
+<circle class="coreOuter" cx="360" cy="360" r="112"/>
+<circle class="coreInner" cx="360" cy="360" r="96"/>
+<text class="coreE" x="360" y="318">E</text>
+<text class="coreText" x="360" y="368">ERATGUARD</text>
+<text class="coreSub" x="360" y="394">PRO AKTİF · CANLI</text>
+<text class="coreSub" x="360" y="410">KORUMA</text>
+</svg>
 </section>
 
 <section class="status"><span class="dot"></span>KORUMA AKTİF · 12P HAZIR</section>
