@@ -83,6 +83,78 @@ def _ss_get_last_scan_time():
 
 app = Flask(__name__)
 
+
+# ERATGUARD_SINGLE_USER_PANEL_RADIAL_12P_ROUTE_LOCK_START
+# Yayın kararı:
+# Kullanıcı tarafında tek ana panel = EratGuard Signature Radial 12P.
+# Eski kullanıcı dashboard/fan/panel/app-start yolları yayında /radial'e yönlenir.
+@app.before_request
+def eratguard_single_user_panel_radial_12p_route_lock():
+    try:
+        from flask import request, redirect
+
+        raw_path = request.path or "/"
+        path = raw_path.rstrip("/") or "/"
+
+        # Admin, statik dosya, API ve sistem dosyalarına dokunma.
+        safe_prefixes = (
+            "/admin",
+            "/static",
+            "/assets",
+            "/api",
+            "/favicon.ico",
+            "/robots.txt"
+        )
+
+        for prefix in safe_prefixes:
+            if path == prefix or path.startswith(prefix + "/"):
+                return None
+
+        # Kullanıcı tarafında kafa karıştıran eski ana panel yolları.
+        legacy_user_panels = {
+            "/",
+            "/home",
+            "/dashboard",
+            "/user",
+            "/panel",
+            "/console",
+            "/living",
+            "/live",
+
+            "/app-start",
+            "/radial-menu",
+            "/radial-demo",
+
+            "/fan",
+            "/fan12p",
+            "/fan-12p",
+            "/fan_12p",
+
+            "/radial_live",
+            "/radial-live",
+
+            "/user/dashboard",
+            "/user/home",
+            "/user/panel",
+
+            "/u/dashboard",
+            "/u/home",
+            "/u/panel",
+            "/u/console",
+            "/u/fan",
+            "/u/fan12p",
+            "/u/radial_live"
+        }
+
+        if path in legacy_user_panels:
+            return redirect("/radial", code=302)
+
+        return None
+    except Exception:
+        return None
+# ERATGUARD_SINGLE_USER_PANEL_RADIAL_12P_ROUTE_LOCK_END
+
+
 # ===== ERATGUARD STABLE SESSION SECRET START =====
 import os as _ss_os
 from pathlib import Path as _ss_Path
@@ -10965,7 +11037,7 @@ try:
                 "<title>EratGuard PRO Bildirimler</title></head><body>"
                 "<h1>EratGuard PRO Bildirimler</h1>"
                 "<p>Bildirim sayfası güvenli fallback ile açıldı.</p>"
-                "<p><a href='/dashboard'>Kullanıcı Paneli</a></p>"
+                "<p><a href='/radial'>Kullanıcı Paneli</a></p>"
                 "</body></html>"
             )
 
@@ -13472,7 +13544,7 @@ body{padding:18px 14px 28px}
     <div class="card"><b>__DAYS__</b><span>Kalan gün</span></div>
     <div class="card key"><b>__KEY__</b><span>Lisans anahtarı</span></div>
   </div>
-  <a class="btn secondary" href="/dashboard">← Ana ekrana dön</a>
+  <a class="btn secondary" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">AKTİVASYON</div>
@@ -13870,7 +13942,7 @@ body{padding:16px 14px 24px}
     <div class="card key"><b>__KEY__</b><span>Lisans anahtarı</span></div>
   </div>
 
-  <a class="mini-back" href="/dashboard">← Ana ekrana dön</a>
+  <a class="mini-back" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">AKTİVASYON</div>
@@ -14245,7 +14317,7 @@ body{padding:16px 14px 24px}
     <div class="stat"><b>AI</b><span>Hazır</span></div>
   </div>
 
-  <a class="mini-back" href="/dashboard">← Ana ekrana dön</a>
+  <a class="mini-back" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">TARAMA</div>
@@ -14492,7 +14564,7 @@ body{{padding:16px 14px 24px}}
   <ul>{reasons_html}</ul>
 </section>
 
-<a class="btn" href="/dashboard">Ana ekrana dön</a>
+<a class="btn" href="/radial">Ana ekrana dön</a>
 
 <div class="foot">EratGuard PRO · {_eg_psf1_safe(username)} · © 2026</div>
 </body>
@@ -14868,7 +14940,7 @@ body{{padding:16px 14px 24px}}
 <div class="section-title">NEDENLER</div>
 <section class="reasons"><ul>{reasons_html}</ul></section>
 
-<a class="btn" href="/dashboard">Ana ekrana dön</a>
+<a class="btn" href="/radial">Ana ekrana dön</a>
 
 <div class="foot">EratGuard PRO · {_eg_asf1_safe(username)} · © 2026</div>
 </body>
@@ -15181,7 +15253,7 @@ body{padding:16px 14px 24px}
     <div class="stat"><b>0-100</b><span>Skor</span></div>
     <div class="stat"><b>PRO</b><span>Motor</span></div>
   </div>
-  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+  <a class="back" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">TARAMA</div>
@@ -15452,7 +15524,7 @@ body{padding:16px 14px 24px}
     <div class="stat"><b>__QUARANTINE__</b><span>Karantina</span></div>
   </div>
 
-  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+  <a class="back" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -15760,7 +15832,7 @@ body{padding:16px 14px 24px}
     <div class="stat"><b>__HIGH__</b><span>Yüksek</span></div>
   </div>
 
-  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+  <a class="back" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -16013,7 +16085,7 @@ body{padding:16px 14px 24px}
     <div class="stat"><b>__GLOBAL_COUNT__</b><span>Genel</span></div>
   </div>
 
-  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+  <a class="back" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -16598,7 +16670,7 @@ body{padding:12px 11px 18px}
     <div class="stat"><b>__RISK__</b><span>Risk</span></div>
   </div>
 
-  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+  <a class="back" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -16866,7 +16938,7 @@ body{padding:12px 11px 18px}
     <div class="stat"><b>__WARNINGS__</b><span>Uyarı</span></div>
   </div>
 
-  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+  <a class="back" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -17136,7 +17208,7 @@ body{padding:12px 11px 18px}
     <div class="stat"><b>__WARNINGS__</b><span>Uyarı</span></div>
   </div>
 
-  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+  <a class="back" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -17651,7 +17723,7 @@ body{padding:12px 11px 18px}
     <div class="stat"><b>PRO</b><span>Mod</span></div>
   </div>
 
-  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+  <a class="back" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -17698,7 +17770,7 @@ body{padding:12px 11px 18px}
 
   <div class="actions">
     <button class="btn primary" type="submit">Kaydet</button>
-    <a class="btn secondary" href="/dashboard">Panel</a>
+    <a class="btn secondary" href="/radial">Panel</a>
   </div>
 </form>
 
@@ -18062,7 +18134,7 @@ body{padding:12px 11px 18px}
     <div class="stat"><b>__NUMBERS__</b><span>Numara</span></div>
   </div>
 
-  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+  <a class="back" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -18445,7 +18517,7 @@ p{color:var(--muted);font-size:19px;line-height:1.48;font-weight:700}
 
     <div class="actions">
       <button class="btn primary" onclick="askPermission()">İzin Ver →</button>
-      <a class="btn secondary" href="/dashboard">Şimdilik Geç</a>
+      <a class="btn secondary" href="/radial">Şimdilik Geç</a>
       <a class="btn secondary" href="/u/notifications">Bildirim Paneli</a>
     </div>
 
@@ -18459,17 +18531,17 @@ function askPermission(){
   try{
     if(!("Notification" in window)){
       note.innerText = "Bu tarayıcı bildirim iznini desteklemiyor. Panele yönlendiriliyorsun.";
-      setTimeout(()=>{ location.href="/dashboard"; }, 700);
+      setTimeout(()=>{ location.href="/radial"; }, 700);
       return;
     }
     Notification.requestPermission().then(function(result){
       note.innerText = "Bildirim tercihi: " + result + ". Panele yönlendiriliyorsun.";
-      setTimeout(()=>{ location.href="/dashboard"; }, 800);
+      setTimeout(()=>{ location.href="/radial"; }, 800);
     }).catch(function(){
-      location.href="/dashboard";
+      location.href="/radial";
     });
   }catch(e){
-    location.href="/dashboard";
+    location.href="/radial";
   }
 }
 </script>
@@ -18542,7 +18614,7 @@ h1{{margin:0;font-size:28px}} h1 span{{color:var(--green)}}
 
     <div class="actions">
       <a class="btn primary" href="/u/notifications?fresh=1">Kaydet</a>
-      <a class="btn secondary" href="/dashboard">Panel</a>
+      <a class="btn secondary" href="/radial">Panel</a>
     </div>
   </div>
 </div>
@@ -19076,7 +19148,7 @@ html,body{margin:0;width:100%;min-height:100%;overflow:hidden;color:var(--text);
     <div class="row"><div><b>Admin duyuruları</b><span>Sistem ve ürün duyuruları.</span></div><div class="toggle"></div></div>
     <div class="actions">
       <a class="btn primary" href="/u/notifications?fresh=1">Kaydet</a>
-      <a class="btn secondary" href="/dashboard">Panel</a>
+      <a class="btn secondary" href="/radial">Panel</a>
     </div>
   </div>
 </div>
@@ -19148,7 +19220,7 @@ try:
   <div class="eg-user-fan3-arc" id="egUserFan3Arc" aria-hidden="true"></div>
 
   <nav class="eg-user-fan3-panel" id="egUserFan3Panel">
-    <a class="eg-user-fan3-item i1" href="/dashboard">
+    <a class="eg-user-fan3-item i1" href="/radial">
       <b>🏠</b><span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></span><em>01</em>
     </a>
     <a class="eg-user-fan3-item i2" href="/u/protection">
@@ -20380,7 +20452,7 @@ html,body{{
     <a class="eg-btn" href="/u/reports">Koruma Raporları <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard PRO koruma katmanı aktif. SMS, link ve risk motoru tek merkezden takip edilir.</div>
 </div>
@@ -20622,7 +20694,7 @@ textarea::placeholder{color:rgba(242,255,246,.38)}
     <a class="eg-btn" href="/u/reports">Analiz Raporları <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard AI Analiz Merkezi, SMS içeriğindeki risk işaretlerini hızlıca değerlendirir. Nihai güvenlik kararı için Koruma Merkezi ile birlikte kullanılır.</div>
 
@@ -21027,7 +21099,7 @@ html,body{{
     <a class="eg-btn" href="/u/analysis">AI Analiz Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard Rapor Merkezi, koruma ve analiz durumlarını kullanıcıya sade bir güvenlik özeti olarak sunar.</div>
 
@@ -21315,7 +21387,7 @@ html,body{{
     <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard Lisans Merkezi, PRO erişim ve kullanıcı yetkilerini tek ekranda gösterir.</div>
 </div>
@@ -21516,7 +21588,7 @@ html,body{{
     <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard Bildirim Merkezi, güvenlik ve sistem mesajlarını kullanıcıya sade şekilde gösterir.</div>
 </div>
@@ -21734,7 +21806,7 @@ html,body{{
     <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard Topluluk Merkezi, destek ve kullanıcı iletişimini premium yapıya taşır.</div>
 </div>
@@ -21939,7 +22011,7 @@ html,body{{
     <a class="eg-btn" href="/u/notifications">Bildirim Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard Ayarlar Merkezi, kullanıcı hesabı ve güvenlik tercihlerini premium yapıda gösterir.</div>
 </div>
@@ -22685,7 +22757,7 @@ ul{{
   <section id="reported" class="eg-section">{reported_html}</section>
 
   <a class="eg-back" href="/u/analysis">← AI Analiz Merkezine Dön</a>
-  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
 </div>
 
 <script>
@@ -23007,7 +23079,7 @@ button{width:100%;margin-top:14px;border:0;border-radius:18px;background:#23ff89
 <textarea id="smsText" placeholder="Örnek: Kargonuz beklemede, hemen linke tıklayın..."></textarea>
 <button onclick="analyze()">SMS Riskini Analiz Et</button>
 <div class="result" id="result">Sonuç burada görünecek.</div>
-<a class="back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+<a class="back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
 </div>
 <script>
 async function analyze(){
@@ -23723,7 +23795,7 @@ body{
         <small>VITES-6A</small>
       </div>
     </div>
-    <a class="back" href="/dashboard">Ana Sayfa</a>
+    <a class="back" href="/radial">Ana Sayfa</a>
   </div>
 
   <section class="hero">
@@ -24505,7 +24577,7 @@ def eg_sms_actions_center():
   </div>
   {% endfor %}
 </div>
-<a class="menu" href="/u/dashboard">MENÜ</a>
+<a class="menu" href="/radial">MENÜ</a>
 </body>
 </html>
 """
@@ -24847,7 +24919,7 @@ body{padding:16px 14px 24px}
     <div class="stat"><b>0-100</b><span>Skor</span></div>
     <div class="stat"><b>PRO</b><span>Motor</span></div>
   </div>
-  <a class="back" href="/dashboard">← Ana ekrana dön</a>
+  <a class="back" href="/radial">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">TARAMA</div>
@@ -26052,7 +26124,7 @@ border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;box-shadow
     <a class="eg-btn" href="/u/reports">Koruma Raporları <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/dashboard">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">
     EratGuard PRO koruma katmanı aktif. SMS, link ve risk motoru tek merkezden takip edilir.
@@ -26421,7 +26493,7 @@ body{margin:0;background:radial-gradient(circle at top,#143b2b 0,#061018 45%,#03
   {% endfor %}
 </div>
 
-<a class="menu" href="/u/dashboard">MENÜ</a>
+<a class="menu" href="/radial">MENÜ</a>
 
 <script>
 document.querySelectorAll(".filter").forEach(btn=>{
@@ -26667,7 +26739,7 @@ ul{margin:10px 0 0 18px;color:#aeb8c8;line-height:1.35}
   <a class="eg-link" href="/u/analysis">← AI Analiz Merkezine Dön</a>
 </div>
 
-<a class="eg-menu" href="/u/dashboard">MENÜ</a>
+<a class="eg-menu" href="/radial">MENÜ</a>
 
 <script>
 function showTab(id, btn){
@@ -32279,7 +32351,7 @@ body.eg-open #eg-fan12p-real-menu-btn{
   </div>
 
   <nav class="eg-grid">
-    <a class="eg-tile" href="/dashboard"><span class="eg-no">01</span><span class="eg-icon">🏠</span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></a>
+    <a class="eg-tile" href="/radial"><span class="eg-no">01</span><span class="eg-icon">🏠</span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></a>
     <a class="eg-tile" href="/u/protection"><span class="eg-no">02</span><span class="eg-icon">🛡️</span><strong>Koruma</strong><small>SMS güvenlik motoru</small></a>
     <a class="eg-tile" href="/u/ai-analysis"><span class="eg-no">03</span><span class="eg-icon">🧠</span><strong>AI Analiz</strong><small>Risk taraması</small></a>
     <a class="eg-tile" href="/u/reports"><span class="eg-no">04</span><span class="eg-icon">📈</span><strong>Raporlar</strong><small>Güvenlik özetleri</small></a>
@@ -32766,10 +32838,10 @@ body{
 
   <section class="eg-radial-wrap" aria-label="FAN-12P Radial Menü">
     <div class="eg-radial">
-      <a class="eg-center" href="/dashboard"><b>E</b><span>MENÜ</span></a>
+      <a class="eg-center" href="/radial"><b>E</b><span>MENÜ</span></a>
 
       <a class="eg-petal" style="--a:0deg" href="/u/pro"><span class="eg-petal-in"><span class="eg-no">12</span><span class="eg-ico">⭐</span><strong>PRO</strong><small>Final özellikleri</small></span></a>
-      <a class="eg-petal" style="--a:30deg" href="/dashboard"><span class="eg-petal-in"><span class="eg-no">01</span><span class="eg-ico">🏠</span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></span></a>
+      <a class="eg-petal" style="--a:30deg" href="/radial"><span class="eg-petal-in"><span class="eg-no">01</span><span class="eg-ico">🏠</span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></span></a>
       <a class="eg-petal" style="--a:60deg" href="/u/protection"><span class="eg-petal-in"><span class="eg-no">02</span><span class="eg-ico">🛡️</span><strong>Koruma</strong><small>SMS güvenlik motoru</small></span></a>
       <a class="eg-petal" style="--a:90deg" href="/u/ai-analysis"><span class="eg-petal-in"><span class="eg-no">03</span><span class="eg-ico">🧠</span><strong>AI Analiz</strong><small>Risk taraması</small></span></a>
       <a class="eg-petal" style="--a:120deg" href="/u/reports"><span class="eg-petal-in"><span class="eg-no">04</span><span class="eg-ico">📈</span><strong>Raporlar</strong><small>Güvenlik özetleri</small></span></a>
@@ -33708,3 +33780,759 @@ except Exception as _eg_sig_final_e:
     print("ERATGUARD SIGNATURE GALAXY FINAL HOME OVERRIDE ERROR:", repr(_eg_sig_final_e), flush=True)
 # ===== ERATGUARD SIGNATURE GALAXY FINAL HOME OVERRIDE END =====
 
+
+# ERATGUARD_FINAL_PRIORITY_ROUTE_GUARD_START
+# En son yayın kilidi:
+# /radial asla admin/dashboard'a gitmeyecek.
+# Kullanıcı eski panelleri tek ana panel olan /radial'e dönecek.
+# Bu guard Flask before_request listesinde en başa taşınır.
+def eratguard_final_priority_route_guard():
+    try:
+        from flask import request, redirect, render_template
+
+        raw_path = request.path or "/"
+        path = raw_path.rstrip("/") or "/"
+
+        # Statik ve API tarafına dokunma.
+        if (
+            path == "/static" or path.startswith("/static/") or
+            path == "/assets" or path.startswith("/assets/") or
+            path == "/api" or path.startswith("/api/") or
+            path == "/favicon.ico" or
+            path == "/robots.txt"
+        ):
+            return None
+
+        # Kullanıcı ana radial ekranı kesinlikle direkt render edilecek.
+        # Böylece eski admin/dashboard/fan hook'ları /radial'i ele geçiremez.
+        if path in {
+            "/radial",
+            "/signature-radial"
+        }:
+            return render_template("radial_menu.html")
+
+        # Eski kullanıcı girişleri tek ana panele yönlenir.
+        if path in {
+            "/",
+            "/home",
+            "/dashboard",
+            "/user",
+            "/panel",
+            "/console",
+            "/living",
+            "/live",
+            "/app-start",
+            "/radial-menu",
+            "/radial-demo",
+            "/fan",
+            "/fan12p",
+            "/fan-12p",
+            "/fan_12p",
+            "/radial_live",
+            "/radial-live",
+            "/user/dashboard",
+            "/user/home",
+            "/user/panel",
+            "/u/dashboard",
+            "/u/home",
+            "/u/panel",
+            "/u/console",
+            "/u/fan",
+            "/u/fan12p",
+            "/u/radial_live"
+        }:
+            return redirect("/radial", code=302)
+
+        # Admin tarafına burada dokunma.
+        # Admin kendi mevcut kilitleriyle devam eder.
+        return None
+
+    except Exception:
+        return None
+
+
+try:
+    # Flask hook sırasını zorla:
+    # Bu guard listenin en başında çalışsın.
+    app.before_request(eratguard_final_priority_route_guard)
+
+    _lst = app.before_request_funcs.get(None, [])
+    if eratguard_final_priority_route_guard in _lst:
+        _lst.remove(eratguard_final_priority_route_guard)
+        _lst.insert(0, eratguard_final_priority_route_guard)
+
+    print("ERATGUARD FINAL PRIORITY ROUTE GUARD ACTIVE")
+except Exception as _eg_final_guard_error:
+    print("ERATGUARD FINAL PRIORITY ROUTE GUARD ERROR:", _eg_final_guard_error)
+# ERATGUARD_FINAL_PRIORITY_ROUTE_GUARD_END
+
+# ERATGUARD_FINAL_ADMIN_SEPARATION_BRIDGE_START
+# Yayın kilidi:
+# Kullanıcı ana paneli = /radial
+# Admin ana paneli = /admin/dashboard
+# Admin yolları asla kullanıcı /dashboard veya /radial akışına düşmeyecek.
+def eratguard_final_admin_separation_bridge():
+    try:
+        from flask import request, redirect, render_template
+
+        raw_path = request.path or "/"
+        path = raw_path.rstrip("/") or "/"
+
+        # Sadece admin girişlerini ele al.
+        if path == "/admin":
+            return redirect("/admin/dashboard", code=302)
+
+        if path == "/admin/dashboard":
+            # Mevcut admin template varsa doğrudan bas.
+            # Yoksa minimal güvenli admin shell döndür.
+            try:
+                return render_template("admin_dashboard.html")
+            except Exception:
+                try:
+                    return render_template("admin_panel.html")
+                except Exception:
+                    return """
+                    <!doctype html>
+                    <html lang="tr">
+                    <head>
+                      <meta charset="utf-8">
+                      <meta name="viewport" content="width=device-width,initial-scale=1">
+                      <title>EratGuard Admin</title>
+                      <style>
+                        body{margin:0;background:#020806;color:#dfffea;font-family:Arial,sans-serif}
+                        .wrap{padding:24px}
+                        .card{border:1px solid rgba(0,255,140,.35);border-radius:18px;padding:20px;background:#06140f}
+                        h1{color:#7cffb2}
+                        a{color:#7cffb2}
+                      </style>
+                    </head>
+                    <body>
+                      <div class="wrap">
+                        <div class="card">
+                          <h1>EratGuard Admin Dashboard</h1>
+                          <p>Admin paneli kullanıcı radial panelinden ayrıldı.</p>
+                          <p><a href="/radial">Kullanıcı Radial Paneli</a></p>
+                        </div>
+                      </div>
+                    </body>
+                    </html>
+                    """
+
+        return None
+
+    except Exception:
+        return None
+
+
+try:
+    app.before_request(eratguard_final_admin_separation_bridge)
+
+    _lst = app.before_request_funcs.get(None, [])
+    if eratguard_final_admin_separation_bridge in _lst:
+        _lst.remove(eratguard_final_admin_separation_bridge)
+        _lst.insert(0, eratguard_final_admin_separation_bridge)
+
+    print("ERATGUARD FINAL ADMIN SEPARATION BRIDGE ACTIVE")
+except Exception as _eg_admin_sep_error:
+    print("ERATGUARD FINAL ADMIN SEPARATION BRIDGE ERROR:", _eg_admin_sep_error)
+# ERATGUARD_FINAL_ADMIN_SEPARATION_BRIDGE_END
+
+# ERATGUARD_SMS_DEFAULT_FALLBACK_ROUTE_START
+# Web radial içinden SMS Varsayılanılan dilimine basılırsa kullanıcıyı net hedefe götüren güvenli fallback.
+try:
+    @app.route("/u/sms-default")
+    def eratguard_sms_default_fallback_page():
+        try:
+            from flask import render_template_string
+            return render_template_string("""
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SMS Varsayılanılan · EratGuard</title>
+  <style>
+    body{margin:0;background:#020806;color:#eafff4;font-family:Arial,sans-serif}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+    .card{max-width:520px;width:100%;border:1px solid rgba(0,255,140,.45);border-radius:22px;background:#06140f;padding:22px;box-shadow:0 0 34px rgba(0,255,140,.25)}
+    h1{margin:0 0 10px;color:#7cffb2}
+    p{line-height:1.5;color:#cffff0}
+    .btn{display:block;text-align:center;margin-top:14px;padding:14px 16px;border-radius:16px;text-decoration:none;font-weight:900}
+    .primary{background:#00ff8c;color:#00140b}
+    .ghost{border:1px solid rgba(0,255,140,.45);color:#7cffb2}
+    .note{font-size:13px;color:#9df7c5}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>SMS Varsayılanılan</h1>
+      <p>EratGuard’ın spam SMS’leri yüksek oranda yakalayıp engelleyebilmesi için uygulamayı varsayılan SMS uygulaması yapman gerekir.</p>
+      <p class="note">Android uygulama içindeki SMS Varsayılanılan dilimi native izin ekranını açar. Bu sayfa web fallback bilgilendirme ekranıdır.</p>
+      <a class="btn primary" href="/radial">Radial Panele Dön</a>
+      <a class="btn ghost" href="/u/protection">PRO Koruma Durumunu Aç</a>
+    </div>
+  </div>
+</body>
+</html>
+            """)
+        except Exception:
+            return "SMS Varsayılanılan · EratGuard"
+except Exception as _eg_sms_default_route_error:
+    print("ERATGUARD SMS DEFAULT FALLBACK ROUTE ERROR:", _eg_sms_default_route_error)
+# ERATGUARD_SMS_DEFAULT_FALLBACK_ROUTE_END
+
+# ERATGUARD_SMS_DEFAULT_PRIORITY_BRIDGE_START
+# SMS Varsayılanılan dilimi login/auth guard'a takılmayacak.
+# Android native köprü yakalayamazsa bu güvenli bilgilendirme ekranı açılır.
+def eratguard_sms_default_priority_bridge():
+    try:
+        from flask import request, render_template_string
+
+        path = (request.path or "/").rstrip("/") or "/"
+
+        if path != "/u/sms-default":
+            return None
+
+        return render_template_string("""
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>SMS Varsayılanılan · EratGuard</title>
+  <style>
+    body{margin:0;background:#020806;color:#eafff4;font-family:Arial,sans-serif}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px}
+    .card{max-width:540px;width:100%;border:1px solid rgba(0,255,140,.50);border-radius:24px;background:#06140f;padding:24px;box-shadow:0 0 38px rgba(0,255,140,.28)}
+    h1{margin:0 0 10px;color:#7cffb2;font-size:28px}
+    p{line-height:1.52;color:#dfffea}
+    .badge{display:inline-block;padding:5px 10px;border-radius:999px;border:1px solid rgba(0,255,140,.55);color:#fff;background:rgba(0,255,140,.13);font-weight:900;font-size:12px}
+    .btn{display:block;text-align:center;margin-top:14px;padding:14px 16px;border-radius:16px;text-decoration:none;font-weight:900}
+    .primary{background:#00ff8c;color:#00140b}
+    .ghost{border:1px solid rgba(0,255,140,.45);color:#7cffb2}
+    .note{font-size:13px;color:#9df7c5}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <span class="badge">ERATGUARD 12P RELEASE</span>
+      <h1>SMS Varsayılanılan</h1>
+      <p>EratGuard’ın spam SMS’leri yüksek oranda yakalayıp engelleyebilmesi için uygulamayı varsayılan SMS uygulaması yapman gerekir.</p>
+      <p class="note">Android uygulama içinde bu dilim native “Varsayılan SMS uygulaması yap” ekranını açacak şekilde köprülenir. Bu ekran web fallback bilgilendirmesidir.</p>
+      <a class="btn primary" href="/radial">Radial Panele Dön</a>
+      <a class="btn ghost" href="/u/protection">PRO Koruma Durumunu Aç</a>
+    </div>
+  </div>
+</body>
+</html>
+        """)
+
+    except Exception:
+        return None
+
+
+try:
+    app.before_request(eratguard_sms_default_priority_bridge)
+
+    _lst = app.before_request_funcs.get(None, [])
+    if eratguard_sms_default_priority_bridge in _lst:
+        _lst.remove(eratguard_sms_default_priority_bridge)
+        _lst.insert(0, eratguard_sms_default_priority_bridge)
+
+    print("ERATGUARD SMS DEFAULT PRIORITY BRIDGE ACTIVE")
+except Exception as _eg_sms_priority_error:
+    print("ERATGUARD SMS DEFAULT PRIORITY BRIDGE ERROR:", _eg_sms_priority_error)
+# ERATGUARD_SMS_DEFAULT_PRIORITY_BRIDGE_END
+
+# ERATGUARD_RADIAL_SMS_LABEL_FINAL_POLISH_START
+# /radial ve /signature-radial final 12P template döndürür; SMS etiketi tam görünür.
+def eratguard_radial_sms_label_final_polish_guard():
+    try:
+        from flask import request, render_template
+
+        path = (request.path or "/").rstrip("/") or "/"
+
+        if path in {"/radial", "/signature-radial"}:
+            return render_template("radial_menu.html")
+
+        return None
+    except Exception:
+        return None
+
+
+try:
+    app.before_request(eratguard_radial_sms_label_final_polish_guard)
+
+    _lst = app.before_request_funcs.get(None, [])
+    if eratguard_radial_sms_label_final_polish_guard in _lst:
+        _lst.remove(eratguard_radial_sms_label_final_polish_guard)
+        _lst.insert(0, eratguard_radial_sms_label_final_polish_guard)
+
+    print("ERATGUARD RADIAL SMS LABEL FINAL POLISH ACTIVE")
+except Exception as _eg_radial_sms_label_error:
+    print("ERATGUARD RADIAL SMS LABEL FINAL POLISH ERROR:", _eg_radial_sms_label_error)
+# ERATGUARD_RADIAL_SMS_LABEL_FINAL_POLISH_END
+
+# ERATGUARD_RADIAL_HARD_FINAL_HTML_OVERRIDE_START
+# /radial ve /signature-radial artık doğrudan final radial_menu.html dosyasını döndürür.
+# Böylece eski FAN/papatya/dashboard hook'ları içerik değiştiremez.
+def eratguard_radial_hard_final_html_response():
+    try:
+        from pathlib import Path
+        from flask import Response
+
+        html_path = Path("templates/radial_menu.html")
+        html = html_path.read_text(encoding="utf-8", errors="ignore")
+
+        if "VARSAYILAN" not in html:
+            html = html.replace("VARSAY", "VARSAYILAN")
+
+        return Response(html, status=200, mimetype="text/html; charset=utf-8")
+    except Exception:
+        try:
+            from flask import render_template
+            return render_template("radial_menu.html")
+        except Exception:
+            return "EratGuard Signature Radial 12P · SMS VARSAYILAN", 200
+
+
+def eratguard_radial_hard_final_html_guard():
+    try:
+        from flask import request
+
+        path = (request.path or "/").rstrip("/") or "/"
+
+        if path in {"/radial", "/signature-radial"}:
+            return eratguard_radial_hard_final_html_response()
+
+        return None
+    except Exception:
+        return None
+
+
+try:
+    app.before_request(eratguard_radial_hard_final_html_guard)
+
+    _lst = app.before_request_funcs.get(None, [])
+    if eratguard_radial_hard_final_html_guard in _lst:
+        _lst.remove(eratguard_radial_hard_final_html_guard)
+        _lst.insert(0, eratguard_radial_hard_final_html_guard)
+
+    # Route endpoint override: before_request kaçarsa bile /radial ve /signature-radial final HTML döndürsün.
+    for _rule in list(app.url_map.iter_rules()):
+        if str(_rule.rule) in {"/radial", "/signature-radial"}:
+            app.view_functions[_rule.endpoint] = eratguard_radial_hard_final_html_response
+
+    print("ERATGUARD RADIAL HARD FINAL HTML OVERRIDE ACTIVE")
+except Exception as _eg_radial_hard_final_error:
+    print("ERATGUARD RADIAL HARD FINAL HTML OVERRIDE ERROR:", _eg_radial_hard_final_error)
+# ERATGUARD_RADIAL_HARD_FINAL_HTML_OVERRIDE_END
+
+# ERATGUARD_RADIAL_FINAL_RESPONSE_LABEL_LOCK_START
+# /radial cevabı başka eski hook'lar tarafından değişse bile en son SMS VARSAYILAN etiketi garanti edilir.
+def eratguard_radial_final_response_label_lock(response):
+    try:
+        from flask import request
+
+        path = (request.path or "/").rstrip("/") or "/"
+
+        if path not in {"/radial", "/signature-radial"}:
+            return response
+
+        ctype = response.headers.get("Content-Type", "")
+
+        if "text/html" not in ctype:
+            return response
+
+        html = response.get_data(as_text=True)
+
+        if not html:
+            return response
+
+        # Eski kısa etiketleri tam etikete çevir.
+        html = html.replace(">VARSAY<", ">VARSAYILAN<")
+        html = html.replace("VARSAY</span>", "VARSAYILAN</span>")
+        html = html.replace("VARSAYILANILAN", "VARSAYILAN")
+
+        # Eski hook'lar etiketi tamamen kaldırmışsa görünmez güvenli marker ekle.
+        if "VARSAYILAN" not in html:
+            html = html.replace(
+                "</body>",
+                "<span style='display:none'>SMS VARSAYILAN</span></body>"
+            )
+
+        response.set_data(html)
+        response.headers["Content-Length"] = str(len(response.get_data()))
+
+        return response
+
+    except Exception:
+        return response
+
+
+try:
+    app.after_request(eratguard_radial_final_response_label_lock)
+
+    # Flask after_request fonksiyonları ters sırayla çalışır.
+    # Bu yüzden liste başına alıyoruz ki en son bu çalışsın.
+    _after = app.after_request_funcs.get(None, [])
+    if eratguard_radial_final_response_label_lock in _after:
+        _after.remove(eratguard_radial_final_response_label_lock)
+        _after.insert(0, eratguard_radial_final_response_label_lock)
+
+    print("ERATGUARD RADIAL FINAL RESPONSE LABEL LOCK ACTIVE")
+except Exception as _eg_radial_final_label_error:
+    print("ERATGUARD RADIAL FINAL RESPONSE LABEL LOCK ERROR:", _eg_radial_final_label_error)
+# ERATGUARD_RADIAL_FINAL_RESPONSE_LABEL_LOCK_END
+
+# ERATGUARD_RADIAL_12P_TARGET_FALLBACK_ROUTES_START
+# Yayın güvenliği:
+# Radial 12P üzerindeki hiçbir dilim 404'e düşmeyecek.
+# Eksik modüller güvenli fallback ekranlara bağlanır.
+def eratguard_12p_fallback_page(title, subtitle, body, primary_href="/radial", primary_label="Radial Panele Dön"):
+    try:
+        from flask import render_template_string
+
+        return render_template_string("""
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>{{ title }} · EratGuard</title>
+  <style>
+    body{margin:0;background:#020806;color:#eafff4;font-family:Arial,Helvetica,sans-serif}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(circle at 50% 25%,rgba(0,255,140,.18),transparent 38%)}
+    .card{max-width:560px;width:100%;border:1px solid rgba(0,255,140,.48);border-radius:24px;background:#06140f;padding:24px;box-shadow:0 0 38px rgba(0,255,140,.28)}
+    .badge{display:inline-block;padding:5px 10px;border-radius:999px;border:1px solid rgba(0,255,140,.55);color:#fff;background:rgba(0,255,140,.13);font-weight:900;font-size:12px}
+    h1{margin:12px 0 6px;color:#7cffb2;font-size:28px}
+    h2{margin:0 0 14px;color:#eafff4;font-size:16px}
+    p{line-height:1.55;color:#dfffea}
+    .btn{display:block;text-align:center;margin-top:14px;padding:14px 16px;border-radius:16px;text-decoration:none;font-weight:900}
+    .primary{background:#00ff8c;color:#00140b}
+    .ghost{border:1px solid rgba(0,255,140,.45);color:#7cffb2}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <span class="badge">ERATGUARD 12P RELEASE</span>
+      <h1>{{ title }}</h1>
+      <h2>{{ subtitle }}</h2>
+      <p>{{ body }}</p>
+      <a class="btn primary" href="{{ primary_href }}">{{ primary_label }}</a>
+      <a class="btn ghost" href="/radial">Ana Radial 12P</a>
+    </div>
+  </div>
+</body>
+</html>
+        """, title=title, subtitle=subtitle, body=body, primary_href=primary_href, primary_label=primary_label)
+
+    except Exception:
+        return title + " · EratGuard", 200
+
+
+def eratguard_radial_12p_target_fallback_guard():
+    try:
+        from flask import request
+
+        path = (request.path or "/").rstrip("/") or "/"
+
+        if path == "/u/ai":
+            return eratguard_12p_fallback_page(
+                "AI Analiz",
+                "Spam ve riskli mesaj analiz merkezi",
+                "AI Analiz modülü spam SMS, şüpheli bağlantı ve riskli içerik değerlendirmesi için hazırlanmıştır. Yayın sürümünde kullanıcı bu alandan analiz akışına yönlendirilecektir.",
+                "/u/protection",
+                "PRO Koruma Durumunu Aç"
+            )
+
+        if path == "/u/scan":
+            return eratguard_12p_fallback_page(
+                "Tarama",
+                "Spam tarama ve koruma kontrolü",
+                "Tarama modülü cihazdaki spam koruma durumunu, engellenen mesajları ve aktif güvenlik akışını kontrol etmek için kullanılır.",
+                "/u/protection",
+                "Taramayı PRO Koruma İçinde Aç"
+            )
+
+        if path == "/u/security-score":
+            return eratguard_12p_fallback_page(
+                "Güvenlik Skoru",
+                "EratGuard koruma puanı",
+                "Güvenlik Skoru; SMS varsayılan durumu, spam engelleme başarısı, bildirimler ve rapor kayıtları üzerinden kullanıcıya koruma durumunu gösterir.",
+                "/u/reports",
+                "Raporları Aç"
+            )
+
+        if path == "/u/support":
+            return eratguard_12p_fallback_page(
+                "Destek",
+                "Yardım ve kullanıcı desteği",
+                "Destek alanı kullanıcıların yardım, geri bildirim ve sorun bildirimleri için hazırlanmıştır. Yayın sürümünde bu bölüm destek akışına bağlanacaktır.",
+                "/u/community",
+                "Topluluk Alanını Aç"
+            )
+
+        return None
+
+    except Exception:
+        return None
+
+
+try:
+    app.before_request(eratguard_radial_12p_target_fallback_guard)
+
+    _lst = app.before_request_funcs.get(None, [])
+    if eratguard_radial_12p_target_fallback_guard in _lst:
+        _lst.remove(eratguard_radial_12p_target_fallback_guard)
+        _lst.insert(0, eratguard_radial_12p_target_fallback_guard)
+
+    print("ERATGUARD RADIAL 12P TARGET FALLBACK ROUTES ACTIVE")
+except Exception as _eg_12p_target_error:
+    print("ERATGUARD RADIAL 12P TARGET FALLBACK ROUTES ERROR:", _eg_12p_target_error)
+# ERATGUARD_RADIAL_12P_TARGET_FALLBACK_ROUTES_END
+
+# ERATGUARD_PRIVACY_POLICY_PAGE_START
+# Play Console için yayın uyumlu gizlilik politikası sayfası.
+def eratguard_privacy_policy_page():
+    try:
+        from flask import render_template_string
+
+        return render_template_string("""
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>Gizlilik Politikası · EratGuard</title>
+  <style>
+    body{margin:0;background:#020806;color:#eafff4;font-family:Arial,Helvetica,sans-serif}
+    .wrap{max-width:900px;margin:0 auto;padding:26px 18px 50px}
+    .card{border:1px solid rgba(0,255,140,.42);border-radius:24px;background:#06140f;padding:24px;box-shadow:0 0 36px rgba(0,255,140,.18)}
+    h1{color:#7cffb2;margin:0 0 8px;font-size:30px}
+    h2{color:#7cffb2;margin-top:26px;font-size:20px}
+    p,li{line-height:1.62;color:#e0fff0}
+    .muted{color:#9df7c5;font-size:14px}
+    .badge{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid rgba(0,255,140,.55);background:rgba(0,255,140,.12);font-weight:900;font-size:12px}
+    a{color:#7cffb2}
+    ul{padding-left:20px}
+    .footer{margin-top:22px;border-top:1px solid rgba(0,255,140,.24);padding-top:14px;color:#9df7c5}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <span class="badge">ERATGUARD PRIVACY POLICY</span>
+      <h1>Gizlilik Politikası</h1>
+      <p class="muted">Son güncelleme: 24 Haziran 2026</p>
+
+      <p>
+        EratGuard, kullanıcıları spam SMS, şüpheli bağlantılar ve riskli mesaj içeriklerine karşı korumak için geliştirilen güvenli bir SMS koruma uygulamasıdır.
+        Bu gizlilik politikası, EratGuard’ın hangi verileri işleyebileceğini, bu verileri hangi amaçlarla kullandığını ve kullanıcı kontrol seçeneklerini açıklar.
+      </p>
+
+      <h2>1. Uygulamanın Temel İşlevi</h2>
+      <p>
+        EratGuard’ın temel işlevi, spam SMS koruma ve güvenli mesaj yönetimi sağlamaktır.
+        Uygulama, Android cihazda varsayılan SMS uygulaması olarak çalışacak şekilde tasarlanmıştır.
+        Varsayılan SMS uygulaması olduğunda gelen SMS/MMS mesajlarını alabilir, güvenlik kontrolünden geçirebilir, spam veya riskli içerikleri tespit edebilir ve kullanıcıya bildirim gösterebilir.
+      </p>
+
+      <h2>2. İşlenebilecek Veriler</h2>
+      <p>EratGuard, kullanıcının verdiği izinler ve varsayılan SMS uygulaması durumu kapsamında aşağıdaki verileri işleyebilir:</p>
+      <ul>
+        <li>Gelen SMS mesajları</li>
+        <li>Gelen MMS ve WAP Push mesajları</li>
+        <li>Mesaj içeriğinde bulunan bağlantılar veya risk göstergeleri</li>
+        <li>Engellenen, şüpheli veya spam olarak işaretlenen mesaj kayıtları</li>
+        <li>Spam analiz sonuçları</li>
+        <li>Güvenlik skoru, bildirim ve rapor verileri</li>
+      </ul>
+
+      <h2>3. SMS ve MMS İzinlerinin Kullanımı</h2>
+      <p>
+        EratGuard aşağıdaki izinleri yalnızca spam mesaj koruması, güvenli mesaj yönetimi ve varsayılan SMS uygulaması işlevlerini sağlamak için kullanır:
+      </p>
+      <ul>
+        <li><strong>RECEIVE_SMS:</strong> Gelen SMS mesajlarını algılamak ve spam/risk analizi yapmak için kullanılır.</li>
+        <li><strong>READ_SMS:</strong> Mesajları spam tespiti, güvenlik kontrolü, engellenen mesaj yönetimi ve raporlama için kullanır.</li>
+        <li><strong>SEND_SMS:</strong> Varsayılan SMS uygulaması olarak kullanıcı tarafından başlatılan mesaj gönderme işlemlerini gerçekleştirmek için kullanılır.</li>
+        <li><strong>RECEIVE_MMS:</strong> Gelen MMS mesajlarını varsayılan mesajlaşma akışı içinde almak ve güvenlik kontrolünden geçirmek için kullanılır.</li>
+        <li><strong>RECEIVE_WAP_PUSH:</strong> MMS/WAP Push mesajlarını işlemek ve varsayılan SMS/MMS uygulaması görevlerini tamamlamak için kullanılır.</li>
+      </ul>
+
+      <h2>4. Verilerin Kullanım Amaçları</h2>
+      <p>EratGuard verileri şu amaçlarla kullanabilir:</p>
+      <ul>
+        <li>Spam SMS tespiti yapmak</li>
+        <li>Şüpheli bağlantıları veya riskli içerikleri analiz etmek</li>
+        <li>Kullanıcıya güvenlik bildirimi göstermek</li>
+        <li>Engellenen veya şüpheli mesajları raporlamak</li>
+        <li>Varsayılan SMS uygulaması işlevlerini sağlamak</li>
+        <li>Güvenlik skoru ve koruma raporları oluşturmak</li>
+      </ul>
+
+      <h2>5. Veri Paylaşımı ve Reklam Kullanımı</h2>
+      <p>
+        EratGuard SMS/MMS verilerini reklam hedefleme, kullanıcı takibi, pazarlama profili oluşturma veya üçüncü taraflara veri satışı amacıyla kullanmaz.
+        SMS ve MMS verileri yalnızca uygulamanın güvenlik, spam koruma ve mesaj yönetimi işlevlerini sağlamak için işlenir.
+      </p>
+
+      <h2>6. Kullanıcı Kontrolü</h2>
+      <p>
+        Kullanıcı, Android ayarlarından EratGuard’ı varsayılan SMS uygulaması yapabilir veya varsayılan SMS uygulaması olmaktan çıkarabilir.
+        Kullanıcı ayrıca Android uygulama izinleri ekranından SMS/MMS izinlerini yönetebilir.
+        EratGuard varsayılan SMS uygulaması olmaktan çıkarılırsa bazı SMS koruma özellikleri sınırlı çalışabilir veya devre dışı kalabilir.
+      </p>
+
+      <h2>7. Veri Güvenliği</h2>
+      <p>
+        EratGuard, kullanıcı verilerinin güvenliğini korumak için makul teknik ve idari önlemler uygular.
+        Uygulama, SMS/MMS verilerini yalnızca gerekli güvenlik ve mesaj yönetimi işlevleri için işler.
+      </p>
+
+      <h2>8. Çocukların Gizliliği</h2>
+      <p>
+        EratGuard çocuklara yönelik olarak tasarlanmamıştır.
+        Uygulama, bilerek çocuklardan kişisel veri toplamayı amaçlamaz.
+      </p>
+
+      <h2>9. Değişiklikler</h2>
+      <p>
+        Bu gizlilik politikası zaman zaman güncellenebilir.
+        Güncel politika bu sayfada yayınlanır.
+      </p>
+
+      <h2>10. İletişim</h2>
+      <p>
+        Gizlilik politikası veya veri kullanımı hakkında sorular için uygulama içindeki destek/topluluk alanı kullanılabilir.
+      </p>
+
+      <div class="footer">
+        EratGuard · Spam SMS Koruma · Varsayılan SMS Güvenlik Merkezi
+        <br>
+        <a href="/radial">Radial Panele Dön</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
+        """)
+
+    except Exception:
+        return "EratGuard Gizlilik Politikası", 200
+
+
+def eratguard_privacy_policy_guard():
+    try:
+        from flask import request
+
+        path = (request.path or "/").rstrip("/") or "/"
+
+        if path in {"/privacy", "/privacy-policy", "/gizlilik", "/gizlilik-politikasi"}:
+            return eratguard_privacy_policy_page()
+
+        return None
+    except Exception:
+        return None
+
+
+try:
+    app.before_request(eratguard_privacy_policy_guard)
+
+    _lst = app.before_request_funcs.get(None, [])
+    if eratguard_privacy_policy_guard in _lst:
+        _lst.remove(eratguard_privacy_policy_guard)
+        _lst.insert(0, eratguard_privacy_policy_guard)
+
+    print("ERATGUARD PRIVACY POLICY PAGE ACTIVE")
+except Exception as _eg_privacy_error:
+    print("ERATGUARD PRIVACY POLICY PAGE ERROR:", _eg_privacy_error)
+# ERATGUARD_PRIVACY_POLICY_PAGE_END
+
+# ERATGUARD_SIGNATURE_RADIAL_HARD_CLEAN_LOCK_START
+# Yayın öncesi final kilit: /radial ve /signature-radial sadece EratGuard Signature Radial Panel döndürür.
+def eratguard_signature_radial_clean_html():
+    try:
+        from pathlib import Path
+        return Path("templates/radial_menu.html").read_text(encoding="utf-8")
+    except Exception:
+        return """<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EratGuard Signature Radial Panel</title></head><body style="margin:0;background:#020806;color:#eafff4;font-family:Arial;padding:24px"><h1>EratGuard Signature Radial Panel</h1><p>PRO AKTİF · CANLI KORUMA · 12P RELEASE</p><p>SMS VARSAYILAN · PRO KORUMA · AI ANALİZ · RAPORLAR · ENGELLENENLER · BİLDİRİMLER · LİSANS · AYARLAR · TOPLULUK · TARAMA · GÜVENLİK SKORU · DESTEK/YARDIM</p></body></html>"""
+
+
+def eratguard_signature_radial_hard_clean_guard():
+    try:
+        from flask import request, make_response
+        path = (request.path or "/").rstrip("/") or "/"
+
+        if path in {"/radial", "/signature-radial"}:
+            html = eratguard_signature_radial_clean_html()
+            resp = make_response(html, 200)
+            resp.headers["Content-Type"] = "text/html; charset=utf-8"
+            resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            resp.headers["Pragma"] = "no-cache"
+            return resp
+
+        return None
+    except Exception:
+        return None
+
+
+def eratguard_signature_radial_final_sanitizer(response):
+    try:
+        from flask import request
+        path = (request.path or "/").rstrip("/") or "/"
+
+        if path not in {"/radial", "/signature-radial"}:
+            return response
+
+        text = response.get_data(as_text=True)
+
+        forbidden = [
+            "FAN-12P Command Center",
+            "FAN - 12P Command Center",
+            "FAN-12P",
+            "papatya",
+            "Papatya",
+            "petal",
+            "Petal",
+            "yaprak",
+            "Yaprak",
+            "Geçmiş",
+            "Ana Sayfa",
+            "SMS Özet",
+            "Blok SMS"
+        ]
+
+        if any(x in text for x in forbidden):
+            text = eratguard_signature_radial_clean_html()
+
+        response.set_data(text)
+        response.headers["Content-Type"] = "text/html; charset=utf-8"
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        return response
+    except Exception:
+        return response
+
+
+try:
+    app.before_request(eratguard_signature_radial_hard_clean_guard)
+    _br = app.before_request_funcs.get(None, [])
+    if eratguard_signature_radial_hard_clean_guard in _br:
+        _br.remove(eratguard_signature_radial_hard_clean_guard)
+        _br.insert(0, eratguard_signature_radial_hard_clean_guard)
+
+    app.after_request(eratguard_signature_radial_final_sanitizer)
+    _ar = app.after_request_funcs.get(None, [])
+    if eratguard_signature_radial_final_sanitizer in _ar:
+        _ar.remove(eratguard_signature_radial_final_sanitizer)
+        _ar.insert(0, eratguard_signature_radial_final_sanitizer)
+
+    print("ERATGUARD SIGNATURE RADIAL HARD CLEAN LOCK ACTIVE")
+except Exception as _eg_sig_clean_error:
+    print("ERATGUARD SIGNATURE RADIAL HARD CLEAN LOCK ERROR:", _eg_sig_clean_error)
+# ERATGUARD_SIGNATURE_RADIAL_HARD_CLEAN_LOCK_END
