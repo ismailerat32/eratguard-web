@@ -32,9 +32,13 @@
         linear-gradient(120deg, rgba(94,234,255,.045) 1px, transparent 1px);
       background-size:38px 66px;
       opacity:.22;
+      -webkit-mask-image:radial-gradient(circle at 50% 52%, black 0 62%, transparent 83%);
       mask-image:radial-gradient(circle at 50% 52%, black 0 62%, transparent 83%);
     }
     .app{
+      display:block;
+      visibility:visible;
+      opacity:1;
       width:100%;
       max-width:760px;
       min-height:100vh;
@@ -91,6 +95,9 @@
     .pill.release{min-width:190px;margin-top:4px}
     .ringWrap{
       position:relative;
+      display:block;
+      visibility:visible;
+      opacity:1;
       width:min(100vw,720px);
       height:min(100vw,720px);
       margin:4px auto 24px;
@@ -263,6 +270,57 @@
       vertical-align:-7px;
       margin-right:15px;
     }
+
+    .fallbackMenu{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      margin:18px auto 20px;
+      width:100%;
+      max-width:680px;
+    }
+    .fallbackCard{
+      text-decoration:none;
+      border:1px solid rgba(33,255,138,.42);
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(33,255,138,.16),rgba(9,55,82,.62));
+      color:#fff;
+      padding:13px 10px;
+      min-height:74px;
+      box-shadow:0 0 18px rgba(33,255,138,.10), inset 0 0 14px rgba(94,234,255,.06);
+      display:flex;
+      align-items:center;
+      gap:9px;
+    }
+    .fallbackNo{
+      width:30px;
+      height:30px;
+      border-radius:50%;
+      border:1px solid var(--green);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--green2);
+      font-weight:1000;
+      flex:0 0 auto;
+      background:#03140d;
+    }
+    .fallbackTxt b{
+      display:block;
+      font-size:12px;
+      line-height:1.12;
+      letter-spacing:.5px;
+    }
+    .fallbackTxt small{
+      display:block;
+      margin-top:4px;
+      color:#c9ffdf;
+      font-size:10px;
+      opacity:.84;
+    }
+    body.eg-svg-ready .fallbackMenu{display:none}
+    body.eg-svg-failed .ringWrap{display:none}
+
     @media(max-width:430px){
       .app{padding:18px 10px 28px}
       .hero{padding:24px 10px 22px;margin-bottom:16px}
@@ -464,7 +522,22 @@
       });
     }
 
-    build();
+    try {
+      build();
+      document.body.classList.add("eg-svg-ready");
+    } catch (e) {
+      document.body.classList.add("eg-svg-failed");
+      console.error("EratGuard SVG ring failed", e);
+    }
+
+    setTimeout(function(){
+      var segs = document.querySelectorAll("#segments .segHot").length;
+      if(segs >= 12){
+        document.body.classList.add("eg-svg-ready");
+      }else{
+        document.body.classList.add("eg-svg-failed");
+      }
+    }, 800);
   </script>
 </body>
 </html>
