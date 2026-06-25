@@ -34536,3 +34536,38 @@ try:
 except Exception as _eg_sig_clean_error:
     print("ERATGUARD SIGNATURE RADIAL HARD CLEAN LOCK ERROR:", _eg_sig_clean_error)
 # ERATGUARD_SIGNATURE_RADIAL_HARD_CLEAN_LOCK_END
+
+# ERATGUARD_RADIAL_LAB_DOME_PRO_START
+def eratguard_radial_lab_dome_pro_page():
+    try:
+        from pathlib import Path
+        from flask import make_response
+        html = Path("templates/radial_menu_lab.html").read_text(encoding="utf-8")
+        resp = make_response(html, 200)
+        resp.headers["Content-Type"] = "text/html; charset=utf-8"
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        return resp
+    except Exception as e:
+        return "EratGuard radial lab error: " + str(e), 500
+
+def eratguard_radial_lab_dome_pro_guard():
+    try:
+        from flask import request
+        path = (request.path or "/").rstrip("/") or "/"
+        if path in {"/radial-lab", "/radial-wow"}:
+            return eratguard_radial_lab_dome_pro_page()
+        return None
+    except Exception:
+        return None
+
+try:
+    app.before_request(eratguard_radial_lab_dome_pro_guard)
+    _br = app.before_request_funcs.get(None, [])
+    if eratguard_radial_lab_dome_pro_guard in _br:
+        _br.remove(eratguard_radial_lab_dome_pro_guard)
+        _br.insert(0, eratguard_radial_lab_dome_pro_guard)
+    print("ERATGUARD RADIAL LAB DOME PRO ACTIVE")
+except Exception as _eg_lab_err:
+    print("ERATGUARD RADIAL LAB DOME PRO ERROR:", _eg_lab_err)
+# ERATGUARD_RADIAL_LAB_DOME_PRO_END
