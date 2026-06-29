@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>EratGuard Admin Command Center</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{
+  width:100%;min-height:100%;background:#020817;color:#dff7ff;
+  font-family:Arial,Helvetica,sans-serif;overflow-x:hidden;
+}
+body:before{
+  content:"";position:fixed;inset:0;z-index:-3;
+  background:
+    radial-gradient(circle at 50% 36%,rgba(0,170,255,.24),transparent 32%),
+    radial-gradient(circle at 50% 70%,rgba(0,90,180,.16),transparent 40%),
+    linear-gradient(180deg,#04142c,#020817 58%,#01040b);
+}
+body:after{
+  content:"";position:fixed;inset:0;z-index:-2;opacity:.35;
+  background:
+    linear-gradient(rgba(70,180,255,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(70,180,255,.035) 1px,transparent 1px);
+  background-size:34px 34px;
+}
+.scan{
+  position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(80,190,255,.025) 3px,rgba(80,190,255,.025) 4px);
+}
+.wrap{min-height:100vh;padding:22px 18px 28px;display:flex;flex-direction:column;gap:18px}
+.top{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  border:1px solid rgba(90,190,255,.24);border-radius:22px;
+  padding:14px 16px;background:rgba(2,16,38,.72);
+  box-shadow:0 0 28px rgba(0,140,255,.16),inset 0 0 28px rgba(0,140,255,.05);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{
+  width:42px;height:42px;border-radius:14px;
+  background:radial-gradient(circle at 35% 25%,#78e8ff,#006fb7 48%,#001d3a);
+  border:1px solid rgba(140,230,255,.8);
+  box-shadow:0 0 22px rgba(0,180,255,.75);
+  display:grid;place-items:center;font-weight:900;color:white;
+}
+.brand h1{font-size:20px;letter-spacing:.04em}
+.brand p{font-size:11px;color:rgba(195,235,255,.62);letter-spacing:.18em;margin-top:2px}
+.badge{
+  color:#8eeaff;border:1px solid rgba(90,220,255,.45);
+  background:rgba(0,120,210,.13);border-radius:999px;
+  padding:8px 11px;font-size:11px;letter-spacing:.12em;white-space:nowrap;
+}
+.hero{
+  display:grid;grid-template-columns:1fr minmax(260px,380px) 1fr;
+  gap:18px;align-items:center;min-height:520px;
+}
+.side{display:flex;flex-direction:column;gap:12px}
+.card{
+  position:relative;min-height:78px;border-radius:18px;
+  border:1px solid rgba(80,190,255,.28);
+  background:linear-gradient(135deg,rgba(3,26,58,.86),rgba(2,14,34,.72));
+  box-shadow:0 0 22px rgba(0,140,255,.12),inset 0 0 18px rgba(0,150,255,.05);
+  padding:14px 14px 13px 16px;overflow:hidden;
+}
+.card:before{
+  content:"";position:absolute;left:0;top:13px;bottom:13px;width:3px;
+  background:#38d8ff;box-shadow:0 0 12px #38d8ff;border-radius:4px;
+}
+.card:after{
+  content:"";position:absolute;right:-40px;top:-40px;width:100px;height:100px;
+  background:radial-gradient(circle,rgba(0,180,255,.18),transparent 65%);
+}
+.card small{display:block;color:#5fd8ff;font-size:10px;letter-spacing:.18em;margin-bottom:7px}
+.card b{display:block;color:white;font-size:15px;margin-bottom:5px}
+.card span{display:block;color:rgba(210,240,255,.62);font-size:12px;line-height:1.35}
+.center{
+  position:relative;height:430px;border-radius:32px;
+  border:1px solid rgba(100,210,255,.30);
+  background:radial-gradient(circle at 50% 45%,rgba(0,160,255,.18),rgba(2,13,33,.55) 58%,rgba(0,0,0,.18));
+  box-shadow:0 0 50px rgba(0,160,255,.22),inset 0 0 60px rgba(0,120,255,.08);
+  display:grid;place-items:center;overflow:hidden;
+}
+.ring,.ring2,.ring3{
+  position:absolute;border-radius:50%;border:1px solid rgba(105,225,255,.28);
+}
+.ring{width:310px;height:310px;animation:spin 12s linear infinite}
+.ring2{width:238px;height:238px;animation:spin2 9s linear infinite;border-color:rgba(60,190,255,.38)}
+.ring3{width:164px;height:164px;border-color:rgba(160,240,255,.24)}
+.ring:before,.ring2:before{
+  content:"";position:absolute;inset:-3px;border-radius:50%;
+  border-top:5px solid #56e4ff;border-right:5px solid transparent;
+  border-bottom:5px solid transparent;border-left:5px solid transparent;
+  filter:drop-shadow(0 0 12px #56e4ff);
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spin2{to{transform:rotate(-360deg)}}
+.core{
+  width:118px;height:118px;border-radius:30px;
+  background:linear-gradient(145deg,#0ca7ff,#043b78 62%,#011a37);
+  border:1px solid rgba(180,245,255,.8);
+  box-shadow:0 0 34px rgba(0,190,255,.8),inset 0 0 28px rgba(255,255,255,.13);
+  display:grid;place-items:center;z-index:2;transform:rotate(45deg);
+}
+.core span{transform:rotate(-45deg);font-size:42px;font-weight:900;color:#dffaff;text-shadow:0 0 14px #7ceeff}
+.center-title{
+  position:absolute;bottom:54px;text-align:center;z-index:2;
+}
+.center-title h2{font-size:20px;letter-spacing:.16em;color:white}
+.center-title p{font-size:11px;color:#67dcff;letter-spacing:.22em;margin-top:8px}
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+}
+.stat{
+  border:1px solid rgba(90,190,255,.24);border-radius:18px;
+  background:rgba(3,20,48,.74);padding:15px 12px;text-align:center;
+  box-shadow:inset 0 0 20px rgba(0,120,255,.05);
+}
+.stat strong{display:block;color:#4de4ff;font-size:24px;text-shadow:0 0 14px rgba(0,200,255,.65)}
+.stat span{display:block;color:rgba(210,240,255,.58);font-size:10px;letter-spacing:.16em;margin-top:6px}
+.footer{
+  text-align:center;color:rgba(200,235,255,.38);font-size:10px;letter-spacing:.18em;padding:4px 0 0;
+}
+a.card{text-decoration:none;color:inherit}
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;min-height:auto}
+  .center{order:-1;height:360px}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .top{align-items:flex-start;flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="scan"></div>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <div class="logo">EG</div>
+      <div>
+        <h1>EratGuard Admin Command Center</h1>
+        <p>BLUE OPS · SECURITY CONTROL · ADMIN</p>
+      </div>
+    </div>
+    <div class="badge">ADMIN AKTİF · CANLI KONTROL</div>
+  </div>
+
+  <div class="hero">
+    <div class="side">
+      <a class="card" href="/admin/users"><small>USER OPS</small><b>Kullanıcılar</b><span>Hesaplar, roller, erişim ve oturum kontrolü.</span></a>
+      <a class="card" href="/admin/licenses"><small>LICENSE CENTER</small><b>Lisanslar</b><span>PRO aktivasyonları, planlar ve anahtar durumu.</span></a>
+      <a class="card" href="/admin/reports"><small>REPORT MATRIX</small><b>SMS Raporları</b><span>Spam tespitleri, engelleme ve trafik özeti.</span></a>
+      <a class="card" href="/admin/blocked"><small>BLOCK VAULT</small><b>Engellenenler</b><span>Numara, SMS ve filtre karar kayıtları.</span></a>
+      <a class="card" href="/admin/ai"><small>AI CORE</small><b>AI Analiz</b><span>Model sinyalleri, skorlar ve karar katmanı.</span></a>
+    </div>
+
+    <div class="center">
+      <div class="ring"></div>
+      <div class="ring2"></div>
+      <div class="ring3"></div>
+      <div class="core"><span>⌬</span></div>
+      <div class="center-title">
+        <h2>COMMAND CORE</h2>
+        <p>ERATGUARD PRO ADMIN</p>
+      </div>
+    </div>
+
+    <div class="side">
+      <a class="card" href="/admin/system"><small>SYSTEM HEALTH</small><b>Sistem Sağlığı</b><span>Sunucu, bağlantı, servis ve uptime izleme.</span></a>
+      <a class="card" href="/admin/feedback"><small>FEEDBACK HUB</small><b>Geri Bildirimler</b><span>Kullanıcı mesajları ve topluluk sinyalleri.</span></a>
+      <a class="card" href="/admin/support"><small>SUPPORT DESK</small><b>Destek Talepleri</b><span>Yardım, hata bildirimi ve işlem kuyruğu.</span></a>
+      <a class="card" href="/admin/releases"><small>RELEASE OPS</small><b>Yayın Durumu</b><span>Play sürümü, AAB, politika ve build notları.</span></a>
+      <a class="card" href="/admin/privacy"><small>POLICY GUARD</small><b>Gizlilik / Policy</b><span>SMS izinleri, gizlilik metni ve uyumluluk.</span></a>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><strong>1.247</strong><span>ENGELLENEN SMS</span></div>
+    <div class="stat"><strong>98%</strong><span>KORUMA SKORU</span></div>
+    <div class="stat"><strong>12</strong><span>AKTİF MODÜL</span></div>
+    <div class="stat"><strong>OK</strong><span>SİSTEM DURUMU</span></div>
+  </div>
+
+  <div class="footer">ERATGUARD PRO · ADMIN COMMAND CENTER V1 · 2026</div>
+</div>
+</body>
+</html>

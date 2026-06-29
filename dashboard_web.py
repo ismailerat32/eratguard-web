@@ -24971,6 +24971,43 @@ except Exception as _eg_aab2_err:
 
 
 
+
+# === ERATGUARD ADMIN COMMAND CENTER V1 ===
+def _eg_admin_command_center_v1():
+    try:
+        return render_template("admin_command_center.html")
+    except Exception:
+        return """
+        <html><body style='background:#020817;color:#dff7ff;font-family:Arial;padding:40px'>
+        <h1>EratGuard Admin Command Center</h1>
+        <p>Admin panel template yüklenemedi.</p>
+        </body></html>
+        """
+
+@app.route("/admin")
+@app.route("/admin/")
+@app.route("/admin/dashboard")
+@app.route("/admin/radial")
+@app.route("/admin/command")
+@app.route("/admin/command-center")
+def eg_admin_command_center_v1_route():
+    return _eg_admin_command_center_v1()
+
+@app.route("/admin/users")
+@app.route("/admin/licenses")
+@app.route("/admin/reports")
+@app.route("/admin/blocked")
+@app.route("/admin/ai")
+@app.route("/admin/system")
+@app.route("/admin/feedback")
+@app.route("/admin/support")
+@app.route("/admin/releases")
+@app.route("/admin/privacy")
+def eg_admin_command_center_v1_safe_pages():
+    return _eg_admin_command_center_v1()
+# === /ERATGUARD ADMIN COMMAND CENTER V1 ===
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
@@ -34571,3 +34608,146 @@ try:
 except Exception as _eg_lab_err:
     print("ERATGUARD RADIAL LAB DOME PRO ERROR:", _eg_lab_err)
 # ERATGUARD_RADIAL_LAB_DOME_PRO_END
+
+
+# === ERATGUARD HARDENING V1 PRIVACY NO SALE LOCK ===
+# Play review için SMS/veri kullanımı netleştirme: satış yok, reklam takibi yok.
+try:
+    @app.before_request
+    def eratguard_hardening_v1_privacy_no_sale_guard():
+        try:
+            path = request.path or ""
+        except Exception:
+            path = ""
+        if path in ("/privacy", "/privacy-policy", "/gizlilik", "/gizlilik-politikasi"):
+            html = """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EratGuard PRO - Gizlilik Politikası</title>
+<style>
+:root{--bg:#020806;--card:#07130f;--line:rgba(0,255,150,.22);--text:#eafff4;--muted:#9bd8bd;--green:#00f08a}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 50% 0%,#0b2b1e 0,#020806 52%,#000 100%);color:var(--text);font-family:Arial,system-ui,sans-serif;padding:22px}
+.wrap{max-width:820px;margin:0 auto}
+.card{background:rgba(7,19,15,.92);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 0 28px rgba(0,255,150,.12)}
+h1{margin:0 0 10px;color:var(--green);font-size:25px}
+h2{margin:22px 0 8px;font-size:18px;color:#cffff0}
+p,li{line-height:1.55;color:var(--muted);font-size:15px}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:7px 12px;margin:4px 5px 4px 0;color:#cffff0;background:rgba(0,255,150,.06);font-size:13px}
+.strong{color:#fff;font-weight:800}
+a{color:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="card">
+<h1>Gizlilik Politikası</h1>
+<p class="strong">EratGuard PRO, spam SMS koruması ve varsayılan SMS uygulaması işlevleri için gerekli verileri kullanır. Kullanıcı verileri satılmaz, reklam profili oluşturmak için kullanılmaz ve üçüncü taraf reklam ağlarıyla paylaşılmaz.</p>
+
+<h2>Kullanılan izinler</h2>
+<span class="badge">RECEIVE_SMS</span>
+<span class="badge">READ_SMS</span>
+<span class="badge">SEND_SMS</span>
+<span class="badge">RECEIVE_MMS</span>
+<span class="badge">RECEIVE_WAP_PUSH</span>
+<span class="badge">POST_NOTIFICATIONS</span>
+
+<h2>SMS verilerinin kullanım amacı</h2>
+<ul>
+<li>Gelen SMS/MMS mesajlarını spam, riskli bağlantı ve dolandırıcılık işaretleri için analiz etmek.</li>
+<li>Engellenen veya riskli mesajları kullanıcıya göstermek.</li>
+<li>Varsayılan SMS uygulaması işlevlerini sağlamak.</li>
+<li>Bildirim, rapor, güvenlik skoru ve kullanıcı destek süreçlerini çalıştırmak.</li>
+</ul>
+
+<h2>Veri satışı ve reklam</h2>
+<p class="strong">EratGuard PRO kullanıcı SMS içeriklerini, telefon numaralarını, kişi bilgilerini veya güvenlik raporlarını satmaz. Bu veriler reklam hedefleme, pazarlama profili veya üçüncü taraf takip amacıyla kullanılmaz.</p>
+
+<h2>Kullanıcı kontrolü</h2>
+<p>Kullanıcı, Android ayarlarından varsayılan SMS uygulamasını değiştirebilir ve izinleri geri alabilir. İzinler kaldırıldığında SMS koruma özellikleri sınırlı çalışabilir.</p>
+
+<h2>İletişim</h2>
+<p>Destek ve gizlilik talepleri için uygulama içindeki Destek bölümünü kullanabilirsiniz.</p>
+</div>
+</div>
+</body>
+</html>
+"""
+            return html, 200, {"Content-Type": "text/html; charset=utf-8"}
+except Exception:
+    pass
+# === /ERATGUARD HARDENING V1 PRIVACY NO SALE LOCK ===
+
+# === ERATGUARD HARDENING V1B PRIVACY PRIORITY FIX ===
+# V1 privacy guard eski privacy guard'lardan sonra kaldıysa en başa taşır.
+try:
+    _eg_hv1b_funcs = app.before_request_funcs.setdefault(None, [])
+    _eg_hv1b_funcs = [
+        f for f in _eg_hv1b_funcs
+        if getattr(f, "__name__", "") != "eratguard_hardening_v1_privacy_no_sale_guard"
+    ]
+    if "eratguard_hardening_v1_privacy_no_sale_guard" in globals():
+        _eg_hv1b_funcs.insert(0, eratguard_hardening_v1_privacy_no_sale_guard)
+        app.before_request_funcs[None] = _eg_hv1b_funcs
+        print("ERATGUARD HARDENING V1B PRIVACY PRIORITY FIX ACTIVE")
+except Exception as _eg_hv1b_err:
+    print("ERATGUARD HARDENING V1B PRIVACY PRIORITY FIX ERROR:", _eg_hv1b_err)
+# === /ERATGUARD HARDENING V1B PRIVACY PRIORITY FIX ===
+
+# === ERATGUARD ADMIN BLUE COMMAND CENTER FINAL FORCE OVERRIDE ===
+# Bu blok en sonda kalmalı: eski yeşil admin/user center route'larını mavi admin command center'a zorlar.
+try:
+    def _eg_admin_blue_final_force_page():
+        try:
+            return render_template("admin_command_center.html")
+        except Exception:
+            return """
+            <!doctype html>
+            <html><head><meta name="viewport" content="width=device-width,initial-scale=1">
+            <title>EratGuard Admin Command Center</title></head>
+            <body style="background:#020817;color:#dff7ff;font-family:Arial;padding:32px">
+            <h1>EratGuard Admin Command Center</h1>
+            <p>Blue admin panel active.</p>
+            </body></html>
+            """
+
+    _eg_admin_blue_targets = {
+        "/admin",
+        "/admin/",
+        "/admin/dashboard",
+        "/admin/radial",
+        "/admin/command",
+        "/admin/command-center",
+        "/admin/users",
+        "/admin/licenses",
+        "/admin/reports",
+        "/admin/blocked",
+        "/admin/ai",
+        "/admin/system",
+        "/admin/feedback",
+        "/admin/support",
+        "/admin/releases",
+        "/admin/privacy",
+    }
+
+    # Mevcut eski endpoint'leri aynı URL üzerinde mavi template'e çevir.
+    for _eg_rule in list(app.url_map.iter_rules()):
+        try:
+            if str(_eg_rule.rule) in _eg_admin_blue_targets:
+                app.view_functions[_eg_rule.endpoint] = _eg_admin_blue_final_force_page
+        except Exception:
+            pass
+
+    @app.route("/admin-blue")
+    @app.route("/admin-blue/")
+    @app.route("/admin-blue/dashboard")
+    def eg_admin_blue_direct_final_route():
+        return _eg_admin_blue_final_force_page()
+
+    print("ERATGUARD ADMIN BLUE COMMAND CENTER FINAL FORCE ACTIVE", flush=True)
+except Exception as _eg_admin_blue_final_e:
+    print("ERATGUARD ADMIN BLUE COMMAND CENTER FINAL FORCE ERROR:", repr(_eg_admin_blue_final_e), flush=True)
+# === /ERATGUARD ADMIN BLUE COMMAND CENTER FINAL FORCE OVERRIDE ===
