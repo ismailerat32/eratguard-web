@@ -34771,3 +34771,104 @@ except Exception as _eg_admin_blue_final_e:
 @app.route("/ac/dashboard")
 def eratguard_admin_v5_force_route_lock():
     return render_template("admin_command_center.html")
+
+# === ERATGUARD ADMIN HUD V7 MODULE PAGES ===
+_ADMIN_V7_MODULES = {
+    "users": {
+        "title": "Kullanıcılar",
+        "desc": "Kullanıcı yönetimi, rol kontrolü, admin erişimi ve oturum izleme merkezi.",
+        "stat1": "0", "label1": "Toplam kullanıcı",
+        "stat2": "0", "label2": "Aktif",
+        "stat3": "0", "label3": "Admin",
+        "stat4": "0", "label4": "Banlı",
+        "action": "Kullanıcı modülü açıldı",
+    },
+    "licenses": {
+        "title": "Lisanslar",
+        "desc": "PRO aktivasyonları, deneme planları ve lisans anahtarı durumu.",
+        "stat1": "PRO", "label1": "Plan",
+        "stat2": "OK", "label2": "Lisans sistemi",
+        "stat3": "0", "label3": "Aktif lisans",
+        "stat4": "0", "label4": "Deneme",
+        "action": "Lisans kontrol paneli açıldı",
+    },
+    "reports": {
+        "title": "SMS Raporları",
+        "desc": "Spam trafik, engelleme oranı, rapor matrisi ve SMS olay kayıtları.",
+        "stat1": "1.247", "label1": "SMS",
+        "stat2": "98%", "label2": "Koruma",
+        "stat3": "24H", "label3": "Periyot",
+        "stat4": "OK", "label4": "Rapor",
+        "action": "SMS rapor modülü açıldı",
+    },
+    "blocked": {
+        "title": "Engellenenler",
+        "desc": "Engellenen SMS, numara, filtre kararı ve spam liste yönetimi.",
+        "stat1": "17", "label1": "Numara",
+        "stat2": "24", "label2": "Spam",
+        "stat3": "OK", "label3": "Filtre",
+        "stat4": "AI", "label4": "Destek",
+        "action": "Engellenenler paneli açıldı",
+    },
+    "ai": {
+        "title": "AI Analiz",
+        "desc": "AI skor katmanı, spam tahmini ve model sinyalleri izleme merkezi.",
+        "stat1": "98%", "label1": "Skor",
+        "stat2": "AI", "label2": "Motor",
+        "stat3": "12", "label3": "Sinyal",
+        "stat4": "OK", "label4": "Durum",
+        "action": "AI analiz modülü açıldı",
+    },
+    "system": {
+        "title": "Sistem Sağlığı",
+        "desc": "Sunucu, uptime, bağlantı, servis sağlığı ve durum izleme.",
+        "stat1": "OK", "label1": "Sistem",
+        "stat2": "LIVE", "label2": "Servis",
+        "stat3": "200", "label3": "HTTP",
+        "stat4": "UP", "label4": "Uptime",
+        "action": "Sistem sağlığı modülü açıldı",
+    },
+    "feedback": {
+        "title": "Geri Bildirim",
+        "desc": "Kullanıcı geri bildirimleri, topluluk sinyalleri ve mesaj takibi.",
+        "stat1": "0", "label1": "Yeni",
+        "stat2": "OK", "label2": "Kanal",
+        "stat3": "BETA", "label3": "Topluluk",
+        "stat4": "LIVE", "label4": "İzleme",
+        "action": "Geri bildirim modülü açıldı",
+    },
+    "support": {
+        "title": "Destek",
+        "desc": "Destek talepleri, hata bildirimleri ve işlem kuyruğu.",
+        "stat1": "0", "label1": "Açık",
+        "stat2": "0", "label2": "Bekleyen",
+        "stat3": "OK", "label3": "Destek",
+        "stat4": "LIVE", "label4": "Kuyruk",
+        "action": "Destek modülü açıldı",
+    },
+    "release": {
+        "title": "Yayın Durumu",
+        "desc": "Play Console, AAB, upload key reset, gizlilik ve sürüm hazırlığı.",
+        "stat1": "AAB", "label1": "Hazır",
+        "stat2": "SDK34", "label2": "Target",
+        "stat3": "RESET", "label3": "Upload key",
+        "stat4": "WAIT", "label4": "2 Temmuz",
+        "action": "Yayın durumu modülü açıldı",
+    },
+    "privacy": {
+        "title": "Gizlilik",
+        "desc": "SMS izinleri, gizlilik politikası, veri satışı yok beyanı ve Play uyumluluğu.",
+        "stat1": "SMS", "label1": "İzinler",
+        "stat2": "OK", "label2": "Privacy",
+        "stat3": "NO", "label3": "Veri satışı",
+        "stat4": "PLAY", "label4": "Uyum",
+        "action": "Gizlilik modülü açıldı",
+    },
+}
+
+@app.route("/admin/v7/<module_key>")
+def eratguard_admin_v7_module_page(module_key):
+    data = _ADMIN_V7_MODULES.get(module_key)
+    if not data:
+        return render_template("admin_command_center.html")
+    return render_template("admin_module_page.html", **data)

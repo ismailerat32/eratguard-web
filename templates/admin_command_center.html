@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>EratGuard Admin HUD V6</title>
+<title>EratGuard Admin HUD V7</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{
@@ -254,7 +254,7 @@ body:after{
   .footer{display:none}
 }
 
-/* ERATGUARD ADMIN HUD V6 LANDSCAPE REFERENCE LOCK */
+/* ERATGUARD ADMIN HUD V7 LANDSCAPE REFERENCE LOCK */
 .landscapeBadge{
   display:none;
   position:absolute;
@@ -590,7 +590,7 @@ body:after{
 }
 
 
-/* ERATGUARD ADMIN HUD V6 POLISH */
+/* ERATGUARD ADMIN HUD V7 POLISH */
 
 /* Portrait polish: reduce center overlap and clean lower panels */
 @media (orientation: portrait) {
@@ -787,6 +787,33 @@ body:after{
   }
 }
 
+
+/* ERATGUARD ADMIN HUD V7 MODULE OPEN FIX */
+.openModule{
+  display:inline-flex;
+  margin-top:9px;
+  color:#071827;
+  background:#7cf3ff;
+  border:1px solid rgba(210,255,255,.95);
+  border-radius:999px;
+  padding:7px 14px;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-decoration:none;
+  box-shadow:0 0 18px rgba(0,220,255,.52);
+}
+@media (orientation: landscape) and (max-height:540px){
+  .openModule{
+    position:absolute;
+    right:10px;
+    top:6px;
+    margin:0;
+    padding:5px 10px;
+    font-size:7px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -800,19 +827,19 @@ body:after{
     <div class="status-left"><span class="dot"></span>ADMIN AKTİF</div>
     <div class="status-right" id="clock">--:--</div>
     <div class="search">SİSTEM MODÜLLERİ · CANLI KONTROL</div>
-    <div class="landscapeBadge">LANDSCAPE COMMAND · V6 MODE</div>
+    <div class="landscapeBadge">LANDSCAPE COMMAND · V7 MODE</div>
 
-    <button class="panel l1 active" data-title="Kullanıcılar" data-info="Rol, erişim ve oturum kontrolleri bu merkezden izlenir."><small>USER OPS</small><b>Kullanıcılar</b><span>Rol ve erişim</span></button>
-    <button class="panel l2" data-title="Lisanslar" data-info="PRO aktivasyonları, planlar ve anahtar durumları izlenir."><small>LICENSE</small><b>Lisanslar</b><span>PRO aktivasyon</span></button>
-    <button class="panel l3" data-title="SMS Raporları" data-info="Spam trafik, engelleme oranı ve rapor matrisi takip edilir."><small>REPORT</small><b>SMS Raporları</b><span>Spam trafik</span></button>
-    <button class="panel l4" data-title="Engellenenler" data-info="Numara, SMS ve filtre karar kayıtları kontrol edilir."><small>BLOCK</small><b>Engellenenler</b><span>Filtre kararları</span></button>
-    <button class="panel l5" data-title="AI Analiz" data-info="AI skor katmanı ve model sinyalleri admin tarafından izlenir."><small>AI CORE</small><b>AI Analiz</b><span>Skor katmanı</span></button>
+    <button class="panel l1 active" data-title="Kullanıcılar" data-url="/admin/v7/users" data-info="Rol, erişim ve oturum kontrolleri bu merkezden izlenir."><small>USER OPS</small><b>Kullanıcılar</b><span>Rol ve erişim</span></button>
+    <button class="panel l2" data-title="Lisanslar" data-url="/admin/v7/licenses" data-info="PRO aktivasyonları, planlar ve anahtar durumları izlenir."><small>LICENSE</small><b>Lisanslar</b><span>PRO aktivasyon</span></button>
+    <button class="panel l3" data-title="SMS Raporları" data-url="/admin/v7/reports" data-info="Spam trafik, engelleme oranı ve rapor matrisi takip edilir."><small>REPORT</small><b>SMS Raporları</b><span>Spam trafik</span></button>
+    <button class="panel l4" data-title="Engellenenler" data-url="/admin/v7/blocked" data-info="Numara, SMS ve filtre karar kayıtları kontrol edilir."><small>BLOCK</small><b>Engellenenler</b><span>Filtre kararları</span></button>
+    <button class="panel l5" data-title="AI Analiz" data-url="/admin/v7/ai" data-info="AI skor katmanı ve model sinyalleri admin tarafından izlenir."><small>AI CORE</small><b>AI Analiz</b><span>Skor katmanı</span></button>
 
-    <button class="panel right r1" data-title="Sistem Sağlığı" data-info="Sunucu, servis, bağlantı ve uptime sinyalleri takip edilir."><small>SYSTEM</small><b>Sistem Sağlığı</b><span>Servis durumu</span></button>
-    <button class="panel right r2" data-title="Geri Bildirim" data-info="Kullanıcı mesajları ve topluluk sinyalleri burada toplanır."><small>FEEDBACK</small><b>Geri Bildirim</b><span>Kullanıcı sinyali</span></button>
-    <button class="panel right r3" data-title="Destek" data-info="Yardım, hata bildirimi ve destek işlem kuyruğu izlenir."><small>SUPPORT</small><b>Destek</b><span>İşlem kuyruğu</span></button>
-    <button class="panel right r4" data-title="Yayın Durumu" data-info="AAB, Play Console, politika ve sürüm hazırlığı takip edilir."><small>RELEASE</small><b>Yayın Durumu</b><span>AAB ve Play</span></button>
-    <button class="panel right r5" data-title="Gizlilik" data-info="SMS izinleri, gizlilik metni ve Google Play uyumluluğu kontrol edilir."><small>POLICY</small><b>Gizlilik</b><span>Uyumluluk</span></button>
+    <button class="panel right r1" data-title="Sistem Sağlığı" data-url="/admin/v7/system" data-info="Sunucu, servis, bağlantı ve uptime sinyalleri takip edilir."><small>SYSTEM</small><b>Sistem Sağlığı</b><span>Servis durumu</span></button>
+    <button class="panel right r2" data-title="Geri Bildirim" data-url="/admin/v7/feedback" data-info="Kullanıcı mesajları ve topluluk sinyalleri burada toplanır."><small>FEEDBACK</small><b>Geri Bildirim</b><span>Kullanıcı sinyali</span></button>
+    <button class="panel right r3" data-title="Destek" data-url="/admin/v7/support" data-info="Yardım, hata bildirimi ve destek işlem kuyruğu izlenir."><small>SUPPORT</small><b>Destek</b><span>İşlem kuyruğu</span></button>
+    <button class="panel right r4" data-title="Yayın Durumu" data-url="/admin/v7/release" data-info="AAB, Play Console, politika ve sürüm hazırlığı takip edilir."><small>RELEASE</small><b>Yayın Durumu</b><span>AAB ve Play</span></button>
+    <button class="panel right r5" data-title="Gizlilik" data-url="/admin/v7/privacy" data-info="SMS izinleri, gizlilik metni ve Google Play uyumluluğu kontrol edilir."><small>POLICY</small><b>Gizlilik</b><span>Uyumluluk</span></button>
 
     <section class="center">
       <div class="ring1"></div><div class="ring2"></div><div class="ring3"></div><div class="ring4"></div>
@@ -822,11 +849,12 @@ body:after{
     <section class="detail">
       <b id="detailTitle">Kullanıcılar</b>
       <span id="detailInfo">Rol, erişim ve oturum kontrolleri bu merkezden izlenir.</span>
+      <a id="openModuleBtn" class="openModule" href="/admin/v7/users">Modülü Aç</a>
     </section>
 
     <section class="opslog">
       <b>OPERASYON LOG</b>
-      <span id="opsLine">Admin HUD V6 aktif · Play upload key reset beklemede · Sistem izleniyor</span>
+      <span id="opsLine">Admin HUD V7 aktif · Play upload key reset beklemede · Sistem izleniyor</span>
     </section>
 
     <div class="stats">
@@ -836,7 +864,7 @@ body:after{
       <div class="stat"><strong>OK</strong><span>SYS</span></div>
     </div>
 
-    <div class="footer">ERATGUARD PRO · ADMIN HUD V6 · LANDSCAPE COMMAND · V6</div>
+    <div class="footer">ERATGUARD PRO · ADMIN HUD V7 · LANDSCAPE COMMAND · V7</div>
   </main>
 </div>
 <script>
@@ -855,6 +883,7 @@ body:after{
   var info=document.getElementById('detailInfo');
   var coreLabel=document.getElementById('coreLabel');
   var opsLine=document.getElementById('opsLine');
+  var openModuleBtn=document.getElementById('openModuleBtn');
 
   panels.forEach(function(p){
     p.addEventListener('click',function(){
@@ -863,9 +892,11 @@ body:after{
 
       var t=p.getAttribute('data-title') || 'Admin Modül';
       var i=p.getAttribute('data-info') || 'Modül bilgisi hazırlanıyor.';
+      var u=p.getAttribute('data-url') || '/ac?v=hud7';
 
       title.textContent=t;
       info.textContent=i;
+      if(openModuleBtn){ openModuleBtn.href=u; }
 
       var short=t.split(' ')[0].toUpperCase();
       coreLabel.innerHTML=short+'<br>CORE';
@@ -873,7 +904,12 @@ body:after{
       var d=new Date();
       var h=String(d.getHours()).padStart(2,'0');
       var m=String(d.getMinutes()).padStart(2,'0');
-      opsLine.textContent=h+':'+m+' · '+t+' modülü seçildi · '+i;
+      opsLine.textContent=h+':'+m+' · '+t+' modülü seçildi · Açmak için Modülü Aç butonuna bas.';
+    });
+
+    p.addEventListener('dblclick',function(){
+      var u=p.getAttribute('data-url');
+      if(u){ window.location.href=u; }
     });
   });
 })();
