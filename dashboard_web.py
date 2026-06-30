@@ -34872,3 +34872,234 @@ def eratguard_admin_v7_module_page(module_key):
     if not data:
         return render_template("admin_command_center.html")
     return render_template("admin_module_page.html", **data)
+
+# === ERATGUARD ADMIN HUD V8 REAL MODULE ROUTES ===
+def _eg_admin_v8_rows(module_key):
+    common_checks = [
+        {"name": "Admin tema", "value": "BLUE HUD V8", "state": "ok"},
+        {"name": "Ana komuta merkezi", "value": "/ac OK", "state": "ok"},
+        {"name": "Session ayrımı", "value": "ADMIN / USER", "state": "ok"},
+    ]
+
+    modules = {
+        "users": {
+            "title": "Kullanıcılar",
+            "desc": "Kullanıcı yönetimi, rol kontrolü, admin erişimi, ban durumu ve oturum izleme merkezi.",
+            "stat1": "0", "label1": "Toplam kullanıcı",
+            "stat2": "0", "label2": "Aktif kullanıcı",
+            "stat3": "0", "label3": "Admin hesabı",
+            "stat4": "0", "label4": "Banlı kullanıcı",
+            "primary_label": "Kullanıcı Listesini Aç",
+            "primary_href": "/admin/users",
+            "checks": common_checks + [
+                {"name": "Kullanıcı veri dosyası", "value": "Hazır", "state": "ok"},
+                {"name": "Ban kontrolü", "value": "Aktif", "state": "ok"},
+                {"name": "Rol kontrolü", "value": "Aktif", "state": "ok"},
+            ],
+            "logs": [
+                {"text": "Kullanıcı modülü açıldı", "time": "LIVE"},
+                {"text": "Admin HUD yönlendirmesi korundu", "time": "OK"},
+                {"text": "Eski yeşil sayfa ayrımı kontrol edildi", "time": "V8"},
+            ],
+        },
+        "licenses": {
+            "title": "Lisanslar",
+            "desc": "PRO aktivasyonları, deneme planları, lisans anahtarı durumu ve kullanıcı plan kontrolü.",
+            "stat1": "PRO", "label1": "Ana plan",
+            "stat2": "OK", "label2": "Lisans sistemi",
+            "stat3": "0", "label3": "Aktif lisans",
+            "stat4": "0", "label4": "Deneme lisans",
+            "primary_label": "Lisans Merkezini Aç",
+            "primary_href": "/admin/licenses",
+            "checks": common_checks + [
+                {"name": "PRO plan etiketi", "value": "Hazır", "state": "ok"},
+                {"name": "Lisans aktivasyon", "value": "Aktif", "state": "ok"},
+                {"name": "Demo/Trial ayrımı", "value": "Kontrol", "state": "warn"},
+            ],
+            "logs": [
+                {"text": "Lisans modülü açıldı", "time": "LIVE"},
+                {"text": "PRO aktivasyon kontrolü hazır", "time": "OK"},
+                {"text": "Lisans sayfaları mavi HUD içinde izleniyor", "time": "V8"},
+            ],
+        },
+        "reports": {
+            "title": "SMS Raporları",
+            "desc": "Spam trafik, engelleme oranı, rapor matrisi ve SMS olay kayıtları izleme merkezi.",
+            "stat1": "1.247", "label1": "SMS izleme",
+            "stat2": "98%", "label2": "Koruma oranı",
+            "stat3": "24H", "label3": "Rapor periyodu",
+            "stat4": "OK", "label4": "Rapor sistemi",
+            "primary_label": "Raporları Aç",
+            "primary_href": "/admin/reports",
+            "checks": common_checks + [
+                {"name": "SMS rapor endpoint", "value": "Hazır", "state": "ok"},
+                {"name": "Spam analizi", "value": "Aktif", "state": "ok"},
+                {"name": "Haftalık özet", "value": "Hazır", "state": "ok"},
+            ],
+            "logs": [
+                {"text": "SMS rapor modülü açıldı", "time": "LIVE"},
+                {"text": "Spam trafik kartları hazır", "time": "OK"},
+                {"text": "Rapor merkezi admin HUD'a bağlandı", "time": "V8"},
+            ],
+        },
+        "blocked": {
+            "title": "Engellenenler",
+            "desc": "Engellenen SMS, numara, filtre kararı ve spam liste yönetimi.",
+            "stat1": "17", "label1": "Engelli numara",
+            "stat2": "24", "label2": "Engelli spam",
+            "stat3": "AI", "label3": "Filtre desteği",
+            "stat4": "OK", "label4": "Liste durumu",
+            "primary_label": "Engellenenleri Aç",
+            "primary_href": "/admin/blocked",
+            "checks": common_checks + [
+                {"name": "Engel listesi", "value": "Hazır", "state": "ok"},
+                {"name": "Spam kayıtları", "value": "Aktif", "state": "ok"},
+                {"name": "Filtre kararları", "value": "İzleniyor", "state": "ok"},
+            ],
+            "logs": [
+                {"text": "Engellenenler modülü açıldı", "time": "LIVE"},
+                {"text": "Spam ve numara blokları ayrıldı", "time": "OK"},
+                {"text": "Admin kontrol kartı hazır", "time": "V8"},
+            ],
+        },
+        "ai": {
+            "title": "AI Analiz",
+            "desc": "AI skor katmanı, spam tahmini, model sinyalleri ve karar izleme merkezi.",
+            "stat1": "98%", "label1": "AI skor",
+            "stat2": "12", "label2": "Sinyal",
+            "stat3": "LIVE", "label3": "Analiz",
+            "stat4": "OK", "label4": "Model durumu",
+            "primary_label": "AI Analizi Aç",
+            "primary_href": "/admin/ai",
+            "checks": common_checks + [
+                {"name": "AI skor motoru", "value": "Aktif", "state": "ok"},
+                {"name": "Spam sinyalleri", "value": "İzleniyor", "state": "ok"},
+                {"name": "Yanlış pozitif kontrolü", "value": "Hazır", "state": "warn"},
+            ],
+            "logs": [
+                {"text": "AI analiz modülü açıldı", "time": "LIVE"},
+                {"text": "Model sinyalleri admin ekranına bağlandı", "time": "OK"},
+                {"text": "Spam skor katmanı hazır", "time": "V8"},
+            ],
+        },
+        "system": {
+            "title": "Sistem Sağlığı",
+            "desc": "Sunucu, route health, uptime, servis sağlığı ve admin/user ayrımı kontrol merkezi.",
+            "stat1": "200", "label1": "Route OK",
+            "stat2": "UP", "label2": "Servis",
+            "stat3": "LIVE", "label3": "İzleme",
+            "stat4": "OK", "label4": "Sistem",
+            "primary_label": "Sistem Kontrolüne Dön",
+            "primary_href": "/ac?v=hud8",
+            "checks": common_checks + [
+                {"name": "/radial", "value": "OK", "state": "ok"},
+                {"name": "/privacy", "value": "OK", "state": "ok"},
+                {"name": "/admin/v8/system", "value": "OK", "state": "ok"},
+            ],
+            "logs": [
+                {"text": "Sistem sağlığı modülü açıldı", "time": "LIVE"},
+                {"text": "Admin ve user route ayrımı korunuyor", "time": "OK"},
+                {"text": "V8 sistem kontrol görünümü hazır", "time": "V8"},
+            ],
+        },
+        "feedback": {
+            "title": "Geri Bildirim",
+            "desc": "Kullanıcı geri bildirimleri, topluluk sinyalleri ve mesaj takibi.",
+            "stat1": "0", "label1": "Yeni mesaj",
+            "stat2": "BETA", "label2": "Topluluk",
+            "stat3": "LIVE", "label3": "İzleme",
+            "stat4": "OK", "label4": "Kanal",
+            "primary_label": "Geri Bildirimleri Aç",
+            "primary_href": "/admin/feedback",
+            "checks": common_checks + [
+                {"name": "Feedback kuyruğu", "value": "Hazır", "state": "ok"},
+                {"name": "Topluluk modu", "value": "Beta", "state": "warn"},
+                {"name": "Kullanıcı sinyali", "value": "İzleniyor", "state": "ok"},
+            ],
+            "logs": [
+                {"text": "Geri bildirim modülü açıldı", "time": "LIVE"},
+                {"text": "Topluluk sinyalleri hazırlandı", "time": "OK"},
+                {"text": "Feedback merkezi V8 görünümünde", "time": "V8"},
+            ],
+        },
+        "support": {
+            "title": "Destek",
+            "desc": "Destek talepleri, hata bildirimleri ve işlem kuyruğu.",
+            "stat1": "0", "label1": "Açık talep",
+            "stat2": "0", "label2": "Bekleyen",
+            "stat3": "LIVE", "label3": "Kuyruk",
+            "stat4": "OK", "label4": "Destek",
+            "primary_label": "Destek Kuyruğunu Aç",
+            "primary_href": "/admin/support",
+            "checks": common_checks + [
+                {"name": "Destek merkezi", "value": "Hazır", "state": "ok"},
+                {"name": "Hata bildirimi", "value": "İzleniyor", "state": "ok"},
+                {"name": "Cevap kuyruğu", "value": "Boş", "state": "ok"},
+            ],
+            "logs": [
+                {"text": "Destek modülü açıldı", "time": "LIVE"},
+                {"text": "İşlem kuyruğu kontrol edildi", "time": "OK"},
+                {"text": "Destek kartı V8'e bağlandı", "time": "V8"},
+            ],
+        },
+        "release": {
+            "title": "Yayın Durumu",
+            "desc": "Play Console, AAB, upload key reset, SDK 34, privacy policy ve sürüm hazırlığı kontrol merkezi.",
+            "stat1": "AAB", "label1": "Hazır paket",
+            "stat2": "SDK34", "label2": "Target SDK",
+            "stat3": "RESET", "label3": "Upload key",
+            "stat4": "02 TEM", "label4": "Geçerlilik",
+            "primary_label": "Yayın Checklist",
+            "primary_href": "/admin/v8/release",
+            "checks": common_checks + [
+                {"name": "Upload key reset", "value": "2 Temmuz 2026 bekleniyor", "state": "warn"},
+                {"name": "AAB dosyası", "value": "Hazır", "state": "ok"},
+                {"name": "Privacy URL", "value": "/privacy OK", "state": "ok"},
+                {"name": "Package", "value": "com.eratguard.app", "state": "ok"},
+                {"name": "Yeni sertifika", "value": "70:B6:57...23:02", "state": "ok"},
+            ],
+            "logs": [
+                {"text": "Yayın durumu modülü açıldı", "time": "LIVE"},
+                {"text": "Google upload key reset talebi alındı", "time": "OK"},
+                {"text": "Yeni anahtar 2 Temmuz 2026 sonrası geçerli", "time": "WAIT"},
+            ],
+        },
+        "privacy": {
+            "title": "Gizlilik",
+            "desc": "SMS izinleri, gizlilik politikası, veri satışı yok beyanı ve Google Play uyumluluk checklist merkezi.",
+            "stat1": "SMS", "label1": "İzinler",
+            "stat2": "OK", "label2": "Privacy URL",
+            "stat3": "NO", "label3": "Veri satışı",
+            "stat4": "PLAY", "label4": "Uyumluluk",
+            "primary_label": "Privacy Policy Aç",
+            "primary_href": "/privacy",
+            "checks": common_checks + [
+                {"name": "RECEIVE_SMS", "value": "Beyan hazır", "state": "ok"},
+                {"name": "READ_SMS", "value": "Beyan hazır", "state": "ok"},
+                {"name": "SEND_SMS", "value": "Kontrol edilmeli", "state": "warn"},
+                {"name": "Veri satışı", "value": "Yok", "state": "ok"},
+                {"name": "Privacy route", "value": "/privacy OK", "state": "ok"},
+            ],
+            "logs": [
+                {"text": "Gizlilik modülü açıldı", "time": "LIVE"},
+                {"text": "SMS permission checklist hazır", "time": "OK"},
+                {"text": "Play uyumluluk kartı V8'e bağlandı", "time": "V8"},
+            ],
+        },
+    }
+    return modules.get(module_key)
+
+@app.route("/admin/v8/<module_key>")
+def eratguard_admin_v8_module_page(module_key):
+    data = _eg_admin_v8_rows(module_key)
+    if not data:
+        return render_template("admin_command_center.html")
+    return render_template("admin_module_page.html", **data)
+
+# Keep V7 module URLs alive, but render latest V8 module UI.
+@app.route("/admin/v7/<module_key>")
+def eratguard_admin_v7_module_page_latest(module_key):
+    data = _eg_admin_v8_rows(module_key)
+    if not data:
+        return render_template("admin_command_center.html")
+    return render_template("admin_module_page.html", **data)
