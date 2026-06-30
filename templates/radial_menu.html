@@ -425,5 +425,76 @@ svg{
 
   <section class="status"><span class="dot"></span>KORUMA AKTİF · 12P HAZIR</section>
 </main>
+
+<script id="eratguard-12p-link-bridge">
+(function(){
+  if(window.__ERATGUARD_12P_LINK_BRIDGE__) return;
+  window.__ERATGUARD_12P_LINK_BRIDGE__ = true;
+
+  var routes = [
+    {keys:["SMS VARSAYILAN","VARSAYILAN SMS","SMS"], url:"/u/sms-default"},
+    {keys:["PRO KORUMA","PRO"], url:"/u/protection"},
+    {keys:["AI ANALIZ","AI ANALİZ","AI"], url:"/u/ai"},
+    {keys:["RAPORLAR","RAPOR"], url:"/u/reports"},
+    {keys:["ENGELLENENLER","ENGELLENEN"], url:"/u/blocked-sms"},
+    {keys:["BILDIRIMLER","BİLDİRİMLER","BILDIRIM","BİLDİRİM"], url:"/u/notifications"},
+    {keys:["LISANS","LİSANS"], url:"/u/license"},
+    {keys:["AYARLAR","AYAR"], url:"/u/settings"},
+    {keys:["TOPLULUK"], url:"/u/community"},
+    {keys:["TARAMA","SCAN"], url:"/u/scan"},
+    {keys:["GUVENLIK SKORU","GÜVENLİK SKORU","GUVENLIK","GÜVENLİK"], url:"/u/security-score"},
+    {keys:["DESTEK YARDIM","DESTEK","YARDIM"], url:"/u/support"}
+  ];
+
+  function norm(x){
+    return (x || "")
+      .toUpperCase()
+      .replace(/\s+/g," ")
+      .replace(/[^\wÇĞİÖŞÜçğıöşü ]/g,"")
+      .trim();
+  }
+
+  function findUrl(text){
+    var t = norm(text);
+    for(var i=0;i<routes.length;i++){
+      for(var j=0;j<routes[i].keys.length;j++){
+        if(t.indexOf(norm(routes[i].keys[j])) !== -1){
+          return routes[i].url;
+        }
+      }
+    }
+    return null;
+  }
+
+  function attach(){
+    var candidates = [].slice.call(document.querySelectorAll("a,button,[onclick],.slice,.sector,.item,.menu-item,.radial-item,g,path,text,div"));
+    candidates.forEach(function(el){
+      if(el.__eratguard12p) return;
+      var txt = norm(el.innerText || el.textContent || el.getAttribute("aria-label") || el.getAttribute("title") || "");
+      var url = findUrl(txt);
+      if(!url) return;
+
+      el.__eratguard12p = true;
+      el.setAttribute("data-eg-url", url);
+      el.style.cursor = "pointer";
+
+      if(el.tagName && el.tagName.toLowerCase() === "a"){
+        el.setAttribute("href", url);
+      }
+
+      el.addEventListener("click", function(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+        window.location.href = url;
+      }, true);
+    });
+  }
+
+  attach();
+  setTimeout(attach,300);
+  setTimeout(attach,900);
+})();
+</script>
+
 </body>
 </html>
