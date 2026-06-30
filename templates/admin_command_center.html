@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>EratGuard Admin HUD V4</title>
+<title>EratGuard Admin HUD V5</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{
@@ -253,6 +253,342 @@ body:after{
   .stat span{font-size:7px}
   .footer{display:none}
 }
+
+/* ERATGUARD ADMIN HUD V5 LANDSCAPE REFERENCE LOCK */
+.landscapeBadge{
+  display:none;
+  position:absolute;
+  top:82px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:7;
+  color:#bdf8ff;
+  font-size:9px;
+  letter-spacing:.32em;
+  text-shadow:0 0 14px rgba(80,225,255,.95);
+  border:1px solid rgba(110,220,255,.32);
+  background:linear-gradient(90deg,transparent,rgba(0,130,255,.22),transparent);
+  padding:6px 18px;
+  border-radius:999px;
+}
+
+@media (orientation: landscape) and (max-height: 540px) {
+  html,body{
+    overflow:hidden;
+    background:#020b20;
+  }
+
+  .shell{
+    height:100vh;
+    padding:4px;
+  }
+
+  .hud{
+    width:100vw;
+    height:100vh;
+    max-width:none;
+    max-height:none;
+    border-radius:8px;
+    border-color:rgba(145,230,255,.55);
+    background:
+      radial-gradient(circle at 50% 48%,rgba(0,170,255,.30),transparent 28%),
+      radial-gradient(circle at 50% 52%,rgba(15,75,150,.28),transparent 48%),
+      linear-gradient(180deg,#082653,#020919 70%,#00040d);
+    box-shadow:
+      inset 0 0 92px rgba(0,130,255,.20),
+      0 0 42px rgba(0,150,255,.32);
+  }
+
+  .hud:before{
+    inset:8px;
+    border-radius:6px;
+    border-color:rgba(140,230,255,.18);
+  }
+
+  .hud:after{
+    height:45px;
+    background:
+      linear-gradient(90deg,transparent,rgba(80,210,255,.10),transparent),
+      linear-gradient(180deg,rgba(30,130,240,.18),transparent);
+  }
+
+  .corner{
+    width:36px;
+    height:36px;
+  }
+
+  .tl{left:8px;top:8px}
+  .tr{right:8px;top:8px}
+  .bl{left:8px;bottom:8px}
+  .br{right:8px;bottom:8px}
+
+  .top-title{
+    top:8px;
+    font-size:14px;
+    letter-spacing:.36em;
+    width:78vw;
+    padding:8px 0;
+    border-top:1px solid rgba(120,230,255,.30);
+    border-bottom:1px solid rgba(120,230,255,.22);
+    background:linear-gradient(90deg,transparent,rgba(0,125,255,.23),transparent);
+  }
+
+  .sub-title{
+    top:35px;
+    font-size:7px;
+    letter-spacing:.24em;
+  }
+
+  .landscapeBadge{
+    display:block;
+    top:54px;
+    font-size:7px;
+    padding:4px 12px;
+  }
+
+  .status-left,
+  .status-right{
+    top:12px;
+    font-size:7px;
+    padding:5px 8px;
+    background:rgba(0,20,48,.58);
+  }
+
+  .status-left{left:48px}
+  .status-right{right:48px}
+
+  .search{
+    top:74px;
+    width:300px;
+    min-height:22px;
+    font-size:7px;
+    letter-spacing:.20em;
+    padding:5px 10px;
+    border-radius:3px;
+  }
+
+  .axis-v{
+    left:50%;
+    opacity:.9;
+  }
+
+  .axis-h{
+    top:53%;
+    opacity:.9;
+  }
+
+  .center{
+    top:53%;
+    width:250px;
+    height:250px;
+  }
+
+  .ring1{width:250px;height:250px}
+  .ring2{width:204px;height:204px}
+  .ring3{width:154px;height:154px}
+  .ring4{width:104px;height:104px}
+
+  .ring1:before,
+  .ring2:before{
+    border-top-width:6px;
+    border-right-width:6px;
+    border-bottom-width:6px;
+    border-left-width:6px;
+  }
+
+  .core{
+    width:86px;
+    height:86px;
+  }
+
+  .core:before{
+    width:112px;
+    height:112px;
+  }
+
+  .core b{
+    font-size:13px;
+    letter-spacing:.08em;
+  }
+
+  .panel{
+    width:29vw;
+    max-width:245px;
+    height:36px;
+    padding:5px 11px;
+    border-color:rgba(105,220,255,.36);
+    background:
+      linear-gradient(90deg,rgba(10,58,112,.78),rgba(3,20,48,.48));
+    clip-path:polygon(0 0,94% 0,100% 50%,94% 100%,0 100%,5% 50%);
+  }
+
+  .panel.right{
+    clip-path:polygon(6% 0,100% 0,95% 50%,100% 100%,6% 100%,0 50%);
+  }
+
+  .panel small{
+    font-size:6px;
+    letter-spacing:.18em;
+    margin-bottom:1px;
+  }
+
+  .panel b{
+    font-size:10px;
+    margin-bottom:0;
+  }
+
+  .panel span{
+    font-size:7px;
+  }
+
+  .panel:before{
+    content:"";
+    position:absolute;
+    top:50%;
+    width:26px;
+    height:1px;
+    background:rgba(110,225,255,.42);
+    box-shadow:0 0 10px rgba(110,225,255,.70);
+  }
+
+  .panel:not(.right):before{
+    right:-24px;
+  }
+
+  .panel.right:before{
+    left:-24px;
+  }
+
+  .l1{left:3vw;top:22%}
+  .l2{left:6vw;top:34%}
+  .l3{left:3vw;top:46%}
+  .l4{left:6vw;top:58%}
+  .l5{left:3vw;top:70%}
+
+  .r1{right:3vw;top:22%}
+  .r2{right:6vw;top:34%}
+  .r3{right:3vw;top:46%}
+  .r4{right:6vw;top:58%}
+  .r5{right:3vw;top:70%}
+
+  .detail{
+    bottom:34px;
+    width:48vw;
+    min-height:34px;
+    padding:7px 12px;
+    border-radius:8px;
+    background:rgba(0,16,42,.68);
+  }
+
+  .detail b{
+    font-size:11px;
+    margin-bottom:2px;
+  }
+
+  .detail span{
+    font-size:8px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .opslog{
+    bottom:6px;
+    width:58vw;
+    min-height:24px;
+    padding:5px 10px;
+    border-radius:5px;
+    background:rgba(0,10,28,.72);
+  }
+
+  .opslog b{
+    display:inline;
+    font-size:7px;
+    margin-right:8px;
+    letter-spacing:.18em;
+  }
+
+  .opslog span{
+    display:inline;
+    font-size:7px;
+    letter-spacing:.06em;
+  }
+
+  .stats{
+    bottom:8px;
+    left:auto;
+    right:12px;
+    transform:none;
+    width:auto;
+    display:flex;
+    gap:5px;
+  }
+
+  .stat{
+    width:48px;
+    height:28px;
+    border-radius:5px;
+  }
+
+  .stat strong{
+    font-size:10px;
+  }
+
+  .stat span{
+    font-size:5px;
+  }
+
+  .footer{
+    display:block;
+    left:14px;
+    right:auto;
+    bottom:10px;
+    font-size:6px;
+    color:rgba(190,235,255,.34);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 420px) {
+  .center{
+    width:220px;
+    height:220px;
+  }
+
+  .ring1{width:220px;height:220px}
+  .ring2{width:180px;height:180px}
+  .ring3{width:136px;height:136px}
+  .ring4{width:92px;height:92px}
+
+  .core{
+    width:76px;
+    height:76px;
+  }
+
+  .core b{
+    font-size:12px;
+  }
+
+  .panel{
+    height:32px;
+  }
+
+  .panel b{
+    font-size:9px;
+  }
+
+  .panel span{
+    display:none;
+  }
+
+  .detail{
+    bottom:31px;
+  }
+
+  .opslog{
+    bottom:5px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -266,6 +602,7 @@ body:after{
     <div class="status-left"><span class="dot"></span>ADMIN AKTİF</div>
     <div class="status-right" id="clock">--:--</div>
     <div class="search">SİSTEM MODÜLLERİ · CANLI KONTROL</div>
+    <div class="landscapeBadge">LANDSCAPE COMMAND MODE</div>
 
     <button class="panel l1 active" data-title="Kullanıcılar" data-info="Rol, erişim ve oturum kontrolleri bu merkezden izlenir."><small>USER OPS</small><b>Kullanıcılar</b><span>Rol ve erişim</span></button>
     <button class="panel l2" data-title="Lisanslar" data-info="PRO aktivasyonları, planlar ve anahtar durumları izlenir."><small>LICENSE</small><b>Lisanslar</b><span>PRO aktivasyon</span></button>
@@ -301,7 +638,7 @@ body:after{
       <div class="stat"><strong>OK</strong><span>SYS</span></div>
     </div>
 
-    <div class="footer">ERATGUARD PRO · ADMIN HUD V4 · TACTICAL</div>
+    <div class="footer">ERATGUARD PRO · ADMIN HUD V5 · LANDSCAPE COMMAND</div>
   </main>
 </div>
 <script>
