@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>EratGuard Admin HUD V5</title>
+<title>EratGuard Admin HUD V6</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{
@@ -254,7 +254,7 @@ body:after{
   .footer{display:none}
 }
 
-/* ERATGUARD ADMIN HUD V5 LANDSCAPE REFERENCE LOCK */
+/* ERATGUARD ADMIN HUD V6 LANDSCAPE REFERENCE LOCK */
 .landscapeBadge{
   display:none;
   position:absolute;
@@ -589,6 +589,204 @@ body:after{
   }
 }
 
+
+/* ERATGUARD ADMIN HUD V6 POLISH */
+
+/* Portrait polish: reduce center overlap and clean lower panels */
+@media (orientation: portrait) {
+  .hud{
+    height:760px;
+  }
+
+  .center{
+    top:50%;
+    width:205px;
+    height:205px;
+    opacity:.72;
+    z-index:2;
+  }
+
+  .ring1{width:205px;height:205px}
+  .ring2{width:166px;height:166px}
+  .ring3{width:124px;height:124px}
+  .ring4{width:84px;height:84px}
+
+  .core{
+    width:72px;
+    height:72px;
+  }
+
+  .core:before{
+    width:92px;
+    height:92px;
+  }
+
+  .core b{
+    font-size:12px;
+  }
+
+  .panel{
+    z-index:5;
+    background:linear-gradient(90deg,rgba(5,52,104,.94),rgba(3,18,48,.84));
+  }
+
+  .panel.right{
+    background:linear-gradient(270deg,rgba(5,52,104,.94),rgba(3,18,48,.84));
+  }
+
+  .detail{
+    bottom:100px;
+    z-index:7;
+  }
+
+  .opslog{
+    bottom:170px;
+    z-index:7;
+  }
+
+  .stats{
+    bottom:26px;
+    z-index:7;
+  }
+}
+
+/* Landscape polish: tighter reference look */
+@media (orientation: landscape) and (max-height: 540px) {
+  .top-title{
+    top:6px;
+    padding:6px 0;
+    font-size:13px;
+  }
+
+  .sub-title{
+    top:30px;
+  }
+
+  .landscapeBadge{
+    top:49px;
+  }
+
+  .search{
+    top:68px;
+    min-height:20px;
+  }
+
+  .center{
+    top:52%;
+    width:232px;
+    height:232px;
+  }
+
+  .ring1{width:232px;height:232px}
+  .ring2{width:190px;height:190px}
+  .ring3{width:144px;height:144px}
+  .ring4{width:98px;height:98px}
+
+  .core{
+    width:82px;
+    height:82px;
+  }
+
+  .core:before{
+    width:104px;
+    height:104px;
+  }
+
+  .core b{
+    font-size:12px;
+  }
+
+  .panel{
+    height:34px;
+    width:28.5vw;
+  }
+
+  .l1{left:3vw;top:21%}
+  .l2{left:6vw;top:33%}
+  .l3{left:3vw;top:45%}
+  .l4{left:6vw;top:57%}
+  .l5{left:3vw;top:69%}
+
+  .r1{right:3vw;top:21%}
+  .r2{right:6vw;top:33%}
+  .r3{right:3vw;top:45%}
+  .r4{right:6vw;top:57%}
+  .r5{right:3vw;top:69%}
+
+  .detail{
+    bottom:32px;
+    min-height:31px;
+  }
+
+  .opslog{
+    bottom:5px;
+    min-height:22px;
+  }
+
+  .stat{
+    height:26px;
+  }
+}
+
+/* Extra narrow landscape polish */
+@media (orientation: landscape) and (max-height: 390px) {
+  .top-title{
+    font-size:12px;
+    letter-spacing:.30em;
+  }
+
+  .sub-title{
+    display:none;
+  }
+
+  .landscapeBadge{
+    top:38px;
+  }
+
+  .search{
+    top:60px;
+  }
+
+  .center{
+    width:205px;
+    height:205px;
+  }
+
+  .ring1{width:205px;height:205px}
+  .ring2{width:168px;height:168px}
+  .ring3{width:128px;height:128px}
+  .ring4{width:86px;height:86px}
+
+  .core{
+    width:70px;
+    height:70px;
+  }
+
+  .core b{
+    font-size:10px;
+  }
+
+  .panel{
+    height:30px;
+  }
+
+  .panel small{
+    font-size:5px;
+  }
+
+  .panel b{
+    font-size:8px;
+  }
+
+  .detail{
+    bottom:28px;
+  }
+
+  .opslog{
+    bottom:4px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -602,7 +800,7 @@ body:after{
     <div class="status-left"><span class="dot"></span>ADMIN AKTİF</div>
     <div class="status-right" id="clock">--:--</div>
     <div class="search">SİSTEM MODÜLLERİ · CANLI KONTROL</div>
-    <div class="landscapeBadge">LANDSCAPE COMMAND MODE</div>
+    <div class="landscapeBadge">LANDSCAPE COMMAND · V6 MODE</div>
 
     <button class="panel l1 active" data-title="Kullanıcılar" data-info="Rol, erişim ve oturum kontrolleri bu merkezden izlenir."><small>USER OPS</small><b>Kullanıcılar</b><span>Rol ve erişim</span></button>
     <button class="panel l2" data-title="Lisanslar" data-info="PRO aktivasyonları, planlar ve anahtar durumları izlenir."><small>LICENSE</small><b>Lisanslar</b><span>PRO aktivasyon</span></button>
@@ -628,7 +826,7 @@ body:after{
 
     <section class="opslog">
       <b>OPERASYON LOG</b>
-      <span id="opsLine">Admin HUD V4 aktif · Play upload key reset beklemede · Sistem izleniyor</span>
+      <span id="opsLine">Admin HUD V6 aktif · Play upload key reset beklemede · Sistem izleniyor</span>
     </section>
 
     <div class="stats">
@@ -638,7 +836,7 @@ body:after{
       <div class="stat"><strong>OK</strong><span>SYS</span></div>
     </div>
 
-    <div class="footer">ERATGUARD PRO · ADMIN HUD V5 · LANDSCAPE COMMAND</div>
+    <div class="footer">ERATGUARD PRO · ADMIN HUD V6 · LANDSCAPE COMMAND · V6</div>
   </main>
 </div>
 <script>
