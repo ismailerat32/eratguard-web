@@ -34751,3 +34751,23 @@ try:
 except Exception as _eg_admin_blue_final_e:
     print("ERATGUARD ADMIN BLUE COMMAND CENTER FINAL FORCE ERROR:", repr(_eg_admin_blue_final_e), flush=True)
 # === /ERATGUARD ADMIN BLUE COMMAND CENTER FINAL FORCE OVERRIDE ===
+
+# === ERATGUARD ADMIN V5 FORCE ROUTE LOCK ===
+# Old green admin/user-center pages must not appear as the admin home.
+@app.route("/admin")
+@app.route("/admin/")
+@app.route("/admin/dashboard")
+@app.route("/admin/radial")
+@app.route("/admin/command")
+@app.route("/admin/command-center")
+@app.route("/admin/users")
+@app.route("/admin/user")
+@app.route("/admin/user-center")
+@app.route("/admin/kullanici")
+@app.route("/admin/kullanici-merkezi")
+@app.route("/ac")
+@app.route("/ac/")
+@app.route("/ac/admin")
+@app.route("/ac/dashboard")
+def eratguard_admin_v5_force_route_lock():
+    return render_template("admin_command_center.html")
