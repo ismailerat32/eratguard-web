@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>EratGuard Admin HUD V9</title>
+<title>EratGuard Admin HUD V10 3D</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{
@@ -254,7 +254,7 @@ body:after{
   .footer{display:none}
 }
 
-/* ERATGUARD ADMIN HUD V9 LANDSCAPE REFERENCE LOCK */
+/* ERATGUARD ADMIN HUD V10 3D LANDSCAPE REFERENCE LOCK */
 .landscapeBadge{
   display:none;
   position:absolute;
@@ -590,7 +590,7 @@ body:after{
 }
 
 
-/* ERATGUARD ADMIN HUD V9 POLISH */
+/* ERATGUARD ADMIN HUD V10 3D POLISH */
 
 /* Portrait polish: reduce center overlap and clean lower panels */
 @media (orientation: portrait) {
@@ -788,7 +788,7 @@ body:after{
 }
 
 
-/* ERATGUARD ADMIN HUD V9 MODULE OPEN FIX */
+/* ERATGUARD ADMIN HUD V10 3D MODULE OPEN FIX */
 .openModule{
   display:inline-flex;
   margin-top:9px;
@@ -814,6 +814,101 @@ body:after{
   }
 }
 
+
+/* ERATGUARD ADMIN V10 3D SHELL MAIN HUD */
+body{
+  perspective:1200px;
+}
+.hud{
+  transform-style:preserve-3d;
+  transform:rotateX(1.2deg);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.55),
+    0 0 70px rgba(0,160,255,.34),
+    inset 0 0 110px rgba(0,130,255,.10);
+}
+.hud:before{
+  transform:translateZ(14px);
+}
+.top-title,
+.sub-title,
+.status-left,
+.status-right,
+.search,
+.landscapeBadge{
+  transform:translateZ(32px);
+}
+.center{
+  transform:translate(-50%,-50%) translateZ(58px);
+  filter:drop-shadow(0 22px 34px rgba(0,0,0,.42));
+}
+.ring1,.ring2,.ring3,.ring4{
+  box-shadow:0 0 24px rgba(0,210,255,.18);
+}
+.core{
+  transform:translateZ(44px);
+  box-shadow:
+    0 18px 34px rgba(0,0,0,.50),
+    0 0 34px rgba(255,255,255,.50),
+    0 0 72px rgba(0,220,255,1),
+    0 0 120px rgba(0,140,255,.46),
+    inset 0 0 36px rgba(255,255,255,.20);
+}
+.panel{
+  transform-style:preserve-3d;
+  transform:translateZ(36px);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  box-shadow:
+    0 14px 28px rgba(0,0,0,.34),
+    0 0 24px rgba(0,160,255,.16),
+    inset 0 0 26px rgba(0,150,255,.10);
+}
+.panel:hover,
+.panel.active{
+  transform:translateZ(64px) scale(1.025);
+  box-shadow:
+    0 20px 36px rgba(0,0,0,.46),
+    0 0 40px rgba(0,220,255,.48),
+    inset 0 0 34px rgba(0,190,255,.18);
+}
+.detail,
+.opslog,
+.stats{
+  transform:translateZ(42px);
+}
+.stat{
+  box-shadow:
+    0 12px 24px rgba(0,0,0,.30),
+    inset 0 0 22px rgba(0,140,255,.09);
+}
+@media(max-width:760px){
+  .hud{
+    transform:none;
+  }
+  .center{
+    transform:translate(-50%,-50%) translateZ(24px);
+  }
+  .panel:hover,
+  .panel.active{
+    transform:translateZ(28px) scale(1.01);
+  }
+}
+@media (orientation: landscape) and (max-height:540px){
+  .hud{
+    transform:rotateX(.8deg);
+  }
+  .center{
+    transform:translate(-50%,-50%) translateZ(42px);
+  }
+  .panel{
+    transform:translateZ(28px);
+  }
+  .panel:hover,
+  .panel.active{
+    transform:translateZ(50px) scale(1.018);
+  }
+}
+
 </style>
 </head>
 <body>
@@ -827,7 +922,7 @@ body:after{
     <div class="status-left"><span class="dot"></span>ADMIN AKTİF</div>
     <div class="status-right" id="clock">--:--</div>
     <div class="search">SİSTEM MODÜLLERİ · CANLI KONTROL</div>
-    <div class="landscapeBadge">LANDSCAPE COMMAND · V9 MODE</div>
+    <div class="landscapeBadge">LANDSCAPE COMMAND · V10 3D MODE</div>
 
     <button class="panel l1 active" data-title="Kullanıcılar" data-url="/eg-admin-v8/users" data-info="Rol, erişim ve oturum kontrolleri bu merkezden izlenir."><small>USER OPS</small><b>Kullanıcılar</b><span>Rol ve erişim</span></button>
     <button class="panel l2" data-title="Lisanslar" data-url="/eg-admin-v8/licenses" data-info="PRO aktivasyonları, planlar ve anahtar durumları izlenir."><small>LICENSE</small><b>Lisanslar</b><span>PRO aktivasyon</span></button>
@@ -854,7 +949,7 @@ body:after{
 
     <section class="opslog">
       <b>OPERASYON LOG</b>
-      <span id="opsLine">Admin HUD V9 aktif · Güvenli admin modül yolları aktif · Sistem izleniyor</span>
+      <span id="opsLine">Admin HUD V10 3D aktif · Güvenli admin modül yolları aktif · Sistem izleniyor</span>
     </section>
 
     <div class="stats">
@@ -864,7 +959,7 @@ body:after{
       <div class="stat"><strong>OK</strong><span>SYS</span></div>
     </div>
 
-    <div class="footer">ERATGUARD PRO · ADMIN HUD V9 · LANDSCAPE COMMAND · V9</div>
+    <div class="footer">ERATGUARD PRO · ADMIN HUD V10 3D · LANDSCAPE COMMAND · V10 3D</div>
   </main>
 </div>
 <script>
@@ -892,7 +987,7 @@ body:after{
 
       var t=p.getAttribute('data-title') || 'Admin Modül';
       var i=p.getAttribute('data-info') || 'Modül bilgisi hazırlanıyor.';
-      var u=p.getAttribute('data-url') || '/ac?v=hud9';
+      var u=p.getAttribute('data-url') || '/ac?v=3d';
 
       title.textContent=t;
       info.textContent=i;

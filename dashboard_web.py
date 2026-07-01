@@ -35192,3 +35192,36 @@ def eratguard_admin_v9_safe_module_page(module_key):
         return render_template("admin_command_center.html")
     return render_template("admin_module_page.html", **data)
 # === ERATGUARD ADMIN HUD V9 SAFE MODULE ROUTES END ===
+
+# === ERATGUARD ADMIN V10 3D SAFE MODULE ALIAS ===
+@app.before_request
+def eratguard_admin_v10_3d_safe_alias_guard():
+    try:
+        path = request.path.rstrip("/") or "/"
+        if path in {"/eg-admin-3d", "/eg-admin-v10-3d"}:
+            return render_template("admin_command_center.html")
+
+        if path.startswith("/eg-admin-3d/") or path.startswith("/eg-admin-v10-3d/"):
+            prefix = "/eg-admin-3d/" if path.startswith("/eg-admin-3d/") else "/eg-admin-v10-3d/"
+            module_key = path.split(prefix, 1)[1].strip("/").split("/", 1)[0]
+
+            try:
+                data = _eg_admin_v8_rows(module_key)
+            except Exception:
+                data = None
+
+            if data:
+                return render_template("admin_module_page.html", **data)
+            return render_template("admin_command_center.html")
+    except Exception as e:
+        print("ADMIN_V10_3D_ALIAS_ERROR:", e, flush=True)
+        return None
+
+@app.route("/eg-admin-3d/<module_key>")
+@app.route("/eg-admin-v10-3d/<module_key>")
+def eratguard_admin_v10_3d_safe_module_page(module_key):
+    data = _eg_admin_v8_rows(module_key)
+    if not data:
+        return render_template("admin_command_center.html")
+    return render_template("admin_module_page.html", **data)
+# === ERATGUARD ADMIN V10 3D SAFE MODULE ALIAS END ===

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>EratGuard Admin Module V8</title>
+<title>EratGuard Admin Module V10 3D</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{
@@ -265,24 +265,133 @@ h1{
   .card strong{font-size:22px}
   .two{grid-template-columns:1fr}
 }
+
+/* ERATGUARD ADMIN V10 3D SHELL MODULES */
+body{
+  perspective:1200px;
+}
+.shell{
+  transform-style:preserve-3d;
+  transform:rotateX(1deg);
+  box-shadow:
+    0 26px 76px rgba(0,0,0,.58),
+    0 0 64px rgba(0,160,255,.26),
+    inset 0 0 100px rgba(0,130,255,.10);
+}
+.shell:before{
+  transform:translateZ(16px);
+}
+.topline,
+.hero,
+.grid,
+.two,
+.panel,
+.footer{
+  transform-style:preserve-3d;
+}
+.topline{
+  transform:translateZ(40px);
+}
+.hero{
+  transform:translateZ(38px);
+  box-shadow:
+    0 18px 36px rgba(0,0,0,.36),
+    inset 0 0 58px rgba(0,130,255,.12);
+}
+.hero:after{
+  content:"";
+  position:absolute;
+  right:24px;
+  top:24px;
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  border:1px solid rgba(120,235,255,.24);
+  box-shadow:0 0 32px rgba(0,210,255,.14), inset 0 0 28px rgba(0,150,255,.10);
+  transform:translateZ(22px);
+  pointer-events:none;
+}
+.card{
+  transform:translateZ(30px);
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  box-shadow:
+    0 16px 30px rgba(0,0,0,.34),
+    0 0 20px rgba(0,140,255,.10),
+    inset 0 0 26px rgba(0,140,255,.10);
+}
+.card:hover{
+  transform:translateZ(58px) translateY(-4px);
+  border-color:rgba(160,245,255,.55);
+  box-shadow:
+    0 24px 42px rgba(0,0,0,.46),
+    0 0 34px rgba(0,220,255,.26),
+    inset 0 0 32px rgba(0,180,255,.14);
+}
+.panel{
+  transform:translateZ(26px);
+  box-shadow:
+    0 16px 32px rgba(0,0,0,.32),
+    inset 0 0 26px rgba(0,140,255,.08);
+}
+.row{
+  transition:background .16s ease, transform .16s ease;
+}
+.row:hover{
+  background:rgba(90,220,255,.045);
+  transform:translateX(4px);
+}
+.action{
+  transition:transform .16s ease, box-shadow .16s ease;
+}
+.action:hover{
+  transform:translateY(-2px) translateZ(20px);
+  box-shadow:0 16px 26px rgba(0,0,0,.30),0 0 24px rgba(0,220,255,.22);
+}
+.log div{
+  transition:background .16s ease;
+}
+.log div:hover{
+  background:rgba(90,220,255,.045);
+}
+.footer{
+  transform:translateZ(22px);
+}
+@media(max-width:760px){
+  .shell{
+    transform:none;
+  }
+  .topline,
+  .hero,
+  .grid,
+  .two,
+  .panel,
+  .footer,
+  .card{
+    transform:none;
+  }
+  .card:hover{
+    transform:translateY(-2px);
+  }
+}
+
 </style>
 </head>
 <body>
 <div class="wrap">
   <main class="shell">
     <div class="topline">
-      <a class="back" href="/ac?v=hud9">← COMMAND CENTER</a>
+      <a class="back" href="/ac?v=3d">← COMMAND CENTER</a>
       <div class="status"><span class="dot"></span>ADMIN MODULE V9</div>
     </div>
 
     <section class="hero">
-      <div class="badge">ERATGUARD ADMIN · REAL MODULE · V9</div>
+      <div class="badge">ERATGUARD ADMIN · REAL MODULE · V10 3D</div>
       <h1>{{ title }}</h1>
       <div class="sub">{{ desc }}</div>
 
       <div class="actions">
         <a class="action primary" href="{{ primary_href }}">{{ primary_label }}</a>
-        <a class="action" href="/ac?v=hud9">Ana HUD'a Dön</a>
+        <a class="action" href="/ac?v=3d">Ana HUD'a Dön</a>
       </div>
     </section>
 
@@ -311,7 +420,7 @@ h1{
       </div>
     </section>
 
-    <div class="footer">ERATGUARD PRO · ADMIN HUD V9 · SAFE MODULE CONTROL</div>
+    <div class="footer">ERATGUARD PRO · ADMIN HUD V10 3D · MODULE CONTROL</div>
   </main>
 </div>
 </body>
