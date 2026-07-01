@@ -35152,3 +35152,43 @@ def eratguard_admin_v7_module_page_latest(module_key):
     if not data:
         return render_template("admin_command_center.html")
     return render_template("admin_module_page.html", **data)
+
+# === ERATGUARD ADMIN HUD V9 SAFE MODULE ROUTES ===
+# These routes intentionally avoid /admin/* because old admin guards may redirect there.
+@app.before_request
+def eratguard_admin_v9_safe_module_guard():
+    try:
+        path = request.path.rstrip("/") or "/"
+
+        if path in {"/ac", "/eg-admin", "/eg-admin-v9", "/eg-admin-v8"}:
+            return render_template("admin_command_center.html")
+
+        if path.startswith("/eg-admin-v8/") or path.startswith("/eg-admin-v9/"):
+            if path.startswith("/eg-admin-v8/"):
+                module_key = path.split("/eg-admin-v8/", 1)[1].strip("/").split("/", 1)[0]
+            else:
+                module_key = path.split("/eg-admin-v9/", 1)[1].strip("/").split("/", 1)[0]
+
+            try:
+                data = _eg_admin_v8_rows(module_key)
+            except Exception as e:
+                print("ADMIN_V9_SAFE_MODULE_DATA_ERROR:", e, flush=True)
+                data = None
+
+            if data:
+                return render_template("admin_module_page.html", **data)
+
+            return render_template("admin_command_center.html")
+
+    except Exception as e:
+        print("ADMIN_V9_SAFE_MODULE_GUARD_ERROR:", e, flush=True)
+        return None
+
+@app.route("/eg-admin-v8/<module_key>")
+@app.route("/eg-admin-v9/<module_key>")
+def eratguard_admin_v9_safe_module_page(module_key):
+    data = _eg_admin_v8_rows(module_key)
+    if not data:
+        return render_template("admin_command_center.html")
+    return render_template("admin_module_page.html", **data)
+# === ERATGUARD ADMIN HUD V9 SAFE MODULE ROUTES END ===
