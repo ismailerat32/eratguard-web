@@ -909,6 +909,167 @@ body{
   }
 }
 
+
+/* ERATGUARD ADMIN V10 3D BALANCE FIX */
+
+/* Desktop: reduce over-bright core and stop detail/log overlap */
+@media (min-width: 900px) and (orientation: landscape) {
+  .center{
+    top:50%;
+    width:300px;
+    height:300px;
+    transform:translate(-50%,-50%) translateZ(46px);
+  }
+
+  .ring1{width:300px;height:300px}
+  .ring2{width:242px;height:242px}
+  .ring3{width:182px;height:182px}
+  .ring4{width:118px;height:118px}
+
+  .core{
+    width:94px;
+    height:94px;
+    background:
+      radial-gradient(circle at 38% 28%,rgba(255,255,255,.32),transparent 18%),
+      radial-gradient(circle,#72eaff,#0b79c9 46%,#022a58 74%,#000b20);
+    box-shadow:
+      0 14px 30px rgba(0,0,0,.46),
+      0 0 24px rgba(255,255,255,.28),
+      0 0 46px rgba(0,210,255,.72),
+      0 0 74px rgba(0,120,255,.28),
+      inset 0 0 28px rgba(255,255,255,.14);
+  }
+
+  .core:before{
+    width:118px;
+    height:118px;
+  }
+
+  .core b{
+    font-size:13px;
+    color:#f5fdff;
+    text-shadow:
+      0 0 8px rgba(255,255,255,.85),
+      0 0 16px rgba(80,220,255,.72);
+  }
+
+  .panel{
+    width:270px;
+    height:58px;
+  }
+
+  .panel b{
+    font-size:14px;
+  }
+
+  .panel span{
+    font-size:9px;
+  }
+
+  .l1{left:42px;top:165px}
+  .l2{left:74px;top:237px}
+  .l3{left:42px;top:309px}
+  .l4{left:74px;top:381px}
+  .l5{left:42px;top:453px}
+
+  .r1{right:42px;top:165px}
+  .r2{right:74px;top:237px}
+  .r3{right:42px;top:309px}
+  .r4{right:74px;top:381px}
+  .r5{right:42px;top:453px}
+
+  .opslog{
+    bottom:118px;
+    width:430px;
+    min-height:38px;
+    padding:8px 12px;
+    text-align:left;
+    z-index:9;
+  }
+
+  .detail{
+    bottom:64px;
+    width:430px;
+    min-height:44px;
+    padding:9px 14px;
+    z-index:9;
+  }
+
+  .detail b{
+    font-size:13px;
+    margin-bottom:3px;
+  }
+
+  .detail span{
+    font-size:10px;
+  }
+
+  .openModule{
+    position:static;
+    margin-top:7px;
+    padding:5px 12px;
+    font-size:8px;
+  }
+
+  .stats{
+    bottom:16px;
+    gap:10px;
+    z-index:8;
+  }
+
+  .stat{
+    width:104px;
+    height:42px;
+  }
+
+  .stat strong{
+    font-size:16px;
+  }
+}
+
+/* Wide desktop browser polish */
+@media (min-width: 1100px) and (min-height: 620px) {
+  .hud{
+    height:min(690px, calc(100vh - 18px));
+  }
+
+  .detail{
+    bottom:70px;
+  }
+
+  .opslog{
+    bottom:126px;
+  }
+
+  .stats{
+    bottom:18px;
+  }
+}
+
+/* Prevent landscape phone rules from shrinking desktop too aggressively */
+@media (min-width: 900px) and (max-height: 620px) and (orientation: landscape) {
+  .search{
+    top:100px;
+  }
+
+  .landscapeBadge{
+    top:72px;
+  }
+
+  .top-title{
+    top:12px;
+    font-size:18px;
+  }
+
+  .sub-title{
+    top:42px;
+  }
+
+  .status-left,.status-right{
+    top:78px;
+  }
+}
+
 </style>
 </head>
 <body>
