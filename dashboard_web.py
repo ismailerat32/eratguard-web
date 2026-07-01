@@ -84,6 +84,55 @@ def _ss_get_last_scan_time():
 app = Flask(__name__)
 
 
+
+# === ERATGUARD ADMIN V8 PRIORITY GUARD FIX ===
+# This guard must be near the top of the app, before old user-panel redirects.
+@app.before_request
+def eratguard_admin_v8_priority_guard_fix():
+    try:
+        path = request.path.rstrip("/") or "/"
+
+        admin_home_paths = {
+            "/ac",
+            "/admin",
+            "/admin/dashboard",
+            "/admin/radial",
+            "/admin/command",
+            "/admin/command-center",
+            "/admin/user-center",
+            "/admin/kullanici",
+            "/admin/kullanici-merkezi",
+        }
+
+        if path in admin_home_paths:
+            return render_template("admin_command_center.html")
+
+        if path.startswith("/admin/v8/"):
+            module_key = path.split("/admin/v8/", 1)[1].strip("/").split("/", 1)[0]
+            try:
+                data = _eg_admin_v8_rows(module_key)
+            except Exception:
+                data = None
+            if data:
+                return render_template("admin_module_page.html", **data)
+            return render_template("admin_command_center.html")
+
+        if path.startswith("/admin/v7/"):
+            module_key = path.split("/admin/v7/", 1)[1].strip("/").split("/", 1)[0]
+            try:
+                data = _eg_admin_v8_rows(module_key)
+            except Exception:
+                data = None
+            if data:
+                return render_template("admin_module_page.html", **data)
+            return render_template("admin_command_center.html")
+
+    except Exception as e:
+        print("ADMIN_V8_PRIORITY_GUARD_ERROR:", e, flush=True)
+        return None
+# === ERATGUARD ADMIN V8 PRIORITY GUARD FIX END ===
+
+
 # ERATGUARD_SINGLE_USER_PANEL_RADIAL_12P_ROUTE_LOCK_START
 # Yayın kararı:
 # Kullanıcı tarafında tek ana panel = EratGuard Signature Radial 12P.
