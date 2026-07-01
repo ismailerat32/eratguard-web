@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>EratGuard Admin HUD V10 3D</title>
+<title>EratGuard Admin HUD V11 Reference</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{
@@ -254,7 +254,7 @@ body:after{
   .footer{display:none}
 }
 
-/* ERATGUARD ADMIN HUD V10 3D LANDSCAPE REFERENCE LOCK */
+/* ERATGUARD ADMIN HUD V11 LANDSCAPE REFERENCE LOCK */
 .landscapeBadge{
   display:none;
   position:absolute;
@@ -590,7 +590,7 @@ body:after{
 }
 
 
-/* ERATGUARD ADMIN HUD V10 3D POLISH */
+/* ERATGUARD ADMIN HUD V11 POLISH */
 
 /* Portrait polish: reduce center overlap and clean lower panels */
 @media (orientation: portrait) {
@@ -788,7 +788,7 @@ body:after{
 }
 
 
-/* ERATGUARD ADMIN HUD V10 3D MODULE OPEN FIX */
+/* ERATGUARD ADMIN HUD V11 MODULE OPEN FIX */
 .openModule{
   display:inline-flex;
   margin-top:9px;
@@ -1070,6 +1070,364 @@ body{
   }
 }
 
+
+/* ERATGUARD ADMIN V11 REFERENCE MODULE LAYOUT */
+
+/*
+  Reference goal:
+  - thinner side HUD rows
+  - no big detail box covering right modules
+  - center core stays clean
+  - operation log becomes a lower command strip
+*/
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .hud{
+    height:min(690px, calc(100vh - 18px));
+    transform:rotateX(.65deg);
+  }
+
+  .top-title{
+    top:14px;
+    font-size:17px;
+    letter-spacing:.42em;
+  }
+
+  .sub-title{
+    top:43px;
+    font-size:8px;
+  }
+
+  .status-left,.status-right{
+    top:78px;
+  }
+
+  .search{
+    top:92px;
+    width:430px;
+    min-height:28px;
+    font-size:9px;
+  }
+
+  .landscapeBadge{
+    top:62px;
+  }
+
+  .center{
+    top:50%;
+    width:270px;
+    height:270px;
+    transform:translate(-50%,-50%) translateZ(42px);
+    z-index:3;
+  }
+
+  .ring1{width:270px;height:270px}
+  .ring2{width:218px;height:218px}
+  .ring3{width:164px;height:164px}
+  .ring4{width:108px;height:108px}
+
+  .core{
+    width:82px;
+    height:82px;
+    background:
+      radial-gradient(circle at 38% 28%,rgba(255,255,255,.25),transparent 17%),
+      radial-gradient(circle,#62e6ff,#0b71bd 46%,#02244d 75%,#000b20);
+    box-shadow:
+      0 12px 24px rgba(0,0,0,.42),
+      0 0 18px rgba(255,255,255,.22),
+      0 0 36px rgba(0,210,255,.58),
+      0 0 58px rgba(0,120,255,.22),
+      inset 0 0 22px rgba(255,255,255,.12);
+  }
+
+  .core:before{
+    width:104px;
+    height:104px;
+  }
+
+  .core:after{
+    width:56px;
+    opacity:.72;
+  }
+
+  .core b{
+    font-size:11px;
+    line-height:1.12;
+    letter-spacing:.08em;
+    text-shadow:0 0 7px rgba(255,255,255,.75),0 0 13px rgba(80,220,255,.62);
+  }
+
+  /* Reference-like thin module rails */
+  .panel{
+    width:282px;
+    height:44px;
+    padding:5px 13px;
+    background:
+      linear-gradient(90deg,rgba(10,62,118,.72),rgba(3,20,48,.42));
+    border-color:rgba(105,220,255,.32);
+    box-shadow:
+      0 10px 20px rgba(0,0,0,.30),
+      0 0 18px rgba(0,160,255,.12),
+      inset 0 0 20px rgba(0,150,255,.07);
+  }
+
+  .panel.right{
+    background:
+      linear-gradient(270deg,rgba(10,62,118,.72),rgba(3,20,48,.42));
+  }
+
+  .panel small{
+    font-size:7px;
+    letter-spacing:.22em;
+    margin-bottom:1px;
+  }
+
+  .panel b{
+    font-size:12px;
+    line-height:1.05;
+  }
+
+  .panel span{
+    font-size:7px;
+    opacity:.78;
+  }
+
+  .panel:hover,
+  .panel.active{
+    transform:translateZ(44px) scale(1.012);
+    box-shadow:
+      0 16px 28px rgba(0,0,0,.40),
+      0 0 30px rgba(0,220,255,.34),
+      inset 0 0 26px rgba(0,190,255,.13);
+  }
+
+  .panel:before{
+    width:44px;
+    opacity:.68;
+  }
+
+  .panel:not(.right):before{
+    right:-42px;
+  }
+
+  .panel.right:before{
+    left:-42px;
+  }
+
+  /* Staggered two-depth feel like the reference */
+  .l1{left:50px;top:150px}
+  .l2{left:86px;top:208px}
+  .l3{left:50px;top:266px}
+  .l4{left:86px;top:324px}
+  .l5{left:50px;top:382px}
+
+  .r1{right:50px;top:150px}
+  .r2{right:86px;top:208px}
+  .r3{right:50px;top:266px}
+  .r4{right:86px;top:324px}
+  .r5{right:50px;top:382px}
+
+  /* Detail becomes a compact lower center panel */
+  .detail{
+    bottom:70px;
+    width:390px;
+    min-height:42px;
+    padding:8px 90px 8px 14px;
+    border-radius:10px;
+    z-index:9;
+    background:rgba(0,15,42,.76);
+  }
+
+  .detail b{
+    font-size:12px;
+    margin-bottom:2px;
+  }
+
+  .detail span{
+    font-size:9px;
+    display:block;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .openModule{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    margin:0;
+    padding:6px 11px;
+    font-size:7px;
+    letter-spacing:.10em;
+  }
+
+  /* Operation log becomes a thin strip under detail */
+  .opslog{
+    bottom:38px;
+    width:520px;
+    min-height:26px;
+    padding:6px 12px;
+    border-radius:999px;
+    z-index:9;
+    background:rgba(0,10,30,.70);
+    text-align:left;
+  }
+
+  .opslog b{
+    display:inline;
+    font-size:7px;
+    letter-spacing:.20em;
+    margin-right:9px;
+  }
+
+  .opslog span{
+    display:inline;
+    font-size:8px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .stats{
+    bottom:10px;
+    gap:8px;
+    z-index:8;
+  }
+
+  .stat{
+    width:92px;
+    height:34px;
+    border-radius:8px;
+  }
+
+  .stat strong{
+    font-size:14px;
+  }
+
+  .stat span{
+    font-size:6px;
+  }
+
+  .footer{
+    right:22px;
+    bottom:8px;
+    font-size:6px;
+  }
+}
+
+/* Laptop browser with visible toolbar: compact but not phone layout */
+@media (min-width: 900px) and (max-height: 650px) and (orientation: landscape) {
+  .hud{
+    height:calc(100vh - 10px);
+  }
+
+  .top-title{
+    top:10px;
+  }
+
+  .sub-title{
+    top:36px;
+  }
+
+  .status-left,.status-right{
+    top:70px;
+  }
+
+  .search{
+    top:82px;
+  }
+
+  .center{
+    top:48%;
+    width:246px;
+    height:246px;
+  }
+
+  .ring1{width:246px;height:246px}
+  .ring2{width:198px;height:198px}
+  .ring3{width:150px;height:150px}
+  .ring4{width:98px;height:98px}
+
+  .core{
+    width:74px;
+    height:74px;
+  }
+
+  .core:before{
+    width:94px;
+    height:94px;
+  }
+
+  .panel{
+    height:40px;
+  }
+
+  .l1{left:48px;top:132px}
+  .l2{left:84px;top:184px}
+  .l3{left:48px;top:236px}
+  .l4{left:84px;top:288px}
+  .l5{left:48px;top:340px}
+
+  .r1{right:48px;top:132px}
+  .r2{right:84px;top:184px}
+  .r3{right:48px;top:236px}
+  .r4{right:84px;top:288px}
+  .r5{right:48px;top:340px}
+
+  .detail{
+    bottom:58px;
+  }
+
+  .opslog{
+    bottom:32px;
+  }
+
+  .stats{
+    bottom:6px;
+  }
+}
+
+/* Phone landscape keeps the earlier compact command mode but with the V11 strip logic */
+@media (orientation: landscape) and (max-height: 540px) and (max-width: 899px) {
+  .detail{
+    bottom:31px;
+    width:48vw;
+    min-height:30px;
+    padding:6px 70px 6px 10px;
+  }
+
+  .openModule{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    padding:4px 8px;
+    font-size:6px;
+  }
+
+  .opslog{
+    bottom:5px;
+    width:58vw;
+    min-height:22px;
+    border-radius:999px;
+  }
+}
+
+/* Portrait keeps readability */
+@media (orientation: portrait) {
+  .detail{
+    padding-bottom:12px;
+  }
+
+  .openModule{
+    display:inline-flex;
+    position:static;
+    transform:none;
+    margin-top:8px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1083,7 +1441,7 @@ body{
     <div class="status-left"><span class="dot"></span>ADMIN AKTİF</div>
     <div class="status-right" id="clock">--:--</div>
     <div class="search">SİSTEM MODÜLLERİ · CANLI KONTROL</div>
-    <div class="landscapeBadge">LANDSCAPE COMMAND · V10 3D MODE</div>
+    <div class="landscapeBadge">LANDSCAPE COMMAND · V11 MODE</div>
 
     <button class="panel l1 active" data-title="Kullanıcılar" data-url="/eg-admin-v8/users" data-info="Rol, erişim ve oturum kontrolleri bu merkezden izlenir."><small>USER OPS</small><b>Kullanıcılar</b><span>Rol ve erişim</span></button>
     <button class="panel l2" data-title="Lisanslar" data-url="/eg-admin-v8/licenses" data-info="PRO aktivasyonları, planlar ve anahtar durumları izlenir."><small>LICENSE</small><b>Lisanslar</b><span>PRO aktivasyon</span></button>
@@ -1110,7 +1468,7 @@ body{
 
     <section class="opslog">
       <b>OPERASYON LOG</b>
-      <span id="opsLine">Admin HUD V10 3D aktif · Güvenli admin modül yolları aktif · Sistem izleniyor</span>
+      <span id="opsLine">Admin HUD V11 aktif · Güvenli admin modül yolları aktif · Sistem izleniyor</span>
     </section>
 
     <div class="stats">
@@ -1120,7 +1478,7 @@ body{
       <div class="stat"><strong>OK</strong><span>SYS</span></div>
     </div>
 
-    <div class="footer">ERATGUARD PRO · ADMIN HUD V10 3D · LANDSCAPE COMMAND · V10 3D</div>
+    <div class="footer">ERATGUARD PRO · ADMIN HUD V11 · LANDSCAPE COMMAND · V11</div>
   </main>
 </div>
 <script>
@@ -1148,7 +1506,7 @@ body{
 
       var t=p.getAttribute('data-title') || 'Admin Modül';
       var i=p.getAttribute('data-info') || 'Modül bilgisi hazırlanıyor.';
-      var u=p.getAttribute('data-url') || '/ac?v=3d';
+      var u=p.getAttribute('data-url') || '/ac?v=v11-ref';
 
       title.textContent=t;
       info.textContent=i;
