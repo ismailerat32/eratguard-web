@@ -1043,16 +1043,270 @@ svg{
 }
 </style>
 
+
+<style id="eratguard-radial-v19-clean-signature-css">
+/* ERATGUARD USER RADIAL V19 CLEAN SIGNATURE SPIRAL */
+
+/* Eski animasyon katmanlarını tamamen sustur */
+.eg-v13-spiral-overlay,
+.eg-v13-ready-flash,
+.eg-v15-clone-layer,
+.eg-v15-energy,
+.eg-v15-spiral-path,
+.eg-v15-ready,
+.eg-v16-stage,
+.eg-v16-core-burst,
+.eg-v16-orbit,
+.eg-v16-ready,
+.eg-v16-replay,
+.eg-v13-sound-toggle{
+  display:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* Siyah noktalar / sayı rozetleri kesin sil */
+.seg-link .num,
+.seg-link .number,
+.seg-link .idx,
+.seg-link .badge,
+.seg-link .seg-no,
+.seg-link .seg-num,
+.segment-number,
+.slice-number,
+.radial-number,
+.seg-link [class*="num"],
+.seg-link [class*="badge"],
+.seg-link [class*="index"],
+.seg-link > span:first-child,
+.seg-link > b:first-child{
+  display:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+}
+
+/* V19 sırasında gerçek dilimleri gizle; kilitlenenleri tek tek göster */
+.eg-v19-running .seg-link{
+  opacity:0!important;
+  pointer-events:none!important;
+  filter:none!important;
+}
+
+.eg-v19-running .seg-link.eg-v19-locked,
+.seg-link.eg-v19-locked{
+  opacity:1!important;
+  filter:brightness(1.08) drop-shadow(0 0 14px rgba(0,255,130,.38))!important;
+  pointer-events:auto!important;
+}
+
+/* Finalde tek temiz panel */
+.eg-v19-finished .seg-link{
+  opacity:1!important;
+  filter:none!important;
+  pointer-events:auto!important;
+}
+
+.eg-v19-stage{
+  position:fixed;
+  inset:0;
+  z-index:180;
+  pointer-events:none;
+  overflow:hidden;
+  mix-blend-mode:screen;
+}
+
+.eg-v19-svg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+
+.eg-v19-path{
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-dasharray:1;
+  stroke-dashoffset:1;
+  opacity:0;
+  filter:
+    drop-shadow(0 0 14px rgba(0,255,130,.95))
+    drop-shadow(0 0 30px rgba(0,240,255,.40));
+}
+
+.eg-v19-path.green{
+  stroke:rgba(0,255,130,.88);
+  stroke-width:3.2;
+}
+
+.eg-v19-path.cyan{
+  stroke:rgba(0,240,255,.70);
+  stroke-width:2.7;
+}
+
+.eg-v19-core{
+  position:fixed;
+  left:50%;
+  top:43%;
+  width:118px;
+  height:118px;
+  margin-left:-59px;
+  margin-top:-59px;
+  border-radius:50%;
+  z-index:184;
+  opacity:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle,
+      rgba(255,255,255,.95),
+      rgba(0,255,130,.58) 22%,
+      rgba(0,240,255,.25) 48%,
+      transparent 72%);
+  box-shadow:
+    0 0 42px rgba(0,255,130,.96),
+    0 0 92px rgba(0,240,255,.40),
+    inset 0 0 30px rgba(255,255,255,.25);
+}
+
+.eg-v19-spiral{
+  position:fixed;
+  left:50%;
+  top:43%;
+  width:520px;
+  height:520px;
+  margin-left:-260px;
+  margin-top:-260px;
+  border-radius:50%;
+  z-index:182;
+  opacity:0;
+  pointer-events:none;
+  background:
+    conic-gradient(from -120deg,
+      transparent 0deg,
+      rgba(0,255,130,.04) 20deg,
+      rgba(0,255,130,.52) 58deg,
+      rgba(0,240,255,.36) 92deg,
+      rgba(0,255,130,.12) 126deg,
+      transparent 162deg,
+      transparent 360deg);
+  filter:
+    blur(.25px)
+    drop-shadow(0 0 26px rgba(0,255,130,.85))
+    drop-shadow(0 0 48px rgba(0,240,255,.32));
+}
+
+.eg-v19-clone{
+  position:fixed;
+  margin:0!important;
+  transform-origin:center center!important;
+  pointer-events:none!important;
+  will-change:left,top,transform,opacity,filter;
+  z-index:190;
+  filter:
+    drop-shadow(0 0 22px rgba(0,255,130,.92))
+    drop-shadow(0 0 40px rgba(0,240,255,.42))
+    brightness(1.14);
+}
+
+.eg-v19-clone *{
+  pointer-events:none!important;
+}
+
+.eg-v19-lock{
+  position:fixed;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  z-index:188;
+  pointer-events:none;
+  border:1px solid rgba(210,255,230,.92);
+  background:radial-gradient(circle,rgba(230,255,240,.72),rgba(0,255,130,.24),transparent 70%);
+  box-shadow:
+    0 0 22px rgba(0,255,130,.96),
+    0 0 42px rgba(0,240,255,.36);
+  opacity:0;
+}
+
+.eg-v19-ready{
+  position:fixed;
+  left:50%;
+  bottom:82px;
+  transform:translateX(-50%);
+  z-index:195;
+  pointer-events:none;
+  color:#ecfff4;
+  border:1px solid rgba(0,255,130,.46);
+  border-radius:999px;
+  background:rgba(0,18,9,.80);
+  padding:9px 16px;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.20em;
+  text-shadow:0 0 12px rgba(0,255,130,.84);
+  box-shadow:0 0 24px rgba(0,255,130,.24), inset 0 0 20px rgba(0,255,130,.10);
+  opacity:0;
+}
+
+.eg-v19-sound{
+  position:fixed;
+  right:14px;
+  top:calc(env(safe-area-inset-top,0px) + 14px);
+  z-index:230;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  border:1px solid rgba(0,255,130,.44);
+  background:rgba(0,20,10,.78);
+  color:#7cffb2;
+  font-size:18px;
+  font-weight:900;
+  box-shadow:0 0 20px rgba(0,255,130,.24), inset 0 0 20px rgba(0,255,130,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  backdrop-filter:blur(8px);
+}
+
+.eg-v19-sound.muted{
+  color:rgba(220,255,235,.50);
+  border-color:rgba(220,255,235,.20);
+}
+
+@media(max-width:760px){
+  .eg-v19-spiral{
+    width:430px;
+    height:430px;
+    margin-left:-215px;
+    margin-top:-215px;
+  }
+
+  .eg-v19-core{
+    width:96px;
+    height:96px;
+    margin-left:-48px;
+    margin-top:-48px;
+  }
+
+  .eg-v19-ready{
+    bottom:68px;
+    font-size:9px;
+  }
+}
+</style>
+
 </head>
 <body>
 <main class="app">
   <section class="hero">
     <div class="brand">Erat<span>Guard</span></div>
-    <div class="sub">SIGNATURE RADIAL PANEL · SIGNATURE V18</div>
+    <div class="sub">SIGNATURE RADIAL PANEL · SIGNATURE V19</div>
     <div class="pills">
       <div class="pill">PRO AKTİF</div>
       <div class="pill">CANLI KORUMA</div>
-      <div class="pill">12P SIGNATURE V18</div>
+      <div class="pill">12P SIGNATURE V19</div>
     </div>
   </section>
 
@@ -2366,7 +2620,7 @@ svg{
   function boot(){
     ensureStage();
     hideNumbers(document);
-    setTimeout(function(){ replay(false); }, 80);
+    /* disabled by V19 clean signature */
     setTimeout(function(){ hideNumbers(document); }, 2400);
     setTimeout(function(){ hideNumbers(document); }, 4600);
   }
@@ -2507,7 +2761,7 @@ svg{
     patchReplayHook();
 
     /* İlk yükleme V16 çalıştıktan hemen sonra progressive reveal takvimi */
-    setTimeout(progressiveLockSchedule, 160);
+    /* disabled by V19 clean signature */
     setTimeout(cleanNumbers, 500);
     setTimeout(cleanNumbers, 1800);
     setTimeout(cleanNumbers, 4200);
@@ -2515,6 +2769,288 @@ svg{
 
   if(document.readyState === "loading"){
     document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
+})();
+</script>
+
+
+<script id="eratguard-radial-v19-clean-signature-js">
+(function(){
+  if(window.__ERATGUARD_RADIAL_V19_CLEAN__) return;
+  window.__ERATGUARD_RADIAL_V19_CLEAN__ = true;
+
+  var audioCtx=null;
+  var audioOn=false;
+  var unlocked=false;
+  var running=false;
+
+  function qsa(sel,root){return Array.prototype.slice.call((root||document).querySelectorAll(sel));}
+
+  function ensureAudio(){
+    try{
+      if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+      if(audioCtx.state==="suspended") audioCtx.resume();
+      unlocked=true;
+    }catch(e){}
+  }
+
+  function beep(freq,dur,gainVal,type,delay){
+    if(!audioOn || !unlocked || !audioCtx) return;
+    try{
+      var t=audioCtx.currentTime+(delay||0);
+      var osc=audioCtx.createOscillator();
+      var gain=audioCtx.createGain();
+      osc.type=type||"sine";
+      osc.frequency.setValueAtTime(freq,t);
+      osc.frequency.exponentialRampToValueAtTime(Math.max(80,freq*.72),t+dur);
+      gain.gain.setValueAtTime(.0001,t);
+      gain.gain.exponentialRampToValueAtTime(gainVal||.014,t+.012);
+      gain.gain.exponentialRampToValueAtTime(.0001,t+dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t+dur+.03);
+    }catch(e){}
+  }
+
+  function soundLock(i){
+    beep(760+i*16,.045,.010,"sine",0);
+    beep(380+i*7,.060,.005,"triangle",.012);
+  }
+
+  function soundReady(){
+    beep(330,.12,.014,"sine",0);
+    beep(560,.15,.010,"triangle",.05);
+    beep(840,.18,.008,"sine",.12);
+  }
+
+  function vibrate(x){
+    try{ if(audioOn && navigator.vibrate) navigator.vibrate(x||7); }catch(e){}
+  }
+
+  function cleanNumbers(root){
+    qsa(".seg-link .num,.seg-link .number,.seg-link .idx,.seg-link .badge,.seg-link [class*='num'],.seg-link [class*='badge'],.seg-link [class*='index']",root).forEach(function(n){
+      n.style.display="none";n.style.opacity="0";n.style.visibility="hidden";
+    });
+    qsa(".seg-link span,.seg-link b,.seg-link i,.seg-link em,.seg-link div",root).forEach(function(n){
+      var t=(n.textContent||"").trim();
+      if(/^(0?[1-9]|1[0-2])$/.test(t)){
+        n.style.display="none";n.style.opacity="0";n.style.visibility="hidden";
+      }
+    });
+  }
+
+  function corePoint(){
+    var core=document.querySelector(".core")||document.querySelector(".center")||document.querySelector("[class*='core']")||document.querySelector("[class*='center']");
+    if(core){
+      var r=core.getBoundingClientRect();
+      return {x:r.left+r.width/2,y:r.top+r.height/2};
+    }
+    return {x:window.innerWidth/2,y:window.innerHeight*.43};
+  }
+
+  function slices(){
+    var a=qsa(".seg-link");
+    if(a.length<6) a=qsa("a[href^='/u/']");
+    return a.slice(0,12);
+  }
+
+  function ensureStage(){
+    var st=document.querySelector(".eg-v19-stage");
+    if(!st){
+      st=document.createElement("div");
+      st.className="eg-v19-stage";
+      st.innerHTML='<svg class="eg-v19-svg"></svg><div class="eg-v19-core"></div><div class="eg-v19-spiral"></div><div class="eg-v19-ready">KORUMA AKTİF · 12P HAZIR</div>';
+      document.body.appendChild(st);
+    }
+
+    var btn=document.querySelector(".eg-v19-sound");
+    if(!btn){
+      btn=document.createElement("button");
+      btn.type="button";
+      btn.className="eg-v19-sound muted";
+      btn.innerHTML="🔇";
+      btn.setAttribute("aria-label","Ses ve imza animasyonu");
+      btn.addEventListener("click",function(ev){
+        ev.preventDefault();ev.stopPropagation();
+        ensureAudio();
+        audioOn=!audioOn;
+        btn.classList.toggle("muted",!audioOn);
+        btn.innerHTML=audioOn?"♪":"🔇";
+        run(true);
+      },true);
+      document.body.appendChild(btn);
+    }
+
+    return st;
+  }
+
+  function clearStage(st){
+    qsa(".eg-v19-clone,.eg-v19-lock",st).forEach(function(x){x.remove();});
+    var svg=st.querySelector(".eg-v19-svg");
+    if(svg) svg.innerHTML="";
+  }
+
+  function path(svg,c,e,i){
+    var ns="http://www.w3.org/2000/svg";
+    var p=document.createElementNS(ns,"path");
+    var ang=Math.atan2(e.y-c.y,e.x-c.x);
+    var dist=Math.hypot(e.x-c.x,e.y-c.y);
+    var m1={x:c.x+Math.cos(ang-.92)*(dist*.28+36),y:c.y+Math.sin(ang-.92)*(dist*.28+36)};
+    var m2={x:c.x+Math.cos(ang+.60)*(dist*.66+22),y:c.y+Math.sin(ang+.60)*(dist*.66+22)};
+    p.setAttribute("d","M "+c.x+" "+c.y+" C "+m1.x+" "+m1.y+", "+m2.x+" "+m2.y+", "+e.x+" "+e.y);
+    p.setAttribute("class","eg-v19-path "+(i%2?"cyan":"green"));
+    svg.appendChild(p);
+    var len=1; try{len=p.getTotalLength();}catch(e){}
+    p.style.strokeDasharray=len;
+    p.style.strokeDashoffset=len;
+    p.animate([
+      {opacity:0,strokeDashoffset:len},
+      {opacity:.9,strokeDashoffset:len*.42,offset:.42},
+      {opacity:.26,strokeDashoffset:0,offset:.86},
+      {opacity:0,strokeDashoffset:0}
+    ],{delay:40+i*88,duration:1250,easing:"cubic-bezier(.16,.9,.24,1)",fill:"both"});
+  }
+
+  function energy(st){
+    var core=st.querySelector(".eg-v19-core");
+    var spiral=st.querySelector(".eg-v19-spiral");
+    if(core){
+      core.animate([
+        {opacity:0,transform:"scale(.12)"},
+        {opacity:1,transform:"scale(1)",offset:.18},
+        {opacity:.58,transform:"scale(1.45)",offset:.62},
+        {opacity:0,transform:"scale(2)"}
+      ],{duration:2300,easing:"cubic-bezier(.16,.9,.24,1)",fill:"both"});
+    }
+    if(spiral){
+      spiral.animate([
+        {opacity:0,transform:"scale(.15) rotate(-180deg)"},
+        {opacity:.82,transform:"scale(.86) rotate(130deg)",offset:.52},
+        {opacity:.22,transform:"scale(1.06) rotate(330deg)",offset:.84},
+        {opacity:0,transform:"scale(1.12) rotate(430deg)"}
+      ],{duration:2700,easing:"cubic-bezier(.16,.9,.24,1)",fill:"both"});
+    }
+  }
+
+  function lockFlash(st,x,y){
+    var l=document.createElement("div");
+    l.className="eg-v19-lock";
+    l.style.left=(x-21)+"px";
+    l.style.top=(y-21)+"px";
+    st.appendChild(l);
+    l.animate([
+      {opacity:0,transform:"scale(.35)"},
+      {opacity:1,transform:"scale(1.12)",offset:.28},
+      {opacity:0,transform:"scale(1.75)"}
+    ],{duration:520,easing:"cubic-bezier(.2,.8,.2,1)",fill:"both"}).onfinish=function(){l.remove();};
+  }
+
+  function ready(st){
+    var r=st.querySelector(".eg-v19-ready");
+    if(!r) return;
+    r.animate([
+      {opacity:0,transform:"translateX(-50%) translateY(8px) scale(.96)"},
+      {opacity:1,transform:"translateX(-50%) translateY(0) scale(1)",offset:.18},
+      {opacity:1,transform:"translateX(-50%) translateY(0) scale(1)",offset:.70},
+      {opacity:0,transform:"translateX(-50%) translateY(-6px) scale(.98)"}
+    ],{duration:1600,easing:"cubic-bezier(.2,.8,.2,1)",fill:"both"});
+  }
+
+  function run(force){
+    if(running && !force) return;
+    running=true;
+
+    var st=ensureStage();
+    clearStage(st);
+    cleanNumbers(document);
+
+    var list=slices();
+    if(!list.length){running=false;return;}
+
+    document.body.classList.remove("eg-v19-finished");
+    list.forEach(function(el){el.classList.remove("eg-v19-locked");});
+    document.body.classList.add("eg-v19-running");
+
+    var svg=st.querySelector(".eg-v19-svg");
+    var c=corePoint();
+    energy(st);
+
+    var last=0;
+
+    list.forEach(function(el,i){
+      cleanNumbers(el);
+      var r=el.getBoundingClientRect();
+      if(!r.width||!r.height) return;
+
+      var e={x:r.left+r.width/2,y:r.top+r.height/2};
+      path(svg,c,e,i);
+
+      var clone=el.cloneNode(true);
+      clone.removeAttribute("id");
+      clone.classList.add("eg-v19-clone");
+      clone.style.width=r.width+"px";
+      clone.style.height=r.height+"px";
+      clone.style.left=c.x+"px";
+      clone.style.top=c.y+"px";
+      clone.style.opacity="0";
+      cleanNumbers(clone);
+      st.appendChild(clone);
+
+      var ang=Math.atan2(e.y-c.y,e.x-c.x);
+      var dist=Math.hypot(e.x-c.x,e.y-c.y);
+      var m1={x:c.x+Math.cos(ang-.95)*(dist*.30+34),y:c.y+Math.sin(ang-.95)*(dist*.30+34)};
+      var m2={x:c.x+Math.cos(ang+.60)*(dist*.68+18),y:c.y+Math.sin(ang+.60)*(dist*.68+18)};
+
+      var delay=60+i*95;
+      var dur=1120;
+      last=Math.max(last,delay+dur);
+
+      clone.animate([
+        {left:c.x+"px",top:c.y+"px",opacity:.18,filter:"blur(7px) brightness(2.1)",transform:"translate(-50%,-50%) scale(.10) rotate("+(280+i*24)+"deg)"},
+        {left:m1.x+"px",top:m1.y+"px",opacity:.80,filter:"blur(3px) brightness(1.8)",transform:"translate(-50%,-50%) scale(.42) rotate("+(185+i*15)+"deg)",offset:.34},
+        {left:m2.x+"px",top:m2.y+"px",opacity:.96,filter:"blur(1px) brightness(1.45)",transform:"translate(-50%,-50%) scale(.76) rotate("+(85+i*7)+"deg)",offset:.68},
+        {left:e.x+"px",top:e.y+"px",opacity:1,filter:"blur(0) brightness(1.22)",transform:"translate(-50%,-50%) scale(1.06) rotate(-3deg)",offset:.90},
+        {left:e.x+"px",top:e.y+"px",opacity:1,filter:"blur(0) brightness(1)",transform:"translate(-50%,-50%) scale(1) rotate(0deg)"}
+      ],{delay:delay,duration:dur,easing:"cubic-bezier(.15,.95,.2,1)",fill:"both"}).onfinish=function(){
+        el.classList.add("eg-v19-locked");
+        soundLock(i);
+        lockFlash(st,e.x,e.y);
+        vibrate(6);
+      };
+    });
+
+    setTimeout(function(){
+      document.body.classList.remove("eg-v19-running");
+      document.body.classList.add("eg-v19-finished");
+      list.forEach(function(el){el.classList.add("eg-v19-locked");});
+      soundReady();
+      ready(st);
+      vibrate([10,26,10]);
+      setTimeout(function(){
+        clearStage(st);
+        running=false;
+        cleanNumbers(document);
+      },220);
+    },last+180);
+  }
+
+  window.EratGuardSignatureReplay=run;
+  window.EratGuardReplaySpiral=run;
+  window.EratGuardV19Replay=run;
+
+  function boot(){
+    ensureStage();
+    cleanNumbers(document);
+    setTimeout(function(){run(false);},120);
+    setTimeout(function(){cleanNumbers(document);},1800);
+    setTimeout(function(){cleanNumbers(document);},4200);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",boot);
   }else{
     boot();
   }
