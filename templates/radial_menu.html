@@ -225,352 +225,31 @@ svg{
 }
 </style>
 
-<style id="eratguard-radial-v13-spiral-css">
-/* ERATGUARD USER RADIAL V13 SPIRAL DEPLOY */
-.eg-v13-spiral-overlay{
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  z-index:80;
-  overflow:hidden;
-}
-.eg-v13-spiral-ring{
-  position:absolute;
-  left:50%;
-  top:45%;
-  width:280px;
-  height:280px;
-  margin-left:-140px;
-  margin-top:-140px;
-  border-radius:50%;
-  border:1px solid rgba(0,255,130,.28);
-  box-shadow:
-    0 0 30px rgba(0,255,130,.25),
-    inset 0 0 28px rgba(0,255,130,.09);
-  opacity:0;
-  transform:scale(.25) rotate(0deg);
-}
-.eg-v13-spiral-ring.r2{
-  width:430px;
-  height:430px;
-  margin-left:-215px;
-  margin-top:-215px;
-  border-color:rgba(0,240,255,.20);
-}
-.eg-v13-spiral-ring.r3{
-  width:590px;
-  height:590px;
-  margin-left:-295px;
-  margin-top:-295px;
-  border-color:rgba(0,255,130,.14);
-}
-.eg-v13-spiral-sweep{
-  position:absolute;
-  left:50%;
-  top:45%;
-  width:420px;
-  height:420px;
-  margin-left:-210px;
-  margin-top:-210px;
-  border-radius:50%;
-  background:
-    conic-gradient(from 0deg,
-      transparent 0deg,
-      rgba(0,255,130,.00) 34deg,
-      rgba(0,255,130,.44) 60deg,
-      rgba(0,240,255,.28) 78deg,
-      transparent 102deg,
-      transparent 360deg);
-  filter:blur(.2px) drop-shadow(0 0 18px rgba(0,255,130,.72));
-  opacity:0;
-  transform:scale(.2) rotate(-140deg);
-}
-.eg-v13-sound-toggle{
-  position:fixed;
-  right:14px;
-  top:calc(env(safe-area-inset-top,0px) + 14px);
-  z-index:120;
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  border:1px solid rgba(0,255,130,.42);
-  background:rgba(0,20,10,.72);
-  color:#7cffb2;
-  font-size:17px;
-  font-weight:900;
-  box-shadow:0 0 18px rgba(0,255,130,.22), inset 0 0 18px rgba(0,255,130,.08);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  backdrop-filter:blur(8px);
-}
-.eg-v13-sound-toggle.off{
-  color:rgba(210,255,230,.42);
-  border-color:rgba(210,255,230,.18);
-  box-shadow:inset 0 0 18px rgba(255,255,255,.04);
-}
-.eg-v13-ready-flash{
-  position:fixed;
-  left:50%;
-  bottom:74px;
-  transform:translateX(-50%);
-  z-index:95;
-  pointer-events:none;
-  color:#dfffee;
-  border:1px solid rgba(0,255,130,.38);
-  border-radius:999px;
-  background:rgba(0,18,9,.70);
-  padding:10px 18px;
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:.22em;
-  text-shadow:0 0 12px rgba(0,255,130,.78);
-  box-shadow:0 0 22px rgba(0,255,130,.20), inset 0 0 22px rgba(0,255,130,.08);
-  opacity:0;
-}
-.eg-v13-spawned{
-  will-change:transform,opacity,filter;
-}
-.eg-v13-core-pulse{
-  animation:egV13CorePulse 1.2s ease-in-out 0s 2;
-}
-@keyframes egV13CorePulse{
-  0%{filter:drop-shadow(0 0 0 rgba(0,255,130,0));}
-  45%{filter:drop-shadow(0 0 24px rgba(0,255,130,.90)) drop-shadow(0 0 46px rgba(0,240,255,.42));}
-  100%{filter:drop-shadow(0 0 8px rgba(0,255,130,.30));}
-}
-@media(max-width:760px){
-  .eg-v13-spiral-ring{top:42%}
-  .eg-v13-spiral-ring.r2{width:360px;height:360px;margin-left:-180px;margin-top:-180px}
-  .eg-v13-spiral-ring.r3{width:500px;height:500px;margin-left:-250px;margin-top:-250px}
-  .eg-v13-spiral-sweep{
-    top:42%;
-    width:360px;
-    height:360px;
-    margin-left:-180px;
-    margin-top:-180px;
-  }
-  .eg-v13-ready-flash{
-    bottom:62px;
-    font-size:9px;
-    padding:9px 14px;
-  }
-}
-</style>
 
 
-<style id="eratguard-radial-v14-spiral-polish-css">
-/* ERATGUARD USER RADIAL V14 SPIRAL POLISH */
-
-/* Hide 01-12 visual number badges on the radial slices */
-.seg-link .num,
-.seg-link .number,
-.seg-link .idx,
-.seg-link .badge,
-.seg-link .seg-no,
-.seg-link .seg-num,
-.segment-number,
-.slice-number,
-.radial-number,
-[data-index],
-[data-no]{
-  display:none!important;
-}
-
-/* Fallback: hide small absolute circular number badges commonly used around slices */
-.seg-link > span:first-child,
-.seg-link > b:first-child{
-  /* JS will decide text-based hiding too; this keeps layout clean if first child is the number badge */
-}
-
-/* Make the deploy feel more like reference #2: spiral energy flow */
-.eg-v13-spiral-overlay{
-  mix-blend-mode:screen;
-}
-.eg-v13-spiral-sweep{
-  width:520px!important;
-  height:520px!important;
-  margin-left:-260px!important;
-  margin-top:-260px!important;
-  background:
-    conic-gradient(from 0deg,
-      transparent 0deg,
-      rgba(0,255,130,.00) 22deg,
-      rgba(0,255,130,.18) 44deg,
-      rgba(0,255,130,.68) 66deg,
-      rgba(0,240,255,.42) 92deg,
-      rgba(0,255,130,.16) 122deg,
-      transparent 152deg,
-      transparent 360deg)!important;
-  filter:blur(.4px) drop-shadow(0 0 22px rgba(0,255,130,.9)) drop-shadow(0 0 42px rgba(0,240,255,.35))!important;
-}
-.eg-v13-spiral-ring{
-  border-style:dashed!important;
-  animation:egV14SlowRotate 5.5s linear infinite;
-}
-.eg-v13-spawned{
-  transform-origin:center center!important;
-}
-.seg-link.eg-v13-spawned{
-  filter:drop-shadow(0 0 18px rgba(0,255,130,.48));
-}
-@keyframes egV14SlowRotate{
-  to{transform:rotate(360deg)}
-}
-@media(max-width:760px){
-  .eg-v13-spiral-sweep{
-    width:430px!important;
-    height:430px!important;
-    margin-left:-215px!important;
-    margin-top:-215px!important;
-  }
-}
-</style>
 
 
-<style id="eratguard-radial-v15-center-clone-css">
-/* ERATGUARD USER RADIAL V15 CENTER CLONE DEPLOY */
-
-/* Hide old black number dots/badges completely */
-.seg-link .num,
-.seg-link .number,
-.seg-link .idx,
-.seg-link .badge,
-.seg-link .seg-no,
-.seg-link .seg-num,
-.segment-number,
-.slice-number,
-.radial-number,
-.seg-link [class*="num"],
-.seg-link [class*="badge"],
-.seg-link [class*="index"]{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-}
-
-/* During deploy original slices are hidden; clones do the animation */
-.eg-v15-deploying .seg-link{
-  opacity:0!important;
-}
-
-.eg-v15-clone-layer{
-  position:fixed;
-  inset:0;
-  z-index:110;
-  pointer-events:none;
-  overflow:hidden;
-  mix-blend-mode:screen;
-}
-
-.eg-v15-clone{
-  position:fixed;
-  margin:0!important;
-  transform-origin:center center!important;
-  pointer-events:none!important;
-  will-change:left,top,transform,opacity,filter;
-  filter:
-    drop-shadow(0 0 16px rgba(0,255,130,.70))
-    drop-shadow(0 0 30px rgba(0,240,255,.28));
-}
-
-.eg-v15-clone *{
-  pointer-events:none!important;
-}
-
-.eg-v15-energy{
-  position:fixed;
-  left:50%;
-  top:43%;
-  width:70px;
-  height:70px;
-  margin-left:-35px;
-  margin-top:-35px;
-  border-radius:50%;
-  z-index:108;
-  pointer-events:none;
-  background:
-    radial-gradient(circle,rgba(180,255,220,.80),rgba(0,255,130,.34) 34%,rgba(0,240,255,.12) 58%,transparent 72%);
-  box-shadow:
-    0 0 32px rgba(0,255,130,.85),
-    0 0 70px rgba(0,240,255,.32);
-  opacity:0;
-}
-
-.eg-v15-spiral-path{
-  position:fixed;
-  left:50%;
-  top:43%;
-  width:470px;
-  height:470px;
-  margin-left:-235px;
-  margin-top:-235px;
-  border-radius:50%;
-  z-index:107;
-  pointer-events:none;
-  background:
-    conic-gradient(from -90deg,
-      transparent 0deg,
-      rgba(0,255,130,.02) 24deg,
-      rgba(0,255,130,.36) 54deg,
-      rgba(0,240,255,.24) 80deg,
-      transparent 115deg,
-      transparent 360deg);
-  filter:drop-shadow(0 0 22px rgba(0,255,130,.72));
-  opacity:0;
-}
-
-.eg-v15-ready{
-  position:fixed;
-  left:50%;
-  bottom:72px;
-  transform:translateX(-50%);
-  z-index:115;
-  color:#eafff4;
-  border:1px solid rgba(0,255,130,.45);
-  border-radius:999px;
-  background:rgba(0,18,9,.78);
-  padding:10px 18px;
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:.20em;
-  text-shadow:0 0 12px rgba(0,255,130,.78);
-  box-shadow:0 0 24px rgba(0,255,130,.22), inset 0 0 20px rgba(0,255,130,.08);
-  opacity:0;
-  pointer-events:none;
-}
-
-.eg-v13-sound-toggle{
-  z-index:130!important;
-}
-
-@media(max-width:760px){
-  .eg-v15-spiral-path{
-    top:43%;
-    width:390px;
-    height:390px;
-    margin-left:-195px;
-    margin-top:-195px;
-  }
-
-  .eg-v15-energy{
-    top:43%;
-  }
-
-  .eg-v15-ready{
-    bottom:62px;
-    font-size:9px;
-    padding:9px 14px;
-  }
-}
-</style>
 
 
-<style id="eratguard-radial-v16-signature-css">
-/* ERATGUARD USER RADIAL V16 SIGNATURE ENGINE */
 
-/* Kill remaining visual number dots */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style id="eratguard-radial-v20-clean-engine-css">
+/* ERATGUARD USER RADIAL V20 CLEAN SIGNATURE ENGINE */
+
+/* Number dots/badges removed completely */
 .seg-link .num,
 .seg-link .number,
 .seg-link .idx,
@@ -590,524 +269,22 @@ svg{
   visibility:hidden!important;
 }
 
-/* Intro state: real segments hidden while clones fly from core */
-.eg-v16-running .seg-link{
+/* During deploy, real slices stay hidden until each one locks */
+.eg-v20-running .seg-link{
   opacity:0!important;
   pointer-events:none!important;
 }
 
-.eg-v16-stage{
-  position:fixed;
-  inset:0;
-  z-index:160;
-  pointer-events:none;
-  overflow:hidden;
-  mix-blend-mode:screen;
-}
-
-.eg-v16-svg{
-  position:absolute;
-  inset:0;
-  width:100%;
-  height:100%;
-  overflow:visible;
-}
-
-.eg-v16-path{
-  fill:none;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-  opacity:0;
-  filter:drop-shadow(0 0 10px rgba(0,255,130,.85)) drop-shadow(0 0 24px rgba(0,240,255,.35));
-}
-
-.eg-v16-path.green{
-  stroke:rgba(0,255,130,.72);
-}
-
-.eg-v16-path.cyan{
-  stroke:rgba(0,240,255,.52);
-}
-
-.eg-v16-particle{
-  position:fixed;
-  width:5px;
-  height:5px;
-  border-radius:50%;
-  background:#7dffb2;
-  box-shadow:0 0 12px #32ff93,0 0 24px rgba(0,240,255,.35);
-  opacity:0;
-  z-index:170;
-}
-
-.eg-v16-core-burst{
-  position:fixed;
-  left:50%;
-  top:43%;
-  width:90px;
-  height:90px;
-  margin-left:-45px;
-  margin-top:-45px;
-  border-radius:50%;
-  z-index:165;
-  pointer-events:none;
-  background:
-    radial-gradient(circle,rgba(240,255,245,.95),rgba(0,255,130,.46) 28%,rgba(0,240,255,.20) 55%,transparent 72%);
-  box-shadow:
-    0 0 36px rgba(0,255,130,.95),
-    0 0 86px rgba(0,240,255,.42),
-    inset 0 0 26px rgba(255,255,255,.30);
-  opacity:0;
-}
-
-.eg-v16-orbit{
-  position:fixed;
-  left:50%;
-  top:43%;
-  width:560px;
-  height:560px;
-  margin-left:-280px;
-  margin-top:-280px;
-  border-radius:50%;
-  z-index:150;
-  pointer-events:none;
-  opacity:0;
-  background:
-    conic-gradient(from -90deg,
-      transparent 0deg,
-      rgba(0,255,130,.06) 24deg,
-      rgba(0,255,130,.50) 54deg,
-      rgba(0,240,255,.34) 88deg,
-      rgba(0,255,130,.10) 124deg,
-      transparent 158deg,
-      transparent 360deg);
-  filter:blur(.2px) drop-shadow(0 0 24px rgba(0,255,130,.80));
-}
-
-.eg-v16-clone{
-  position:fixed;
-  margin:0!important;
-  pointer-events:none!important;
-  transform-origin:center center!important;
-  will-change:left,top,transform,opacity,filter;
-  z-index:175;
-  filter:
-    drop-shadow(0 0 18px rgba(0,255,130,.80))
-    drop-shadow(0 0 34px rgba(0,240,255,.34));
-}
-
-.eg-v16-clone *{
-  pointer-events:none!important;
-}
-
-.eg-v16-lock{
-  position:fixed;
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  z-index:172;
-  pointer-events:none;
-  border:1px solid rgba(160,255,210,.88);
-  background:radial-gradient(circle,rgba(230,255,240,.72),rgba(0,255,130,.26),transparent 70%);
-  box-shadow:0 0 18px rgba(0,255,130,.88),0 0 34px rgba(0,240,255,.28);
-  opacity:0;
-}
-
-.eg-v16-ready{
-  position:fixed;
-  left:50%;
-  bottom:72px;
-  transform:translateX(-50%);
-  z-index:190;
-  pointer-events:none;
-  color:#ecfff4;
-  border:1px solid rgba(0,255,130,.46);
-  border-radius:999px;
-  background:rgba(0,18,9,.80);
-  padding:10px 18px;
-  font-size:11px;
-  font-weight:900;
-  letter-spacing:.22em;
-  text-shadow:0 0 12px rgba(0,255,130,.84);
-  box-shadow:0 0 28px rgba(0,255,130,.26), inset 0 0 22px rgba(0,255,130,.10);
-  opacity:0;
-}
-
-.eg-v16-replay{
-  position:fixed;
-  right:14px;
-  top:calc(env(safe-area-inset-top,0px) + 14px);
-  z-index:210;
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  border:1px solid rgba(0,255,130,.44);
-  background:rgba(0,20,10,.78);
-  color:#7cffb2;
-  font-size:18px;
-  font-weight:900;
-  box-shadow:0 0 20px rgba(0,255,130,.24), inset 0 0 20px rgba(0,255,130,.10);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  backdrop-filter:blur(8px);
-}
-
-.eg-v16-replay.muted{
-  color:rgba(220,255,235,.50);
-  border-color:rgba(220,255,235,.20);
-}
-
-.eg-v16-replay:active{
-  transform:scale(.94);
-}
-
-@media(max-width:760px){
-  .eg-v16-orbit{
-    top:43%;
-    width:430px;
-    height:430px;
-    margin-left:-215px;
-    margin-top:-215px;
-  }
-
-  .eg-v16-core-burst{
-    top:43%;
-  }
-
-  .eg-v16-ready{
-    bottom:62px;
-    font-size:9px;
-    padding:9px 14px;
-  }
-}
-</style>
-
-
-<style id="eratguard-radial-v17-signature-final-css">
-/* ERATGUARD USER RADIAL V17 SIGNATURE FINAL POLISH */
-
-/* Eski V13/V14/V15 sahne katmanlarını V17 sırasında sustur */
-.eg-v16-running .eg-v13-spiral-overlay,
-.eg-v16-running .eg-v13-ready-flash,
-.eg-v16-running .eg-v15-energy,
-.eg-v16-running .eg-v15-spiral-path,
-.eg-v16-running .eg-v15-clone-layer,
-.eg-v16-running .eg-v15-ready,
-.eg-v16-running .eg-v13-sound-toggle{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-}
-
-/* Boş sahne hissini azalt: gerçek dilimleri tamamen yok etme, hayalet gibi arkada tut */
-.eg-v16-running .seg-link{
-  opacity:.10!important;
-  pointer-events:none!important;
-  filter:blur(2px) brightness(.55)!important;
-  transition:opacity .25s ease, filter .25s ease!important;
-}
-
-/* V17 finalde dilimler güçlü geri gelsin */
-.seg-link{
-  transition:opacity .22s ease, filter .22s ease, transform .18s ease!important;
-}
-
-/* Siyah/numara noktaları kesin sil */
-.seg-link .num,
-.seg-link .number,
-.seg-link .idx,
-.seg-link .badge,
-.seg-link .seg-no,
-.seg-link .seg-num,
-.segment-number,
-.slice-number,
-.radial-number,
-.seg-link [class*="num"],
-.seg-link [class*="badge"],
-.seg-link [class*="index"],
-.seg-link > span:first-child,
-.seg-link > b:first-child{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-}
-
-/* Daha güçlü merkez doğuşu */
-.eg-v16-core-burst{
-  width:130px!important;
-  height:130px!important;
-  margin-left:-65px!important;
-  margin-top:-65px!important;
-  background:
-    radial-gradient(circle,
-      rgba(245,255,250,.98),
-      rgba(0,255,130,.62) 24%,
-      rgba(0,240,255,.30) 48%,
-      rgba(0,255,130,.08) 68%,
-      transparent 78%)!important;
-  box-shadow:
-    0 0 46px rgba(0,255,130,1),
-    0 0 110px rgba(0,240,255,.52),
-    0 0 160px rgba(0,255,130,.22),
-    inset 0 0 32px rgba(255,255,255,.34)!important;
-}
-
-/* Referans 2 hissi: daha yoğun spiral enerji */
-.eg-v16-orbit{
-  width:620px!important;
-  height:620px!important;
-  margin-left:-310px!important;
-  margin-top:-310px!important;
-  background:
-    conic-gradient(from -110deg,
-      transparent 0deg,
-      rgba(0,255,130,.02) 16deg,
-      rgba(0,255,130,.20) 36deg,
-      rgba(0,255,130,.78) 62deg,
-      rgba(0,240,255,.48) 96deg,
-      rgba(0,255,130,.18) 134deg,
-      transparent 170deg,
-      transparent 360deg)!important;
-  filter:
-    blur(.25px)
-    drop-shadow(0 0 28px rgba(0,255,130,.95))
-    drop-shadow(0 0 56px rgba(0,240,255,.45))!important;
-}
-
-/* Clone dilimler daha okunur, daha premium */
-.eg-v16-clone{
-  filter:
-    drop-shadow(0 0 20px rgba(0,255,130,.92))
-    drop-shadow(0 0 42px rgba(0,240,255,.46))
-    brightness(1.12)!important;
-}
-
-/* Enerji yolları daha görünür */
-.eg-v16-path{
-  opacity:.85;
-  filter:
-    drop-shadow(0 0 14px rgba(0,255,130,.95))
-    drop-shadow(0 0 30px rgba(0,240,255,.46))!important;
-}
-
-.eg-v16-path.green{
-  stroke:rgba(0,255,130,.92)!important;
-  stroke-width:3.4!important;
-}
-
-.eg-v16-path.cyan{
-  stroke:rgba(0,240,255,.72)!important;
-  stroke-width:2.8!important;
-}
-
-/* Replay butonu tek ve temiz */
-.eg-v16-replay{
-  z-index:230!important;
-}
-
-@media(max-width:760px){
-  .eg-v16-orbit{
-    width:470px!important;
-    height:470px!important;
-    margin-left:-235px!important;
-    margin-top:-235px!important;
-  }
-
-  .eg-v16-core-burst{
-    width:104px!important;
-    height:104px!important;
-    margin-left:-52px!important;
-    margin-top:-52px!important;
-  }
-}
-</style>
-
-
-<style id="eratguard-radial-v18-progressive-css">
-/* ERATGUARD USER RADIAL V18 PROGRESSIVE SIGNATURE BUILD */
-
-/* Başlangıçta tamamen boş bırakma: gerçek dilimler düşük ghost olarak dursun */
-.eg-v16-running .seg-link{
-  opacity:.18!important;
-  pointer-events:none!important;
-  filter:blur(1.2px) brightness(.68) saturate(.85)!important;
-}
-
-/* Her dilim yerine oturdukça gerçek dilimi görünür yap */
-.seg-link.eg-v18-locked{
+.eg-v20-running .seg-link.eg-v20-locked,
+.seg-link.eg-v20-locked,
+.eg-v20-finished .seg-link{
   opacity:1!important;
-  filter:blur(0) brightness(1.08) saturate(1.08)!important;
-  transform:scale(1.018)!important;
-}
-
-/* Finalde normal tıklanabilir durum */
-.eg-v18-finished .seg-link{
-  opacity:1!important;
-  filter:none!important;
-}
-
-/* Siyah/numara noktalarını kesin sustur */
-.seg-link .num,
-.seg-link .number,
-.seg-link .idx,
-.seg-link .badge,
-.seg-link .seg-no,
-.seg-link .seg-num,
-.segment-number,
-.slice-number,
-.radial-number,
-.seg-link [class*="num"],
-.seg-link [class*="badge"],
-.seg-link [class*="index"]{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-}
-
-/* Clone daha erken ve daha parlak görünsün */
-.eg-v16-clone{
-  opacity:1;
-  filter:
-    drop-shadow(0 0 22px rgba(0,255,130,.96))
-    drop-shadow(0 0 48px rgba(0,240,255,.50))
-    brightness(1.18)!important;
-}
-
-/* Enerji yolları gerçek spiral gibi daha belirgin */
-.eg-v16-path{
-  filter:
-    drop-shadow(0 0 18px rgba(0,255,130,1))
-    drop-shadow(0 0 38px rgba(0,240,255,.58))!important;
-}
-
-.eg-v16-path.green{
-  stroke:rgba(0,255,130,.98)!important;
-  stroke-width:4!important;
-}
-
-.eg-v16-path.cyan{
-  stroke:rgba(0,240,255,.82)!important;
-  stroke-width:3.2!important;
-}
-
-/* Merkez patlaması daha hızlı başlasın, daha net görünsün */
-.eg-v16-core-burst{
-  opacity:.95;
-  width:145px!important;
-  height:145px!important;
-  margin-left:-72.5px!important;
-  margin-top:-72.5px!important;
-}
-
-/* Arka spiral referans görseldeki gibi güçlü ama boğmayacak */
-.eg-v16-orbit{
-  opacity:.92;
-  width:650px!important;
-  height:650px!important;
-  margin-left:-325px!important;
-  margin-top:-325px!important;
-}
-
-/* Lock halkası daha net */
-.eg-v16-lock{
-  width:46px!important;
-  height:46px!important;
-  border-color:rgba(210,255,230,.95)!important;
-  box-shadow:
-    0 0 24px rgba(0,255,130,1),
-    0 0 48px rgba(0,240,255,.42)!important;
-}
-
-/* Ready yazısı tekrar etmesin, ana status yeterli; animasyon flash küçük kalsın */
-.eg-v16-ready{
-  bottom:118px!important;
-  transform:translateX(-50%) scale(.88)!important;
-}
-
-@media(max-width:760px){
-  .eg-v16-orbit{
-    width:500px!important;
-    height:500px!important;
-    margin-left:-250px!important;
-    margin-top:-250px!important;
-  }
-
-  .eg-v16-core-burst{
-    width:112px!important;
-    height:112px!important;
-    margin-left:-56px!important;
-    margin-top:-56px!important;
-  }
-}
-</style>
-
-
-<style id="eratguard-radial-v19-clean-signature-css">
-/* ERATGUARD USER RADIAL V19 CLEAN SIGNATURE SPIRAL */
-
-/* Eski animasyon katmanlarını tamamen sustur */
-.eg-v13-spiral-overlay,
-.eg-v13-ready-flash,
-.eg-v15-clone-layer,
-.eg-v15-energy,
-.eg-v15-spiral-path,
-.eg-v15-ready,
-.eg-v16-stage,
-.eg-v16-core-burst,
-.eg-v16-orbit,
-.eg-v16-ready,
-.eg-v16-replay,
-.eg-v13-sound-toggle{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-
-/* Siyah noktalar / sayı rozetleri kesin sil */
-.seg-link .num,
-.seg-link .number,
-.seg-link .idx,
-.seg-link .badge,
-.seg-link .seg-no,
-.seg-link .seg-num,
-.segment-number,
-.slice-number,
-.radial-number,
-.seg-link [class*="num"],
-.seg-link [class*="badge"],
-.seg-link [class*="index"],
-.seg-link > span:first-child,
-.seg-link > b:first-child{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-}
-
-/* V19 sırasında gerçek dilimleri gizle; kilitlenenleri tek tek göster */
-.eg-v19-running .seg-link{
-  opacity:0!important;
-  pointer-events:none!important;
-  filter:none!important;
-}
-
-.eg-v19-running .seg-link.eg-v19-locked,
-.seg-link.eg-v19-locked{
-  opacity:1!important;
-  filter:brightness(1.08) drop-shadow(0 0 14px rgba(0,255,130,.38))!important;
   pointer-events:auto!important;
-}
-
-/* Finalde tek temiz panel */
-.eg-v19-finished .seg-link{
-  opacity:1!important;
   filter:none!important;
-  pointer-events:auto!important;
 }
 
-.eg-v19-stage{
+/* Main animation stage */
+.eg-v20-stage{
   position:fixed;
   inset:0;
   z-index:180;
@@ -1116,7 +293,7 @@ svg{
   mix-blend-mode:screen;
 }
 
-.eg-v19-svg{
+.eg-v20-svg{
   position:absolute;
   inset:0;
   width:100%;
@@ -1124,29 +301,27 @@ svg{
   overflow:visible;
 }
 
-.eg-v19-path{
+.eg-v20-path{
   fill:none;
   stroke-linecap:round;
   stroke-linejoin:round;
-  stroke-dasharray:1;
-  stroke-dashoffset:1;
   opacity:0;
   filter:
-    drop-shadow(0 0 14px rgba(0,255,130,.95))
-    drop-shadow(0 0 30px rgba(0,240,255,.40));
+    drop-shadow(0 0 12px rgba(0,255,130,.92))
+    drop-shadow(0 0 28px rgba(0,240,255,.38));
 }
 
-.eg-v19-path.green{
-  stroke:rgba(0,255,130,.88);
+.eg-v20-path.green{
+  stroke:rgba(0,255,130,.86);
   stroke-width:3.2;
 }
 
-.eg-v19-path.cyan{
-  stroke:rgba(0,240,255,.70);
-  stroke-width:2.7;
+.eg-v20-path.cyan{
+  stroke:rgba(0,240,255,.68);
+  stroke-width:2.6;
 }
 
-.eg-v19-core{
+.eg-v20-core{
   position:fixed;
   left:50%;
   top:43%;
@@ -1157,12 +332,11 @@ svg{
   border-radius:50%;
   z-index:184;
   opacity:0;
-  pointer-events:none;
   background:
     radial-gradient(circle,
       rgba(255,255,255,.95),
-      rgba(0,255,130,.58) 22%,
-      rgba(0,240,255,.25) 48%,
+      rgba(0,255,130,.56) 22%,
+      rgba(0,240,255,.24) 48%,
       transparent 72%);
   box-shadow:
     0 0 42px rgba(0,255,130,.96),
@@ -1170,7 +344,7 @@ svg{
     inset 0 0 30px rgba(255,255,255,.25);
 }
 
-.eg-v19-spiral{
+.eg-v20-spiral{
   position:fixed;
   left:50%;
   top:43%;
@@ -1181,7 +355,6 @@ svg{
   border-radius:50%;
   z-index:182;
   opacity:0;
-  pointer-events:none;
   background:
     conic-gradient(from -120deg,
       transparent 0deg,
@@ -1197,7 +370,7 @@ svg{
     drop-shadow(0 0 48px rgba(0,240,255,.32));
 }
 
-.eg-v19-clone{
+.eg-v20-clone{
   position:fixed;
   margin:0!important;
   transform-origin:center center!important;
@@ -1207,20 +380,19 @@ svg{
   filter:
     drop-shadow(0 0 22px rgba(0,255,130,.92))
     drop-shadow(0 0 40px rgba(0,240,255,.42))
-    brightness(1.14);
+    brightness(1.12);
 }
 
-.eg-v19-clone *{
+.eg-v20-clone *{
   pointer-events:none!important;
 }
 
-.eg-v19-lock{
+.eg-v20-lock{
   position:fixed;
   width:42px;
   height:42px;
   border-radius:50%;
   z-index:188;
-  pointer-events:none;
   border:1px solid rgba(210,255,230,.92);
   background:radial-gradient(circle,rgba(230,255,240,.72),rgba(0,255,130,.24),transparent 70%);
   box-shadow:
@@ -1229,13 +401,12 @@ svg{
   opacity:0;
 }
 
-.eg-v19-ready{
+.eg-v20-ready{
   position:fixed;
   left:50%;
   bottom:82px;
   transform:translateX(-50%);
   z-index:195;
-  pointer-events:none;
   color:#ecfff4;
   border:1px solid rgba(0,255,130,.46);
   border-radius:999px;
@@ -1249,7 +420,7 @@ svg{
   opacity:0;
 }
 
-.eg-v19-sound{
+.eg-v20-sound{
   position:fixed;
   right:14px;
   top:calc(env(safe-area-inset-top,0px) + 14px);
@@ -1270,27 +441,27 @@ svg{
   backdrop-filter:blur(8px);
 }
 
-.eg-v19-sound.muted{
+.eg-v20-sound.muted{
   color:rgba(220,255,235,.50);
   border-color:rgba(220,255,235,.20);
 }
 
 @media(max-width:760px){
-  .eg-v19-spiral{
+  .eg-v20-spiral{
     width:430px;
     height:430px;
     margin-left:-215px;
     margin-top:-215px;
   }
 
-  .eg-v19-core{
+  .eg-v20-core{
     width:96px;
     height:96px;
     margin-left:-48px;
     margin-top:-48px;
   }
 
-  .eg-v19-ready{
+  .eg-v20-ready{
     bottom:68px;
     font-size:9px;
   }
@@ -1302,11 +473,11 @@ svg{
 <main class="app">
   <section class="hero">
     <div class="brand">Erat<span>Guard</span></div>
-    <div class="sub">SIGNATURE RADIAL PANEL · SIGNATURE V19</div>
+    <div class="sub">SIGNATURE RADIAL PANEL · SIGNATURE V20</div>
     <div class="pills">
       <div class="pill">PRO AKTİF</div>
       <div class="pill">CANLI KORUMA</div>
-      <div class="pill">12P SIGNATURE V19</div>
+      <div class="pill">12P SIGNATURE V20</div>
     </div>
   </section>
 
@@ -1570,1216 +741,31 @@ svg{
 </script>
 
 
-<script id="eratguard-radial-v13-spiral-js">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script id="eratguard-radial-v20-clean-engine-js">
 (function(){
-  if(window.__ERATGUARD_RADIAL_V13_SPIRAL__) return;
-  window.__ERATGUARD_RADIAL_V13_SPIRAL__ = true;
-
-  var soundEnabled = false;
-  var audioCtx = null;
-  var unlocked = false;
-
-  function qsa(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
-
-  function ensureUi(){
-    if(!document.querySelector(".eg-v13-spiral-overlay")){
-      var overlay = document.createElement("div");
-      overlay.className = "eg-v13-spiral-overlay";
-      overlay.innerHTML = '<div class="eg-v13-spiral-ring r1"></div><div class="eg-v13-spiral-ring r2"></div><div class="eg-v13-spiral-ring r3"></div><div class="eg-v13-spiral-sweep"></div>';
-      document.body.appendChild(overlay);
-    }
-
-    if(!document.querySelector(".eg-v13-sound-toggle")){
-      var btn = document.createElement("button");
-      btn.className = "eg-v13-sound-toggle off";
-      btn.type = "button";
-      btn.innerHTML = "🔇";
-      btn.setAttribute("aria-label","Ses aç/kapat");
-      btn.addEventListener("click", function(ev){
-        ev.preventDefault();
-        ev.stopPropagation();
-        soundEnabled = !soundEnabled;
-        btn.classList.toggle("off", !soundEnabled);
-        btn.innerHTML = soundEnabled ? "♪" : "🔇";
-        unlockAudio();
-        if(soundEnabled){
-          playReady();
-          replaySpiral();
-        }
-      });
-      document.body.appendChild(btn);
-    }
-
-    if(!document.querySelector(".eg-v13-ready-flash")){
-      var flash = document.createElement("div");
-      flash.className = "eg-v13-ready-flash";
-      flash.textContent = "KORUMA AKTİF · 12P HAZIR";
-      document.body.appendChild(flash);
-    }
-  }
-
-  function unlockAudio(){
-    try{
-      if(!audioCtx){
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if(audioCtx.state === "suspended") audioCtx.resume();
-      unlocked = true;
-    }catch(e){}
-  }
-
-  document.addEventListener("pointerdown", unlockAudio, {once:true, passive:true});
-  document.addEventListener("touchstart", unlockAudio, {once:true, passive:true});
-
-  function tone(freq, dur, type, gainValue, delay){
-    if(!soundEnabled || !unlocked || !audioCtx) return;
-    try{
-      var t0 = audioCtx.currentTime + (delay || 0);
-      var osc = audioCtx.createOscillator();
-      var gain = audioCtx.createGain();
-
-      osc.type = type || "sine";
-      osc.frequency.setValueAtTime(freq, t0);
-      osc.frequency.exponentialRampToValueAtTime(Math.max(80, freq * 0.72), t0 + dur);
-
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.exponentialRampToValueAtTime(gainValue || 0.018, t0 + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(t0);
-      osc.stop(t0 + dur + 0.02);
-    }catch(e){}
-  }
-
-  function playTick(i){
-    tone(520 + (i * 17), 0.055, "triangle", 0.012, 0);
-    tone(980 + (i * 11), 0.035, "sine", 0.006, 0.012);
-  }
-
-  function playReady(){
-    tone(420, 0.12, "sine", 0.018, 0);
-    tone(640, 0.16, "triangle", 0.012, 0.05);
-    tone(860, 0.18, "sine", 0.010, 0.11);
-  }
-
-  function centerPoint(){
-    var core =
-      document.querySelector(".core") ||
-      document.querySelector(".center") ||
-      document.querySelector("[class*='core']") ||
-      document.querySelector("[class*='center']");
-    if(core){
-      var r = core.getBoundingClientRect();
-      return {x:r.left + r.width/2, y:r.top + r.height/2};
-    }
-    return {x:window.innerWidth/2, y:window.innerHeight*0.42};
-  }
-
-  function collectSlices(){
-    var items = qsa(".seg-link");
-    if(items.length < 6) items = qsa("a[href^='/u/']");
-    if(items.length < 6) items = qsa("[data-eg-url]");
-    var seen = new Set();
-    items = items.filter(function(el){
-      if(!el || seen.has(el)) return false;
-      seen.add(el);
-      var text = (el.innerText || el.textContent || "").trim();
-      var href = el.getAttribute("href") || el.getAttribute("data-eg-url") || "";
-      return text || href;
-    });
-    return items.slice(0,12);
-  }
-
-  function animateOverlay(){
-    var rings = qsa(".eg-v13-spiral-ring");
-    var sweep = document.querySelector(".eg-v13-spiral-sweep");
-
-    rings.forEach(function(r,i){
-      r.animate([
-        {opacity:0, transform:"scale(.22) rotate("+(i*30)+"deg)"},
-        {opacity:.94, transform:"scale(1) rotate("+(160+i*90)+"deg)", offset:.58},
-        {opacity:.10, transform:"scale(1.18) rotate("+(300+i*140)+"deg)"}
-      ], {
-        duration:2200 + i*180,
-        easing:"cubic-bezier(.16,.9,.24,1)",
-        fill:"forwards"
-      });
-    });
-
-    if(sweep){
-      sweep.animate([
-        {opacity:0, transform:"scale(.22) rotate(-160deg)"},
-        {opacity:.94, transform:"scale(1) rotate(160deg)", offset:.62},
-        {opacity:0, transform:"scale(1.08) rotate(330deg)"}
-      ], {
-        duration:2850,
-        easing:"cubic-bezier(.16,.9,.24,1)",
-        fill:"forwards"
-      });
-    }
-  }
-
-  function flashReady(){
-    var f = document.querySelector(".eg-v13-ready-flash");
-    if(!f) return;
-    f.animate([
-      {opacity:0, transform:"translateX(-50%) translateY(10px) scale(.96)"},
-      {opacity:1, transform:"translateX(-50%) translateY(0) scale(1)", offset:.18},
-      {opacity:1, transform:"translateX(-50%) translateY(0) scale(1)", offset:.74},
-      {opacity:0, transform:"translateX(-50%) translateY(-8px) scale(.98)"}
-    ], {
-      duration:1900,
-      easing:"cubic-bezier(.2,.8,.2,1)",
-      fill:"both"
-    });
-  }
-
-  function animateSlices(){
-    var items = collectSlices();
-    var c = centerPoint();
-
-    items.forEach(function(el,i){
-      var r = el.getBoundingClientRect();
-      var ex = r.left + r.width/2;
-      var ey = r.top + r.height/2;
-      var dx = c.x - ex;
-      var dy = c.y - ey;
-      var spin = 260 + i * 28;
-      var delay = 260 + i * 155;
-
-      el.classList.add("eg-v13-spawned");
-      el.style.pointerEvents = "none";
-
-      setTimeout(function(){ playTick(i); }, delay);
-
-      el.animate([
-        {
-          opacity:0,
-          filter:"blur(8px) brightness(1.8)",
-          transform:"translate("+dx+"px,"+dy+"px) scale(.16) rotate("+spin+"deg)"
-        },
-        {
-          opacity:.72,
-          filter:"blur(2px) brightness(1.65)",
-          transform:"translate("+(dx*.36)+"px,"+(dy*.36)+"px) scale(.78) rotate("+(spin*.38)+"deg)",
-          offset:.62
-        },
-        {
-          opacity:1,
-          filter:"blur(0) brightness(1.18)",
-          transform:"translate(0,0) scale(1.035) rotate(0deg)",
-          offset:.86
-        },
-        {
-          opacity:1,
-          filter:"blur(0) brightness(1)",
-          transform:"translate(0,0) scale(1) rotate(0deg)"
-        }
-      ], {
-        duration:1350,
-        delay:delay,
-        easing:"cubic-bezier(.15,.95,.2,1)",
-        fill:"both"
-      }).onfinish = function(){
-        el.style.pointerEvents = "";
-      };
-    });
-
-    var total = 260 + items.length * 155 + 1350;
-    setTimeout(function(){
-      playReady();
-      flashReady();
-    }, total + 60);
-  }
-
-  function pulseCore(){
-    var core =
-      document.querySelector(".core") ||
-      document.querySelector(".center") ||
-      document.querySelector("[class*='core']") ||
-      document.querySelector("[class*='center']");
-    if(core){
-      core.classList.remove("eg-v13-core-pulse");
-      void core.offsetWidth;
-      core.classList.add("eg-v13-core-pulse");
-    }
-  }
-
-  function replaySpiral(){
-    ensureUi();
-    pulseCore();
-    animateOverlay();
-    animateSlices();
-  }
-
-  window.EratGuardReplaySpiral = replaySpiral;
-
-  function boot(){
-    ensureUi();
-    /* disabled by V16 signature engine */
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", boot);
-  }else{
-    boot();
-  }
-})();
-</script>
-
-
-<script id="eratguard-radial-v14-spiral-polish-js">
-(function(){
-  if(window.__ERATGUARD_RADIAL_V14_POLISH__) return;
-  window.__ERATGUARD_RADIAL_V14_POLISH__ = true;
-
-  function hideNumberBadges(){
-    var nodes = Array.prototype.slice.call(document.querySelectorAll(".seg-link span,.seg-link b,.seg-link i,.seg-link em,.seg-link div"));
-    nodes.forEach(function(n){
-      var t = (n.textContent || "").trim();
-      if(/^(0?[1-9]|1[0-2])$/.test(t)){
-        var r = n.getBoundingClientRect();
-        if(r.width <= 44 && r.height <= 44){
-          n.style.display = "none";
-        }
-      }
-    });
-  }
-
-  function fixSoundButton(){
-    var btn = document.querySelector(".eg-v13-sound-toggle");
-    if(btn && !btn.__v14Fixed){
-      btn.__v14Fixed = true;
-      if(btn.classList.contains("off")){
-        btn.innerHTML = "🔇";
-      }
-      btn.addEventListener("click", function(){
-        setTimeout(function(){
-          btn.innerHTML = btn.classList.contains("off") ? "🔇" : "♪";
-        }, 30);
-      }, true);
-    }
-  }
-
-  function boot(){
-    hideNumberBadges();
-    fixSoundButton();
-    setTimeout(hideNumberBadges, 400);
-    setTimeout(hideNumberBadges, 1400);
-    setTimeout(hideNumberBadges, 3000);
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", boot);
-  }else{
-    boot();
-  }
-})();
-</script>
-
-
-<script id="eratguard-radial-v15-center-clone-js">
-(function(){
-  if(window.__ERATGUARD_RADIAL_V15_CENTER_CLONE__) return;
-  window.__ERATGUARD_RADIAL_V15_CENTER_CLONE__ = true;
-
-  var soundEnabled = false;
-  var audioCtx = null;
-  var unlocked = false;
-  var running = false;
-
-  function qsa(sel){ return Array.prototype.slice.call(document.querySelectorAll(sel)); }
-
-  function ensureAudio(){
-    try{
-      if(!audioCtx){
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if(audioCtx.state === "suspended") audioCtx.resume();
-      unlocked = true;
-    }catch(e){}
-  }
-
-  function tone(freq, dur, gainValue, type, delay){
-    if(!soundEnabled || !unlocked || !audioCtx) return;
-    try{
-      var t0 = audioCtx.currentTime + (delay || 0);
-      var osc = audioCtx.createOscillator();
-      var gain = audioCtx.createGain();
-
-      osc.type = type || "sine";
-      osc.frequency.setValueAtTime(freq, t0);
-      osc.frequency.exponentialRampToValueAtTime(Math.max(70, freq * 0.68), t0 + dur);
-
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.exponentialRampToValueAtTime(gainValue || 0.018, t0 + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start(t0);
-      osc.stop(t0 + dur + 0.03);
-    }catch(e){}
-  }
-
-  function playLaunch(i){
-    tone(420 + i * 18, .080, .012, "triangle", 0);
-  }
-
-  function playLock(i){
-    tone(780 + i * 16, .050, .010, "sine", 0);
-    tone(390 + i * 7, .060, .006, "triangle", .012);
-  }
-
-  function playReady(){
-    tone(360, .13, .016, "sine", 0);
-    tone(580, .15, .012, "triangle", .06);
-    tone(820, .18, .010, "sine", .13);
-  }
-
-  function centerPoint(){
-    var core =
-      document.querySelector(".core") ||
-      document.querySelector(".center") ||
-      document.querySelector("[class*='core']") ||
-      document.querySelector("[class*='center']");
-    if(core){
-      var r = core.getBoundingClientRect();
-      return {x:r.left + r.width/2, y:r.top + r.height/2};
-    }
-    return {x:window.innerWidth/2, y:window.innerHeight*0.43};
-  }
-
-  function collectSlices(){
-    var items = qsa(".seg-link");
-    if(items.length < 6) items = qsa("a[href^='/u/']");
-    return items.slice(0,12);
-  }
-
-  function hideNumberBadges(root){
-    var nodes = qsa.call ? [] : [];
-    var list = Array.prototype.slice.call((root || document).querySelectorAll("span,b,i,em,div"));
-    list.forEach(function(n){
-      var t = (n.textContent || "").trim();
-      if(/^(0?[1-9]|1[0-2])$/.test(t)){
-        var r = n.getBoundingClientRect();
-        if(!r.width || r.width <= 48){
-          n.style.display = "none";
-          n.style.opacity = "0";
-          n.style.visibility = "hidden";
-        }
-      }
-    });
-  }
-
-  function ensureUi(){
-    if(!document.querySelector(".eg-v15-clone-layer")){
-      var layer = document.createElement("div");
-      layer.className = "eg-v15-clone-layer";
-      document.body.appendChild(layer);
-    }
-
-    if(!document.querySelector(".eg-v15-energy")){
-      var energy = document.createElement("div");
-      energy.className = "eg-v15-energy";
-      document.body.appendChild(energy);
-    }
-
-    if(!document.querySelector(".eg-v15-spiral-path")){
-      var path = document.createElement("div");
-      path.className = "eg-v15-spiral-path";
-      document.body.appendChild(path);
-    }
-
-    if(!document.querySelector(".eg-v15-ready")){
-      var ready = document.createElement("div");
-      ready.className = "eg-v15-ready";
-      ready.textContent = "KORUMA AKTİF · 12P HAZIR";
-      document.body.appendChild(ready);
-    }
-
-    var btn = document.querySelector(".eg-v13-sound-toggle");
-    if(btn && !btn.__v15Fixed){
-      btn.__v15Fixed = true;
-      btn.classList.add("off");
-      btn.innerHTML = "🔇";
-      btn.onclick = null;
-      btn.addEventListener("click", function(ev){
-        ev.preventDefault();
-        ev.stopPropagation();
-        ensureAudio();
-        soundEnabled = !soundEnabled;
-        btn.classList.toggle("off", !soundEnabled);
-        btn.innerHTML = soundEnabled ? "♪" : "🔇";
-        if(soundEnabled){
-          playReady();
-        }
-        replay();
-      }, true);
-    }
-  }
-
-  function animateEnergy(){
-    var energy = document.querySelector(".eg-v15-energy");
-    var path = document.querySelector(".eg-v15-spiral-path");
-
-    if(energy){
-      energy.animate([
-        {opacity:0, transform:"scale(.20)"},
-        {opacity:1, transform:"scale(1)", offset:.22},
-        {opacity:.72, transform:"scale(1.35)", offset:.70},
-        {opacity:0, transform:"scale(1.9)"}
-      ], {
-        duration:3100,
-        easing:"cubic-bezier(.16,.9,.24,1)",
-        fill:"both"
-      });
-    }
-
-    if(path){
-      path.animate([
-        {opacity:0, transform:"scale(.18) rotate(-180deg)"},
-        {opacity:.85, transform:"scale(.86) rotate(120deg)", offset:.52},
-        {opacity:.30, transform:"scale(1.08) rotate(330deg)", offset:.82},
-        {opacity:0, transform:"scale(1.14) rotate(430deg)"}
-      ], {
-        duration:3600,
-        easing:"cubic-bezier(.16,.9,.24,1)",
-        fill:"both"
-      });
-    }
-  }
-
-  function flashReady(){
-    var f = document.querySelector(".eg-v15-ready");
-    if(!f) return;
-    f.animate([
-      {opacity:0, transform:"translateX(-50%) translateY(10px) scale(.96)"},
-      {opacity:1, transform:"translateX(-50%) translateY(0) scale(1)", offset:.20},
-      {opacity:1, transform:"translateX(-50%) translateY(0) scale(1)", offset:.76},
-      {opacity:0, transform:"translateX(-50%) translateY(-8px) scale(.98)"}
-    ], {
-      duration:1900,
-      easing:"cubic-bezier(.2,.8,.2,1)",
-      fill:"both"
-    });
-  }
-
-  function replay(){
-    if(running) return;
-    running = true;
-
-    ensureUi();
-    hideNumberBadges(document);
-
-    var items = collectSlices();
-    var layer = document.querySelector(".eg-v15-clone-layer");
-    if(!layer || !items.length){
-      running = false;
-      return;
-    }
-
-    layer.innerHTML = "";
-    document.body.classList.add("eg-v15-deploying");
-
-    var c = centerPoint();
-    animateEnergy();
-
-    var lastEnd = 0;
-
-    items.forEach(function(el,i){
-      hideNumberBadges(el);
-
-      var r = el.getBoundingClientRect();
-      if(!r.width || !r.height) return;
-
-      var clone = el.cloneNode(true);
-      clone.removeAttribute("id");
-      clone.classList.add("eg-v15-clone");
-
-      clone.style.width = r.width + "px";
-      clone.style.height = r.height + "px";
-      clone.style.left = c.x + "px";
-      clone.style.top = c.y + "px";
-      clone.style.opacity = "0";
-
-      hideNumberBadges(clone);
-      layer.appendChild(clone);
-
-      var endLeft = r.left + r.width/2;
-      var endTop = r.top + r.height/2;
-      var midAngle = -150 + i * 34;
-      var midRadius = 60 + i * 13;
-      var midLeft = c.x + Math.cos(midAngle * Math.PI / 180) * midRadius;
-      var midTop = c.y + Math.sin(midAngle * Math.PI / 180) * midRadius;
-
-      var delay = 180 + i * 165;
-      var duration = 1450;
-      lastEnd = Math.max(lastEnd, delay + duration);
-
-      setTimeout(function(){ playLaunch(i); }, delay);
-
-      var anim = clone.animate([
-        {
-          left:c.x + "px",
-          top:c.y + "px",
-          opacity:0,
-          filter:"blur(8px) brightness(1.9)",
-          transform:"translate(-50%,-50%) scale(.12) rotate("+(260+i*28)+"deg)"
-        },
-        {
-          left:midLeft + "px",
-          top:midTop + "px",
-          opacity:.70,
-          filter:"blur(2px) brightness(1.65)",
-          transform:"translate(-50%,-50%) scale(.58) rotate("+(145+i*18)+"deg)",
-          offset:.46
-        },
-        {
-          left:endLeft + "px",
-          top:endTop + "px",
-          opacity:1,
-          filter:"blur(0) brightness(1.25)",
-          transform:"translate(-50%,-50%) scale(1.06) rotate(-4deg)",
-          offset:.88
-        },
-        {
-          left:endLeft + "px",
-          top:endTop + "px",
-          opacity:1,
-          filter:"blur(0) brightness(1)",
-          transform:"translate(-50%,-50%) scale(1) rotate(0deg)"
-        }
-      ], {
-        delay:delay,
-        duration:duration,
-        easing:"cubic-bezier(.15,.95,.2,1)",
-        fill:"both"
-      });
-
-      anim.onfinish = function(){
-        playLock(i);
-      };
-    });
-
-    setTimeout(function(){
-      playReady();
-      flashReady();
-      document.body.classList.remove("eg-v15-deploying");
-      setTimeout(function(){
-        layer.innerHTML = "";
-        running = false;
-      }, 150);
-    }, lastEnd + 180);
-  }
-
-  window.EratGuardReplaySpiral = replay;
-  window.EratGuardV15Replay = replay;
-
-  function boot(){
-    ensureUi();
-    hideNumberBadges(document);
-    /* disabled by V16 signature engine */
-    setTimeout(function(){ hideNumberBadges(document); }, 2200);
-    setTimeout(function(){ hideNumberBadges(document); }, 4200);
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", boot);
-  }else{
-    boot();
-  }
-})();
-</script>
-
-
-<script id="eratguard-radial-v16-signature-js">
-(function(){
-  if(window.__ERATGUARD_RADIAL_V16_SIGNATURE__) return;
-  window.__ERATGUARD_RADIAL_V16_SIGNATURE__ = true;
-
-  var audioCtx = null;
-  var audioOn = false;
-  var unlocked = false;
-  var running = false;
-  var lastRun = 0;
-
-  function qsa(sel, root){
-    return Array.prototype.slice.call((root || document).querySelectorAll(sel));
-  }
-
-  function now(){ return Date.now(); }
-
-  function ensureAudio(){
-    try{
-      if(!audioCtx){
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if(audioCtx.state === "suspended") audioCtx.resume();
-      unlocked = true;
-    }catch(e){}
-  }
-
-  function beep(freq, dur, gainValue, type, delay){
-    if(!audioOn || !unlocked || !audioCtx) return;
-    try{
-      var t0 = audioCtx.currentTime + (delay || 0);
-      var osc = audioCtx.createOscillator();
-      var gain = audioCtx.createGain();
-      var filter = audioCtx.createBiquadFilter();
-
-      osc.type = type || "sine";
-      osc.frequency.setValueAtTime(freq, t0);
-      osc.frequency.exponentialRampToValueAtTime(Math.max(70, freq * .72), t0 + dur);
-
-      filter.type = "lowpass";
-      filter.frequency.setValueAtTime(2600, t0);
-
-      gain.gain.setValueAtTime(0.0001, t0);
-      gain.gain.exponentialRampToValueAtTime(gainValue || 0.018, t0 + .012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      osc.start(t0);
-      osc.stop(t0 + dur + .03);
-    }catch(e){}
-  }
-
-  function soundLaunch(i){
-    beep(360 + i * 22, .075, .010, "triangle", 0);
-  }
-
-  function soundLock(i){
-    beep(720 + i * 18, .045, .012, "sine", 0);
-    beep(360 + i * 8, .065, .006, "triangle", .014);
-  }
-
-  function soundReady(){
-    beep(320, .13, .016, "sine", 0);
-    beep(520, .16, .012, "triangle", .06);
-    beep(840, .20, .010, "sine", .14);
-  }
-
-  function vibrate(ms){
-    try{
-      if(navigator.vibrate) navigator.vibrate(ms || 8);
-    }catch(e){}
-  }
-
-  function findCore(){
-    return document.querySelector(".core") ||
-           document.querySelector(".center") ||
-           document.querySelector("[class*='core']") ||
-           document.querySelector("[class*='center']");
-  }
-
-  function centerPoint(){
-    var core = findCore();
-    if(core){
-      var r = core.getBoundingClientRect();
-      return {x:r.left + r.width/2, y:r.top + r.height/2};
-    }
-    return {x:window.innerWidth/2, y:window.innerHeight*.43};
-  }
-
-  function collectSlices(){
-    var items = qsa(".seg-link");
-    if(items.length < 6) items = qsa("a[href^='/u/']");
-    return items.slice(0,12);
-  }
-
-  function hideNumbers(root){
-    qsa(".seg-link .num,.seg-link .number,.seg-link .idx,.seg-link .badge,.seg-link [class*='num'],.seg-link [class*='badge'],.seg-link [class*='index']", root).forEach(function(n){
-      n.style.display = "none";
-      n.style.opacity = "0";
-      n.style.visibility = "hidden";
-    });
-
-    qsa(".seg-link span,.seg-link b,.seg-link i,.seg-link em,.seg-link div", root).forEach(function(n){
-      var t = (n.textContent || "").trim();
-      if(/^(0?[1-9]|1[0-2])$/.test(t)){
-        var r = n.getBoundingClientRect();
-        if(!r.width || r.width <= 54){
-          n.style.display = "none";
-          n.style.opacity = "0";
-          n.style.visibility = "hidden";
-        }
-      }
-    });
-  }
-
-  function ensureStage(){
-    var stage = document.querySelector(".eg-v16-stage");
-    if(!stage){
-      stage = document.createElement("div");
-      stage.className = "eg-v16-stage";
-      stage.innerHTML = '<svg class="eg-v16-svg"></svg><div class="eg-v16-core-burst"></div><div class="eg-v16-orbit"></div><div class="eg-v16-ready">KORUMA AKTİF · 12P HAZIR</div>';
-      document.body.appendChild(stage);
-    }
-
-    var btn = document.querySelector(".eg-v16-replay");
-    if(!btn){
-      btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "eg-v16-replay muted";
-      btn.innerHTML = "🔇";
-      btn.setAttribute("aria-label","İmza animasyonu ve ses");
-      btn.addEventListener("click", function(ev){
-        ev.preventDefault();
-        ev.stopPropagation();
-        ensureAudio();
-        audioOn = !audioOn;
-        btn.classList.toggle("muted", !audioOn);
-        btn.innerHTML = audioOn ? "♪" : "🔇";
-        replay(true);
-      }, true);
-      document.body.appendChild(btn);
-    }
-
-    return stage;
-  }
-
-  function clearStage(stage){
-    qsa(".eg-v16-clone,.eg-v16-particle,.eg-v16-lock", stage).forEach(function(x){ x.remove(); });
-    var svg = stage.querySelector(".eg-v16-svg");
-    if(svg) svg.innerHTML = "";
-  }
-
-  function makePath(svg, c, end, i){
-    var ns = "http://www.w3.org/2000/svg";
-    var p = document.createElementNS(ns, "path");
-    var angle = Math.atan2(end.y-c.y, end.x-c.x);
-    var dist = Math.hypot(end.x-c.x, end.y-c.y);
-    var swirl = (i % 2 ? -1 : 1) * (80 + i * 7);
-    var m1 = {
-      x: c.x + Math.cos(angle - .92) * (dist*.28 + swirl*.18),
-      y: c.y + Math.sin(angle - .92) * (dist*.28 + swirl*.18)
-    };
-    var m2 = {
-      x: c.x + Math.cos(angle + .62) * (dist*.62 + swirl*.12),
-      y: c.y + Math.sin(angle + .62) * (dist*.62 + swirl*.12)
-    };
-
-    p.setAttribute("d", "M "+c.x+" "+c.y+" C "+m1.x+" "+m1.y+", "+m2.x+" "+m2.y+", "+end.x+" "+end.y);
-    p.setAttribute("class", "eg-v16-path " + (i % 2 ? "cyan" : "green"));
-    p.setAttribute("stroke-width", i % 2 ? "2.2" : "2.8");
-    svg.appendChild(p);
-
-    var len = 1;
-    try{ len = p.getTotalLength(); }catch(e){}
-    p.style.strokeDasharray = len;
-    p.style.strokeDashoffset = len;
-
-    p.animate([
-      {opacity:0, strokeDashoffset:len},
-      {opacity:.94, strokeDashoffset:len*.35, offset:.55},
-      {opacity:.22, strokeDashoffset:0, offset:.88},
-      {opacity:0, strokeDashoffset:0}
-    ], {
-      delay:120 + i*135,
-      duration:1900,
-      easing:"cubic-bezier(.16,.9,.24,1)",
-      fill:"both"
-    });
-
-    return p;
-  }
-
-  function animateCore(stage){
-    var burst = stage.querySelector(".eg-v16-core-burst");
-    var orbit = stage.querySelector(".eg-v16-orbit");
-    var core = findCore();
-
-    if(core){
-      core.animate([
-        {filter:"drop-shadow(0 0 0 rgba(0,255,130,0))", transform:"scale(1)"},
-        {filter:"drop-shadow(0 0 28px rgba(0,255,130,.95)) drop-shadow(0 0 58px rgba(0,240,255,.42))", transform:"scale(1.035)", offset:.45},
-        {filter:"drop-shadow(0 0 10px rgba(0,255,130,.35))", transform:"scale(1)"}
-      ], {
-        duration:1600,
-        easing:"cubic-bezier(.2,.8,.2,1)",
-        fill:"both"
-      });
-    }
-
-    if(burst){
-      burst.animate([
-        {opacity:0, transform:"scale(.18)"},
-        {opacity:1, transform:"scale(1)", offset:.20},
-        {opacity:.66, transform:"scale(1.55)", offset:.62},
-        {opacity:0, transform:"scale(2.1)"}
-      ], {
-        duration:3000,
-        easing:"cubic-bezier(.16,.9,.24,1)",
-        fill:"both"
-      });
-    }
-
-    if(orbit){
-      orbit.animate([
-        {opacity:0, transform:"scale(.18) rotate(-210deg)"},
-        {opacity:.86, transform:"scale(.88) rotate(130deg)", offset:.52},
-        {opacity:.36, transform:"scale(1.08) rotate(330deg)", offset:.82},
-        {opacity:0, transform:"scale(1.16) rotate(470deg)"}
-      ], {
-        duration:3300,
-        easing:"cubic-bezier(.16,.9,.24,1)",
-        fill:"both"
-      });
-    }
-  }
-
-  function createParticle(stage, x, y, i){
-    var dot = document.createElement("div");
-    dot.className = "eg-v16-particle";
-    dot.style.left = x + "px";
-    dot.style.top = y + "px";
-    stage.appendChild(dot);
-
-    var a = (i*29) * Math.PI/180;
-    var d = 30 + (i%5)*8;
-    dot.animate([
-      {opacity:0, transform:"translate(-50%,-50%) scale(.3)"},
-      {opacity:1, transform:"translate(-50%,-50%) scale(1)", offset:.18},
-      {opacity:0, transform:"translate("+(Math.cos(a)*d)+"px,"+(Math.sin(a)*d)+"px) scale(.2)"}
-    ], {
-      duration:650,
-      easing:"cubic-bezier(.2,.8,.2,1)",
-      fill:"both"
-    }).onfinish = function(){ dot.remove(); };
-  }
-
-  function createLock(stage, x, y){
-    var lock = document.createElement("div");
-    lock.className = "eg-v16-lock";
-    lock.style.left = (x-19) + "px";
-    lock.style.top = (y-19) + "px";
-    stage.appendChild(lock);
-
-    lock.animate([
-      {opacity:0, transform:"scale(.35)"},
-      {opacity:1, transform:"scale(1.1)", offset:.28},
-      {opacity:0, transform:"scale(1.8)"}
-    ], {
-      duration:620,
-      easing:"cubic-bezier(.2,.8,.2,1)",
-      fill:"both"
-    }).onfinish = function(){ lock.remove(); };
-  }
-
-  function flashReady(stage){
-    var ready = stage.querySelector(".eg-v16-ready");
-    if(!ready) return;
-    ready.animate([
-      {opacity:0, transform:"translateX(-50%) translateY(10px) scale(.96)"},
-      {opacity:1, transform:"translateX(-50%) translateY(0) scale(1)", offset:.18},
-      {opacity:1, transform:"translateX(-50%) translateY(0) scale(1)", offset:.74},
-      {opacity:0, transform:"translateX(-50%) translateY(-8px) scale(.98)"}
-    ], {
-      duration:1900,
-      easing:"cubic-bezier(.2,.8,.2,1)",
-      fill:"both"
-    });
-  }
-
-  function replay(force){
-    if(running) return;
-    if(!force && now() - lastRun < 1200) return;
-    lastRun = now();
-    running = true;
-
-    var stage = ensureStage();
-    clearStage(stage);
-    hideNumbers(document);
-
-    var items = collectSlices();
-    if(!items.length){
-      running = false;
-      return;
-    }
-
-    var svg = stage.querySelector(".eg-v16-svg");
-    var c = centerPoint();
-
-    document.body.classList.add("eg-v16-running");
-    animateCore(stage);
-
-    var lastEnd = 0;
-
-    items.forEach(function(el, i){
-      hideNumbers(el);
-      var r = el.getBoundingClientRect();
-      if(!r.width || !r.height) return;
-
-      var end = {x:r.left + r.width/2, y:r.top + r.height/2};
-      makePath(svg, c, end, i);
-
-      var clone = el.cloneNode(true);
-      clone.removeAttribute("id");
-      clone.classList.add("eg-v16-clone");
-      clone.style.width = r.width + "px";
-      clone.style.height = r.height + "px";
-      clone.style.left = c.x + "px";
-      clone.style.top = c.y + "px";
-      clone.style.opacity = "0";
-      hideNumbers(clone);
-      stage.appendChild(clone);
-
-      var angle = Math.atan2(end.y-c.y, end.x-c.x);
-      var dist = Math.hypot(end.x-c.x, end.y-c.y);
-      var mid1 = {
-        x:c.x + Math.cos(angle - .95) * (dist*.25 + 38),
-        y:c.y + Math.sin(angle - .95) * (dist*.25 + 38)
-      };
-      var mid2 = {
-        x:c.x + Math.cos(angle + .58) * (dist*.66 + 20),
-        y:c.y + Math.sin(angle + .58) * (dist*.66 + 20)
-      };
-
-      var delay = 60 + i * 105;
-      var duration = 1220;
-      lastEnd = Math.max(lastEnd, delay + duration);
-
-      setTimeout(function(){
-        soundLaunch(i);
-        createParticle(stage, c.x, c.y, i);
-      }, delay);
-
-      clone.animate([
-        {
-          left:c.x+"px",
-          top:c.y+"px",
-          opacity:0,
-          filter:"blur(8px) brightness(2)",
-          transform:"translate(-50%,-50%) scale(.10) rotate("+(280+i*24)+"deg)"
-        },
-        {
-          left:mid1.x+"px",
-          top:mid1.y+"px",
-          opacity:.78,
-          filter:"blur(4px) brightness(1.8)",
-          transform:"translate(-50%,-50%) scale(.38) rotate("+(190+i*16)+"deg)",
-          offset:.34
-        },
-        {
-          left:mid2.x+"px",
-          top:mid2.y+"px",
-          opacity:.94,
-          filter:"blur(1.5px) brightness(1.55)",
-          transform:"translate(-50%,-50%) scale(.72) rotate("+(92+i*8)+"deg)",
-          offset:.66
-        },
-        {
-          left:end.x+"px",
-          top:end.y+"px",
-          opacity:1,
-          filter:"blur(0) brightness(1.24)",
-          transform:"translate(-50%,-50%) scale(1.06) rotate(-4deg)",
-          offset:.90
-        },
-        {
-          left:end.x+"px",
-          top:end.y+"px",
-          opacity:1,
-          filter:"blur(0) brightness(1)",
-          transform:"translate(-50%,-50%) scale(1) rotate(0deg)"
-        }
-      ], {
-        delay:delay,
-        duration:duration,
-        easing:"cubic-bezier(.15,.95,.2,1)",
-        fill:"both"
-      }).onfinish = function(){
-        soundLock(i);
-        createLock(stage, end.x, end.y);
-        if(audioOn) vibrate(6);
-      };
-    });
-
-    setTimeout(function(){
-      soundReady();
-      flashReady(stage);
-      if(audioOn) vibrate([12,30,12]);
-      document.body.classList.remove("eg-v16-running");
-      setTimeout(function(){
-        clearStage(stage);
-        running = false;
-        hideNumbers(document);
-      }, 260);
-    }, lastEnd + 240);
-  }
-
-  window.EratGuardSignatureReplay = replay;
-  window.EratGuardReplaySpiral = replay;
-
-  function boot(){
-    ensureStage();
-    hideNumbers(document);
-    /* disabled by V19 clean signature */
-    setTimeout(function(){ hideNumbers(document); }, 2400);
-    setTimeout(function(){ hideNumbers(document); }, 4600);
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", boot);
-  }else{
-    boot();
-  }
-})();
-</script>
-
-
-<script id="eratguard-radial-v17-signature-final-js">
-(function(){
-  if(window.__ERATGUARD_RADIAL_V17_FINAL__) return;
-  window.__ERATGUARD_RADIAL_V17_FINAL__ = true;
-
-  function hideOldButtons(){
-    document.querySelectorAll(".eg-v13-sound-toggle").forEach(function(x){
-      x.style.display = "none";
-      x.style.opacity = "0";
-      x.style.visibility = "hidden";
-    });
-  }
-
-  function hideNumberBadges(){
-    var nodes = Array.prototype.slice.call(document.querySelectorAll(".seg-link span,.seg-link b,.seg-link i,.seg-link em,.seg-link div"));
-    nodes.forEach(function(n){
-      var t = (n.textContent || "").trim();
-      if(/^(0?[1-9]|1[0-2])$/.test(t)){
-        n.style.display = "none";
-        n.style.opacity = "0";
-        n.style.visibility = "hidden";
-      }
-    });
-  }
-
-  function patchV16Timing(){
-    if(!window.__ERATGUARD_V17_TIMING_HINT__){
-      window.__ERATGUARD_V17_TIMING_HINT__ = true;
-      console.log("EratGuard V17 Signature Final active");
-    }
-  }
-
-  function boot(){
-    hideOldButtons();
-    hideNumberBadges();
-    patchV16Timing();
-
-    setTimeout(hideOldButtons, 300);
-    setTimeout(hideNumberBadges, 500);
-    setTimeout(hideNumberBadges, 1800);
-    setTimeout(hideNumberBadges, 4200);
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", boot);
-  }else{
-    boot();
-  }
-})();
-</script>
-
-
-<script id="eratguard-radial-v18-progressive-js">
-(function(){
-  if(window.__ERATGUARD_RADIAL_V18_PROGRESSIVE__) return;
-  window.__ERATGUARD_RADIAL_V18_PROGRESSIVE__ = true;
-
-  function qsa(sel, root){
-    return Array.prototype.slice.call((root || document).querySelectorAll(sel));
-  }
-
-  function cleanNumbers(){
-    qsa(".seg-link .num,.seg-link .number,.seg-link .idx,.seg-link .badge,.seg-link [class*='num'],.seg-link [class*='badge'],.seg-link [class*='index']").forEach(function(n){
-      n.style.display="none";
-      n.style.opacity="0";
-      n.style.visibility="hidden";
-    });
-
-    qsa(".seg-link span,.seg-link b,.seg-link i,.seg-link em,.seg-link div").forEach(function(n){
-      var t=(n.textContent||"").trim();
-      if(/^(0?[1-9]|1[0-2])$/.test(t)){
-        n.style.display="none";
-        n.style.opacity="0";
-        n.style.visibility="hidden";
-      }
-    });
-  }
-
-  function resetProgressive(){
-    document.body.classList.remove("eg-v18-finished");
-    qsa(".seg-link").forEach(function(el){
-      el.classList.remove("eg-v18-locked");
-    });
-  }
-
-  function progressiveLockSchedule(){
-    var items = qsa(".seg-link").slice(0,12);
-    resetProgressive();
-
-    items.forEach(function(el,i){
-      var delay = 80 + i * 115 + 980;
-      setTimeout(function(){
-        el.classList.add("eg-v18-locked");
-      }, delay);
-    });
-
-    setTimeout(function(){
-      document.body.classList.add("eg-v18-finished");
-      qsa(".seg-link").forEach(function(el){
-        el.classList.add("eg-v18-locked");
-      });
-      cleanNumbers();
-    }, 80 + items.length * 115 + 1900);
-  }
-
-  function patchReplayHook(){
-    var oldReplay = window.EratGuardSignatureReplay || window.EratGuardReplaySpiral;
-
-    if(oldReplay && !window.__EG_V18_REPLAY_PATCHED__){
-      window.__EG_V18_REPLAY_PATCHED__ = true;
-
-      window.EratGuardSignatureReplay = function(force){
-        resetProgressive();
-        var result = oldReplay(force);
-        progressiveLockSchedule();
-        return result;
-      };
-
-      window.EratGuardReplaySpiral = window.EratGuardSignatureReplay;
-    }
-  }
-
-  function boot(){
-    cleanNumbers();
-    patchReplayHook();
-
-    /* İlk yükleme V16 çalıştıktan hemen sonra progressive reveal takvimi */
-    /* disabled by V19 clean signature */
-    setTimeout(cleanNumbers, 500);
-    setTimeout(cleanNumbers, 1800);
-    setTimeout(cleanNumbers, 4200);
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", boot);
-  }else{
-    boot();
-  }
-})();
-</script>
-
-
-<script id="eratguard-radial-v19-clean-signature-js">
-(function(){
-  if(window.__ERATGUARD_RADIAL_V19_CLEAN__) return;
-  window.__ERATGUARD_RADIAL_V19_CLEAN__ = true;
+  if(window.__ERATGUARD_RADIAL_V20_CLEAN__) return;
+  window.__ERATGUARD_RADIAL_V20_CLEAN__ = true;
 
   var audioCtx=null;
   var audioOn=false;
@@ -2858,19 +844,19 @@ svg{
   }
 
   function ensureStage(){
-    var st=document.querySelector(".eg-v19-stage");
+    var st=document.querySelector(".eg-v20-stage");
     if(!st){
       st=document.createElement("div");
-      st.className="eg-v19-stage";
-      st.innerHTML='<svg class="eg-v19-svg"></svg><div class="eg-v19-core"></div><div class="eg-v19-spiral"></div><div class="eg-v19-ready">KORUMA AKTİF · 12P HAZIR</div>';
+      st.className="eg-v20-stage";
+      st.innerHTML='<svg class="eg-v20-svg"></svg><div class="eg-v20-core"></div><div class="eg-v20-spiral"></div><div class="eg-v20-ready">KORUMA AKTİF · 12P HAZIR</div>';
       document.body.appendChild(st);
     }
 
-    var btn=document.querySelector(".eg-v19-sound");
+    var btn=document.querySelector(".eg-v20-sound");
     if(!btn){
       btn=document.createElement("button");
       btn.type="button";
-      btn.className="eg-v19-sound muted";
+      btn.className="eg-v20-sound muted";
       btn.innerHTML="🔇";
       btn.setAttribute("aria-label","Ses ve imza animasyonu");
       btn.addEventListener("click",function(ev){
@@ -2888,8 +874,8 @@ svg{
   }
 
   function clearStage(st){
-    qsa(".eg-v19-clone,.eg-v19-lock",st).forEach(function(x){x.remove();});
-    var svg=st.querySelector(".eg-v19-svg");
+    qsa(".eg-v20-clone,.eg-v20-lock",st).forEach(function(x){x.remove();});
+    var svg=st.querySelector(".eg-v20-svg");
     if(svg) svg.innerHTML="";
   }
 
@@ -2901,7 +887,7 @@ svg{
     var m1={x:c.x+Math.cos(ang-.92)*(dist*.28+36),y:c.y+Math.sin(ang-.92)*(dist*.28+36)};
     var m2={x:c.x+Math.cos(ang+.60)*(dist*.66+22),y:c.y+Math.sin(ang+.60)*(dist*.66+22)};
     p.setAttribute("d","M "+c.x+" "+c.y+" C "+m1.x+" "+m1.y+", "+m2.x+" "+m2.y+", "+e.x+" "+e.y);
-    p.setAttribute("class","eg-v19-path "+(i%2?"cyan":"green"));
+    p.setAttribute("class","eg-v20-path "+(i%2?"cyan":"green"));
     svg.appendChild(p);
     var len=1; try{len=p.getTotalLength();}catch(e){}
     p.style.strokeDasharray=len;
@@ -2915,8 +901,8 @@ svg{
   }
 
   function energy(st){
-    var core=st.querySelector(".eg-v19-core");
-    var spiral=st.querySelector(".eg-v19-spiral");
+    var core=st.querySelector(".eg-v20-core");
+    var spiral=st.querySelector(".eg-v20-spiral");
     if(core){
       core.animate([
         {opacity:0,transform:"scale(.12)"},
@@ -2937,7 +923,7 @@ svg{
 
   function lockFlash(st,x,y){
     var l=document.createElement("div");
-    l.className="eg-v19-lock";
+    l.className="eg-v20-lock";
     l.style.left=(x-21)+"px";
     l.style.top=(y-21)+"px";
     st.appendChild(l);
@@ -2949,7 +935,7 @@ svg{
   }
 
   function ready(st){
-    var r=st.querySelector(".eg-v19-ready");
+    var r=st.querySelector(".eg-v20-ready");
     if(!r) return;
     r.animate([
       {opacity:0,transform:"translateX(-50%) translateY(8px) scale(.96)"},
@@ -2970,11 +956,11 @@ svg{
     var list=slices();
     if(!list.length){running=false;return;}
 
-    document.body.classList.remove("eg-v19-finished");
-    list.forEach(function(el){el.classList.remove("eg-v19-locked");});
-    document.body.classList.add("eg-v19-running");
+    document.body.classList.remove("eg-v20-finished");
+    list.forEach(function(el){el.classList.remove("eg-v20-locked");});
+    document.body.classList.add("eg-v20-running");
 
-    var svg=st.querySelector(".eg-v19-svg");
+    var svg=st.querySelector(".eg-v20-svg");
     var c=corePoint();
     energy(st);
 
@@ -2990,7 +976,7 @@ svg{
 
       var clone=el.cloneNode(true);
       clone.removeAttribute("id");
-      clone.classList.add("eg-v19-clone");
+      clone.classList.add("eg-v20-clone");
       clone.style.width=r.width+"px";
       clone.style.height=r.height+"px";
       clone.style.left=c.x+"px";
@@ -3015,7 +1001,7 @@ svg{
         {left:e.x+"px",top:e.y+"px",opacity:1,filter:"blur(0) brightness(1.22)",transform:"translate(-50%,-50%) scale(1.06) rotate(-3deg)",offset:.90},
         {left:e.x+"px",top:e.y+"px",opacity:1,filter:"blur(0) brightness(1)",transform:"translate(-50%,-50%) scale(1) rotate(0deg)"}
       ],{delay:delay,duration:dur,easing:"cubic-bezier(.15,.95,.2,1)",fill:"both"}).onfinish=function(){
-        el.classList.add("eg-v19-locked");
+        el.classList.add("eg-v20-locked");
         soundLock(i);
         lockFlash(st,e.x,e.y);
         vibrate(6);
@@ -3023,9 +1009,9 @@ svg{
     });
 
     setTimeout(function(){
-      document.body.classList.remove("eg-v19-running");
-      document.body.classList.add("eg-v19-finished");
-      list.forEach(function(el){el.classList.add("eg-v19-locked");});
+      document.body.classList.remove("eg-v20-running");
+      document.body.classList.add("eg-v20-finished");
+      list.forEach(function(el){el.classList.add("eg-v20-locked");});
       soundReady();
       ready(st);
       vibrate([10,26,10]);
@@ -3039,7 +1025,7 @@ svg{
 
   window.EratGuardSignatureReplay=run;
   window.EratGuardReplaySpiral=run;
-  window.EratGuardV19Replay=run;
+  window.EratGuardV20Replay=run;
 
   function boot(){
     ensureStage();
