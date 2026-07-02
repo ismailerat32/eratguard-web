@@ -359,16 +359,85 @@ svg{
 }
 </style>
 
+
+<style id="eratguard-radial-v14-spiral-polish-css">
+/* ERATGUARD USER RADIAL V14 SPIRAL POLISH */
+
+/* Hide 01-12 visual number badges on the radial slices */
+.seg-link .num,
+.seg-link .number,
+.seg-link .idx,
+.seg-link .badge,
+.seg-link .seg-no,
+.seg-link .seg-num,
+.segment-number,
+.slice-number,
+.radial-number,
+[data-index],
+[data-no]{
+  display:none!important;
+}
+
+/* Fallback: hide small absolute circular number badges commonly used around slices */
+.seg-link > span:first-child,
+.seg-link > b:first-child{
+  /* JS will decide text-based hiding too; this keeps layout clean if first child is the number badge */
+}
+
+/* Make the deploy feel more like reference #2: spiral energy flow */
+.eg-v13-spiral-overlay{
+  mix-blend-mode:screen;
+}
+.eg-v13-spiral-sweep{
+  width:520px!important;
+  height:520px!important;
+  margin-left:-260px!important;
+  margin-top:-260px!important;
+  background:
+    conic-gradient(from 0deg,
+      transparent 0deg,
+      rgba(0,255,130,.00) 22deg,
+      rgba(0,255,130,.18) 44deg,
+      rgba(0,255,130,.68) 66deg,
+      rgba(0,240,255,.42) 92deg,
+      rgba(0,255,130,.16) 122deg,
+      transparent 152deg,
+      transparent 360deg)!important;
+  filter:blur(.4px) drop-shadow(0 0 22px rgba(0,255,130,.9)) drop-shadow(0 0 42px rgba(0,240,255,.35))!important;
+}
+.eg-v13-spiral-ring{
+  border-style:dashed!important;
+  animation:egV14SlowRotate 5.5s linear infinite;
+}
+.eg-v13-spawned{
+  transform-origin:center center!important;
+}
+.seg-link.eg-v13-spawned{
+  filter:drop-shadow(0 0 18px rgba(0,255,130,.48));
+}
+@keyframes egV14SlowRotate{
+  to{transform:rotate(360deg)}
+}
+@media(max-width:760px){
+  .eg-v13-spiral-sweep{
+    width:430px!important;
+    height:430px!important;
+    margin-left:-215px!important;
+    margin-top:-215px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <main class="app">
   <section class="hero">
     <div class="brand">Erat<span>Guard</span></div>
-    <div class="sub">SIGNATURE RADIAL PANEL · SPIRAL V13</div>
+    <div class="sub">SIGNATURE RADIAL PANEL · SPIRAL V14</div>
     <div class="pills">
       <div class="pill">PRO AKTİF</div>
       <div class="pill">CANLI KORUMA</div>
-      <div class="pill">12P SPIRAL</div>
+      <div class="pill">12P SPIRAL V14</div>
     </div>
   </section>
 
@@ -637,7 +706,7 @@ svg{
   if(window.__ERATGUARD_RADIAL_V13_SPIRAL__) return;
   window.__ERATGUARD_RADIAL_V13_SPIRAL__ = true;
 
-  var soundEnabled = true;
+  var soundEnabled = false;
   var audioCtx = null;
   var unlocked = false;
 
@@ -653,15 +722,16 @@ svg{
 
     if(!document.querySelector(".eg-v13-sound-toggle")){
       var btn = document.createElement("button");
-      btn.className = "eg-v13-sound-toggle";
+      btn.className = "eg-v13-sound-toggle off";
       btn.type = "button";
-      btn.innerHTML = "♪";
+      btn.innerHTML = "🔇";
       btn.setAttribute("aria-label","Ses aç/kapat");
       btn.addEventListener("click", function(ev){
         ev.preventDefault();
         ev.stopPropagation();
         soundEnabled = !soundEnabled;
         btn.classList.toggle("off", !soundEnabled);
+        btn.innerHTML = soundEnabled ? "♪" : "🔇";
         unlockAudio();
         if(soundEnabled){
           playReady();
@@ -763,7 +833,7 @@ svg{
         {opacity:.82, transform:"scale(1) rotate("+(160+i*90)+"deg)", offset:.58},
         {opacity:.10, transform:"scale(1.18) rotate("+(300+i*140)+"deg)"}
       ], {
-        duration:1250 + i*130,
+        duration:2200 + i*180,
         easing:"cubic-bezier(.16,.9,.24,1)",
         fill:"forwards"
       });
@@ -775,7 +845,7 @@ svg{
         {opacity:.82, transform:"scale(1) rotate(160deg)", offset:.62},
         {opacity:0, transform:"scale(1.08) rotate(330deg)"}
       ], {
-        duration:1550,
+        duration:2850,
         easing:"cubic-bezier(.16,.9,.24,1)",
         fill:"forwards"
       });
@@ -807,8 +877,8 @@ svg{
       var ey = r.top + r.height/2;
       var dx = c.x - ex;
       var dy = c.y - ey;
-      var spin = (i % 2 ? -1 : 1) * (110 + i * 14);
-      var delay = 180 + i * 82;
+      var spin = 260 + i * 28;
+      var delay = 260 + i * 155;
 
       el.classList.add("eg-v13-spawned");
       el.style.pointerEvents = "none";
@@ -839,7 +909,7 @@ svg{
           transform:"translate(0,0) scale(1) rotate(0deg)"
         }
       ], {
-        duration:920,
+        duration:1350,
         delay:delay,
         easing:"cubic-bezier(.15,.95,.2,1)",
         fill:"both"
@@ -848,7 +918,7 @@ svg{
       };
     });
 
-    var total = 180 + items.length * 82 + 920;
+    var total = 260 + items.length * 155 + 1350;
     setTimeout(function(){
       playReady();
       flashReady();
@@ -880,6 +950,56 @@ svg{
   function boot(){
     ensureUi();
     setTimeout(replaySpiral, 220);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
+})();
+</script>
+
+
+<script id="eratguard-radial-v14-spiral-polish-js">
+(function(){
+  if(window.__ERATGUARD_RADIAL_V14_POLISH__) return;
+  window.__ERATGUARD_RADIAL_V14_POLISH__ = true;
+
+  function hideNumberBadges(){
+    var nodes = Array.prototype.slice.call(document.querySelectorAll(".seg-link span,.seg-link b,.seg-link i,.seg-link em,.seg-link div"));
+    nodes.forEach(function(n){
+      var t = (n.textContent || "").trim();
+      if(/^(0?[1-9]|1[0-2])$/.test(t)){
+        var r = n.getBoundingClientRect();
+        if(r.width <= 44 && r.height <= 44){
+          n.style.display = "none";
+        }
+      }
+    });
+  }
+
+  function fixSoundButton(){
+    var btn = document.querySelector(".eg-v13-sound-toggle");
+    if(btn && !btn.__v14Fixed){
+      btn.__v14Fixed = true;
+      if(btn.classList.contains("off")){
+        btn.innerHTML = "🔇";
+      }
+      btn.addEventListener("click", function(){
+        setTimeout(function(){
+          btn.innerHTML = btn.classList.contains("off") ? "🔇" : "♪";
+        }, 30);
+      }, true);
+    }
+  }
+
+  function boot(){
+    hideNumberBadges();
+    fixSoundButton();
+    setTimeout(hideNumberBadges, 400);
+    setTimeout(hideNumberBadges, 1400);
+    setTimeout(hideNumberBadges, 3000);
   }
 
   if(document.readyState === "loading"){
