@@ -784,16 +784,156 @@ svg{
 }
 </style>
 
+
+<style id="eratguard-radial-v17-signature-final-css">
+/* ERATGUARD USER RADIAL V17 SIGNATURE FINAL POLISH */
+
+/* Eski V13/V14/V15 sahne katmanlarını V17 sırasında sustur */
+.eg-v16-running .eg-v13-spiral-overlay,
+.eg-v16-running .eg-v13-ready-flash,
+.eg-v16-running .eg-v15-energy,
+.eg-v16-running .eg-v15-spiral-path,
+.eg-v16-running .eg-v15-clone-layer,
+.eg-v16-running .eg-v15-ready,
+.eg-v16-running .eg-v13-sound-toggle{
+  display:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+}
+
+/* Boş sahne hissini azalt: gerçek dilimleri tamamen yok etme, hayalet gibi arkada tut */
+.eg-v16-running .seg-link{
+  opacity:.10!important;
+  pointer-events:none!important;
+  filter:blur(2px) brightness(.55)!important;
+  transition:opacity .25s ease, filter .25s ease!important;
+}
+
+/* V17 finalde dilimler güçlü geri gelsin */
+.seg-link{
+  transition:opacity .22s ease, filter .22s ease, transform .18s ease!important;
+}
+
+/* Siyah/numara noktaları kesin sil */
+.seg-link .num,
+.seg-link .number,
+.seg-link .idx,
+.seg-link .badge,
+.seg-link .seg-no,
+.seg-link .seg-num,
+.segment-number,
+.slice-number,
+.radial-number,
+.seg-link [class*="num"],
+.seg-link [class*="badge"],
+.seg-link [class*="index"],
+.seg-link > span:first-child,
+.seg-link > b:first-child{
+  display:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+}
+
+/* Daha güçlü merkez doğuşu */
+.eg-v16-core-burst{
+  width:130px!important;
+  height:130px!important;
+  margin-left:-65px!important;
+  margin-top:-65px!important;
+  background:
+    radial-gradient(circle,
+      rgba(245,255,250,.98),
+      rgba(0,255,130,.62) 24%,
+      rgba(0,240,255,.30) 48%,
+      rgba(0,255,130,.08) 68%,
+      transparent 78%)!important;
+  box-shadow:
+    0 0 46px rgba(0,255,130,1),
+    0 0 110px rgba(0,240,255,.52),
+    0 0 160px rgba(0,255,130,.22),
+    inset 0 0 32px rgba(255,255,255,.34)!important;
+}
+
+/* Referans 2 hissi: daha yoğun spiral enerji */
+.eg-v16-orbit{
+  width:620px!important;
+  height:620px!important;
+  margin-left:-310px!important;
+  margin-top:-310px!important;
+  background:
+    conic-gradient(from -110deg,
+      transparent 0deg,
+      rgba(0,255,130,.02) 16deg,
+      rgba(0,255,130,.20) 36deg,
+      rgba(0,255,130,.78) 62deg,
+      rgba(0,240,255,.48) 96deg,
+      rgba(0,255,130,.18) 134deg,
+      transparent 170deg,
+      transparent 360deg)!important;
+  filter:
+    blur(.25px)
+    drop-shadow(0 0 28px rgba(0,255,130,.95))
+    drop-shadow(0 0 56px rgba(0,240,255,.45))!important;
+}
+
+/* Clone dilimler daha okunur, daha premium */
+.eg-v16-clone{
+  filter:
+    drop-shadow(0 0 20px rgba(0,255,130,.92))
+    drop-shadow(0 0 42px rgba(0,240,255,.46))
+    brightness(1.12)!important;
+}
+
+/* Enerji yolları daha görünür */
+.eg-v16-path{
+  opacity:.85;
+  filter:
+    drop-shadow(0 0 14px rgba(0,255,130,.95))
+    drop-shadow(0 0 30px rgba(0,240,255,.46))!important;
+}
+
+.eg-v16-path.green{
+  stroke:rgba(0,255,130,.92)!important;
+  stroke-width:3.4!important;
+}
+
+.eg-v16-path.cyan{
+  stroke:rgba(0,240,255,.72)!important;
+  stroke-width:2.8!important;
+}
+
+/* Replay butonu tek ve temiz */
+.eg-v16-replay{
+  z-index:230!important;
+}
+
+@media(max-width:760px){
+  .eg-v16-orbit{
+    width:470px!important;
+    height:470px!important;
+    margin-left:-235px!important;
+    margin-top:-235px!important;
+  }
+
+  .eg-v16-core-burst{
+    width:104px!important;
+    height:104px!important;
+    margin-left:-52px!important;
+    margin-top:-52px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <main class="app">
   <section class="hero">
     <div class="brand">Erat<span>Guard</span></div>
-    <div class="sub">SIGNATURE RADIAL PANEL · SIGNATURE V16</div>
+    <div class="sub">SIGNATURE RADIAL PANEL · SIGNATURE V17</div>
     <div class="pills">
       <div class="pill">PRO AKTİF</div>
       <div class="pill">CANLI KORUMA</div>
-      <div class="pill">12P SIGNATURE V16</div>
+      <div class="pill">12P SIGNATURE V17</div>
     </div>
   </section>
 
@@ -1901,7 +2041,7 @@ svg{
         {opacity:.66, transform:"scale(1.55)", offset:.62},
         {opacity:0, transform:"scale(2.1)"}
       ], {
-        duration:3400,
+        duration:3000,
         easing:"cubic-bezier(.16,.9,.24,1)",
         fill:"both"
       });
@@ -1914,7 +2054,7 @@ svg{
         {opacity:.36, transform:"scale(1.08) rotate(330deg)", offset:.82},
         {opacity:0, transform:"scale(1.16) rotate(470deg)"}
       ], {
-        duration:3900,
+        duration:3300,
         easing:"cubic-bezier(.16,.9,.24,1)",
         fill:"both"
       });
@@ -2028,8 +2168,8 @@ svg{
         y:c.y + Math.sin(angle + .58) * (dist*.66 + 20)
       };
 
-      var delay = 220 + i * 145;
-      var duration = 1500;
+      var delay = 80 + i * 115;
+      var duration = 1320;
       lastEnd = Math.max(lastEnd, delay + duration);
 
       setTimeout(function(){
@@ -2107,9 +2247,61 @@ svg{
   function boot(){
     ensureStage();
     hideNumbers(document);
-    setTimeout(function(){ replay(false); }, 500);
+    setTimeout(function(){ replay(false); }, 140);
     setTimeout(function(){ hideNumbers(document); }, 2400);
     setTimeout(function(){ hideNumbers(document); }, 4600);
+  }
+
+  if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", boot);
+  }else{
+    boot();
+  }
+})();
+</script>
+
+
+<script id="eratguard-radial-v17-signature-final-js">
+(function(){
+  if(window.__ERATGUARD_RADIAL_V17_FINAL__) return;
+  window.__ERATGUARD_RADIAL_V17_FINAL__ = true;
+
+  function hideOldButtons(){
+    document.querySelectorAll(".eg-v13-sound-toggle").forEach(function(x){
+      x.style.display = "none";
+      x.style.opacity = "0";
+      x.style.visibility = "hidden";
+    });
+  }
+
+  function hideNumberBadges(){
+    var nodes = Array.prototype.slice.call(document.querySelectorAll(".seg-link span,.seg-link b,.seg-link i,.seg-link em,.seg-link div"));
+    nodes.forEach(function(n){
+      var t = (n.textContent || "").trim();
+      if(/^(0?[1-9]|1[0-2])$/.test(t)){
+        n.style.display = "none";
+        n.style.opacity = "0";
+        n.style.visibility = "hidden";
+      }
+    });
+  }
+
+  function patchV16Timing(){
+    if(!window.__ERATGUARD_V17_TIMING_HINT__){
+      window.__ERATGUARD_V17_TIMING_HINT__ = true;
+      console.log("EratGuard V17 Signature Final active");
+    }
+  }
+
+  function boot(){
+    hideOldButtons();
+    hideNumberBadges();
+    patchV16Timing();
+
+    setTimeout(hideOldButtons, 300);
+    setTimeout(hideNumberBadges, 500);
+    setTimeout(hideNumberBadges, 1800);
+    setTimeout(hideNumberBadges, 4200);
   }
 
   if(document.readyState === "loading"){
