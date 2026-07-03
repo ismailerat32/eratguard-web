@@ -61,6 +61,343 @@ input:focus{border-color:rgba(0,255,136,.4);background:rgba(0,255,136,.04);box-s
   padding:10px 12px;
 }
 .password-policy-hint b{color:#00ff88}
+
+/* ERATGUARD PASSWORD EYE ALIGN FIX */
+.password-field,
+.password-wrap,
+.password-input-wrap,
+.input-password,
+.form-password,
+.field-password {
+  position: relative !important;
+}
+
+.password-field input,
+.password-wrap input,
+.password-input-wrap input,
+.input-password input,
+.form-password input,
+.field-password input,
+input[type="password"] {
+  padding-right: 58px !important;
+}
+
+.password-eye,
+.eye-icon,
+.toggle-password,
+.password-toggle,
+.show-password,
+.hide-password,
+button[aria-label*="şifre"],
+button[aria-label*="Şifre"],
+button[aria-label*="password"],
+button[onclick*="password"],
+button[onclick*="Password"],
+.eye {
+  position: absolute !important;
+  right: 18px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+  border: 0 !important;
+  background: transparent !important;
+  z-index: 5 !important;
+  opacity: .78 !important;
+}
+
+.password-eye svg,
+.eye-icon svg,
+.toggle-password svg,
+.password-toggle svg,
+.show-password svg,
+.hide-password svg,
+.eye svg {
+  width: 22px !important;
+  height: 22px !important;
+  display: block !important;
+}
+
+.password-eye img,
+.eye-icon img,
+.toggle-password img,
+.password-toggle img,
+.show-password img,
+.hide-password img,
+.eye img {
+  width: 22px !important;
+  height: 22px !important;
+  display: block !important;
+}
+
+
+/* ERATGUARD REGISTER EXACT PASS TOGGLE FIX */
+form[action="/register"] .input-wrap {
+  position: relative !important;
+}
+
+form[action="/register"] input[type="email"],
+form[action="/register"] input[type="text"],
+form[action="/register"] input[type="password"] {
+  background: rgba(0, 18, 10, .72) !important;
+  color: #f4fff9 !important;
+  border: 1px solid rgba(0,255,136,.18) !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.025), 0 0 18px rgba(0,255,136,.05) !important;
+  -webkit-text-fill-color: #f4fff9 !important;
+  caret-color: #00ff88 !important;
+}
+
+form[action="/register"] input:-webkit-autofill,
+form[action="/register"] input:-webkit-autofill:hover,
+form[action="/register"] input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px rgba(0, 18, 10, .96) inset !important;
+  -webkit-text-fill-color: #f4fff9 !important;
+  caret-color: #00ff88 !important;
+  transition: background-color 9999s ease-in-out 0s !important;
+}
+
+form[action="/register"] .pass-toggle {
+  position: absolute !important;
+  right: 18px !important;
+  top: 32px !important;
+  transform: none !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: rgba(230,255,242,.82) !important;
+  font-size: 21px !important;
+  line-height: 1 !important;
+  z-index: 20 !important;
+}
+
+form[action="/register"] input[name="password"] {
+  padding-right: 64px !important;
+}
+
+form[action="/register"] .password-policy-hint {
+  position: relative !important;
+  z-index: 1 !important;
+  margin-top: 10px !important;
+}
+
+
+/* ERATGUARD REGISTER PASSWORD ICON FINAL ALIGN FIX */
+form[action="/register"] .field:has(input[name="password"]) .input-wrap {
+  position: relative !important;
+  display: block !important;
+}
+
+form[action="/register"] .field:has(input[name="password"]) input[name="password"] {
+  height: 64px !important;
+  min-height: 64px !important;
+  padding-left: 82px !important;
+  padding-right: 68px !important;
+  line-height: 64px !important;
+  box-sizing: border-box !important;
+}
+
+form[action="/register"] .field:has(input[name="password"]) .input-icon {
+  position: absolute !important;
+  left: 34px !important;
+  top: 32px !important;
+  transform: translateY(-50%) !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 30 !important;
+}
+
+form[action="/register"] .field:has(input[name="password"]) .pass-toggle {
+  position: absolute !important;
+  right: 22px !important;
+  top: 32px !important;
+  transform: translateY(-50%) !important;
+  width: 30px !important;
+  height: 30px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  opacity: .70 !important;
+  z-index: 30 !important;
+}
+
+form[action="/register"] .field:has(input[name="password"]) .password-policy-hint {
+  display: block !important;
+  position: relative !important;
+  margin-top: 10px !important;
+  padding: 12px 14px !important;
+  z-index: 1 !important;
+  clear: both !important;
+}
+
+
+/* ERATGUARD REGISTER PASSWORD HTML STRUCTURE FINAL FIX */
+form[action="/register"] .password-field-final {
+  position: relative !important;
+}
+
+form[action="/register"] .password-wrap-final {
+  position: relative !important;
+  display: block !important;
+}
+
+form[action="/register"] .password-wrap-final input[name="password"] {
+  height: 64px !important;
+  min-height: 64px !important;
+  line-height: normal !important;
+  padding-left: 82px !important;
+  padding-right: 72px !important;
+  box-sizing: border-box !important;
+  display: block !important;
+}
+
+form[action="/register"] .password-wrap-final .password-lock-final {
+  position: absolute !important;
+  left: 34px !important;
+  top: 32px !important;
+  transform: translateY(-50%) !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 50 !important;
+  pointer-events: none !important;
+}
+
+form[action="/register"] .password-wrap-final .pass-toggle {
+  position: absolute !important;
+  right: 22px !important;
+  top: 32px !important;
+  transform: translateY(-50%) !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: rgba(230,255,242,.82) !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  opacity: .72 !important;
+  z-index: 60 !important;
+}
+
+form[action="/register"] .password-wrap-final .password-policy-hint {
+  position: relative !important;
+  display: block !important;
+  margin-top: 10px !important;
+  padding: 12px 14px !important;
+  clear: both !important;
+  z-index: 1 !important;
+}
+
+/* Eski genel kurallar bu özel alanda etkisiz kalsın */
+form[action="/register"] .password-wrap-final .input-icon:not(.password-lock-final) {
+  display: none !important;
+}
+
+
+/* ERATGUARD REGISTER PASSWORD FIELD REBUILD FINAL */
+form[action="/register"] .eg-pass-field-final {
+  position: relative !important;
+}
+
+form[action="/register"] .eg-pass-box-final {
+  position: relative !important;
+  width: 100% !important;
+  height: 64px !important;
+  display: block !important;
+}
+
+form[action="/register"] .eg-pass-box-final input[name="password"] {
+  width: 100% !important;
+  height: 64px !important;
+  min-height: 64px !important;
+  box-sizing: border-box !important;
+  display: block !important;
+  padding: 0 72px 0 82px !important;
+  line-height: normal !important;
+  background: rgba(0, 18, 10, .72) !important;
+  color: #f4fff9 !important;
+  border: 1.5px solid rgba(255,255,255,.08) !important;
+  border-radius: 16px !important;
+  outline: none !important;
+  -webkit-text-fill-color: #f4fff9 !important;
+  caret-color: #00ff88 !important;
+}
+
+form[action="/register"] .eg-pass-lock-final {
+  position: absolute !important;
+  left: 34px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 50 !important;
+  pointer-events: none !important;
+}
+
+form[action="/register"] .eg-pass-eye-final {
+  position: absolute !important;
+  right: 22px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: rgba(230,255,242,.82) !important;
+  font-size: 20px !important;
+  line-height: 1 !important;
+  opacity: .72 !important;
+  z-index: 60 !important;
+}
+
+form[action="/register"] .eg-pass-hint-final {
+  display: block !important;
+  position: relative !important;
+  margin-top: 10px !important;
+  z-index: 1 !important;
+}
+
 </style>
 </head>
 <body>
@@ -109,14 +446,14 @@ input:focus{border-color:rgba(0,255,136,.4);background:rgba(0,255,136,.04);box-s
             <input type="email" name="email" placeholder="E-posta adresin">
           </div>
         </div>
-        <div class="field">
+        <div class="field eg-pass-field-final">
           <label>Şifre</label>
-          <div class="input-wrap">
-            <span class="input-icon">🔒</span>
+          <div class="eg-pass-box-final">
+            <span class="eg-pass-lock-final">🔒</span>
             <input type="password" id="password" name="password" placeholder="Güçlü şifreni belirle" minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}" title="Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir." autocomplete="new-password" required>
-            <div class="password-policy-hint"><b>Güçlü şifre:</b> Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir.</div>
-            <button class="pass-toggle" type="button" onclick="togglePass()">👁️</button>
+            <button class="eg-pass-eye-final" type="button" onclick="togglePass()" aria-label="Şifreyi göster veya gizle">👁️</button>
           </div>
+          <div class="password-policy-hint eg-pass-hint-final"><b>Güçlü şifre:</b> Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir.</div>
         </div>
         <div class="terms">
           Kayıt olarak <a href="/u/legal">Kullanım Koşulları</a> ve <a href="/privacy">Gizlilik Politikası</a>'nı kabul etmiş olursunuz.
