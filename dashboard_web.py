@@ -25057,6 +25057,308 @@ def eg_admin_command_center_v1_safe_pages():
 # === /ERATGUARD ADMIN COMMAND CENTER V1 ===
 
 
+
+
+# ERATGUARD_12P_FINAL_PRIORITY_FIX_V25_START
+# 12P radial dilimlerinin login guard'a düşmesini engelleyen en yüksek öncelikli final köprü.
+def eratguard_12p_final_v25_page(title, subtitle, body, primary_href="/radial", primary_label="Radial Panele Dön"):
+    try:
+        from flask import render_template_string
+        return render_template_string("""
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>{{ title }} · EratGuard PRO</title>
+<style>
+body{margin:0;background:#020806;color:#eafff4;font-family:Arial,Helvetica,sans-serif}
+.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(circle at 50% 20%,rgba(0,255,140,.20),transparent 42%),linear-gradient(180deg,#03100b,#000503)}
+.card{width:100%;max-width:620px;border:1px solid rgba(0,255,140,.45);border-radius:24px;background:rgba(3,18,12,.94);padding:24px;box-shadow:0 0 38px rgba(0,255,140,.24)}
+.badge{display:inline-block;padding:6px 12px;border-radius:999px;border:1px solid rgba(0,255,140,.55);color:#7cffb2;background:rgba(0,255,140,.10);font-weight:900;font-size:12px;letter-spacing:1px}
+h1{margin:14px 0 7px;color:#7cffb2;font-size:30px}
+h2{margin:0 0 14px;color:#eafff4;font-size:17px}
+p{line-height:1.55;color:#dfffea;font-size:15px}
+.btn{display:block;text-align:center;margin-top:14px;padding:14px 16px;border-radius:16px;text-decoration:none;font-weight:900}
+.primary{background:#00ff8c;color:#00140b}
+.ghost{border:1px solid rgba(0,255,140,.45);color:#7cffb2}
+.small{margin-top:14px;color:#80d6aa;font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <span class="badge">ERATGUARD 12P FINAL</span>
+    <h1>{{ title }}</h1>
+    <h2>{{ subtitle }}</h2>
+    <p>{{ body }}</p>
+    <a class="btn primary" href="{{ primary_href }}">{{ primary_label }}</a>
+    <a class="btn ghost" href="/radial">Ana Radial 12P</a>
+    <div class="small">KORUMA AKTİF · 12P HAZIR · V25</div>
+  </div>
+</div>
+</body>
+</html>
+        """, title=title, subtitle=subtitle, body=body, primary_href=primary_href, primary_label=primary_label)
+    except Exception:
+        return title + " · EratGuard PRO", 200
+
+
+def eratguard_12p_final_priority_fix_v25():
+    try:
+        from flask import request, redirect
+
+        path = (request.path or "/").rstrip("/") or "/"
+
+        if path == "/u/blocked-sms":
+            return redirect("/u/blocked", code=302)
+
+        if path == "/u/sms-default":
+            return eratguard_12p_final_v25_page(
+                "SMS Varsayılan",
+                "Varsayılan SMS uygulaması yetkilendirme alanı",
+                "EratGuard'ın spam SMS engelleme ve silme korumasını tam çalıştırması için cihazda varsayılan SMS uygulaması olarak yetkilendirilmesi gerekir. Android uygulamasında bu dilim doğrudan varsayılan SMS akışını başlatır.",
+                "/u/protection",
+                "PRO Koruma Durumunu Aç"
+            )
+
+        if path in ("/u/ai", "/u/ai-analysis"):
+            return eratguard_12p_final_v25_page(
+                "AI Analiz",
+                "Spam ve riskli mesaj analiz merkezi",
+                "AI Analiz modülü şüpheli SMS içeriklerini, riskli bağlantıları ve spam davranışlarını değerlendirmek için hazırlanmıştır.",
+                "/u/protection",
+                "PRO Koruma Merkezini Aç"
+            )
+
+        if path == "/u/scan":
+            return eratguard_12p_final_v25_page(
+                "Tarama",
+                "Spam tarama ve koruma kontrolü",
+                "Tarama alanı aktif koruma durumunu, spam filtre akışını ve güvenlik kontrolünü tek ekrandan başlatmak için hazırlanmıştır.",
+                "/u/protection",
+                "Taramayı PRO Koruma İçinde Aç"
+            )
+
+        if path == "/u/security-score":
+            return eratguard_12p_final_v25_page(
+                "Güvenlik Skoru",
+                "EratGuard koruma puanı",
+                "Güvenlik Skoru; SMS varsayılan durumu, engellenen mesajlar, bildirimler ve rapor kayıtları üzerinden koruma seviyesini gösterir.",
+                "/u/reports",
+                "Raporları Aç"
+            )
+
+        if path == "/u/support":
+            return eratguard_12p_final_v25_page(
+                "Destek",
+                "Yardım ve kullanıcı desteği",
+                "Destek alanı kullanıcı geri bildirimi, sorun bildirimi ve yardım akışı için hazırlanmıştır.",
+                "/contact",
+                "İletişim Sayfasını Aç"
+            )
+
+        return None
+    except Exception:
+        return None
+
+
+try:
+    app.before_request(eratguard_12p_final_priority_fix_v25)
+
+    _eg_v25_funcs = app.before_request_funcs.setdefault(None, [])
+    _eg_v25_funcs = [
+        f for f in _eg_v25_funcs
+        if getattr(f, "__name__", "") != "eratguard_12p_final_priority_fix_v25"
+    ]
+    _eg_v25_funcs.insert(0, eratguard_12p_final_priority_fix_v25)
+    app.before_request_funcs[None] = _eg_v25_funcs
+
+    print("ERATGUARD 12P FINAL PRIORITY FIX V25 ACTIVE")
+except Exception as _eg_v25_error:
+    print("ERATGUARD 12P FINAL PRIORITY FIX V25 ERROR:", _eg_v25_error)
+# ERATGUARD_12P_FINAL_PRIORITY_FIX_V25_END
+
+
+
+
+# ERATGUARD_PRICING_BILLING_V26_START
+# Yayın öncesi Ücretlendirme / Paketler / Satın Alma merkezi.
+def eratguard_pricing_billing_v26_page():
+    try:
+        from flask import render_template_string
+        return render_template_string("""
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Ücretlendirme · EratGuard PRO</title>
+<style>
+:root{
+  --bg:#020806;
+  --card:#06140f;
+  --line:rgba(0,255,140,.34);
+  --green:#00ff8c;
+  --soft:#baffdc;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at 50% 12%,rgba(0,255,140,.18),transparent 36%),
+    linear-gradient(180deg,#03110b,#000503);
+  color:#eafff4;
+  font-family:Arial,Helvetica,sans-serif;
+}
+.wrap{
+  width:100%;
+  max-width:760px;
+  margin:0 auto;
+  padding:22px 14px 38px;
+}
+.top{
+  border:1px solid var(--line);
+  border-radius:24px;
+  padding:20px;
+  background:rgba(3,18,12,.88);
+  box-shadow:0 0 34px rgba(0,255,140,.14);
+}
+.badge{
+  display:inline-block;
+  padding:6px 12px;
+  border:1px solid rgba(0,255,140,.55);
+  border-radius:999px;
+  color:#8dffc4;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:1px;
+}
+h1{margin:12px 0 8px;font-size:30px;color:#7cffb2}
+p{line-height:1.55;color:#dfffea}
+.grid{
+  display:grid;
+  gap:14px;
+  margin-top:16px;
+}
+.plan{
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:rgba(0,20,12,.72);
+  padding:18px;
+}
+.plan.pro{
+  box-shadow:0 0 28px rgba(0,255,140,.20);
+  border-color:rgba(0,255,140,.62);
+}
+.plan h2{margin:0 0 8px;color:#fff;font-size:22px}
+.price{
+  font-size:28px;
+  color:var(--green);
+  font-weight:900;
+  margin:8px 0;
+}
+.small{font-size:12px;color:#8fd9b4}
+ul{margin:12px 0 0;padding-left:18px;color:#dfffea}
+li{margin:7px 0}
+.btn{
+  display:block;
+  text-align:center;
+  padding:14px 16px;
+  border-radius:15px;
+  margin-top:14px;
+  text-decoration:none;
+  font-weight:900;
+}
+.primary{background:var(--green);color:#00140b}
+.ghost{border:1px solid rgba(0,255,140,.42);color:#7cffb2}
+.note{
+  margin-top:14px;
+  padding:14px;
+  border-radius:18px;
+  background:rgba(0,255,140,.07);
+  border:1px solid rgba(0,255,140,.22);
+  color:#cffff0;
+  font-size:13px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="top">
+    <span class="badge">ERATGUARD PRO · ÜCRETLENDİRME</span>
+    <h1>Paketler ve Satın Alma</h1>
+    <p>EratGuard PRO, SMS spam engelleme, AI analiz, raporlar, bildirimler ve 12P güvenlik paneli için hazırlanmıştır.</p>
+  </section>
+
+  <section class="grid">
+    <div class="plan">
+      <h2>Deneme</h2>
+      <div class="price">Ücretsiz</div>
+      <div class="small">Temel tanıtım ve ilk kullanım</div>
+      <ul>
+        <li>Radial 12P panel erişimi</li>
+        <li>Temel koruma ekranları</li>
+        <li>Lisans durum kontrolü</li>
+      </ul>
+      <a class="btn ghost" href="/u/license">Lisans Durumunu Kontrol Et</a>
+    </div>
+
+    <div class="plan pro">
+      <h2>PRO</h2>
+      <div class="price">Aktivasyon / Lisans</div>
+      <div class="small">Tam koruma ve premium kullanım</div>
+      <ul>
+        <li>SMS spam engelleme akışı</li>
+        <li>AI analiz ve risk değerlendirme</li>
+        <li>Engellenenler, raporlar ve bildirim merkezi</li>
+        <li>12P imza radial panel</li>
+        <li>Premium koyu güvenlik arayüzü</li>
+      </ul>
+      <a class="btn primary" href="/u/license">PRO Lisans Merkezi</a>
+    </div>
+  </section>
+
+  <div class="note">
+    Not: Play Store yayınında ödeme modeli Google Play Console üzerinden tanımlanacaktır. Bu sayfa uygulama içindeki paket/lisans bilgilendirme ekranıdır.
+  </div>
+
+  <a class="btn ghost" href="/radial">← Ana Radial 12P Paneline Dön</a>
+</div>
+</body>
+</html>
+        """)
+    except Exception:
+        return "EratGuard PRO Ücretlendirme", 200
+
+
+def eratguard_pricing_billing_v26_guard():
+    try:
+        from flask import request
+        path = (request.path or "/").rstrip("/") or "/"
+        if path in ("/pricing", "/u/pricing", "/u/billing", "/u/upgrade", "/billing", "/upgrade"):
+            return eratguard_pricing_billing_v26_page()
+        return None
+    except Exception:
+        return None
+
+
+try:
+    app.before_request(eratguard_pricing_billing_v26_guard)
+    _eg_price_funcs = app.before_request_funcs.setdefault(None, [])
+    _eg_price_funcs = [
+        f for f in _eg_price_funcs
+        if getattr(f, "__name__", "") != "eratguard_pricing_billing_v26_guard"
+    ]
+    _eg_price_funcs.insert(0, eratguard_pricing_billing_v26_guard)
+    app.before_request_funcs[None] = _eg_price_funcs
+    print("ERATGUARD PRICING BILLING V26 ACTIVE")
+except Exception as _eg_price_error:
+    print("ERATGUARD PRICING BILLING V26 ERROR:", _eg_price_error)
+# ERATGUARD_PRICING_BILLING_V26_END
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
@@ -35225,3 +35527,11 @@ def eratguard_admin_v10_3d_safe_module_page(module_key):
         return render_template("admin_command_center.html")
     return render_template("admin_module_page.html", **data)
 # === ERATGUARD ADMIN V10 3D SAFE MODULE ALIAS END ===
+
+
+
+@app.route("/u/eg-panel")
+def eg_user_panel_v2():
+    if not login_required():
+        return redirect(url_for("login"))
+    return render_template("eg_panel_v2.html")
