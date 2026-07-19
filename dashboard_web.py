@@ -35530,8 +35530,70 @@ def eratguard_admin_v10_3d_safe_module_page(module_key):
 
 
 
+
+from datetime import timedelta as _eg_timedelta
+
+def _eg_panel_metrics():
+    actions = _eg_load_sms_actions()
+    counts = _eg_counts(actions)
+    total = counts.get("total", 0)
+    blocked = counts.get("blocked", 0)
+    safe = counts.get("safe", 0)
+    reported = counts.get("reported", 0)
+
+    score = round(100 * safe / total) if total > 0 else 100
+    score = max(0, min(100, score))
+
+    if score >= 80:
+        threat_label = "DÜŞÜK"
+    elif score >= 50:
+        threat_label = "ORTA"
+    else:
+        threat_label = "YÜKSEK"
+
+    today = datetime.now().date()
+    day_counts = {}
+    for i in range(7):
+        d = today - _eg_timedelta(days=6 - i)
+        day_counts[d.isoformat()] = 0
+    for a in actions:
+        ts = str(a.get("created_at", ""))
+        try:
+            d = datetime.fromisoformat(ts.replace("Z", "")).date().isoformat()
+        except Exception:
+            continue
+        if d in day_counts:
+            day_counts[d] += 1
+
+    values = list(day_counts.values())
+    max_v = max(values) if max(values) > 0 else 1
+    n = len(values)
+    points = []
+    for idx, v in enumerate(values):
+        x = round(idx * (98 / (n - 1))) if n > 1 else 0
+        y = round(26 - (v / max_v) * 22)
+        points.append(f"{x},{y}")
+    spark_points = " ".join(points)
+
+    return {
+        "total": total, "blocked": blocked, "safe": safe, "reported": reported,
+        "score": score, "threat_label": threat_label, "spark_points": spark_points,
+    }
+
+
 @app.route("/u/eg-panel")
 def eg_user_panel_v2():
     if not login_required():
         return redirect(url_for("login"))
-    return render_template("eg_panel_v2.html")
+
+    metrics = _eg_panel_metrics()
+
+    users = load_users()
+    username = session.get("username", "")
+    udata = users.get(username, {})
+    license_info = {
+        "plan": udata.get("license_key") or "Ücretsiz",
+        "expires_at": udata.get("expires_at") or "—",
+    }
+
+    return render_template("eg_panel_v2.html", metrics=metrics, license_info=license_info)

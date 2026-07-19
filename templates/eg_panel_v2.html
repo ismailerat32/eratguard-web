@@ -233,7 +233,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
       <div class="status-card">
         <div class="l">7 GÜNLÜK</div>
         <svg class="spark" viewBox="0 0 98 30" preserveAspectRatio="none">
-          <polyline points="0,26 14,22 28,24 42,13 56,17 70,7 84,12 98,3" fill="none" stroke="#2dffa0" stroke-width="2.5"/>
+          <polyline points="{{ metrics.spark_points }}" fill="none" stroke="#2dffa0" stroke-width="2.5"/>
         </svg>
       </div>
       <div class="status-card score-card">
@@ -247,7 +247,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
       </div>
       <div class="status-card threat-card">
         <div class="l">TEHDİT</div>
-        <div class="v">ÇOK DÜŞÜK</div>
+        <div class="v">{{ metrics.threat_label }}</div>
       </div>
     </div>
   </div>
@@ -270,10 +270,10 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   <!-- bottom stats -->
   <div class="stats">
     <div class="stats-inner">
-      <div class="stat"><span class="ic"><i class="fa-solid fa-shield-halved"></i></span><div class="v">1.247</div><div class="u">SMS</div></div>
-      <div class="stat"><span class="ic"><i class="fa-solid fa-satellite-dish"></i></span><div class="v" id="eg-scan-val">356</div><div class="u">SMS</div></div>
-      <div class="stat"><span class="ic"><i class="fa-solid fa-bullseye"></i></span><div class="v">99.8%</div><div class="u">Başarı</div></div>
-      <div class="stat"><span class="ic"><i class="fa-solid fa-wave-square"></i></span><div class="v">Mükemmel</div><div class="u">Her şey yolunda</div></div>
+      <div class="stat"><span class="ic"><i class="fa-solid fa-shield-halved"></i></span><div class="v">{{ metrics.blocked }}</div><div class="u">Engellenen</div></div>
+      <div class="stat"><span class="ic"><i class="fa-solid fa-satellite-dish"></i></span><div class="v">{{ metrics.total }}</div><div class="u">Toplam Tarama</div></div>
+      <div class="stat"><span class="ic"><i class="fa-solid fa-check"></i></span><div class="v">{{ metrics.safe }}</div><div class="u">Güvenli</div></div>
+      <div class="stat"><span class="ic"><i class="fa-solid fa-flag"></i></span><div class="v">{{ metrics.reported }}</div><div class="u">Şikayet Edilen</div></div>
     </div>
   </div>
 
@@ -316,27 +316,27 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 // ---------------------------------------------------------------------------
 const MODULES = [
   { id:1, title:'Spam Koruması', sub:"Gelen SMS'leri akıllıca filtrele", icon:'fa-shield-halved', route:'/u/protection',
-    rows:[['Durum','Aktif'],['Bugün filtrelenen','128'],['Hassasiyet','Yüksek']] },
+    rows:[['Durum','Aktif']] },
   { id:2, title:'AI Analiz', sub:'Yapay zeka ile akıllı analiz', icon:'fa-brain', route:'/u/analysis',
-    rows:[['Risk skoru','12 / 100'],['İncelenen olay','342'],['Model','v2.4']] },
+    rows:[] },
   { id:3, title:'Risk Tarama', sub:'Tehlikeleri tara, güvende kal', icon:'fa-satellite-dish', route:'/u/sms-risk-test',
-    rows:[['Taranan öğe','1.204'],['Şüpheli bulgu','3'],['Süre','0.8sn/öğe']] },
-  { id:4, title:'Engellenenler', sub:'Engellenen numaralar ve mesajlar', icon:'fa-ban', route:'/u/blocked', badge:4,
-    rows:[['Toplam engelli','57'],['Bu hafta eklenen','4'],['Otomatik ekleme','Açık']] },
-  { id:5, title:'SMS Merkezi', sub:'Tüm mesajların yönetim merkezi', icon:'fa-comments', route:'/u/sms-actions-center', badge:6,
-    rows:[['Okunmamış','6'],['Son mesaj','2 dk önce'],['Kanal sayısı','4']] },
+    rows:[['Toplam tarama','{{ metrics.total }}'],['Durum','Aktif']] },
+  { id:4, title:'Engellenenler', sub:'Engellenen numaralar ve mesajlar', icon:'fa-ban', route:'/u/blocked',
+    rows:[['Toplam engellenen','{{ metrics.blocked }}']] },
+  { id:5, title:'SMS Merkezi', sub:'Tüm mesajların yönetim merkezi', icon:'fa-comments', route:'/u/sms-actions-center',
+    rows:[['Toplam işlem','{{ metrics.total }}']] },
   { id:6, title:'Geçmiş', sub:'Geçmiş mesajlar ve kayıtlar', icon:'fa-clock-rotate-left', route:'/u/history',
-    rows:[['Kayıtlı gün','90'],['Toplam kayıt','3.482'],['Otomatik silme','90 gün']] },
+    rows:[] },
   { id:7, title:'Raporlar', sub:'Detaylı istatistikler ve raporlar', icon:'fa-chart-column', route:'/u/reports',
-    rows:[['Bu ay olay','89'],['Trend','↓ %12'],['Son rapor','Dün']] },
-  { id:8, title:'Bildirimler', sub:'Sistem bildirimleri ve uyarılar', icon:'fa-bell', route:'/u/notifications', badge:2,
-    rows:[['Aktif uyarı','2'],['Sessiz saat','23:00–07:00'],['Kanal','Push + E-posta']] },
+    rows:[] },
+  { id:8, title:'Bildirimler', sub:'Sistem bildirimleri ve uyarılar', icon:'fa-bell', route:'/u/notifications',
+    rows:[] },
   { id:9, title:'İzinler', sub:'Uygulama izinleri ve yönetimi', icon:'fa-lock', route:'/u/settings', /* GÖZDEN GEÇİR */
-    rows:[['SMS izni','Verildi'],['Bildirim izni','Verildi'],['Arka plan','Sınırsız']] },
+    rows:[] },
   { id:10, title:'Güvenlik Merkezi', sub:'Gelişmiş güvenlik araçları', icon:'fa-shield', route:'/u/protection', /* GÖZDEN GEÇİR */
-    rows:[['Koruma seviyesi','Pro'],['Son tarama','3 saat önce'],['Tehdit','0']] },
+    rows:[] },
   { id:11, title:'Lisans', sub:'Lisans bilgileri ve durumu', icon:'fa-award', route:'/u/license',
-    rows:[['Plan','Pro Yıllık'],['Bitiş','14.03.2027'],['Cihaz','3 / 5']] },
+    rows:[['Lisans','{{ license_info.plan }}'],['Bitiş','{{ license_info.expires_at }}']] },
   { id:12, title:'Ayarlar', sub:'Uygulama ayarları ve tercihler', icon:'fa-gear', route:'/u/settings',
     rows:[['Tema','Koyu'],['Dil','Türkçe'],['Senkronizasyon','Açık']] },
 ];
@@ -400,7 +400,7 @@ setInterval(tickClock, 1000);
 
 // security score count-up
 (function animateScore(){
-  const target = 100, duration = 900, start = performance.now();
+  const target = {{ metrics.score }}, duration = 900, start = performance.now();
   const ring = document.getElementById('eg-score-ring');
   const val = document.getElementById('eg-score-val');
   const CIRC = 94.2;
@@ -415,14 +415,8 @@ setInterval(tickClock, 1000);
   requestAnimationFrame(step);
 })();
 
-// live-ticking scan counter (purely cosmetic — wire to a real endpoint when ready)
-let scanCount = 356;
-setInterval(function(){
-  scanCount++;
-  const el = document.getElementById('eg-scan-val');
-  el.textContent = scanCount;
-  el.classList.remove('value-flash'); void el.offsetWidth; el.classList.add('value-flash');
-}, 4200);
+// (fake ticking scan counter removed — bottom stats now render real
+// server-computed values directly via Jinja, no client-side faking)
 
 // module detail sheet
 const overlay = document.getElementById('eg-sheet-overlay');
@@ -435,9 +429,11 @@ function openSheet(id){
   document.getElementById('eg-sheet-sub').textContent = mod.sub;
   document.getElementById('eg-sheet-open').href = mod.route;
   document.getElementById('eg-sheet-route').textContent = mod.route;
-  document.getElementById('eg-sheet-rows').innerHTML = mod.rows.map(function(r){
-    return '<div class="sheet-row"><span class="k">'+r[0]+'</span><span class="v">'+r[1]+'</span></div>';
-  }).join('');
+  document.getElementById('eg-sheet-rows').innerHTML = mod.rows.length
+    ? mod.rows.map(function(r){
+        return '<div class="sheet-row"><span class="k">'+r[0]+'</span><span class="v">'+r[1]+'</span></div>';
+      }).join('')
+    : '<div class="sheet-row"><span class="k">Bu modülde henüz canlı veri bağlantısı yok</span></div>';
   overlay.classList.add('open');
 }
 document.getElementById('eg-sheet-close').addEventListener('click', function(){ overlay.classList.remove('open'); });
