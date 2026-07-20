@@ -18,7 +18,7 @@ html,body{width:100%;background:radial-gradient(ellipse 90% 55% at 50% 0%, #0a22
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;background:none;border:none;color:inherit;cursor:pointer}
 
-.wrap{position:relative;min-height:100dvh;padding-bottom:24px}
+.wrap{position:relative;padding-bottom:24px}
 
 /* ambient sweep + vignette */
 .sweep{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
@@ -331,9 +331,9 @@ const MODULES = [
     rows:[] },
   { id:8, title:'Bildirimler', sub:'Sistem bildirimleri ve uyarılar', icon:'fa-bell', route:'/u/notifications',
     rows:[] },
-  { id:9, title:'İzinler', sub:'Uygulama izinleri ve yönetimi', icon:'fa-lock', route:'/u/settings', /* GÖZDEN GEÇİR */
+  { id:9, title:'İzinler', sub:'Uygulama izinleri ve yönetimi', icon:'fa-lock', route:'/u/settings',
     rows:[] },
-  { id:10, title:'Güvenlik Merkezi', sub:'Gelişmiş güvenlik araçları', icon:'fa-shield', route:'/u/protection', /* GÖZDEN GEÇİR */
+  { id:10, title:'Güvenlik Merkezi', sub:'Gelişmiş güvenlik araçları', icon:'fa-shield', route:'/u/settings',
     rows:[] },
   { id:11, title:'Lisans', sub:'Lisans bilgileri ve durumu', icon:'fa-award', route:'/u/license',
     rows:[['Lisans','{{ license_info.plan }}'],['Bitiş','{{ license_info.expires_at }}']] },
