@@ -18,7 +18,7 @@ html,body{width:100%;background:radial-gradient(ellipse 90% 55% at 50% 0%, #0a22
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;background:none;border:none;color:inherit;cursor:pointer}
 
-.wrap{position:relative;padding-bottom:24px}
+.wrap{position:relative;padding-bottom:40px}
 
 /* ambient sweep + vignette */
 .sweep{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
@@ -35,7 +35,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .glow-blobs .b3{width:240px;height:240px;bottom:6%;left:10%;background:var(--green)}
 
 /* header */
-.header{position:relative;z-index:1;padding:22px 16px 56px}
+.header{position:relative;z-index:1;padding:26px 16px 70px}
 .header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:16px}
 .badge-active{display:flex;align-items:center;gap:8px;border-radius:10px;padding:8px 11px;
   background:rgba(45,255,160,0.1);border:1px solid rgba(45,255,160,0.55);box-shadow:0 0 14px rgba(45,255,160,0.2)}
@@ -77,8 +77,8 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 
 /* module grid */
 .modgrid{position:relative;z-index:1;padding:0 16px}
-.row{display:grid;gap:11px;margin-bottom:52px}
-.core-wrap{text-align:center;margin:-2px 0 52px}
+.row{display:grid;gap:14px;margin-bottom:66px}
+.core-wrap{text-align:center;margin:-2px 0 66px}
 .core-wrap .t{font-size:14px;font-weight:600;color:#eaf4f0}
 .core-wrap .s{font-size:10px;color:rgba(148,168,160,0.55)}
 
@@ -130,14 +130,14 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .card-base-glow{position:absolute;left:50%;bottom:-8px;width:40px;height:15px;border-radius:50%;
   transform:translateX(-50%);pointer-events:none;filter:blur(2px);
   background:radial-gradient(ellipse, rgba(45,255,160,0.53), transparent 70%)}
-.card-beam{position:absolute;left:50%;top:-48px;width:3px;height:48px;transform:translateX(-50%);
+.card-beam{position:absolute;left:50%;top:-60px;width:4px;height:60px;transform:translateX(-50%);
   transform-origin:bottom center;pointer-events:none;
-  background:linear-gradient(to top, var(--cyan), rgba(34,211,238,0.5) 60%, transparent);
-  filter:blur(0.4px) drop-shadow(0 0 5px var(--cyan));
-  animation:eg-beam-pulse 2.4s ease-in-out infinite}
-.card-beam::after{content:"";position:absolute;top:-3px;left:50%;transform:translateX(-50%);
-  width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px 3px var(--cyan)}
-@keyframes eg-beam-pulse{0%,100%{opacity:.6;transform:translateX(-50%) scaleY(0.85)}50%{opacity:1;transform:translateX(-50%) scaleY(1.1)}}
+  background:linear-gradient(to top, var(--cyan), rgba(34,211,238,0.6) 55%, transparent);
+  filter:blur(0.3px) drop-shadow(0 0 7px var(--cyan)) drop-shadow(0 0 14px rgba(34,211,238,0.5));
+  animation:eg-beam-pulse 3.4s ease-in-out infinite}
+.card-beam::after{content:"";position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px 4px var(--cyan)}
+@keyframes eg-beam-pulse{0%,100%{opacity:.65;transform:translateX(-50%) scaleY(0.88)}50%{opacity:1;transform:translateX(-50%) scaleY(1.08)}}
 
 .card-badge{position:absolute;top:-9px;right:-8px;min-width:24px;height:24px;padding:0 5px;
   display:flex;align-items:center;justify-content:center;border-radius:50%;
@@ -146,7 +146,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 @keyframes eg-badge-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 
 /* one-shot entrance: fall + lock-flash, driven by an inline --delay custom property per card */
-.card{animation:eg-card-fall 950ms cubic-bezier(0.16,0.8,0.24,1) both;animation-delay:var(--delay,0ms)}
+.card{animation:eg-card-fall 1250ms cubic-bezier(0.16,0.8,0.24,1) both;animation-delay:var(--delay,0ms)}
 @keyframes eg-card-fall{
   0%{opacity:0;transform:translateY(-150px) scale(0.9)}
   55%{opacity:1}
@@ -155,7 +155,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 }
 .lock-flash{position:absolute;top:36%;left:50%;width:32px;height:32px;border-radius:50%;
   border:2px solid var(--green);box-shadow:0 0 14px var(--green);opacity:0;pointer-events:none;
-  animation:eg-lock-flash 0.5s ease-out both;animation-delay:calc(var(--delay,0ms) + 870ms)}
+  animation:eg-lock-flash 0.5s ease-out both;animation-delay:calc(var(--delay,0ms) + 1170ms)}
 @keyframes eg-lock-flash{0%{opacity:.95;transform:translate(-50%,-50%) scale(0.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.4)}}
 
 /* bottom stats */
@@ -188,6 +188,15 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   border:1px solid rgba(45,255,160,0.4);box-shadow:0 0 14px rgba(45,255,160,0.27), 0 0 22px rgba(34,211,238,0.13)}
 .nav-ai .ring{position:absolute;inset:-5px;border-radius:50%;border:1px solid rgba(34,211,238,0.2)}
 .nav-ai span{font-size:17px;font-weight:700;color:var(--green);letter-spacing:0.03em}
+
+/* footer */
+.footer{position:relative;z-index:1;padding:22px 16px 8px;text-align:center}
+.footer-line{width:64px;height:1px;margin:0 auto 16px;background:linear-gradient(90deg,transparent,rgba(45,255,160,0.4),transparent)}
+.footer-text{font-size:10px;color:rgba(148,168,160,0.4);letter-spacing:0.04em;line-height:1.8}
+.footer-text .dot{color:rgba(45,255,160,0.4);margin:0 6px}
+.footer-shield{width:26px;height:26px;margin:0 auto 10px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:rgba(45,255,160,0.08);border:1px solid rgba(45,255,160,0.25)}
+.footer-shield i{color:rgba(45,255,160,0.5);font-size:11px}
 
 /* module detail sheet */
 .sheet-overlay{position:fixed;inset:0;z-index:50;display:none;align-items:flex-end;justify-content:center;
@@ -297,6 +306,13 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
       <button class="nav-item"><i class="fa-solid fa-user"></i><span>Profil</span></button>
     </div>
   </div>
+
+  <!-- footer -->
+  <div class="footer">
+    <div class="footer-line"></div>
+    <div class="footer-shield"><i class="fa-solid fa-shield-halved"></i></div>
+    <div class="footer-text">EratGuard PRO<span class="dot">•</span>AI Destekli SMS Güvenliği<span class="dot">•</span>7/24 Aktif Koruma</div>
+  </div>
 </div>
 
 <!-- module detail sheet -->
@@ -327,11 +343,11 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 const MODULES = [
   { id:1, title:'Spam Koruması', sub:"Gelen SMS'leri akıllıca filtrele", icon:'fa-shield-halved', route:'/u/protection',
     rows:[['Durum','Aktif']] },
-  { id:2, title:'AI Analiz', sub:'Yapay zeka ile akıllı analiz', icon:'fa-brain', route:'/u/analysis',
+  { id:2, title:'AI Analiz', sub:'Yapay zeka ile akıllı analiz', icon:'fa-brain', route:'/u/analysis', color:'#3b82f6',
     rows:[] },
   { id:3, title:'Risk Tarama', sub:'Tehlikeleri tara, güvende kal', icon:'fa-satellite-dish', route:'/u/sms-risk-test',
     rows:[['Toplam tarama','{{ metrics.total }}'],['Durum','Aktif']] },
-  { id:4, title:'Engellenenler', sub:'Engellenen numaralar ve mesajlar', icon:'fa-ban', route:'/u/blocked',
+  { id:4, title:'Engellenenler', sub:'Engellenen numaralar ve mesajlar', icon:'fa-ban', route:'/u/blocked', color:'#ff5555',
     rows:[['Toplam engellenen','{{ metrics.blocked }}']] },
   { id:5, title:'SMS Merkezi', sub:'Tüm mesajların yönetim merkezi', icon:'fa-comments', route:'/u/sms-actions-center',
     rows:[['Toplam işlem','{{ metrics.total }}']] },
@@ -339,13 +355,13 @@ const MODULES = [
     rows:[] },
   { id:7, title:'Raporlar', sub:'Detaylı istatistikler ve raporlar', icon:'fa-chart-column', route:'/u/reports',
     rows:[] },
-  { id:8, title:'Bildirimler', sub:'Sistem bildirimleri ve uyarılar', icon:'fa-bell', route:'/u/notifications',
+  { id:8, title:'Bildirimler', sub:'Sistem bildirimleri ve uyarılar', icon:'fa-bell', route:'/u/notifications', color:'#ffb020',
     rows:[] },
   { id:9, title:'İzinler', sub:'Uygulama izinleri ve yönetimi', icon:'fa-lock', route:'/u/settings',
     rows:[] },
   { id:10, title:'Güvenlik Merkezi', sub:'Gelişmiş güvenlik araçları', icon:'fa-shield', route:'/u/settings',
     rows:[] },
-  { id:11, title:'Lisans', sub:'Lisans bilgileri ve durumu', icon:'fa-award', route:'/u/license',
+  { id:11, title:'Lisans', sub:'Lisans bilgileri ve durumu', icon:'fa-award', route:'/u/license', color:'#e8b93b',
     rows:[['Lisans','{{ license_info.plan }}'],['Bitiş','{{ license_info.expires_at }}']] },
   { id:12, title:'Ayarlar', sub:'Uygulama ayarları ve tercihler', icon:'fa-gear', route:'/u/settings',
     rows:[['Tema','Koyu'],['Dil','Türkçe'],['Senkronizasyon','Açık']] },
@@ -353,6 +369,11 @@ const MODULES = [
 
 function cardHtml(mod, delayMs){
   const badge = mod.badge ? `<span class="card-badge">${mod.badge}</span>` : '';
+  const c = mod.color || '#2dffa0';
+  const iconStyle = mod.color
+    ? `style="border-color:${c};box-shadow:0 0 10px ${c}99, 0 0 18px ${c}44"`
+    : '';
+  const iStyle = mod.color ? `style="color:${c};filter:drop-shadow(0 0 3px ${c})"` : '';
   return `
   <button class="card" style="--delay:${delayMs}ms" onclick="openSheet(${mod.id})">
     <div class="card-wall"></div>
@@ -360,7 +381,7 @@ function cardHtml(mod, delayMs){
       <div class="card-edge-pulse"></div>
       <div class="lock-flash"></div>
       <span class="card-num">${String(mod.id).padStart(2,'0')}</span>
-      <div class="card-icon"><span class="glow"></span><i class="fa-solid ${mod.icon}"></i></div>
+      <div class="card-icon" ${iconStyle}><span class="glow"></span><i class="fa-solid ${mod.icon}" ${iStyle}></i></div>
       <div class="card-title">${mod.title}</div>
       <div class="card-sub">${mod.sub}</div>
     </div>
@@ -382,7 +403,7 @@ function coreHtml(){
   const row1 = document.getElementById('eg-row-1');
   const row2 = document.getElementById('eg-row-2');
   const row3 = document.getElementById('eg-row-3');
-  const STAGGER = 100;
+  const STAGGER = 160;
 
   row1.innerHTML =
     cardHtml(MODULES[0], 0*STAGGER) + cardHtml(MODULES[1], 1*STAGGER) +
