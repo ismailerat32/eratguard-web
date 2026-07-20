@@ -28,9 +28,14 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 @keyframes eg-sweep{0%{transform:translateX(-30%) rotate(8deg)}100%{transform:translateX(130%) rotate(8deg)}}
 .vignette{position:absolute;inset:0;pointer-events:none;z-index:0;
   box-shadow:inset 0 0 90px 20px rgba(0,0,0,0.55)}
+.glow-blobs{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.glow-blobs span{position:absolute;border-radius:50%;filter:blur(60px);opacity:0.16}
+.glow-blobs .b1{width:260px;height:260px;top:8%;left:-8%;background:var(--green)}
+.glow-blobs .b2{width:220px;height:220px;top:38%;right:-10%;background:var(--cyan)}
+.glow-blobs .b3{width:240px;height:240px;bottom:6%;left:10%;background:var(--green)}
 
 /* header */
-.header{position:relative;z-index:1;padding:22px 16px 34px}
+.header{position:relative;z-index:1;padding:22px 16px 56px}
 .header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:16px}
 .badge-active{display:flex;align-items:center;gap:8px;border-radius:10px;padding:8px 11px;
   background:rgba(45,255,160,0.1);border:1px solid rgba(45,255,160,0.55);box-shadow:0 0 14px rgba(45,255,160,0.2)}
@@ -72,8 +77,8 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 
 /* module grid */
 .modgrid{position:relative;z-index:1;padding:0 16px}
-.row{display:grid;gap:11px;margin-bottom:30px}
-.core-wrap{text-align:center;margin:-2px 0 30px}
+.row{display:grid;gap:11px;margin-bottom:52px}
+.core-wrap{text-align:center;margin:-2px 0 52px}
 .core-wrap .t{font-size:14px;font-weight:600;color:#eaf4f0}
 .core-wrap .s{font-size:10px;color:rgba(148,168,160,0.55)}
 
@@ -92,13 +97,13 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   text-shadow:0 0 6px var(--green)}
 
 /* module card */
-.card{position:relative;min-height:115px;perspective:700px}
+.card{position:relative;min-height:122px;perspective:700px}
 .card-wall{position:absolute;inset:0;background:linear-gradient(180deg,#071613 0%,#030807 100%);
   border:1px solid rgba(45,255,160,0.13);
   clip-path:polygon(0 10px,10px 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
   transform:rotateX(6deg) translate(3px,4px);transform-origin:50% 0%}
 .card-shell{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:14px 7px 9px;background:linear-gradient(180deg,#102826 0%,#081213 100%);
+  padding:20px 7px 9px;background:linear-gradient(180deg,#102826 0%,#081213 100%);
   border:1.5px solid var(--green);border-top:2px solid var(--cyan);
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.06), 0 6px 14px -6px rgba(0,0,0,0.65);
   filter:drop-shadow(0 0 8px rgba(45,255,160,0.47));
@@ -117,18 +122,22 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   animation:eg-icon-glow 3s ease-in-out infinite}
 @keyframes eg-icon-glow{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.15)}}
 .card-icon i{color:var(--green);font-size:15px;filter:drop-shadow(0 0 3px var(--green))}
+.card-num{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;
+  font-size:11px;font-weight:500;color:rgba(220,232,226,0.55);letter-spacing:0.05em}
 .card-title{font-size:12px;font-weight:600;color:#eaf4f0;line-height:1.2;padding:0 4px}
 .card-sub{font-size:10px;color:rgba(148,168,160,0.55);line-height:1.25;padding:0 4px;margin-top:2px}
 
 .card-base-glow{position:absolute;left:50%;bottom:-8px;width:40px;height:15px;border-radius:50%;
   transform:translateX(-50%);pointer-events:none;filter:blur(2px);
   background:radial-gradient(ellipse, rgba(45,255,160,0.53), transparent 70%)}
-.card-beam{position:absolute;left:50%;top:-27px;width:11px;height:27px;transform:translateX(-50%);
+.card-beam{position:absolute;left:50%;top:-48px;width:3px;height:48px;transform:translateX(-50%);
   transform-origin:bottom center;pointer-events:none;
-  background:linear-gradient(to top, var(--cyan), transparent);
-  filter:blur(0.5px) drop-shadow(0 0 6px var(--cyan));
+  background:linear-gradient(to top, var(--cyan), rgba(34,211,238,0.5) 60%, transparent);
+  filter:blur(0.4px) drop-shadow(0 0 5px var(--cyan));
   animation:eg-beam-pulse 2.4s ease-in-out infinite}
-@keyframes eg-beam-pulse{0%,100%{opacity:.55;transform:translateX(-50%) scaleY(0.8)}50%{opacity:1;transform:translateX(-50%) scaleY(1.15)}}
+.card-beam::after{content:"";position:absolute;top:-3px;left:50%;transform:translateX(-50%);
+  width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px 3px var(--cyan)}
+@keyframes eg-beam-pulse{0%,100%{opacity:.6;transform:translateX(-50%) scaleY(0.85)}50%{opacity:1;transform:translateX(-50%) scaleY(1.1)}}
 
 .card-badge{position:absolute;top:-9px;right:-8px;min-width:24px;height:24px;padding:0 5px;
   display:flex;align-items:center;justify-content:center;border-radius:50%;
@@ -209,6 +218,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 <body>
 <div class="wrap">
   <div class="sweep"></div>
+  <div class="glow-blobs"><span class="b1"></span><span class="b2"></span><span class="b3"></span></div>
   <div class="vignette"></div>
 
   <!-- header -->
@@ -349,6 +359,7 @@ function cardHtml(mod, delayMs){
     <div class="card-shell">
       <div class="card-edge-pulse"></div>
       <div class="lock-flash"></div>
+      <span class="card-num">${String(mod.id).padStart(2,'0')}</span>
       <div class="card-icon"><span class="glow"></span><i class="fa-solid ${mod.icon}"></i></div>
       <div class="card-title">${mod.title}</div>
       <div class="card-sub">${mod.sub}</div>
