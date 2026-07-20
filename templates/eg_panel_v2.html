@@ -35,7 +35,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .glow-blobs .b3{width:240px;height:240px;bottom:6%;left:10%;background:var(--green)}
 
 /* header */
-.header{position:relative;z-index:1;padding:26px 16px 70px}
+.header{position:relative;z-index:1;padding:26px 16px 82px}
 .header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:16px}
 .badge-active{display:flex;align-items:center;gap:8px;border-radius:10px;padding:8px 11px;
   background:rgba(45,255,160,0.1);border:1px solid rgba(45,255,160,0.55);box-shadow:0 0 14px rgba(45,255,160,0.2)}
@@ -77,8 +77,8 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 
 /* module grid */
 .modgrid{position:relative;z-index:1;padding:0 16px}
-.row{display:grid;gap:14px;margin-bottom:66px}
-.core-wrap{text-align:center;margin:-2px 0 66px}
+.row{display:grid;gap:14px;margin-bottom:78px}
+.core-wrap{text-align:center;margin:-2px 0 78px}
 .core-wrap .t{font-size:14px;font-weight:600;color:#eaf4f0}
 .core-wrap .s{font-size:10px;color:rgba(148,168,160,0.55)}
 
@@ -103,10 +103,13 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   clip-path:polygon(0 10px,10px 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
   transform:rotateX(6deg) translate(3px,4px);transform-origin:50% 0%}
 .card-shell{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:20px 7px 9px;background:linear-gradient(180deg,#102826 0%,#081213 100%);
+  padding:20px 7px 9px;
+  background:
+    radial-gradient(circle at 30% 15%, rgba(94,234,255,0.18), transparent 55%),
+    linear-gradient(160deg,#123834 0%,#0a1f22 45%,#050f12 100%);
   border:1.5px solid var(--green);border-top:2px solid var(--cyan);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.06), 0 6px 14px -6px rgba(0,0,0,0.65);
-  filter:drop-shadow(0 0 8px rgba(45,255,160,0.47));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 24px rgba(34,211,238,0.08), 0 8px 18px -6px rgba(0,0,0,0.7);
+  filter:drop-shadow(0 0 10px rgba(45,255,160,0.5));
   clip-path:polygon(0 10px,10px 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
   transform:rotateX(6deg);transform-origin:50% 0%}
 .card-edge-pulse{position:absolute;inset:0;pointer-events:none;
@@ -130,14 +133,18 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .card-base-glow{position:absolute;left:50%;bottom:-8px;width:40px;height:15px;border-radius:50%;
   transform:translateX(-50%);pointer-events:none;filter:blur(2px);
   background:radial-gradient(ellipse, rgba(45,255,160,0.53), transparent 70%)}
-.card-beam{position:absolute;left:50%;top:-60px;width:4px;height:60px;transform:translateX(-50%);
+.card-beam{position:absolute;left:50%;top:-72px;width:6px;height:72px;transform:translateX(-50%);
   transform-origin:bottom center;pointer-events:none;
-  background:linear-gradient(to top, var(--cyan), rgba(34,211,238,0.6) 55%, transparent);
-  filter:blur(0.3px) drop-shadow(0 0 7px var(--cyan)) drop-shadow(0 0 14px rgba(34,211,238,0.5));
+  background:linear-gradient(to top, #fff, var(--cyan) 30%, rgba(34,211,238,0.55) 65%, transparent);
+  filter:drop-shadow(0 0 10px var(--cyan)) drop-shadow(0 0 22px rgba(34,211,238,0.7));
   animation:eg-beam-pulse 3.4s ease-in-out infinite}
-.card-beam::after{content:"";position:absolute;top:-4px;left:50%;transform:translateX(-50%);
-  width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px 4px var(--cyan)}
-@keyframes eg-beam-pulse{0%,100%{opacity:.65;transform:translateX(-50%) scaleY(0.88)}50%{opacity:1;transform:translateX(-50%) scaleY(1.08)}}
+.card-beam-halo{position:absolute;left:50%;top:-72px;width:22px;height:72px;transform:translateX(-50%);
+  pointer-events:none;filter:blur(9px);opacity:.5;
+  background:linear-gradient(to top, rgba(34,211,238,0.55), transparent);
+  animation:eg-beam-pulse 3.4s ease-in-out infinite}
+.card-beam::after{content:"";position:absolute;top:-5px;left:50%;transform:translateX(-50%);
+  width:11px;height:11px;border-radius:50%;background:#fff;box-shadow:0 0 18px 6px var(--cyan)}
+@keyframes eg-beam-pulse{0%,100%{opacity:.7;transform:translateX(-50%) scaleY(0.85)}50%{opacity:1;transform:translateX(-50%) scaleY(1.12)}}
 
 .card-badge{position:absolute;top:-9px;right:-8px;min-width:24px;height:24px;padding:0 5px;
   display:flex;align-items:center;justify-content:center;border-radius:50%;
@@ -190,13 +197,13 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .nav-ai span{font-size:17px;font-weight:700;color:var(--green);letter-spacing:0.03em}
 
 /* footer */
-.footer{position:relative;z-index:1;padding:22px 16px 8px;text-align:center}
-.footer-line{width:64px;height:1px;margin:0 auto 16px;background:linear-gradient(90deg,transparent,rgba(45,255,160,0.4),transparent)}
-.footer-text{font-size:10px;color:rgba(148,168,160,0.4);letter-spacing:0.04em;line-height:1.8}
-.footer-text .dot{color:rgba(45,255,160,0.4);margin:0 6px}
-.footer-shield{width:26px;height:26px;margin:0 auto 10px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  background:rgba(45,255,160,0.08);border:1px solid rgba(45,255,160,0.25)}
-.footer-shield i{color:rgba(45,255,160,0.5);font-size:11px}
+.footer{position:relative;z-index:1;padding:34px 16px 30px;text-align:center}
+.footer-line{width:80px;height:1px;margin:0 auto 22px;background:linear-gradient(90deg,transparent,rgba(45,255,160,0.5),transparent)}
+.footer-text{font-size:11px;color:rgba(148,168,160,0.45);letter-spacing:0.05em;line-height:2.2}
+.footer-text .dot{color:rgba(45,255,160,0.45);margin:0 8px}
+.footer-shield{width:34px;height:34px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:rgba(45,255,160,0.08);border:1px solid rgba(45,255,160,0.3);box-shadow:0 0 16px rgba(45,255,160,0.15)}
+.footer-shield i{color:rgba(45,255,160,0.6);font-size:14px}
 
 /* module detail sheet */
 .sheet-overlay{position:fixed;inset:0;z-index:50;display:none;align-items:flex-end;justify-content:center;
@@ -386,6 +393,7 @@ function cardHtml(mod, delayMs){
       <div class="card-sub">${mod.sub}</div>
     </div>
     <div class="card-base-glow"></div>
+    <div class="card-beam-halo"></div>
     <div class="card-beam"></div>
     ${badge}
   </button>`;
