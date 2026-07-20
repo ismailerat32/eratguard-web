@@ -35584,3 +35584,24 @@ def eg_user_panel_v2():
     }
 
     return render_template("eg_panel_v2.html", metrics=metrics, license_info=license_info)
+
+# ===== ERATGUARD TRUE FINAL RADIAL -> EG-PANEL LOCK (dosyanin en sonu, kesin kazanir) =====
+def eratguard_true_final_radial_lock():
+    try:
+        from flask import request, redirect
+        path = (request.path or "/").rstrip("/") or "/"
+        if path in {"/radial", "/signature-radial"}:
+            return redirect("/u/eg-panel")
+    except Exception:
+        return None
+
+try:
+    app.before_request(eratguard_true_final_radial_lock)
+    _true_final = app.before_request_funcs.get(None, [])
+    _true_final = [f for f in _true_final if getattr(f, "__name__", "") != "eratguard_true_final_radial_lock"]
+    _true_final.insert(0, eratguard_true_final_radial_lock)
+    app.before_request_funcs[None] = _true_final
+    print("ERATGUARD TRUE FINAL RADIAL LOCK ACTIVE")
+except Exception as _eg_true_final_err:
+    print("ERATGUARD TRUE FINAL RADIAL LOCK ERROR:", _eg_true_final_err)
+# ===== ERATGUARD TRUE FINAL RADIAL -> EG-PANEL LOCK END =====
