@@ -2249,7 +2249,7 @@ def radial():
     if not login_required():
         return redirect(url_for("login"))
 
-    return render_template("radial_menu.html")
+    return redirect("/u/eg-panel")
 
 
 # ===== ERATGUARD USER PANEL CLEAN RESET V1 REDIRECT START =====
