@@ -34468,22 +34468,10 @@ except Exception as _eg_radial_sms_label_error:
 # Böylece eski FAN/papatya/dashboard hook'ları içerik değiştiremez.
 def eratguard_radial_hard_final_html_response():
     try:
-        from pathlib import Path
-        from flask import Response
-
-        html_path = Path("templates/radial_menu.html")
-        html = html_path.read_text(encoding="utf-8", errors="ignore")
-
-        if "VARSAYILAN" not in html:
-            html = html.replace("VARSAY", "VARSAYILAN")
-
-        return Response(html, status=200, mimetype="text/html; charset=utf-8")
+        from flask import redirect
+        return redirect("/u/eg-panel")
     except Exception:
-        try:
-            from flask import render_template
-            return render_template("radial_menu.html")
-        except Exception:
-            return "EratGuard Signature Radial 12P · SMS VARSAYILAN", 200
+        return "EratGuard Signature Radial 12P · SMS VARSAYILAN", 200
 
 
 def eratguard_radial_hard_final_html_guard():
