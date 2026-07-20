@@ -34191,13 +34191,12 @@ def eratguard_final_priority_route_guard():
         ):
             return None
 
-        # Kullanıcı ana radial ekranı kesinlikle direkt render edilecek.
-        # Böylece eski admin/dashboard/fan hook'ları /radial'i ele geçiremez.
+        # Kullanıcı ana radial ekranı artık yeni eg-panel'e yönlendirilir.
         if path in {
             "/radial",
             "/signature-radial"
         }:
-            return render_template("radial_menu.html")
+            return redirect("/u/eg-panel")
 
         # Eski kullanıcı girişleri tek ana panele yönlenir.
         if path in {
