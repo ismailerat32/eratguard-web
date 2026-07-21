@@ -230,9 +230,34 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .sheet-open{display:flex;align-items:center;justify-content:center;gap:8px;padding:17px;border-radius:16px;font-weight:600;font-size:17px;
   background:rgba(45,255,160,0.1);border:1px solid rgba(45,255,160,0.33);color:var(--green)}
 .sheet-route{text-align:center;margin-top:-8px;font-size:13px;color:rgba(148,168,160,0.4)}
+
+/* supernova intro (shown once per day) */
+#eg-nova{position:fixed;inset:0;z-index:200;background:#020705;overflow:hidden;pointer-events:none;
+  transition:opacity .45s ease}
+#eg-nova.fade-out{opacity:0}
+#eg-nova.hide{display:none}
+.nova-flash{position:absolute;top:50%;left:50%;width:10px;height:10px;border-radius:50%;background:#fff;
+  transform:translate(-50%,-50%) scale(0);
+  box-shadow:0 0 40px 20px var(--cyan), 0 0 90px 50px rgba(45,255,160,0.6);
+  animation:eg-nova-flash 1.4s cubic-bezier(0.16,0.8,0.24,1) forwards}
+@keyframes eg-nova-flash{
+  0%{transform:translate(-50%,-50%) scale(0);opacity:0}
+  15%{transform:translate(-50%,-50%) scale(1);opacity:1}
+  40%{transform:translate(-50%,-50%) scale(22);opacity:1}
+  100%{transform:translate(-50%,-50%) scale(55);opacity:0}
+}
+.nova-star{position:absolute;top:50%;left:50%;width:3px;height:3px;border-radius:50%;background:#fff;
+  box-shadow:0 0 6px 2px var(--cyan);
+  animation:eg-nova-star 1.3s cubic-bezier(0.1,0.7,0.3,1) forwards}
+@keyframes eg-nova-star{
+  0%{transform:translate(-50%,-50%) scale(0);opacity:0}
+  20%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  100%{transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.3);opacity:0}
+}
 </style>
 </head>
 <body>
+<div id="eg-nova"></div>
 <div class="wrap">
   <div class="sweep"></div>
   <div class="glow-blobs"><span class="b1"></span><span class="b2"></span><span class="b3"></span></div>
@@ -458,6 +483,40 @@ setInterval(tickClock, 1000);
 
 // (fake ticking scan counter removed — bottom stats now render real
 // server-computed values directly via Jinja, no client-side faking)
+
+// supernova intro — shown once per calendar day, then skipped for the rest of the day
+(function initNova(){
+  const nova = document.getElementById('eg-nova');
+  if(!nova) return;
+  const today = new Date().toISOString().slice(0,10);
+  let last = null;
+  try { last = localStorage.getItem('eg_nova_last'); } catch(e) {}
+
+  if(last === today){
+    nova.classList.add('hide');
+    return;
+  }
+  try { localStorage.setItem('eg_nova_last', today); } catch(e) {}
+
+  const flash = document.createElement('div');
+  flash.className = 'nova-flash';
+  nova.appendChild(flash);
+
+  const starCount = 28;
+  for(let i = 0; i < starCount; i++){
+    const s = document.createElement('div');
+    s.className = 'nova-star';
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 260 + Math.random() * 480;
+    s.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+    s.style.setProperty('--dy', (Math.sin(angle) * dist) + 'px');
+    s.style.animationDelay = (0.08 + Math.random() * 0.22) + 's';
+    nova.appendChild(s);
+  }
+
+  setTimeout(function(){ nova.classList.add('fade-out'); }, 1100);
+  setTimeout(function(){ nova.classList.add('hide'); }, 1550);
+})();
 
 // module detail sheet
 const overlay = document.getElementById('eg-sheet-overlay');
