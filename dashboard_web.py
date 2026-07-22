@@ -2753,9 +2753,6 @@ def render_user_module_page(module_key):
     )
 
 
-@app.route("/u/protection")
-def user_protection():
-    return render_user_module_page("protection")
 
 
 @app.route("/u/reports")
