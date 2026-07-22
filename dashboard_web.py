@@ -5420,7 +5420,7 @@ def _ss_user_protection_compact_final():
       <div class="stat"><b>AI</b><span>Hazır</span></div>
     </div>
 
-    <a class="back" href="/radial">← Ana ekrana dön</a>
+    <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
   </section>
 
   <div class="section">DETAYLAR</div>
@@ -5757,7 +5757,7 @@ def _ss_user_analysis_compact_final():
     </div>
 
     <a class="primary" href="/u/analysis/check">SMS Analizi Yap</a>
-    <a class="back" href="/radial">← Ana ekrana dön</a>
+    <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
   </section>
 
   <div class="section">DETAYLAR</div>
@@ -6066,7 +6066,7 @@ def _ss_user_blocked_compact_final():
     </div>
 
     <a class="primary" href="/u/block-list">Blok Listesini Yönet</a>
-    <a class="back" href="/radial">← Ana ekrana dön</a>
+    <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
   </section>
 
   <div class="section">DETAYLAR</div>
@@ -7405,7 +7405,7 @@ def _ss_user_reports_titanium_summary_page_final():
       <div class="stat"><b>{quarantine_count}</b><span>Karantina</span></div>
     </div>
 
-    <a class="back" href="/radial">← Ana ekrana dön</a>
+    <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
   </section>
 
   <div class="section">ÖZET</div>
@@ -7721,7 +7721,7 @@ def _ss_user_notifications_titanium_events_page_final():
       <div class="stat"><b>{len(quarantine)}</b><span>Karantina</span></div>
     </div>
 
-    <a class="back" href="/radial">← Ana ekrana dön</a>
+    <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
   </section>
 
   <div class="section">AKIŞ</div>
@@ -8085,7 +8085,7 @@ def _ss_user_settings_titanium_preferences_page_final():
       <div class="stat"><b>{"Açık" if settings.get("auto_quarantine") else "Kapalı"}</b><span>Karantina</span></div>
     </div>
 
-    <a class="back" href="/radial">← Ana ekrana dön</a>
+    <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
   </section>
 
   {saved_html}
@@ -8400,7 +8400,7 @@ def _ss_user_license_titanium_center_page_final():
     </div>
 
     <div class="actions">
-      <a class="btn ghost" href="/radial">← Ana ekran</a>
+      <a class="btn ghost" href="/u/eg-panel">← Ana ekran</a>
       <a class="btn primary" href="/u/pricing">Planları Gör</a>
     </div>
   </section>
@@ -8807,7 +8807,7 @@ def _ss_user_community_titanium_feedback_page_final():
       <div class="stat"><b>{bug_feedback}</b><span>Hata</span></div>
     </div>
 
-    <a class="back" href="/radial">← Ana ekrana dön</a>
+    <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
   </section>
 
   {status_html}
@@ -13590,7 +13590,7 @@ body{padding:18px 14px 28px}
     <div class="card"><b>__DAYS__</b><span>Kalan gün</span></div>
     <div class="card key"><b>__KEY__</b><span>Lisans anahtarı</span></div>
   </div>
-  <a class="btn secondary" href="/radial">← Ana ekrana dön</a>
+  <a class="btn secondary" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">AKTİVASYON</div>
@@ -13988,7 +13988,7 @@ body{padding:16px 14px 24px}
     <div class="card key"><b>__KEY__</b><span>Lisans anahtarı</span></div>
   </div>
 
-  <a class="mini-back" href="/radial">← Ana ekrana dön</a>
+  <a class="mini-back" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">AKTİVASYON</div>
@@ -14363,7 +14363,7 @@ body{padding:16px 14px 24px}
     <div class="stat"><b>AI</b><span>Hazır</span></div>
   </div>
 
-  <a class="mini-back" href="/radial">← Ana ekrana dön</a>
+  <a class="mini-back" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">TARAMA</div>
@@ -14610,7 +14610,7 @@ body{{padding:16px 14px 24px}}
   <ul>{reasons_html}</ul>
 </section>
 
-<a class="btn" href="/radial">Ana ekrana dön</a>
+<a class="btn" href="/u/eg-panel">Ana ekrana dön</a>
 
 <div class="foot">EratGuard PRO · {_eg_psf1_safe(username)} · © 2026</div>
 </body>
@@ -14986,7 +14986,7 @@ body{{padding:16px 14px 24px}}
 <div class="section-title">NEDENLER</div>
 <section class="reasons"><ul>{reasons_html}</ul></section>
 
-<a class="btn" href="/radial">Ana ekrana dön</a>
+<a class="btn" href="/u/eg-panel">Ana ekrana dön</a>
 
 <div class="foot">EratGuard PRO · {_eg_asf1_safe(username)} · © 2026</div>
 </body>
@@ -15299,7 +15299,7 @@ body{padding:16px 14px 24px}
     <div class="stat"><b>0-100</b><span>Skor</span></div>
     <div class="stat"><b>PRO</b><span>Motor</span></div>
   </div>
-  <a class="back" href="/radial">← Ana ekrana dön</a>
+  <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">TARAMA</div>
@@ -15570,7 +15570,7 @@ body{padding:16px 14px 24px}
     <div class="stat"><b>__QUARANTINE__</b><span>Karantina</span></div>
   </div>
 
-  <a class="back" href="/radial">← Ana ekrana dön</a>
+  <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -15878,7 +15878,7 @@ body{padding:16px 14px 24px}
     <div class="stat"><b>__HIGH__</b><span>Yüksek</span></div>
   </div>
 
-  <a class="back" href="/radial">← Ana ekrana dön</a>
+  <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -16131,7 +16131,7 @@ body{padding:16px 14px 24px}
     <div class="stat"><b>__GLOBAL_COUNT__</b><span>Genel</span></div>
   </div>
 
-  <a class="back" href="/radial">← Ana ekrana dön</a>
+  <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -16716,7 +16716,7 @@ body{padding:12px 11px 18px}
     <div class="stat"><b>__RISK__</b><span>Risk</span></div>
   </div>
 
-  <a class="back" href="/radial">← Ana ekrana dön</a>
+  <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -16984,7 +16984,7 @@ body{padding:12px 11px 18px}
     <div class="stat"><b>__WARNINGS__</b><span>Uyarı</span></div>
   </div>
 
-  <a class="back" href="/radial">← Ana ekrana dön</a>
+  <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -17254,7 +17254,7 @@ body{padding:12px 11px 18px}
     <div class="stat"><b>__WARNINGS__</b><span>Uyarı</span></div>
   </div>
 
-  <a class="back" href="/radial">← Ana ekrana dön</a>
+  <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -17769,7 +17769,7 @@ body{padding:12px 11px 18px}
     <div class="stat"><b>PRO</b><span>Mod</span></div>
   </div>
 
-  <a class="back" href="/radial">← Ana ekrana dön</a>
+  <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -17816,7 +17816,7 @@ body{padding:12px 11px 18px}
 
   <div class="actions">
     <button class="btn primary" type="submit">Kaydet</button>
-    <a class="btn secondary" href="/radial">Panel</a>
+    <a class="btn secondary" href="/u/eg-panel">Panel</a>
   </div>
 </form>
 
@@ -18180,7 +18180,7 @@ body{padding:12px 11px 18px}
     <div class="stat"><b>__NUMBERS__</b><span>Numara</span></div>
   </div>
 
-  <a class="back" href="/radial">← Ana ekrana dön</a>
+  <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">ÖZET</div>
@@ -18563,7 +18563,7 @@ p{color:var(--muted);font-size:19px;line-height:1.48;font-weight:700}
 
     <div class="actions">
       <button class="btn primary" onclick="askPermission()">İzin Ver →</button>
-      <a class="btn secondary" href="/radial">Şimdilik Geç</a>
+      <a class="btn secondary" href="/u/eg-panel">Şimdilik Geç</a>
       <a class="btn secondary" href="/u/notifications">Bildirim Paneli</a>
     </div>
 
@@ -18577,17 +18577,17 @@ function askPermission(){
   try{
     if(!("Notification" in window)){
       note.innerText = "Bu tarayıcı bildirim iznini desteklemiyor. Panele yönlendiriliyorsun.";
-      setTimeout(()=>{ location.href="/radial"; }, 700);
+      setTimeout(()=>{ location.href="/u/eg-panel"; }, 700);
       return;
     }
     Notification.requestPermission().then(function(result){
       note.innerText = "Bildirim tercihi: " + result + ". Panele yönlendiriliyorsun.";
-      setTimeout(()=>{ location.href="/radial"; }, 800);
+      setTimeout(()=>{ location.href="/u/eg-panel"; }, 800);
     }).catch(function(){
-      location.href="/radial";
+      location.href="/u/eg-panel";
     });
   }catch(e){
-    location.href="/radial";
+    location.href="/u/eg-panel";
   }
 }
 </script>
@@ -18660,7 +18660,7 @@ h1{{margin:0;font-size:28px}} h1 span{{color:var(--green)}}
 
     <div class="actions">
       <a class="btn primary" href="/u/notifications?fresh=1">Kaydet</a>
-      <a class="btn secondary" href="/radial">Panel</a>
+      <a class="btn secondary" href="/u/eg-panel">Panel</a>
     </div>
   </div>
 </div>
@@ -19194,7 +19194,7 @@ html,body{margin:0;width:100%;min-height:100%;overflow:hidden;color:var(--text);
     <div class="row"><div><b>Admin duyuruları</b><span>Sistem ve ürün duyuruları.</span></div><div class="toggle"></div></div>
     <div class="actions">
       <a class="btn primary" href="/u/notifications?fresh=1">Kaydet</a>
-      <a class="btn secondary" href="/radial">Panel</a>
+      <a class="btn secondary" href="/u/eg-panel">Panel</a>
     </div>
   </div>
 </div>
@@ -19266,7 +19266,7 @@ try:
   <div class="eg-user-fan3-arc" id="egUserFan3Arc" aria-hidden="true"></div>
 
   <nav class="eg-user-fan3-panel" id="egUserFan3Panel">
-    <a class="eg-user-fan3-item i1" href="/radial">
+    <a class="eg-user-fan3-item i1" href="/u/eg-panel">
       <b>🏠</b><span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></span><em>01</em>
     </a>
     <a class="eg-user-fan3-item i2" href="/u/protection">
@@ -20498,7 +20498,7 @@ html,body{{
     <a class="eg-btn" href="/u/reports">Koruma Raporları <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard PRO koruma katmanı aktif. SMS, link ve risk motoru tek merkezden takip edilir.</div>
 </div>
@@ -20740,7 +20740,7 @@ textarea::placeholder{color:rgba(242,255,246,.38)}
     <a class="eg-btn" href="/u/reports">Analiz Raporları <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard AI Analiz Merkezi, SMS içeriğindeki risk işaretlerini hızlıca değerlendirir. Nihai güvenlik kararı için Koruma Merkezi ile birlikte kullanılır.</div>
 
@@ -21145,7 +21145,7 @@ html,body{{
     <a class="eg-btn" href="/u/analysis">AI Analiz Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard Rapor Merkezi, koruma ve analiz durumlarını kullanıcıya sade bir güvenlik özeti olarak sunar.</div>
 
@@ -21433,7 +21433,7 @@ html,body{{
     <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard Lisans Merkezi, PRO erişim ve kullanıcı yetkilerini tek ekranda gösterir.</div>
 </div>
@@ -21634,7 +21634,7 @@ html,body{{
     <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard Bildirim Merkezi, güvenlik ve sistem mesajlarını kullanıcıya sade şekilde gösterir.</div>
 </div>
@@ -21852,7 +21852,7 @@ html,body{{
     <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard Topluluk Merkezi, destek ve kullanıcı iletişimini premium yapıya taşır.</div>
 </div>
@@ -22057,7 +22057,7 @@ html,body{{
     <a class="eg-btn" href="/u/notifications">Bildirim Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">EratGuard Ayarlar Merkezi, kullanıcı hesabı ve güvenlik tercihlerini premium yapıda gösterir.</div>
 </div>
@@ -22803,7 +22803,7 @@ ul{{
   <section id="reported" class="eg-section">{reported_html}</section>
 
   <a class="eg-back" href="/u/analysis">← AI Analiz Merkezine Dön</a>
-  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
 </div>
 
 <script>
@@ -23125,7 +23125,7 @@ button{width:100%;margin-top:14px;border:0;border-radius:18px;background:#23ff89
 <textarea id="smsText" placeholder="Örnek: Kargonuz beklemede, hemen linke tıklayın..."></textarea>
 <button onclick="analyze()">SMS Riskini Analiz Et</button>
 <div class="result" id="result">Sonuç burada görünecek.</div>
-<a class="back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
+<a class="back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
 </div>
 <script>
 async function analyze(){
@@ -23841,7 +23841,7 @@ body{
         <small>VITES-6A</small>
       </div>
     </div>
-    <a class="back" href="/radial">Ana Sayfa</a>
+    <a class="back" href="/u/eg-panel">Ana Sayfa</a>
   </div>
 
   <section class="hero">
@@ -24623,7 +24623,7 @@ def eg_sms_actions_center():
   </div>
   {% endfor %}
 </div>
-<a class="menu" href="/radial">MENÜ</a>
+<a class="menu" href="/u/eg-panel">MENÜ</a>
 </body>
 </html>
 """
@@ -24965,7 +24965,7 @@ body{padding:16px 14px 24px}
     <div class="stat"><b>0-100</b><span>Skor</span></div>
     <div class="stat"><b>PRO</b><span>Motor</span></div>
   </div>
-  <a class="back" href="/radial">← Ana ekrana dön</a>
+  <a class="back" href="/u/eg-panel">← Ana ekrana dön</a>
 </section>
 
 <div class="section-title">TARAMA</div>
@@ -25058,7 +25058,7 @@ def eg_admin_command_center_v1_safe_pages():
 
 # ERATGUARD_12P_FINAL_PRIORITY_FIX_V25_START
 # 12P radial dilimlerinin login guard'a düşmesini engelleyen en yüksek öncelikli final köprü.
-def eratguard_12p_final_v25_page(title, subtitle, body, primary_href="/radial", primary_label="Radial Panele Dön"):
+def eratguard_12p_final_v25_page(title, subtitle, body, primary_href="/u/eg-panel", primary_label="Radial Panele Dön"):
     try:
         from flask import render_template_string
         return render_template_string("""
@@ -25090,7 +25090,7 @@ p{line-height:1.55;color:#dfffea;font-size:15px}
     <h2>{{ subtitle }}</h2>
     <p>{{ body }}</p>
     <a class="btn primary" href="{{ primary_href }}">{{ primary_label }}</a>
-    <a class="btn ghost" href="/radial">Ana Radial 12P</a>
+    <a class="btn ghost" href="/u/eg-panel">Ana Radial 12P</a>
     <div class="small">KORUMA AKTİF · 12P HAZIR · V25</div>
   </div>
 </div>
@@ -25319,7 +25319,7 @@ li{margin:7px 0}
     Not: Play Store yayınında ödeme modeli Google Play Console üzerinden tanımlanacaktır. Bu sayfa uygulama içindeki paket/lisans bilgilendirme ekranıdır.
   </div>
 
-  <a class="btn ghost" href="/radial">← Ana Radial 12P Paneline Dön</a>
+  <a class="btn ghost" href="/u/eg-panel">← Ana Radial 12P Paneline Dön</a>
 </div>
 </body>
 </html>
@@ -26507,7 +26507,7 @@ border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;box-shadow
     <a class="eg-btn" href="/u/reports">Koruma Raporları <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/radial">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
 
   <div class="eg-note">
     EratGuard PRO koruma katmanı aktif. SMS, link ve risk motoru tek merkezden takip edilir.
@@ -26876,7 +26876,7 @@ body{margin:0;background:radial-gradient(circle at top,#143b2b 0,#061018 45%,#03
   {% endfor %}
 </div>
 
-<a class="menu" href="/radial">MENÜ</a>
+<a class="menu" href="/u/eg-panel">MENÜ</a>
 
 <script>
 document.querySelectorAll(".filter").forEach(btn=>{
@@ -27122,7 +27122,7 @@ ul{margin:10px 0 0 18px;color:#aeb8c8;line-height:1.35}
   <a class="eg-link" href="/u/analysis">← AI Analiz Merkezine Dön</a>
 </div>
 
-<a class="eg-menu" href="/radial">MENÜ</a>
+<a class="eg-menu" href="/u/eg-panel">MENÜ</a>
 
 <script>
 function showTab(id, btn){
@@ -32734,7 +32734,7 @@ body.eg-open #eg-fan12p-real-menu-btn{
   </div>
 
   <nav class="eg-grid">
-    <a class="eg-tile" href="/radial"><span class="eg-no">01</span><span class="eg-icon">🏠</span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></a>
+    <a class="eg-tile" href="/u/eg-panel"><span class="eg-no">01</span><span class="eg-icon">🏠</span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></a>
     <a class="eg-tile" href="/u/protection"><span class="eg-no">02</span><span class="eg-icon">🛡️</span><strong>Koruma</strong><small>SMS güvenlik motoru</small></a>
     <a class="eg-tile" href="/u/ai-analysis"><span class="eg-no">03</span><span class="eg-icon">🧠</span><strong>AI Analiz</strong><small>Risk taraması</small></a>
     <a class="eg-tile" href="/u/reports"><span class="eg-no">04</span><span class="eg-icon">📈</span><strong>Raporlar</strong><small>Güvenlik özetleri</small></a>
@@ -33221,10 +33221,10 @@ body{
 
   <section class="eg-radial-wrap" aria-label="FAN-12P Radial Menü">
     <div class="eg-radial">
-      <a class="eg-center" href="/radial"><b>E</b><span>MENÜ</span></a>
+      <a class="eg-center" href="/u/eg-panel"><b>E</b><span>MENÜ</span></a>
 
       <a class="eg-petal" style="--a:0deg" href="/u/pro"><span class="eg-petal-in"><span class="eg-no">12</span><span class="eg-ico">⭐</span><strong>PRO</strong><small>Final özellikleri</small></span></a>
-      <a class="eg-petal" style="--a:30deg" href="/radial"><span class="eg-petal-in"><span class="eg-no">01</span><span class="eg-ico">🏠</span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></span></a>
+      <a class="eg-petal" style="--a:30deg" href="/u/eg-panel"><span class="eg-petal-in"><span class="eg-no">01</span><span class="eg-ico">🏠</span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></span></a>
       <a class="eg-petal" style="--a:60deg" href="/u/protection"><span class="eg-petal-in"><span class="eg-no">02</span><span class="eg-ico">🛡️</span><strong>Koruma</strong><small>SMS güvenlik motoru</small></span></a>
       <a class="eg-petal" style="--a:90deg" href="/u/ai-analysis"><span class="eg-petal-in"><span class="eg-no">03</span><span class="eg-ico">🧠</span><strong>AI Analiz</strong><small>Risk taraması</small></span></a>
       <a class="eg-petal" style="--a:120deg" href="/u/reports"><span class="eg-petal-in"><span class="eg-no">04</span><span class="eg-ico">📈</span><strong>Raporlar</strong><small>Güvenlik özetleri</small></span></a>
@@ -34293,7 +34293,7 @@ def eratguard_final_admin_separation_bridge():
                         <div class="card">
                           <h1>EratGuard Admin Dashboard</h1>
                           <p>Admin paneli kullanıcı radial panelinden ayrıldı.</p>
-                          <p><a href="/radial">Kullanıcı Radial Paneli</a></p>
+                          <p><a href="/u/eg-panel">Kullanıcı Radial Paneli</a></p>
                         </div>
                       </div>
                     </body>
@@ -34351,7 +34351,7 @@ try:
       <h1>SMS Varsayılanılan</h1>
       <p>EratGuard’ın spam SMS’leri yüksek oranda yakalayıp engelleyebilmesi için uygulamayı varsayılan SMS uygulaması yapman gerekir.</p>
       <p class="note">Android uygulama içindeki SMS Varsayılanılan dilimi native izin ekranını açar. Bu sayfa web fallback bilgilendirme ekranıdır.</p>
-      <a class="btn primary" href="/radial">Radial Panele Dön</a>
+      <a class="btn primary" href="/u/eg-panel">Radial Panele Dön</a>
       <a class="btn ghost" href="/u/protection">PRO Koruma Durumunu Aç</a>
     </div>
   </div>
@@ -34403,7 +34403,7 @@ def eratguard_sms_default_priority_bridge():
       <h1>SMS Varsayılanılan</h1>
       <p>EratGuard’ın spam SMS’leri yüksek oranda yakalayıp engelleyebilmesi için uygulamayı varsayılan SMS uygulaması yapman gerekir.</p>
       <p class="note">Android uygulama içinde bu dilim native “Varsayılan SMS uygulaması yap” ekranını açacak şekilde köprülenir. Bu ekran web fallback bilgilendirmesidir.</p>
-      <a class="btn primary" href="/radial">Radial Panele Dön</a>
+      <a class="btn primary" href="/u/eg-panel">Radial Panele Dön</a>
       <a class="btn ghost" href="/u/protection">PRO Koruma Durumunu Aç</a>
     </div>
   </div>
@@ -34561,7 +34561,7 @@ except Exception as _eg_radial_final_label_error:
 # Yayın güvenliği:
 # Radial 12P üzerindeki hiçbir dilim 404'e düşmeyecek.
 # Eksik modüller güvenli fallback ekranlara bağlanır.
-def eratguard_12p_fallback_page(title, subtitle, body, primary_href="/radial", primary_label="Radial Panele Dön"):
+def eratguard_12p_fallback_page(title, subtitle, body, primary_href="/u/eg-panel", primary_label="Radial Panele Dön"):
     try:
         from flask import render_template_string
 
@@ -34593,7 +34593,7 @@ def eratguard_12p_fallback_page(title, subtitle, body, primary_href="/radial", p
       <h2>{{ subtitle }}</h2>
       <p>{{ body }}</p>
       <a class="btn primary" href="{{ primary_href }}">{{ primary_label }}</a>
-      <a class="btn ghost" href="/radial">Ana Radial 12P</a>
+      <a class="btn ghost" href="/u/eg-panel">Ana Radial 12P</a>
     </div>
   </div>
 </body>
@@ -34784,7 +34784,7 @@ def eratguard_privacy_policy_page():
       <div class="footer">
         EratGuard · Spam SMS Koruma · Varsayılan SMS Güvenlik Merkezi
         <br>
-        <a href="/radial">Radial Panele Dön</a>
+        <a href="/u/eg-panel">Radial Panele Dön</a>
       </div>
     </section>
   </main>
