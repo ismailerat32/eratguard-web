@@ -25107,8 +25107,6 @@ def eratguard_12p_final_priority_fix_v25():
 
         path = (request.path or "/").rstrip("/") or "/"
 
-        if path == "/u/blocked-sms":
-            return redirect("/u/blocked", code=302)
 
         if path == "/u/sms-default":
             return eratguard_12p_final_v25_page(
