@@ -20473,7 +20473,6 @@ html,body{{
     <div class="eg-brand">
       <div class="eg-logo">E</div>
       <div class="eg-title">
-        <small>ERATGUARD VITES-2C</small>
         <b>Koruma Merkezi</b>
       </div>
     </div>
@@ -20707,7 +20706,6 @@ textarea::placeholder{color:rgba(242,255,246,.38)}
     <div class="eg-brand">
       <div class="eg-logo">AI</div>
       <div class="eg-title">
-        <small>ERATGUARD VITES-2D</small>
         <b>AI Analiz Merkezi</b>
       </div>
     </div>
@@ -21089,7 +21087,6 @@ html,body{{
     <div class="eg-brand">
       <div class="eg-logo">R</div>
       <div class="eg-title">
-        <small>ERATGUARD VITES-2E</small>
         <b>Rapor Merkezi</b>
       </div>
     </div>
@@ -21151,7 +21148,6 @@ html,body{{
 
 <div id="egV5eSmsStatsCard" style="margin-top:16px;background:rgba(255,255,255,.06);border:1px solid rgba(35,255,137,.28);border-radius:22px;padding:16px;box-shadow:0 0 24px rgba(35,255,137,.10);">
   <!-- ERATGUARD VITES-5E DIRECT REPORTS CARD START -->
-  <div style="color:#23ff89;font-weight:900;font-size:12px;letter-spacing:.08em;">ERATGUARD VITES-5E</div>
   <h2 style="margin:8px 0 10px;font-size:21px;color:#fff;">SMS Koruma İstatistikleri</h2>
   <p style="margin:0 0 12px;color:#9aa3b2;line-height:1.45;">AI Analiz ekranından gelen gerçek ENGELLE / GÜVENLİ / ŞİKAYET kayıtları.</p>
 
@@ -21379,7 +21375,6 @@ html,body{{
     <div class="eg-brand">
       <div class="eg-logo">L</div>
       <div class="eg-title">
-        <small>ERATGUARD VITES-2F</small>
         <b>Lisans Merkezi</b>
       </div>
     </div>
@@ -21579,7 +21574,6 @@ html,body{{
     <div class="eg-brand">
       <div class="eg-logo">B</div>
       <div class="eg-title">
-        <small>ERATGUARD VITES-2G</small>
         <b>Bildirim Merkezi</b>
       </div>
     </div>
@@ -21796,7 +21790,6 @@ html,body{{
     <div class="eg-brand">
       <div class="eg-logo">T</div>
       <div class="eg-title">
-        <small>ERATGUARD VITES-2H</small>
         <b>Topluluk Merkezi</b>
       </div>
     </div>
@@ -22013,7 +22006,6 @@ html,body{{
     <div class="eg-brand">
       <div class="eg-logo">A</div>
       <div class="eg-title">
-        <small>ERATGUARD VITES-2I</small>
         <b>Ayarlar Merkezi</b>
       </div>
     </div>
@@ -22782,7 +22774,6 @@ ul{{
 <body>
 <div class="eg-wrap">
   <div class="eg-head">
-    <div class="eg-kicker">ERATGUARD VITES-5D</div>
     <h1>Engellenen SMS Merkezi</h1>
     <p>AI Analiz ekranından verilen ENGELLE, GÜVENLİ ve ŞİKAYET aksiyonları burada listelenir.</p>
     <div class="eg-stats">
@@ -22842,7 +22833,6 @@ def eratguard_vites5e_reports_sms_stats_after_response(response):
         card = f"""
 <div style="margin-top:16px;background:rgba(255,255,255,.06);border:1px solid rgba(35,255,137,.28);border-radius:22px;padding:16px;box-shadow:0 0 24px rgba(35,255,137,.10);">
   <!-- ERATGUARD VITES-5E REPORTS SMS STATS CARD START -->
-  <div style="color:#23ff89;font-weight:900;font-size:12px;letter-spacing:.08em;">ERATGUARD VITES-5E</div>
   <h2 style="margin:8px 0 10px;font-size:21px;color:#fff;">SMS Koruma İstatistikleri</h2>
   <p style="margin:0 0 12px;color:#9aa3b2;line-height:1.45;">AI Analiz ekranından gelen gerçek ENGELLE / GÜVENLİ / ŞİKAYET kayıtları.</p>
 
@@ -22919,7 +22909,6 @@ def eratguard_vites5f_protection_sms_status_after_response(response):
         card = f"""
 <div style="margin-top:16px;background:rgba(35,255,137,.08);border:1px solid rgba(35,255,137,.32);border-radius:22px;padding:16px;box-shadow:0 0 24px rgba(35,255,137,.10);">
   <!-- ERATGUARD VITES-5F PROTECTION SMS STATUS CARD START -->
-  <div style="color:#23ff89;font-weight:900;font-size:12px;letter-spacing:.08em;">ERATGUARD VITES-5F</div>
   <h2 style="margin:8px 0 10px;font-size:21px;color:#fff;">SMS Koruma Durumu</h2>
   <p style="margin:0 0 12px;color:#9aa3b2;line-height:1.45;">{desc}</p>
 
@@ -23119,7 +23108,6 @@ button{width:100%;margin-top:14px;border:0;border-radius:18px;background:#23ff89
 </head>
 <body>
 <div class="card">
-<small>ERATGUARD VITES-5A</small>
 <h1>SMS Risk Motoru v1</h1>
 <p>SMS metnini analiz eder, risk puanı ve sebep üretir. Bu motor Vites-5 spam engelleme sisteminin temelidir.</p>
 <textarea id="smsText" placeholder="Örnek: Kargonuz beklemede, hemen linke tıklayın..."></textarea>
@@ -23183,7 +23171,6 @@ def eratguard_vites5g_dashboard_sms_summary_final_order(response):
         card = f"""
 <div style="margin:170px auto 0;max-width:520px;background:rgba(35,255,137,.08);border:1px solid rgba(35,255,137,.32);border-radius:24px;padding:16px;box-shadow:0 0 26px rgba(35,255,137,.12);">
   <!-- ERATGUARD VITES-5G DASHBOARD FINAL CARD START -->
-  <div style="color:#23ff89;font-weight:900;font-size:12px;letter-spacing:.08em;">ERATGUARD VITES-5G</div>
   <h2 style="margin:8px 0 8px;font-size:21px;color:#fff;">SMS Koruma Özeti</h2>
   <p style="margin:0 0 12px;color:#9aa3b2;line-height:1.45;">{desc}</p>
 
@@ -27084,7 +27071,6 @@ ul{margin:10px 0 0 18px;color:#aeb8c8;line-height:1.35}
 <body>
 <div class="eg-wrap">
   <div class="eg-head">
-    <div class="eg-kicker">ERATGUARD VITES-6H</div>
     <h1>Engellenen SMS Merkezi</h1>
     <p>AI Analiz ekranından verilen ENGELLE, GÜVENLİ ve ŞİKAYET aksiyonları gerçek SMS Action Engine verisinden listelenir.</p>
 
