@@ -22,7 +22,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 
 /* ambient sweep + vignette */
 .sweep{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
-.sweep::before{content:"";position:absolute;top:-10%;left:0;width:20%;height:140%;
+.sweep::before{content:"";position:absolute;top:-10%;left:0;width:20%;height:140%;will-change:transform;
   background:linear-gradient(90deg,transparent,rgba(34,211,238,0.16),transparent);
   animation:eg-sweep 7s ease-in-out infinite}
 @keyframes eg-sweep{0%{transform:translateX(-30%) rotate(8deg)}100%{transform:translateX(130%) rotate(8deg)}}
@@ -85,10 +85,10 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 
 .ai-core{position:relative;width:90px;height:90px;justify-self:center;display:flex;flex-direction:column;
   align-items:center;justify-content:center;border-radius:50%}
-.ai-core .halo{position:absolute;inset:-13px;border-radius:50%;
+.ai-core .halo{position:absolute;inset:-13px;border-radius:50%;will-change:transform,opacity;
   background:radial-gradient(circle,rgba(45,255,160,0.2),transparent 70%);animation:eg-breathe-soft2 2.6s ease-in-out infinite}
 @keyframes eg-breathe-soft2{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
-.ai-core .ring-outer{position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--cyan);
+.ai-core .ring-outer{position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--cyan);will-change:transform;
   box-shadow:0 0 16px rgba(34,211,238,0.65);animation:eg-spin 14s linear infinite}
 @keyframes eg-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .ai-core .ring-inner{position:absolute;inset:8px;border-radius:50%;border:1.5px solid var(--green);
@@ -114,7 +114,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 22px rgba(34,211,238,0.1), 0 8px 18px -6px rgba(0,0,0,0.7);
   filter:drop-shadow(0 0 9px rgba(45,255,160,0.4));
   transform:rotateX(6deg);transform-origin:50% 0%}
-.card-edge-pulse{position:absolute;inset:0;pointer-events:none;border-radius:20px 20px 12px 12px;
+.card-edge-pulse{position:absolute;inset:0;pointer-events:none;border-radius:20px 20px 12px 12px;will-change:opacity;
   background:linear-gradient(180deg,rgba(34,211,238,0.15),transparent 45%);
   animation:eg-edge-pulse 2.6s ease-in-out infinite}
 @keyframes eg-edge-pulse{0%,100%{opacity:.35}50%{opacity:.75}}
@@ -122,7 +122,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   display:flex;align-items:center;justify-content:center;
   background:radial-gradient(circle at 35% 30%, rgba(45,255,160,1), rgba(4,16,15,1));
   border:3px solid var(--green);box-shadow:0 0 26px rgba(45,255,160,1), 0 0 48px rgba(34,211,238,0.65)}
-.card-icon .glow{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;
+.card-icon .glow{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;will-change:transform,opacity;
   background:radial-gradient(circle,rgba(45,255,160,0.55),transparent 70%);
   animation:eg-icon-glow 2.4s ease-in-out infinite}
 @keyframes eg-icon-glow{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.25)}}
@@ -136,12 +136,12 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   transform:translateX(-50%);pointer-events:none;filter:blur(2px);
   background:radial-gradient(ellipse, rgba(45,255,160,0.53), transparent 70%)}
 .card-beam{position:absolute;left:50%;top:-88px;width:10px;height:88px;transform:translateX(-50%);
-  transform-origin:bottom center;pointer-events:none;
+  transform-origin:bottom center;pointer-events:none;will-change:transform,opacity;
   background:linear-gradient(to top, #fff, var(--cyan) 25%, rgba(34,211,238,0.75) 60%, transparent);
   filter:drop-shadow(0 0 14px var(--cyan)) drop-shadow(0 0 32px rgba(34,211,238,0.9));
   animation:eg-beam-pulse 2.6s ease-in-out infinite}
 .card-beam-halo{position:absolute;left:50%;top:-88px;width:40px;height:88px;transform:translateX(-50%);
-  pointer-events:none;filter:blur(13px);opacity:.7;
+  pointer-events:none;filter:blur(13px);opacity:.7;will-change:transform,opacity;
   background:linear-gradient(to top, rgba(34,211,238,0.75), transparent);
   animation:eg-beam-pulse 2.6s ease-in-out infinite}
 @keyframes eg-beam-pulse{0%,100%{opacity:.75;transform:translateX(-50%) scaleY(0.82)}50%{opacity:1;transform:translateX(-50%) scaleY(1.16)}}
