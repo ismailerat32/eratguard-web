@@ -51,7 +51,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .threat-card .v{font-size:12px;font-weight:600;color:var(--green)}
 
 /* radial mind-map stage — max size for phone */
-.radial-stage{position:relative;z-index:1;width:min(100vw,600px);aspect-ratio:1/1;margin:18px auto 40px}
+.radial-stage{position:relative;z-index:1;width:min(100vw,600px);aspect-ratio:1/1;margin:40px auto 40px}
 .radial-ambient{position:absolute;inset:-14%;z-index:0;pointer-events:none;
   background:radial-gradient(circle at 50% 45%, rgba(34,211,238,0.22), rgba(45,255,160,0.06) 45%, transparent 68%);
   filter:blur(30px)}
@@ -69,7 +69,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .holo-base span:nth-child(3){width:164%;height:30px;border-color:rgba(34,211,238,0.07)}
 
 .ai-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;
-  width:clamp(120px,32vw,158px);height:clamp(120px,32vw,158px);display:flex;flex-direction:column;
+  width:clamp(128px,34vw,170px);height:clamp(128px,34vw,170px);display:flex;flex-direction:column;
   align-items:center;justify-content:center;border-radius:50%}
 .ai-core .halo{position:absolute;inset:-20px;border-radius:50%;
   background:radial-gradient(circle,rgba(34,211,238,0.32),transparent 70%);
@@ -87,10 +87,10 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   position:relative;z-index:1;text-shadow:0 0 6px var(--green)}
 
 .node{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-50%);z-index:2;
-  display:flex;flex-direction:column;align-items:center;gap:6px;width:clamp(92px,26vw,124px);
+  display:flex;flex-direction:column;align-items:center;gap:6px;width:clamp(96px,27vw,130px);
   animation:eg-node-in .55s cubic-bezier(.16,.8,.24,1) both;animation-delay:var(--delay,0ms)}
 @keyframes eg-node-in{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-.node-circle{width:clamp(74px,21vw,98px);height:clamp(74px,21vw,98px);border-radius:50%;position:relative;
+.node-circle{width:clamp(80px,23vw,108px);height:clamp(80px,23vw,108px);border-radius:50%;position:relative;
   display:flex;align-items:center;justify-content:center;
   background:radial-gradient(circle at 35% 28%, rgba(34,211,238,0.2), rgba(2,10,9,0.96) 72%);
   border:2px solid var(--cyan);
@@ -303,9 +303,9 @@ const MODULES = [
   const nodesEl = document.getElementById('eg-nodes');
   const linesEl = document.getElementById('eg-radial-lines');
   const total = MODULES.length;
-  const nodeRadius = 41;
-  const lineRadius = 43;
-  const dotRadius = 26;
+  const nodeRadius = 42;
+  const lineRadius = 44;
+  const dotRadius = 27;
   let nodesHtml = '';
   let linesHtml = '';
 
