@@ -7,39 +7,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <style>
-:root{
-  --green:#2dffa0;
-  --cyan:#22d3ee;
-  --grid-cols: 1fr 1fr 90px 1fr 1fr;
-}
+:root{--green:#2dffa0;--cyan:#22d3ee}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;background:radial-gradient(ellipse 90% 55% at 50% 0%, #0a2226 0%, #061318 40%, #030607 100%);
   font-family:'DM Mono',monospace;color:#fff;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;background:none;border:none;color:inherit;cursor:pointer}
-
 .wrap{position:relative;padding-bottom:40px}
-
-/* ambient sweep + vignette */
-.sweep{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
-.sweep::before{content:"";position:absolute;top:-10%;left:0;width:20%;height:140%;will-change:transform;
-  background:linear-gradient(90deg,transparent,rgba(34,211,238,0.16),transparent);
-  animation:eg-sweep 7s ease-in-out infinite}
-@keyframes eg-sweep{0%{transform:translateX(-30%) rotate(8deg)}100%{transform:translateX(130%) rotate(8deg)}}
-.vignette{position:absolute;inset:0;pointer-events:none;z-index:0;
-  box-shadow:inset 0 0 90px 20px rgba(0,0,0,0.55)}
-.glow-blobs{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-.glow-blobs span{position:absolute;border-radius:50%;filter:blur(60px);opacity:0.16}
-.glow-blobs .b1{width:260px;height:260px;top:8%;left:-8%;background:var(--green)}
-.glow-blobs .b2{width:220px;height:220px;top:38%;right:-10%;background:var(--cyan)}
-.glow-blobs .b3{width:240px;height:240px;bottom:6%;left:10%;background:var(--green)}
+.vignette{position:absolute;inset:0;pointer-events:none;z-index:0;box-shadow:inset 0 0 90px 20px rgba(0,0,0,0.55)}
 
 /* header */
-.header{position:relative;z-index:1;padding:34px 16px 104px}
+.header{position:relative;z-index:1;padding:34px 16px 20px}
 .header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:16px}
 .badge-active{display:flex;align-items:center;gap:8px;border-radius:10px;padding:8px 11px;
-  background:rgba(45,255,160,0.1);border:1px solid rgba(45,255,160,0.55);box-shadow:0 0 14px rgba(45,255,160,0.2)}
-.badge-active i{color:var(--green);filter:drop-shadow(0 0 4px var(--green));font-size:15px}
+  background:rgba(45,255,160,0.1);border:1px solid rgba(45,255,160,0.55)}
+.badge-active i{color:var(--green);font-size:15px}
 .badge-active .t{font-size:13px;font-weight:700;color:var(--green)}
 .badge-active .s{font-size:10px;color:rgba(148,168,160,0.7)}
 .brand{text-align:center}
@@ -56,134 +38,72 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 
 .status-trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;height:66px}
 .status-card{border-radius:11px;background:rgba(255,255,255,0.03);border:1px solid rgba(45,255,160,0.2);
-  box-shadow:0 4px 10px -4px rgba(0,0,0,0.5), 0 0 8px rgba(45,255,160,0.09);
   display:flex;flex-direction:column;justify-content:space-between;padding:8px 11px;min-width:0}
 .status-card .l{font-size:10px;color:rgba(148,168,160,0.65)}
 .spark{width:100%;height:22px}
-.spark polyline{stroke-dasharray:220;stroke-dashoffset:220;animation:eg-draw 1.4s .3s ease-out forwards;
-  filter:drop-shadow(0 0 3px var(--green))}
+.spark polyline{stroke-dasharray:220;stroke-dashoffset:220;animation:eg-draw 1.4s .3s ease-out forwards}
 @keyframes eg-draw{to{stroke-dashoffset:0}}
 .score-card{border-radius:11px;background:rgba(45,255,160,0.07);border:1px solid rgba(45,255,160,0.35);
-  box-shadow:0 6px 14px -4px rgba(0,0,0,0.55), 0 0 16px rgba(45,255,160,0.2);
-  display:flex;align-items:center;justify-content:center;gap:8px;min-width:0;
-  animation:eg-breathe-soft 2.8s ease-in-out infinite}
-@keyframes eg-breathe-soft{0%,100%{opacity:.85}50%{opacity:1}}
-.score-card svg{filter:drop-shadow(0 0 3px var(--green))}
+  display:flex;align-items:center;justify-content:center;gap:8px;min-width:0}
 .score-card .l{font-size:9px;color:rgba(148,168,160,0.7)}
 .score-card .v{font-size:19px;font-weight:700;color:var(--green);line-height:1}
 .score-card .v .pct{font-size:11px}
 .threat-card{align-items:center;text-align:center;gap:3px}
 .threat-card .v{font-size:12px;font-weight:600;color:var(--green)}
 
-/* module grid */
-.modgrid{position:relative;z-index:1;padding:0 16px}
-.row{display:grid;gap:14px;margin-bottom:100px}
-#eg-row-2{margin-bottom:28px}
-.core-wrap{text-align:center;margin:-2px 0 100px}
-.core-wrap .t{font-size:14px;font-weight:600;color:#eaf4f0}
-.core-wrap .s{font-size:10px;color:rgba(148,168,160,0.55)}
+/* radial mind-map stage */
+.radial-stage{position:relative;z-index:1;width:min(94vw,460px);aspect-ratio:1/1;margin:8px auto 18px}
+.radial-lines{position:absolute;inset:0;z-index:1}
+.radial-lines line{stroke:rgba(45,255,160,0.32);stroke-width:0.6;vector-effect:non-scaling-stroke}
 
-.ai-core{position:relative;width:90px;height:90px;justify-self:center;display:flex;flex-direction:column;
+.ai-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;
+  width:clamp(76px,22vw,104px);height:clamp(76px,22vw,104px);display:flex;flex-direction:column;
   align-items:center;justify-content:center;border-radius:50%}
-.ai-core .halo{position:absolute;inset:-13px;border-radius:50%;will-change:transform,opacity;
-  background:radial-gradient(circle,rgba(45,255,160,0.2),transparent 70%);animation:eg-breathe-soft2 2.6s ease-in-out infinite}
-@keyframes eg-breathe-soft2{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
-.ai-core .ring-outer{position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--cyan);will-change:transform;
-  box-shadow:0 0 16px rgba(34,211,238,0.65);animation:eg-spin 14s linear infinite}
+.ai-core .halo{position:absolute;inset:-14px;border-radius:50%;
+  background:radial-gradient(circle,rgba(45,255,160,0.22),transparent 70%);
+  animation:eg-breathe 2.6s ease-in-out infinite}
+@keyframes eg-breathe{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+.ai-core .ring-outer{position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--cyan);
+  box-shadow:0 0 14px rgba(34,211,238,0.55);animation:eg-spin 14s linear infinite}
 @keyframes eg-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-.ai-core .ring-inner{position:absolute;inset:8px;border-radius:50%;border:1.5px solid var(--green);
-  box-shadow:0 0 14px rgba(45,255,160,0.65)}
-.ai-core i{color:var(--green);filter:drop-shadow(0 0 6px var(--green));font-size:22px}
-.ai-core .lbl{font-size:9px;font-weight:700;color:var(--green);letter-spacing:0.08em;margin-top:3px;
-  text-shadow:0 0 6px var(--green)}
+.ai-core .ring-inner{position:absolute;inset:9px;border-radius:50%;border:1.5px solid var(--green);
+  box-shadow:0 0 12px rgba(45,255,160,0.55)}
+.ai-core i{color:var(--green);font-size:clamp(18px,5vw,24px);position:relative;z-index:1}
+.ai-core .lbl{font-size:9px;font-weight:700;color:var(--green);letter-spacing:0.08em;margin-top:2px;position:relative;z-index:1}
 
-/* module card */
-.card{position:relative;min-height:160px;perspective:700px}
-.card-wall{position:absolute;inset:0;background:linear-gradient(180deg,#071613 0%,#030807 100%);
-  border:1px solid rgba(45,255,160,0.13);
-  border-radius:20px 20px 12px 12px;
-  transform:rotateX(6deg) translate(3px,4px);transform-origin:50% 0%}
-.card-shell{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:20px 7px 9px;
-  background:
-    radial-gradient(circle at 30% 12%, rgba(94,234,255,0.2), transparent 58%),
-    radial-gradient(circle at 70% 90%, rgba(45,255,160,0.1), transparent 60%),
-    linear-gradient(160deg,#153c38 0%,#0a1f22 45%,#050f12 100%);
-  border:2px solid var(--green);border-top:3px solid var(--cyan);
-  border-radius:20px 20px 12px 12px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 22px rgba(34,211,238,0.1), 0 8px 18px -6px rgba(0,0,0,0.7);
-  filter:drop-shadow(0 0 9px rgba(45,255,160,0.4));
-  transform:rotateX(6deg);transform-origin:50% 0%}
-.card-edge-pulse{position:absolute;inset:0;pointer-events:none;border-radius:20px 20px 12px 12px;will-change:opacity;
-  background:linear-gradient(180deg,rgba(34,211,238,0.15),transparent 45%);
-  animation:eg-edge-pulse 2.6s ease-in-out infinite}
-@keyframes eg-edge-pulse{0%,100%{opacity:.35}50%{opacity:.75}}
-.card-icon{position:relative;width:68px;height:68px;flex-shrink:0;border-radius:50%;margin-bottom:9px;
+.node{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-50%);z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:5px;width:clamp(68px,20vw,92px);
+  animation:eg-node-in .55s cubic-bezier(.16,.8,.24,1) both;animation-delay:var(--delay,0ms)}
+@keyframes eg-node-in{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.node-circle{width:clamp(50px,15vw,66px);height:clamp(50px,15vw,66px);border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(circle at 35% 30%, rgba(45,255,160,1), rgba(4,16,15,1));
-  border:3px solid var(--green);box-shadow:0 0 26px rgba(45,255,160,1), 0 0 48px rgba(34,211,238,0.65)}
-.card-icon .glow{position:absolute;inset:-14px;border-radius:50%;pointer-events:none;will-change:transform,opacity;
-  background:radial-gradient(circle,rgba(45,255,160,0.55),transparent 70%);
-  animation:eg-icon-glow 2.4s ease-in-out infinite}
-@keyframes eg-icon-glow{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.25)}}
-.card-icon i{color:#fff;font-size:34px;filter:drop-shadow(0 0 8px var(--green))}
-.card-num{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;
-  font-size:11px;font-weight:500;color:rgba(220,232,226,0.55);letter-spacing:0.05em}
-.card-title{font-size:12px;font-weight:600;color:#eaf4f0;line-height:1.2;padding:0 4px}
-.card-sub{font-size:10px;color:rgba(148,168,160,0.55);line-height:1.25;padding:0 4px;margin-top:2px}
+  background:radial-gradient(circle at 35% 30%, rgba(45,255,160,0.9), rgba(4,16,15,1));
+  border:2px solid var(--green);box-shadow:0 0 12px rgba(45,255,160,0.5), 0 0 22px rgba(34,211,238,0.25);
+  transition:transform .15s ease}
+.node:active .node-circle{transform:scale(.9)}
+.node-circle i{color:#fff;font-size:clamp(16px,4.5vw,20px)}
+.node-label{font-size:10px;font-weight:600;color:#eaf4f0;text-align:center;line-height:1.2;
+  text-shadow:0 1px 3px rgba(0,0,0,0.8)}
 
-.card-base-glow{position:absolute;left:50%;bottom:-8px;width:40px;height:15px;border-radius:50%;
-  transform:translateX(-50%);pointer-events:none;filter:blur(2px);
-  background:radial-gradient(ellipse, rgba(45,255,160,0.53), transparent 70%)}
-.card-beam{position:absolute;left:50%;top:-88px;width:10px;height:88px;transform:translateX(-50%);
-  transform-origin:bottom center;pointer-events:none;will-change:transform,opacity;
-  background:linear-gradient(to top, #fff, var(--cyan) 25%, rgba(34,211,238,0.75) 60%, transparent);
-  filter:drop-shadow(0 0 14px var(--cyan)) drop-shadow(0 0 32px rgba(34,211,238,0.9));
-  animation:eg-beam-pulse 2.6s ease-in-out infinite}
-.card-beam-halo{position:absolute;left:50%;top:-88px;width:40px;height:88px;transform:translateX(-50%);
-  pointer-events:none;filter:blur(13px);opacity:.7;will-change:transform,opacity;
-  background:linear-gradient(to top, rgba(34,211,238,0.75), transparent);
-  animation:eg-beam-pulse 2.6s ease-in-out infinite}
-@keyframes eg-beam-pulse{0%,100%{opacity:.75;transform:translateX(-50%) scaleY(0.82)}50%{opacity:1;transform:translateX(-50%) scaleY(1.16)}}
-
-.card-badge{position:absolute;top:-9px;right:-8px;min-width:24px;height:24px;padding:0 5px;
-  display:flex;align-items:center;justify-content:center;border-radius:50%;
-  background:#ff2d2d;border:2px solid #050b0d;box-shadow:0 0 14px rgba(255,45,45,1);
-  color:#fff;font-weight:700;font-size:13px;z-index:2;animation:eg-badge-pulse 1.8s ease-in-out infinite}
-@keyframes eg-badge-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
-
-/* one-shot entrance: fall + lock-flash, driven by an inline --delay custom property per card */
-.card{animation:eg-card-fall 1250ms cubic-bezier(0.16,0.8,0.24,1) both;animation-delay:var(--delay,0ms)}
-@keyframes eg-card-fall{
-  0%{opacity:0;transform:translateY(-240px) scale(0.85)}
-  50%{opacity:1}
-  76%{transform:translateY(12px) scale(1.03)}
-  100%{opacity:1;transform:translateY(0) scale(1)}
-}
-.lock-flash{position:absolute;top:36%;left:50%;width:32px;height:32px;border-radius:50%;
-  border:2px solid var(--green);box-shadow:0 0 14px var(--green);opacity:0;pointer-events:none;
-  animation:eg-lock-flash 0.5s ease-out both;animation-delay:calc(var(--delay,0ms) + 1170ms)}
-@keyframes eg-lock-flash{0%{opacity:.95;transform:translate(-50%,-50%) scale(0.3)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.4)}}
+.core-caption{text-align:center;margin:-6px 0 8px;position:relative;z-index:1}
+.core-caption .t{font-size:13px;font-weight:600;color:#eaf4f0}
+.core-caption .s{font-size:10px;color:rgba(148,168,160,0.55)}
 
 /* bottom stats */
 .stats{position:relative;z-index:1;padding:16px 16px 0}
 .stats-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;border-radius:20px;padding:16px 11px;
-  background:rgba(255,255,255,0.03);border:1px solid rgba(45,255,160,0.18);
-  box-shadow:0 0 14px rgba(45,255,160,0.08), inset 0 1px 0 rgba(255,255,255,0.04)}
+  background:rgba(255,255,255,0.03);border:1px solid rgba(45,255,160,0.18)}
 .stat{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0}
 .stat .ic{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  background:rgba(45,255,160,0.12);border:1px solid rgba(45,255,160,0.4);box-shadow:0 0 8px rgba(45,255,160,0.27)}
-.stat .ic i{color:var(--green);font-size:15px;filter:drop-shadow(0 0 2px var(--green))}
+  background:rgba(45,255,160,0.12);border:1px solid rgba(45,255,160,0.4)}
+.stat .ic i{color:var(--green);font-size:15px}
 .stat .v{font-size:16px;font-weight:700;color:#eaf4f0;line-height:1}
 .stat .u{font-size:9px;color:rgba(148,168,160,0.5);line-height:1}
-.value-flash{animation:eg-value-flash 0.5s ease-out}
-@keyframes eg-value-flash{0%{color:var(--green);transform:scale(1.15)}100%{color:#eaf4f0;transform:scale(1)}}
 
 /* bottom nav */
 .nav{position:relative;z-index:1;padding:11px 16px 16px}
 .nav-inner{display:flex;align-items:center;justify-content:space-between;border-radius:20px;padding:8px 11px;
-  background:rgba(8,16,17,0.9);border:1px solid rgba(45,255,160,0.15);
-  box-shadow:0 10px 24px -8px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04)}
+  background:rgba(8,16,17,0.9);border:1px solid rgba(45,255,160,0.15)}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 8px;min-width:0}
 .nav-item i{font-size:20px;color:rgba(148,168,160,0.55)}
 .nav-item.active i{color:var(--green)}
@@ -192,9 +112,9 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .nav-ai{position:relative;width:62px;height:62px;border-radius:50%;margin-top:-22px;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
   background:radial-gradient(circle at 35% 30%, #123328, #050b0d);
-  border:1px solid rgba(45,255,160,0.4);box-shadow:0 0 14px rgba(45,255,160,0.27), 0 0 22px rgba(34,211,238,0.13)}
+  border:1px solid rgba(45,255,160,0.4)}
 .nav-ai .ring{position:absolute;inset:-5px;border-radius:50%;border:1px solid rgba(34,211,238,0.2)}
-.nav-ai span{font-size:17px;font-weight:700;color:var(--green);letter-spacing:0.03em}
+.nav-ai span{font-size:17px;font-weight:700;color:var(--green)}
 
 /* footer */
 .footer{position:relative;z-index:1;padding:34px 16px 30px;text-align:center}
@@ -202,7 +122,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .footer-text{font-size:11px;color:rgba(148,168,160,0.45);letter-spacing:0.05em;line-height:2.2}
 .footer-text .dot{color:rgba(45,255,160,0.45);margin:0 8px}
 .footer-shield{width:34px;height:34px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  background:rgba(45,255,160,0.08);border:1px solid rgba(45,255,160,0.3);box-shadow:0 0 16px rgba(45,255,160,0.15)}
+  background:rgba(45,255,160,0.08);border:1px solid rgba(45,255,160,0.3)}
 .footer-shield i{color:rgba(45,255,160,0.6);font-size:14px}
 
 /* module detail sheet */
@@ -230,39 +150,20 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   background:rgba(45,255,160,0.1);border:1px solid rgba(45,255,160,0.33);color:var(--green)}
 .sheet-route{text-align:center;margin-top:-8px;font-size:13px;color:rgba(148,168,160,0.4)}
 
-/* supernova intro (shown once per day) */
-#eg-nova{position:fixed;inset:0;z-index:200;background:#020705;overflow:hidden;pointer-events:none;
-  transition:opacity .45s ease}
+#eg-nova{position:fixed;inset:0;z-index:200;background:#020705;overflow:hidden;pointer-events:none;transition:opacity .4s ease}
 #eg-nova.fade-out{opacity:0}
 #eg-nova.hide{display:none}
 .nova-flash{position:absolute;top:50%;left:50%;width:10px;height:10px;border-radius:50%;background:#fff;
-  transform:translate(-50%,-50%) scale(0);
-  box-shadow:0 0 40px 20px var(--cyan), 0 0 90px 50px rgba(45,255,160,0.6);
-  animation:eg-nova-flash 1.4s cubic-bezier(0.16,0.8,0.24,1) forwards}
-@keyframes eg-nova-flash{
-  0%{transform:translate(-50%,-50%) scale(0);opacity:0}
-  15%{transform:translate(-50%,-50%) scale(1);opacity:1}
-  40%{transform:translate(-50%,-50%) scale(22);opacity:1}
-  100%{transform:translate(-50%,-50%) scale(55);opacity:0}
-}
-.nova-star{position:absolute;top:50%;left:50%;width:3px;height:3px;border-radius:50%;background:#fff;
-  box-shadow:0 0 6px 2px var(--cyan);
-  animation:eg-nova-star 1.3s cubic-bezier(0.1,0.7,0.3,1) forwards}
-@keyframes eg-nova-star{
-  0%{transform:translate(-50%,-50%) scale(0);opacity:0}
-  20%{opacity:1;transform:translate(-50%,-50%) scale(1)}
-  100%{transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.3);opacity:0}
-}
+  transform:translate(-50%,-50%) scale(0);box-shadow:0 0 40px 20px var(--cyan), 0 0 90px 50px rgba(45,255,160,0.6);
+  animation:eg-nova-flash 1.2s cubic-bezier(0.16,0.8,0.24,1) forwards}
+@keyframes eg-nova-flash{0%{transform:translate(-50%,-50%) scale(0);opacity:0}15%{transform:translate(-50%,-50%) scale(1);opacity:1}100%{transform:translate(-50%,-50%) scale(50);opacity:0}}
 </style>
 </head>
 <body>
 <div id="eg-nova"></div>
 <div class="wrap">
-  <div class="sweep"></div>
-  <div class="glow-blobs"><span class="b1"></span><span class="b2"></span><span class="b3"></span></div>
   <div class="vignette"></div>
 
-  <!-- header -->
   <div class="header">
     <div class="header-row">
       <div class="badge-active">
@@ -303,22 +204,19 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
     </div>
   </div>
 
-  <!-- module grid -->
-  <div class="modgrid">
-    <div class="row" id="eg-row-1" style="grid-template-columns:var(--grid-cols)"></div>
-
-    <div class="row" id="eg-row-2" style="grid-template-columns:var(--grid-cols);align-items:center">
-      <!-- populated by JS: card, card, ai-core, card, card -->
+  <div class="radial-stage" id="eg-radial-stage">
+    <svg class="radial-lines" id="eg-radial-lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+    <div class="ai-core">
+      <span class="halo"></span><span class="ring-outer"></span><span class="ring-inner"></span>
+      <i class="fa-solid fa-shield-halved"></i><span class="lbl">AI</span>
     </div>
-    <div class="core-wrap">
-      <div class="t">Ana Koruma Çekirdeği</div>
-      <div class="s">Sistem aktif ve senkronize</div>
-    </div>
-
-    <div class="row" id="eg-row-3" style="grid-template-columns:var(--grid-cols)"></div>
+    <div id="eg-nodes"></div>
+  </div>
+  <div class="core-caption">
+    <div class="t">Ana Koruma Çekirdeği</div>
+    <div class="s">Sistem aktif ve senkronize</div>
   </div>
 
-  <!-- bottom stats -->
   <div class="stats">
     <div class="stats-inner">
       <div class="stat"><span class="ic"><i class="fa-solid fa-shield-halved"></i></span><div class="v">{{ metrics.blocked }}</div><div class="u">Engellenen</div></div>
@@ -328,7 +226,6 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
     </div>
   </div>
 
-  <!-- bottom nav -->
   <div class="nav">
     <div class="nav-inner">
       <button class="nav-item active"><i class="fa-solid fa-table-cells-large"></i><span>Ana Panel</span></button>
@@ -339,7 +236,6 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
     </div>
   </div>
 
-  <!-- footer -->
   <div class="footer">
     <div class="footer-line"></div>
     <div class="footer-shield"><i class="fa-solid fa-shield-halved"></i></div>
@@ -347,7 +243,6 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   </div>
 </div>
 
-<!-- module detail sheet -->
 <div class="sheet-overlay" id="eg-sheet-overlay">
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="sheet-head">
@@ -368,18 +263,14 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 </div>
 
 <script>
-// ---------------------------------------------------------------------------
-// Module data. Routes marked "GÖZDEN GEÇİR" are best-guess placeholders —
-// confirm/fix against your real @app.route list before shipping.
-// ---------------------------------------------------------------------------
 const MODULES = [
   { id:1, title:'Spam Koruması', sub:"Gelen SMS'leri akıllıca filtrele", icon:'fa-shield-halved', route:'/u/protection',
     rows:[['Durum','Aktif']] },
-  { id:2, title:'AI Analiz', sub:'Yapay zeka ile akıllı analiz', icon:'fa-brain', route:'/u/analysis', color:'#3b82f6',
+  { id:2, title:'AI Analiz', sub:'Yapay zeka ile akıllı analiz', icon:'fa-brain', route:'/u/analysis',
     rows:[] },
   { id:3, title:'Risk Tarama', sub:'Tehlikeleri tara, güvende kal', icon:'fa-satellite-dish', route:'/u/sms-risk-test',
     rows:[['Toplam tarama','{{ metrics.total }}'],['Durum','Aktif']] },
-  { id:4, title:'Engellenenler', sub:'Engellenen numaralar ve mesajlar', icon:'fa-ban', route:'/u/blocked', color:'#ff5555',
+  { id:4, title:'Engellenenler', sub:'Engellenen numaralar ve mesajlar', icon:'fa-ban', route:'/u/blocked',
     rows:[['Toplam engellenen','{{ metrics.blocked }}']] },
   { id:5, title:'SMS Merkezi', sub:'Tüm mesajların yönetim merkezi', icon:'fa-comments', route:'/u/sms-actions-center',
     rows:[['Toplam işlem','{{ metrics.total }}']] },
@@ -387,74 +278,38 @@ const MODULES = [
     rows:[] },
   { id:7, title:'Raporlar', sub:'Detaylı istatistikler ve raporlar', icon:'fa-chart-column', route:'/u/reports',
     rows:[] },
-  { id:8, title:'Bildirimler', sub:'Sistem bildirimleri ve uyarılar', icon:'fa-bell', route:'/u/notifications', color:'#ffb020',
+  { id:8, title:'Bildirimler', sub:'Sistem bildirimleri ve uyarılar', icon:'fa-bell', route:'/u/notifications',
     rows:[] },
-  { id:9, title:'İzinler', sub:'Uygulama izinleri ve yönetimi', icon:'fa-lock', route:'/u/settings',
-    rows:[] },
-  { id:10, title:'Güvenlik Merkezi', sub:'Gelişmiş güvenlik araçları', icon:'fa-shield', route:'/u/settings',
-    rows:[] },
-  { id:11, title:'Lisans', sub:'Lisans bilgileri ve durumu', icon:'fa-award', route:'/u/license', color:'#e8b93b',
-    rows:[['Lisans','{{ license_info.plan }}'],['Bitiş','{{ license_info.expires_at }}']] },
-  { id:12, title:'Ayarlar', sub:'Uygulama ayarları ve tercihler', icon:'fa-gear', route:'/u/settings',
-    rows:[['Tema','Koyu'],['Dil','Türkçe'],['Senkronizasyon','Açık']] },
 ];
 
-function cardHtml(mod, delayMs){
-  const badge = mod.badge ? `<span class="card-badge">${mod.badge}</span>` : '';
-  const c = mod.color || '#2dffa0';
-  const iconStyle = mod.color
-    ? `style="border-color:${c};box-shadow:0 0 10px ${c}99, 0 0 18px ${c}44"`
-    : '';
-  const iStyle = mod.color ? `style="color:${c};filter:drop-shadow(0 0 3px ${c})"` : '';
-  return `
-  <button class="card" style="--delay:${delayMs}ms" onclick="openSheet(${mod.id})">
-    <div class="card-wall"></div>
-    <div class="card-shell">
-      <div class="card-edge-pulse"></div>
-      <div class="lock-flash"></div>
-      <span class="card-num">${String(mod.id).padStart(2,'0')}</span>
-      <div class="card-icon" ${iconStyle}><span class="glow"></span><i class="fa-solid ${mod.icon}" ${iStyle}></i></div>
-      <div class="card-title">${mod.title}</div>
-      <div class="card-sub">${mod.sub}</div>
-    </div>
-    <div class="card-base-glow"></div>
-    <div class="card-beam-halo"></div>
-    <div class="card-beam"></div>
-    ${badge}
-  </button>`;
-}
+(function renderRadial(){
+  const nodesEl = document.getElementById('eg-nodes');
+  const linesEl = document.getElementById('eg-radial-lines');
+  const total = MODULES.length;
+  const nodeRadius = 38;
+  const lineRadius = 40;
+  let nodesHtml = '';
+  let linesHtml = '';
 
-function coreHtml(){
-  return `
-  <div class="ai-core">
-    <span class="halo"></span><span class="ring-outer"></span><span class="ring-inner"></span>
-    <i class="fa-solid fa-shield-halved"></i><span class="lbl">AI</span>
-  </div>`;
-}
+  MODULES.forEach((mod, i) => {
+    const angle = (-90 + (360/total)*i) * Math.PI/180;
+    const nx = (50 + nodeRadius*Math.cos(angle)).toFixed(2);
+    const ny = (50 + nodeRadius*Math.sin(angle)).toFixed(2);
+    const lx = (50 + lineRadius*Math.cos(angle)).toFixed(2);
+    const ly = (50 + lineRadius*Math.sin(angle)).toFixed(2);
 
-(function renderGrid(){
-  const row1 = document.getElementById('eg-row-1');
-  const row2 = document.getElementById('eg-row-2');
-  const row3 = document.getElementById('eg-row-3');
-  const STAGGER = 160;
+    linesHtml += `<line x1="50" y1="50" x2="${lx}" y2="${ly}"/>`;
+    nodesHtml += `
+    <button class="node" style="--x:${nx}%;--y:${ny}%;--delay:${i*90}ms" onclick="openSheet(${mod.id})">
+      <span class="node-circle"><i class="fa-solid ${mod.icon}"></i></span>
+      <span class="node-label">${mod.title}</span>
+    </button>`;
+  });
 
-  row1.innerHTML =
-    cardHtml(MODULES[0], 0*STAGGER) + cardHtml(MODULES[1], 1*STAGGER) +
-    '<div></div>' +
-    cardHtml(MODULES[2], 2*STAGGER) + cardHtml(MODULES[3], 3*STAGGER);
-
-  row2.innerHTML =
-    cardHtml(MODULES[4], 4*STAGGER) + cardHtml(MODULES[5], 5*STAGGER) +
-    coreHtml() +
-    cardHtml(MODULES[6], 6*STAGGER) + cardHtml(MODULES[7], 7*STAGGER);
-
-  row3.innerHTML =
-    cardHtml(MODULES[8], 8*STAGGER) + cardHtml(MODULES[9], 9*STAGGER) +
-    '<div></div>' +
-    cardHtml(MODULES[10], 10*STAGGER) + cardHtml(MODULES[11], 11*STAGGER);
+  linesEl.innerHTML = linesHtml;
+  nodesEl.innerHTML = nodesHtml;
 })();
 
-// live clock
 function tickClock(){
   const now = new Date();
   document.getElementById('eg-time').textContent = now.toLocaleTimeString('tr-TR',{hour12:false});
@@ -463,7 +318,6 @@ function tickClock(){
 tickClock();
 setInterval(tickClock, 1000);
 
-// security score count-up
 (function animateScore(){
   const target = {{ metrics.score }}, duration = 900, start = performance.now();
   const ring = document.getElementById('eg-score-ring');
@@ -480,44 +334,21 @@ setInterval(tickClock, 1000);
   requestAnimationFrame(step);
 })();
 
-// (fake ticking scan counter removed — bottom stats now render real
-// server-computed values directly via Jinja, no client-side faking)
-
-// supernova intro — shown once per calendar day, then skipped for the rest of the day
 (function initNova(){
   const nova = document.getElementById('eg-nova');
   if(!nova) return;
   const today = new Date().toISOString().slice(0,10);
   let last = null;
   try { last = localStorage.getItem('eg_nova_last'); } catch(e) {}
-
-  if(last === today){
-    nova.classList.add('hide');
-    return;
-  }
+  if(last === today){ nova.classList.add('hide'); return; }
   try { localStorage.setItem('eg_nova_last', today); } catch(e) {}
-
   const flash = document.createElement('div');
   flash.className = 'nova-flash';
   nova.appendChild(flash);
-
-  const starCount = 28;
-  for(let i = 0; i < starCount; i++){
-    const s = document.createElement('div');
-    s.className = 'nova-star';
-    const angle = Math.random() * Math.PI * 2;
-    const dist = 260 + Math.random() * 480;
-    s.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
-    s.style.setProperty('--dy', (Math.sin(angle) * dist) + 'px');
-    s.style.animationDelay = (0.08 + Math.random() * 0.22) + 's';
-    nova.appendChild(s);
-  }
-
-  setTimeout(function(){ nova.classList.add('fade-out'); }, 1100);
-  setTimeout(function(){ nova.classList.add('hide'); }, 1550);
+  setTimeout(function(){ nova.classList.add('fade-out'); }, 900);
+  setTimeout(function(){ nova.classList.add('hide'); }, 1300);
 })();
 
-// module detail sheet
 const overlay = document.getElementById('eg-sheet-overlay');
 function openSheet(id){
   const mod = MODULES.find(m => m.id === id);

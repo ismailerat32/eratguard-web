@@ -23825,7 +23825,7 @@ body{
       <div class="logo">E</div>
       <div>
         <h1>EratGuard</h1>
-        <small>VITES-6A</small>
+        <small>PRO</small>
       </div>
     </div>
     <a class="back" href="/u/eg-panel">Ana Sayfa</a>
@@ -24108,7 +24108,7 @@ def eratguard_vites6c_history_export():
 
     payload = {
         "app": "EratGuard",
-        "version": "VITES-6C",
+        "version": "PRO",
         "export_type": "sms_protection_history",
         "exported_at": datetime.datetime.now().isoformat(timespec="seconds"),
         "source": str(data_path),
@@ -26802,7 +26802,7 @@ body{margin:0;background:radial-gradient(circle at top,#143b2b 0,#061018 45%,#03
       <h1>Koruma Geçmişi</h1>
       <p>SMS aksiyonları, AI analiz kararları ve güvenlik kayıtları tek merkezden izlenir.</p>
     </div>
-    <div class="version">VITES-6H</div>
+    <div class="version">PRO</div>
   </div>
 
   <div class="grid">
@@ -26887,7 +26887,7 @@ document.querySelectorAll(".filter").forEach(btn=>{
         counts = _eg_hdb1_counts(actions)
         payload = {
             "export_type": "sms_protection_history",
-            "version": "VITES-6H",
+            "version": "PRO",
             "created_at": _eg_hdb1_datetime.now().replace(microsecond=0).isoformat(),
             "counts": counts,
             "actions": actions,
