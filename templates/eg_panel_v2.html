@@ -57,6 +57,12 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   filter:blur(30px)}
 .radial-beam{position:absolute;top:-16%;left:50%;width:2px;height:32%;transform:translateX(-50%);z-index:0;pointer-events:none;
   background:linear-gradient(to bottom, transparent, rgba(34,211,238,0.6));opacity:.75}
+.radial-particles{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.radial-particles span{position:absolute;top:-6%;width:2px;height:2px;border-radius:50%;background:var(--cyan);
+  box-shadow:0 0 4px var(--cyan), 0 0 9px rgba(34,211,238,0.65);opacity:0;
+  animation:eg-particle-fall linear infinite}
+@keyframes eg-particle-fall{0%{opacity:0;transform:translateY(0)}10%{opacity:.9}90%{opacity:.4}100%{opacity:0;transform:translateY(112%)}}
+
 .radial-lines{position:absolute;inset:0;z-index:1;filter:drop-shadow(0 0 2px rgba(34,211,238,0.4))}
 .radial-lines line{stroke:rgba(34,211,238,0.42);stroke-width:0.5;vector-effect:non-scaling-stroke}
 .radial-lines circle{fill:var(--cyan);opacity:0.9}
@@ -221,6 +227,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   <div class="radial-stage" id="eg-radial-stage">
     <div class="radial-ambient"></div>
     <div class="radial-beam"></div>
+    <div class="radial-particles" id="eg-particles"></div>
     <svg class="radial-lines" id="eg-radial-lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
     <div class="holo-base"><span></span><span></span><span></span></div>
     <div class="ai-core">
@@ -298,6 +305,20 @@ const MODULES = [
   { id:8, title:'Bildirimler', sub:'Sistem bildirimleri ve uyarılar', icon:'fa-bell', route:'/u/notifications',
     rows:[] },
 ];
+
+(function renderParticles(){
+  const box = document.getElementById('eg-particles');
+  if(!box) return;
+  const COUNT = 14;
+  let html = '';
+  for(let i=0;i<COUNT;i++){
+    const left = (Math.random()*90+5).toFixed(1);
+    const dur = (3.2 + Math.random()*2.4).toFixed(2);
+    const delay = (Math.random()*4).toFixed(2);
+    html += `<span style="left:${left}%;animation-duration:${dur}s;animation-delay:${delay}s"></span>`;
+  }
+  box.innerHTML = html;
+})();
 
 (function renderRadial(){
   const nodesEl = document.getElementById('eg-nodes');
