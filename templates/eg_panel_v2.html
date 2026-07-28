@@ -52,40 +52,59 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .threat-card .v{font-size:12px;font-weight:600;color:var(--green)}
 
 /* radial mind-map stage */
-.radial-stage{position:relative;z-index:1;width:min(94vw,460px);aspect-ratio:1/1;margin:8px auto 18px}
-.radial-lines{position:absolute;inset:0;z-index:1}
-.radial-lines line{stroke:rgba(45,255,160,0.32);stroke-width:0.6;vector-effect:non-scaling-stroke}
+.radial-stage{position:relative;z-index:1;width:min(94vw,460px);aspect-ratio:1/1;margin:14px auto 30px}
+.radial-ambient{position:absolute;inset:-14%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 45%, rgba(34,211,238,0.16), rgba(45,255,160,0.05) 45%, transparent 68%);
+  filter:blur(26px)}
+.radial-beam{position:absolute;top:-18%;left:50%;width:2px;height:34%;transform:translateX(-50%);z-index:0;pointer-events:none;
+  background:linear-gradient(to bottom, transparent, rgba(34,211,238,0.55));opacity:.7}
+.radial-lines{position:absolute;inset:0;z-index:1;filter:drop-shadow(0 0 2px rgba(45,255,160,0.35))}
+.radial-lines line{stroke:rgba(45,255,160,0.34);stroke-width:0.55;vector-effect:non-scaling-stroke}
+.radial-lines circle{fill:var(--cyan);opacity:0.85}
+
+.holo-base{position:absolute;left:50%;bottom:-4%;transform:translateX(-50%);width:72%;height:1px;z-index:0;pointer-events:none}
+.holo-base span{position:absolute;left:50%;bottom:0;transform:translate(-50%,50%);border-radius:50%;
+  border:1px solid rgba(45,255,160,0.2)}
+.holo-base span:nth-child(1){width:100%;height:14px}
+.holo-base span:nth-child(2){width:132%;height:22px;border-color:rgba(45,255,160,0.12)}
+.holo-base span:nth-child(3){width:164%;height:30px;border-color:rgba(45,255,160,0.06)}
 
 .ai-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;
   width:clamp(76px,22vw,104px);height:clamp(76px,22vw,104px);display:flex;flex-direction:column;
   align-items:center;justify-content:center;border-radius:50%}
-.ai-core .halo{position:absolute;inset:-14px;border-radius:50%;
-  background:radial-gradient(circle,rgba(45,255,160,0.22),transparent 70%);
+.ai-core .halo{position:absolute;inset:-16px;border-radius:50%;
+  background:radial-gradient(circle,rgba(45,255,160,0.28),transparent 70%);
   animation:eg-breathe 2.6s ease-in-out infinite}
 @keyframes eg-breathe{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
 .ai-core .ring-outer{position:absolute;inset:0;border-radius:50%;border:1.5px solid var(--cyan);
-  box-shadow:0 0 14px rgba(34,211,238,0.55);animation:eg-spin 14s linear infinite}
+  box-shadow:0 0 16px rgba(34,211,238,0.6);animation:eg-spin 14s linear infinite}
 @keyframes eg-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .ai-core .ring-inner{position:absolute;inset:9px;border-radius:50%;border:1.5px solid var(--green);
-  box-shadow:0 0 12px rgba(45,255,160,0.55)}
-.ai-core i{color:var(--green);font-size:clamp(18px,5vw,24px);position:relative;z-index:1}
-.ai-core .lbl{font-size:9px;font-weight:700;color:var(--green);letter-spacing:0.08em;margin-top:2px;position:relative;z-index:1}
+  box-shadow:0 0 14px rgba(45,255,160,0.6), inset 0 0 16px rgba(45,255,160,0.15);
+  background:radial-gradient(circle at 40% 30%, rgba(45,255,160,0.1), rgba(2,10,9,0.9) 75%)}
+.ai-core i{color:var(--green);font-size:clamp(18px,5vw,24px);position:relative;z-index:1;
+  filter:drop-shadow(0 0 6px var(--green))}
+.ai-core .lbl{font-size:9px;font-weight:700;color:var(--green);letter-spacing:0.08em;margin-top:2px;
+  position:relative;z-index:1;text-shadow:0 0 6px var(--green)}
 
 .node{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-50%);z-index:2;
   display:flex;flex-direction:column;align-items:center;gap:5px;width:clamp(68px,20vw,92px);
   animation:eg-node-in .55s cubic-bezier(.16,.8,.24,1) both;animation-delay:var(--delay,0ms)}
 @keyframes eg-node-in{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-.node-circle{width:clamp(50px,15vw,66px);height:clamp(50px,15vw,66px);border-radius:50%;
+.node-circle{width:clamp(52px,15.5vw,68px);height:clamp(52px,15.5vw,68px);border-radius:50%;position:relative;
   display:flex;align-items:center;justify-content:center;
-  background:radial-gradient(circle at 35% 30%, rgba(45,255,160,0.9), rgba(4,16,15,1));
-  border:2px solid var(--green);box-shadow:0 0 12px rgba(45,255,160,0.5), 0 0 22px rgba(34,211,238,0.25);
+  background:radial-gradient(circle at 35% 28%, rgba(45,255,160,0.14), rgba(2,10,9,0.96) 72%);
+  border:1.5px solid var(--green);
+  box-shadow:0 0 10px rgba(45,255,160,0.5), 0 0 20px rgba(34,211,238,0.2), inset 0 0 14px rgba(45,255,160,0.1);
   transition:transform .15s ease}
+.node-circle::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1px solid rgba(34,211,238,0.25);
+  pointer-events:none}
 .node:active .node-circle{transform:scale(.9)}
-.node-circle i{color:#fff;font-size:clamp(16px,4.5vw,20px)}
+.node-circle i{color:var(--green);font-size:clamp(16px,4.5vw,20px);filter:drop-shadow(0 0 4px var(--green))}
 .node-label{font-size:10px;font-weight:600;color:#eaf4f0;text-align:center;line-height:1.2;
   text-shadow:0 1px 3px rgba(0,0,0,0.8)}
 
-.core-caption{text-align:center;margin:-6px 0 8px;position:relative;z-index:1}
+.core-caption{text-align:center;margin:2px 0 8px;position:relative;z-index:1}
 .core-caption .t{font-size:13px;font-weight:600;color:#eaf4f0}
 .core-caption .s{font-size:10px;color:rgba(148,168,160,0.55)}
 
@@ -205,7 +224,10 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
   </div>
 
   <div class="radial-stage" id="eg-radial-stage">
+    <div class="radial-ambient"></div>
+    <div class="radial-beam"></div>
     <svg class="radial-lines" id="eg-radial-lines" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+    <div class="holo-base"><span></span><span></span><span></span></div>
     <div class="ai-core">
       <span class="halo"></span><span class="ring-outer"></span><span class="ring-inner"></span>
       <i class="fa-solid fa-shield-halved"></i><span class="lbl">AI</span>
@@ -288,6 +310,7 @@ const MODULES = [
   const total = MODULES.length;
   const nodeRadius = 38;
   const lineRadius = 40;
+  const dotRadius = 24;
   let nodesHtml = '';
   let linesHtml = '';
 
@@ -297,8 +320,10 @@ const MODULES = [
     const ny = (50 + nodeRadius*Math.sin(angle)).toFixed(2);
     const lx = (50 + lineRadius*Math.cos(angle)).toFixed(2);
     const ly = (50 + lineRadius*Math.sin(angle)).toFixed(2);
+    const dx = (50 + dotRadius*Math.cos(angle)).toFixed(2);
+    const dy = (50 + dotRadius*Math.sin(angle)).toFixed(2);
 
-    linesHtml += `<line x1="50" y1="50" x2="${lx}" y2="${ly}"/>`;
+    linesHtml += `<line x1="50" y1="50" x2="${lx}" y2="${ly}"/><circle cx="${dx}" cy="${dy}" r="0.9"/>`;
     nodesHtml += `
     <button class="node" style="--x:${nx}%;--y:${ny}%;--delay:${i*90}ms" onclick="openSheet(${mod.id})">
       <span class="node-circle"><i class="fa-solid ${mod.icon}"></i></span>
