@@ -58,9 +58,9 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .radial-beam{position:absolute;top:-16%;left:50%;width:2px;height:32%;transform:translateX(-50%);z-index:0;pointer-events:none;
   background:linear-gradient(to bottom, transparent, rgba(34,211,238,0.6));opacity:.75}
 .radial-particles{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.radial-particles span{position:absolute;top:-6%;width:3px;height:3px;border-radius:50%;background:var(--cyan);
+.radial-particles span{position:absolute;top:-6%;width:6px;height:6px;border-radius:50%;background:var(--cyan);
   box-shadow:0 0 6px var(--cyan), 0 0 14px rgba(34,211,238,0.85);opacity:0;
-  animation:eg-particle-fall linear infinite}
+  animation:eg-particle-fall linear infinite;background:#fff !important}
 @keyframes eg-particle-fall{0%{opacity:0;transform:translateY(0)}10%{opacity:.9}90%{opacity:.4}100%{opacity:0;transform:translateY(112%)}}
 
 .radial-lines{position:absolute;inset:0;z-index:1;filter:drop-shadow(0 0 2px rgba(34,211,238,0.4))}
