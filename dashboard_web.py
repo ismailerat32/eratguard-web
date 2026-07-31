@@ -21184,7 +21184,7 @@ html,body{{
       <span>Risk puanı üretmeye hazır</span>
     </div>
     <div class="eg-row">
-      <b>FAN-12P</b>
+      <b>Sistem Bağlantısı</b>
       <span>Komuta merkezi bağlantısı aktif</span>
     </div>
   </section>
@@ -21467,7 +21467,7 @@ html,body{{
     <div class="eg-row"><b>Kullanıcı</b><span>{username}</span></div>
     <div class="eg-row"><b>Lisans tipi</b><span>{plan}</span></div>
     <div class="eg-row"><b>Admin bağlantısı</b><span>HAZIR</span></div>
-    <div class="eg-row"><b>FAN-12P erişimi</b><span>AKTİF</span></div>
+    <div class="eg-row"><b>Sistem erişimi</b><span>AKTİF</span></div>
     <!-- ERATGUARD VITES-4C SETTINGS SMS CONTROL LINK START -->
     <a class="eg-row" href="/native/sms-control" style="text-decoration:none;color:inherit;">
       <b>Varsayılan SMS</b><span>HAZIRLIK</span>
@@ -22092,7 +22092,7 @@ html,body{{
     <div class="eg-row"><b>Kullanıcı hesabı</b><span>{username}</span></div>
     <div class="eg-row"><b>Aktif paket</b><span>{plan}</span></div>
     <div class="eg-row"><b>Güvenlik modu</b><span>PRO</span></div>
-    <div class="eg-row"><b>FAN-12P erişimi</b><span>AKTİF</span></div>
+    <div class="eg-row"><b>Sistem erişimi</b><span>AKTİF</span></div>
     <div class="eg-row"><b>Bildirim tercihleri</b><span>HAZIR</span></div>
   </section>
 
