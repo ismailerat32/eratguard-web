@@ -20513,7 +20513,7 @@ html,body{{
     <a class="eg-btn" href="/u/reports">Koruma Raporları <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← Ana Ekrana Dön</a>
 
   <div class="eg-note">EratGuard PRO koruma katmanı aktif. SMS, link ve risk motoru tek merkezden takip edilir.</div>
 </div>
@@ -20754,7 +20754,7 @@ textarea::placeholder{color:rgba(242,255,246,.38)}
     <a class="eg-btn" href="/u/reports">Analiz Raporları <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← Ana Ekrana Dön</a>
 
   <div class="eg-note">EratGuard AI Analiz Merkezi, SMS içeriğindeki risk işaretlerini hızlıca değerlendirir. Nihai güvenlik kararı için Koruma Merkezi ile birlikte kullanılır.</div>
 
@@ -21158,7 +21158,7 @@ html,body{{
     <a class="eg-btn" href="/u/analysis">AI Analiz Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← Ana Ekrana Dön</a>
 
   <div class="eg-note">EratGuard Rapor Merkezi, koruma ve analiz durumlarını kullanıcıya sade bir güvenlik özeti olarak sunar.</div>
 
@@ -21444,7 +21444,7 @@ html,body{{
     <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← Ana Ekrana Dön</a>
 
   <div class="eg-note">EratGuard Lisans Merkezi, PRO erişim ve kullanıcı yetkilerini tek ekranda gösterir.</div>
 </div>
@@ -21644,7 +21644,7 @@ html,body{{
     <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← Ana Ekrana Dön</a>
 
   <div class="eg-note">EratGuard Bildirim Merkezi, güvenlik ve sistem mesajlarını kullanıcıya sade şekilde gösterir.</div>
 </div>
@@ -21861,7 +21861,7 @@ html,body{{
     <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← Ana Ekrana Dön</a>
 
   <div class="eg-note">EratGuard Topluluk Merkezi, destek ve kullanıcı iletişimini premium yapıya taşır.</div>
 </div>
@@ -22065,7 +22065,7 @@ html,body{{
     <a class="eg-btn" href="/u/notifications">Bildirim Merkezine Git <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← Ana Ekrana Dön</a>
 
   <div class="eg-note">EratGuard Ayarlar Merkezi, kullanıcı hesabı ve güvenlik tercihlerini premium yapıda gösterir.</div>
 </div>
@@ -22810,7 +22810,7 @@ ul{{
   <section id="reported" class="eg-section">{reported_html}</section>
 
   <a class="eg-back" href="/u/analysis">← AI Analiz Merkezine Dön</a>
-  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← Ana Ekrana Dön</a>
 </div>
 
 <script>
@@ -23129,7 +23129,7 @@ button{width:100%;margin-top:14px;border:0;border-radius:18px;background:#23ff89
 <textarea id="smsText" placeholder="Örnek: Kargonuz beklemede, hemen linke tıklayın..."></textarea>
 <button onclick="analyze()">SMS Riskini Analiz Et</button>
 <div class="result" id="result">Sonuç burada görünecek.</div>
-<a class="back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
+<a class="back" href="/u/eg-panel">← Ana Ekrana Dön</a>
 </div>
 <script>
 async function analyze(){
@@ -26510,7 +26510,7 @@ border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;box-shadow
     <a class="eg-btn" href="/u/reports">Koruma Raporları <span>→</span></a>
   </div>
 
-  <a class="eg-back" href="/u/eg-panel">← FAN-12P Komuta Merkezine Dön</a>
+  <a class="eg-back" href="/u/eg-panel">← Ana Ekrana Dön</a>
 
   <div class="eg-note">
     EratGuard PRO koruma katmanı aktif. SMS, link ve risk motoru tek merkezden takip edilir.
