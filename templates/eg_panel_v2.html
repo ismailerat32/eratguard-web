@@ -92,6 +92,13 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .ai-core .lbl{font-size:12px;font-weight:700;color:var(--green);letter-spacing:0.08em;margin-top:3px;
   position:relative;z-index:1;text-shadow:0 0 6px var(--green)}
 
+.ai-core::before{content:"";position:absolute;inset:-24px;border-radius:50%;
+  border:1px solid rgba(34,211,238,.28);border-top-color:rgba(34,211,238,.9);
+  box-shadow:0 0 24px rgba(34,211,238,.3);animation:eg-spin 8s linear infinite;pointer-events:none}
+.ai-core::after{content:"";position:absolute;inset:-42px;border-radius:50%;
+  border:1px dashed rgba(45,255,160,.22);animation:eg-spin-rev 16s linear infinite;pointer-events:none}
+@keyframes eg-spin-rev{from{transform:rotate(360deg)}to{transform:rotate(0)}}
+
 .node{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,-50%);z-index:2;
   display:flex;flex-direction:column;align-items:center;gap:6px;width:clamp(96px,27vw,130px);
   animation:eg-node-in .55s cubic-bezier(.16,.8,.24,1) both;animation-delay:var(--delay,0ms)}
@@ -298,8 +305,8 @@ const MODULES = [
     rows:[['Toplam engellenen','{{ metrics.blocked }}']] },
   { id:5, title:'SMS Merkezi', sub:'Tüm mesajların yönetim merkezi', icon:'fa-comments', route:'/u/sms-actions-center',
     rows:[['Toplam işlem','{{ metrics.total }}']] },
-  { id:6, title:'Geçmiş', sub:'Geçmiş mesajlar ve kayıtlar', icon:'fa-clock-rotate-left', route:'/u/history',
-    rows:[] },
+  { id:6, title:'Lisans', sub:'Lisans bilgileri ve durumu', icon:'fa-award', route:'/u/license',
+    rows:[['Lisans','PRO']] },
   { id:7, title:'Raporlar', sub:'Detaylı istatistikler ve raporlar', icon:'fa-chart-column', route:'/u/reports',
     rows:[] },
   { id:8, title:'Bildirimler', sub:'Sistem bildirimleri ve uyarılar', icon:'fa-bell', route:'/u/notifications',
