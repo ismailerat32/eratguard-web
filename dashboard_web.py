@@ -20750,13 +20750,30 @@ textarea::placeholder{color:rgba(242,255,246,.38)}
 
 
 
+
+.eg-logo-wrap-ai{{position:relative;width:42px;height:42px;flex-shrink:0}}
+.eg-logo-wrap-ai .eg-logo{{position:relative;z-index:2}}
+.eg-ring-a-ai{{position:absolute;inset:-9px;border-radius:50%;
+  border:1.5px solid #a78bfa88;border-top-color:transparent;border-bottom-color:transparent;
+  animation:eg-ring-spin-ai 5s linear infinite;pointer-events:none}}
+.eg-ring-b-ai{{position:absolute;inset:-17px;border-radius:50%;
+  border:1px dashed #a78bfa55;animation:eg-ring-spin-rev-ai 9s linear infinite;pointer-events:none}}
+@keyframes eg-ring-spin-ai{{from{{transform:rotate(0)}}to{{transform:rotate(360deg)}}}}
+@keyframes eg-ring-spin-rev-ai{{from{{transform:rotate(360deg)}}to{{transform:rotate(0)}}}}
+.eg-energy-field-ai{{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}}
+.eg-energy-field-ai span{{position:absolute;bottom:-6%;width:3px;height:3px;border-radius:50%;
+  background:#a78bfa;box-shadow:0 0 6px #a78bfa,0 0 12px #a78bfab0;opacity:0;
+  animation:eg-energy-rise-ai linear infinite}}
+@keyframes eg-energy-rise-ai{{0%{{opacity:0;bottom:-6%}}12%{{opacity:.9}}88%{{opacity:.35}}100%{{opacity:0;bottom:106%}}}}
+.eg-wrap{{position:relative;z-index:1}}
 </style>
 </head>
 <body>
+<div class="eg-energy-field-ai" id="eg-energy-field-ai"></div>
 <div class="eg-wrap">
   <div class="eg-top">
     <div class="eg-brand">
-      <div class="eg-logo">AI</div>
+      <div class="eg-logo-wrap-ai"><span class="eg-ring-a-ai"></span><span class="eg-ring-b-ai"></span><div class="eg-logo">AI</div></div>
       <div class="eg-title">
         <b>AI Analiz Merkezi</b>
       </div>
@@ -20980,6 +20997,20 @@ textarea::placeholder{color:rgba(242,255,246,.38)}
 /* ===== ERATGUARD VITES-5B AI ANALYSIS SMS RISK BRIDGE END ===== */
 </script>
 
+<script>
+(function(){{
+  var box = document.getElementById('eg-energy-field-ai');
+  if(!box) return;
+  var n = 14, out = '';
+  for(var i=0;i<n;i++){{
+    var left = (Math.random()*94+3).toFixed(1);
+    var dur = (4 + Math.random()*3).toFixed(2);
+    var delay = (Math.random()*5).toFixed(2);
+    out += '<span style="left:'+left+'%;animation-duration:'+dur+'s;animation-delay:'+delay+'s"></span>';
+  }}
+  box.innerHTML = out;
+}})();
+</script>
 </body>
 </html>"""
     return html.replace("__USERNAME__", str(username)).replace("__PLAN__", str(plan))
@@ -21131,13 +21162,30 @@ html,body{{
   .eg-card{{padding:13px;border-radius:21px}}
   .eg-card .v{{font-size:25px}}
 }}
+
+.eg-logo-wrap-r{{position:relative;width:42px;height:42px;flex-shrink:0}}
+.eg-logo-wrap-r .eg-logo{{position:relative;z-index:2}}
+.eg-ring-a-r{{position:absolute;inset:-9px;border-radius:50%;
+  border:1.5px solid #2dd4bf88;border-top-color:transparent;border-bottom-color:transparent;
+  animation:eg-ring-spin-r 5s linear infinite;pointer-events:none}}
+.eg-ring-b-r{{position:absolute;inset:-17px;border-radius:50%;
+  border:1px dashed #2dd4bf55;animation:eg-ring-spin-rev-r 9s linear infinite;pointer-events:none}}
+@keyframes eg-ring-spin-r{{from{{transform:rotate(0)}}to{{transform:rotate(360deg)}}}}
+@keyframes eg-ring-spin-rev-r{{from{{transform:rotate(360deg)}}to{{transform:rotate(0)}}}}
+.eg-energy-field-r{{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}}
+.eg-energy-field-r span{{position:absolute;bottom:-6%;width:3px;height:3px;border-radius:50%;
+  background:#2dd4bf;box-shadow:0 0 6px #2dd4bf,0 0 12px #2dd4bfb0;opacity:0;
+  animation:eg-energy-rise-r linear infinite}}
+@keyframes eg-energy-rise-r{{0%{{opacity:0;bottom:-6%}}12%{{opacity:.9}}88%{{opacity:.35}}100%{{opacity:0;bottom:106%}}}}
+.eg-wrap{{position:relative;z-index:1}}
 </style>
 </head>
 <body>
+<div class="eg-energy-field-r" id="eg-energy-field-r"></div>
 <div class="eg-wrap">
   <div class="eg-top">
     <div class="eg-brand">
-      <div class="eg-logo">R</div>
+      <div class="eg-logo-wrap-r"><span class="eg-ring-a-r"></span><span class="eg-ring-b-r"></span><div class="eg-logo">R</div></div>
       <div class="eg-title">
         <b>Rapor Merkezi</b>
       </div>
@@ -21263,6 +21311,20 @@ html,body{{
 
 
 </div>
+<script>
+(function(){{
+  var box = document.getElementById('eg-energy-field-r');
+  if(!box) return;
+  var n = 14, out = '';
+  for(var i=0;i<n;i++){{
+    var left = (Math.random()*94+3).toFixed(1);
+    var dur = (4 + Math.random()*3).toFixed(2);
+    var delay = (Math.random()*5).toFixed(2);
+    out += '<span style="left:'+left+'%;animation-duration:'+dur+'s;animation-delay:'+delay+'s"></span>';
+  }}
+  box.innerHTML = out;
+}})();
+</script>
 </body>
 </html>"""
 
@@ -21419,13 +21481,30 @@ html,body{{
   .eg-grid{{grid-template-columns:1fr 1fr;gap:10px}}
   .eg-card{{padding:13px;border-radius:21px}}
 }}
+
+.eg-logo-wrap-l{{position:relative;width:42px;height:42px;flex-shrink:0}}
+.eg-logo-wrap-l .eg-logo{{position:relative;z-index:2}}
+.eg-ring-a-l{{position:absolute;inset:-9px;border-radius:50%;
+  border:1.5px solid #f5c45188;border-top-color:transparent;border-bottom-color:transparent;
+  animation:eg-ring-spin-l 5s linear infinite;pointer-events:none}}
+.eg-ring-b-l{{position:absolute;inset:-17px;border-radius:50%;
+  border:1px dashed #f5c45155;animation:eg-ring-spin-rev-l 9s linear infinite;pointer-events:none}}
+@keyframes eg-ring-spin-l{{from{{transform:rotate(0)}}to{{transform:rotate(360deg)}}}}
+@keyframes eg-ring-spin-rev-l{{from{{transform:rotate(360deg)}}to{{transform:rotate(0)}}}}
+.eg-energy-field-l{{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}}
+.eg-energy-field-l span{{position:absolute;bottom:-6%;width:3px;height:3px;border-radius:50%;
+  background:#f5c451;box-shadow:0 0 6px #f5c451,0 0 12px #f5c451b0;opacity:0;
+  animation:eg-energy-rise-l linear infinite}}
+@keyframes eg-energy-rise-l{{0%{{opacity:0;bottom:-6%}}12%{{opacity:.9}}88%{{opacity:.35}}100%{{opacity:0;bottom:106%}}}}
+.eg-wrap{{position:relative;z-index:1}}
 </style>
 </head>
 <body>
+<div class="eg-energy-field-l" id="eg-energy-field-l"></div>
 <div class="eg-wrap">
   <div class="eg-top">
     <div class="eg-brand">
-      <div class="eg-logo">L</div>
+      <div class="eg-logo-wrap-l"><span class="eg-ring-a-l"></span><span class="eg-ring-b-l"></span><div class="eg-logo">L</div></div>
       <div class="eg-title">
         <b>Lisans Merkezi</b>
       </div>
@@ -21484,6 +21563,20 @@ html,body{{
 
   <div class="eg-note">EratGuard Lisans Merkezi, PRO erişim ve kullanıcı yetkilerini tek ekranda gösterir.</div>
 </div>
+<script>
+(function(){{
+  var box = document.getElementById('eg-energy-field-l');
+  if(!box) return;
+  var n = 14, out = '';
+  for(var i=0;i<n;i++){{
+    var left = (Math.random()*94+3).toFixed(1);
+    var dur = (4 + Math.random()*3).toFixed(2);
+    var delay = (Math.random()*5).toFixed(2);
+    out += '<span style="left:'+left+'%;animation-duration:'+dur+'s;animation-delay:'+delay+'s"></span>';
+  }}
+  box.innerHTML = out;
+}})();
+</script>
 </body>
 </html>"""
 
@@ -21618,13 +21711,30 @@ html,body{{
   .eg-wrap{{padding:18px 14px 28px}}
   .eg-hero h1{{font-size:28px}}
 }}
+
+.eg-logo-wrap-b{{position:relative;width:42px;height:42px;flex-shrink:0}}
+.eg-logo-wrap-b .eg-logo{{position:relative;z-index:2}}
+.eg-ring-a-b{{position:absolute;inset:-9px;border-radius:50%;
+  border:1.5px solid #ffa64d88;border-top-color:transparent;border-bottom-color:transparent;
+  animation:eg-ring-spin-b 5s linear infinite;pointer-events:none}}
+.eg-ring-b-b{{position:absolute;inset:-17px;border-radius:50%;
+  border:1px dashed #ffa64d55;animation:eg-ring-spin-rev-b 9s linear infinite;pointer-events:none}}
+@keyframes eg-ring-spin-b{{from{{transform:rotate(0)}}to{{transform:rotate(360deg)}}}}
+@keyframes eg-ring-spin-rev-b{{from{{transform:rotate(360deg)}}to{{transform:rotate(0)}}}}
+.eg-energy-field-b{{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}}
+.eg-energy-field-b span{{position:absolute;bottom:-6%;width:3px;height:3px;border-radius:50%;
+  background:#ffa64d;box-shadow:0 0 6px #ffa64d,0 0 12px #ffa64db0;opacity:0;
+  animation:eg-energy-rise-b linear infinite}}
+@keyframes eg-energy-rise-b{{0%{{opacity:0;bottom:-6%}}12%{{opacity:.9}}88%{{opacity:.35}}100%{{opacity:0;bottom:106%}}}}
+.eg-wrap{{position:relative;z-index:1}}
 </style>
 </head>
 <body>
+<div class="eg-energy-field-b" id="eg-energy-field-b"></div>
 <div class="eg-wrap">
   <div class="eg-top">
     <div class="eg-brand">
-      <div class="eg-logo">B</div>
+      <div class="eg-logo-wrap-b"><span class="eg-ring-a-b"></span><span class="eg-ring-b-b"></span><div class="eg-logo">B</div></div>
       <div class="eg-title">
         <b>Bildirim Merkezi</b>
       </div>
@@ -21684,6 +21794,20 @@ html,body{{
 
   <div class="eg-note">EratGuard Bildirim Merkezi, güvenlik ve sistem mesajlarını kullanıcıya sade şekilde gösterir.</div>
 </div>
+<script>
+(function(){{
+  var box = document.getElementById('eg-energy-field-b');
+  if(!box) return;
+  var n = 14, out = '';
+  for(var i=0;i<n;i++){{
+    var left = (Math.random()*94+3).toFixed(1);
+    var dur = (4 + Math.random()*3).toFixed(2);
+    var delay = (Math.random()*5).toFixed(2);
+    out += '<span style="left:'+left+'%;animation-duration:'+dur+'s;animation-delay:'+delay+'s"></span>';
+  }}
+  box.innerHTML = out;
+}})();
+</script>
 </body>
 </html>"""
 
@@ -21834,13 +21958,30 @@ html,body{{
   .eg-grid{{grid-template-columns:1fr 1fr;gap:10px}}
   .eg-card{{padding:13px;border-radius:21px}}
 }}
+
+.eg-logo-wrap-t{{position:relative;width:42px;height:42px;flex-shrink:0}}
+.eg-logo-wrap-t .eg-logo{{position:relative;z-index:2}}
+.eg-ring-a-t{{position:absolute;inset:-9px;border-radius:50%;
+  border:1.5px solid #ff6bcb88;border-top-color:transparent;border-bottom-color:transparent;
+  animation:eg-ring-spin-t 5s linear infinite;pointer-events:none}}
+.eg-ring-b-t{{position:absolute;inset:-17px;border-radius:50%;
+  border:1px dashed #ff6bcb55;animation:eg-ring-spin-rev-t 9s linear infinite;pointer-events:none}}
+@keyframes eg-ring-spin-t{{from{{transform:rotate(0)}}to{{transform:rotate(360deg)}}}}
+@keyframes eg-ring-spin-rev-t{{from{{transform:rotate(360deg)}}to{{transform:rotate(0)}}}}
+.eg-energy-field-t{{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}}
+.eg-energy-field-t span{{position:absolute;bottom:-6%;width:3px;height:3px;border-radius:50%;
+  background:#ff6bcb;box-shadow:0 0 6px #ff6bcb,0 0 12px #ff6bcbb0;opacity:0;
+  animation:eg-energy-rise-t linear infinite}}
+@keyframes eg-energy-rise-t{{0%{{opacity:0;bottom:-6%}}12%{{opacity:.9}}88%{{opacity:.35}}100%{{opacity:0;bottom:106%}}}}
+.eg-wrap{{position:relative;z-index:1}}
 </style>
 </head>
 <body>
+<div class="eg-energy-field-t" id="eg-energy-field-t"></div>
 <div class="eg-wrap">
   <div class="eg-top">
     <div class="eg-brand">
-      <div class="eg-logo">T</div>
+      <div class="eg-logo-wrap-t"><span class="eg-ring-a-t"></span><span class="eg-ring-b-t"></span><div class="eg-logo">T</div></div>
       <div class="eg-title">
         <b>Topluluk Merkezi</b>
       </div>
@@ -21901,6 +22042,20 @@ html,body{{
 
   <div class="eg-note">EratGuard Topluluk Merkezi, destek ve kullanıcı iletişimini premium yapıya taşır.</div>
 </div>
+<script>
+(function(){{
+  var box = document.getElementById('eg-energy-field-t');
+  if(!box) return;
+  var n = 14, out = '';
+  for(var i=0;i<n;i++){{
+    var left = (Math.random()*94+3).toFixed(1);
+    var dur = (4 + Math.random()*3).toFixed(2);
+    var delay = (Math.random()*5).toFixed(2);
+    out += '<span style="left:'+left+'%;animation-duration:'+dur+'s;animation-delay:'+delay+'s"></span>';
+  }}
+  box.innerHTML = out;
+}})();
+</script>
 </body>
 </html>"""
 
@@ -22050,13 +22205,30 @@ html,body{{
   .eg-grid{{grid-template-columns:1fr 1fr;gap:10px}}
   .eg-card{{padding:13px;border-radius:21px}}
 }}
+
+.eg-logo-wrap-a{{position:relative;width:42px;height:42px;flex-shrink:0}}
+.eg-logo-wrap-a .eg-logo{{position:relative;z-index:2}}
+.eg-ring-a-a{{position:absolute;inset:-9px;border-radius:50%;
+  border:1.5px solid #7dd3fc88;border-top-color:transparent;border-bottom-color:transparent;
+  animation:eg-ring-spin-a 5s linear infinite;pointer-events:none}}
+.eg-ring-b-a{{position:absolute;inset:-17px;border-radius:50%;
+  border:1px dashed #7dd3fc55;animation:eg-ring-spin-rev-a 9s linear infinite;pointer-events:none}}
+@keyframes eg-ring-spin-a{{from{{transform:rotate(0)}}to{{transform:rotate(360deg)}}}}
+@keyframes eg-ring-spin-rev-a{{from{{transform:rotate(360deg)}}to{{transform:rotate(0)}}}}
+.eg-energy-field-a{{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}}
+.eg-energy-field-a span{{position:absolute;bottom:-6%;width:3px;height:3px;border-radius:50%;
+  background:#7dd3fc;box-shadow:0 0 6px #7dd3fc,0 0 12px #7dd3fcb0;opacity:0;
+  animation:eg-energy-rise-a linear infinite}}
+@keyframes eg-energy-rise-a{{0%{{opacity:0;bottom:-6%}}12%{{opacity:.9}}88%{{opacity:.35}}100%{{opacity:0;bottom:106%}}}}
+.eg-wrap{{position:relative;z-index:1}}
 </style>
 </head>
 <body>
+<div class="eg-energy-field-a" id="eg-energy-field-a"></div>
 <div class="eg-wrap">
   <div class="eg-top">
     <div class="eg-brand">
-      <div class="eg-logo">A</div>
+      <div class="eg-logo-wrap-a"><span class="eg-ring-a-a"></span><span class="eg-ring-b-a"></span><div class="eg-logo">A</div></div>
       <div class="eg-title">
         <b>Ayarlar Merkezi</b>
       </div>
@@ -22105,6 +22277,20 @@ html,body{{
 
   <div class="eg-note">EratGuard Ayarlar Merkezi, kullanıcı hesabı ve güvenlik tercihlerini premium yapıda gösterir.</div>
 </div>
+<script>
+(function(){{
+  var box = document.getElementById('eg-energy-field-a');
+  if(!box) return;
+  var n = 14, out = '';
+  for(var i=0;i<n;i++){{
+    var left = (Math.random()*94+3).toFixed(1);
+    var dur = (4 + Math.random()*3).toFixed(2);
+    var delay = (Math.random()*5).toFixed(2);
+    out += '<span style="left:'+left+'%;animation-duration:'+dur+'s;animation-delay:'+delay+'s"></span>';
+  }}
+  box.innerHTML = out;
+}})();
+</script>
 </body>
 </html>"""
 
