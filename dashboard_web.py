@@ -20434,6 +20434,22 @@ html,body{{
   .eg-card .v{{font-size:15px}}
 }}
 
+/* ===== ERATGUARD HOLO TOUCH V1 START ===== */
+.eg-logo{{position:relative}}
+.eg-logo::after{{content:"";position:absolute;inset:-6px;border-radius:19px;
+  border:1px solid rgba(34,231,255,.35);animation:eg-logo-pulse 2.4s ease-in-out infinite;pointer-events:none}}
+@keyframes eg-logo-pulse{{0%,100%{{opacity:.4;transform:scale(1)}}50%{{opacity:.9;transform:scale(1.06)}}}}
+.eg-hero{{position:relative;overflow:hidden}}
+.eg-hero::after{{content:"";position:absolute;left:-25%;top:0;width:25%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(34,231,255,.07),transparent);
+  animation:eg-hero-sweep 6s ease-in-out infinite;pointer-events:none}}
+@keyframes eg-hero-sweep{{0%{{transform:translateX(0)}}100%{{transform:translateX(500%)}}}}
+.dot{{box-shadow:0 0 10px rgba(35,255,137,.85), 0 0 20px rgba(35,255,137,.4)}}
+.dot.c{{box-shadow:0 0 10px rgba(34,231,255,.85), 0 0 20px rgba(34,231,255,.4)}}
+.eg-btn{{transition:transform .15s ease, border-color .15s ease}}
+.eg-btn:active{{transform:scale(.98);border-color:rgba(34,231,255,.4)}}
+/* ===== ERATGUARD HOLO TOUCH V1 END ===== */
+
 
 
 
