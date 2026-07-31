@@ -11950,6 +11950,20 @@ button{width:100%;margin-top:18px;padding:14px;border:0;border-radius:14px;backg
 <input name="password" type="password" autocomplete="current-password" required>
 <button type="submit">Giriş Yap</button>
 </form>
+<script>
+(function(){{
+  var box = document.getElementById('eg-energy-field');
+  if(!box) return;
+  var n = 16, html = '';
+  for(var i=0;i<n;i++){{
+    var left = (Math.random()*94+3).toFixed(1);
+    var dur = (4 + Math.random()*3).toFixed(2);
+    var delay = (Math.random()*5).toFixed(2);
+    html += '<span style="left:'+left+'%;animation-duration:'+dur+'s;animation-delay:'+delay+'s"></span>';
+  }}
+  box.innerHTML = html;
+}})();
+</script>
 </body>
 </html>"""
 
@@ -20450,6 +20464,27 @@ html,body{{
 .eg-btn:active{{transform:scale(.98);border-color:rgba(34,231,255,.4)}}
 /* ===== ERATGUARD HOLO TOUCH V1 END ===== */
 
+/* ===== ERATGUARD ENERGY FLOW V1 START ===== */
+.eg-logo-wrap{{position:relative;width:42px;height:42px;flex-shrink:0}}
+.eg-logo-wrap .eg-logo{{position:relative;z-index:2}}
+.eg-ring-a{{position:absolute;inset:-9px;border-radius:50%;
+  border:1.5px solid rgba(34,231,255,.55);border-top-color:transparent;border-bottom-color:transparent;
+  animation:eg-ring-spin 5s linear infinite;pointer-events:none}}
+.eg-ring-b{{position:absolute;inset:-17px;border-radius:50%;
+  border:1px dashed rgba(35,255,137,.35);
+  animation:eg-ring-spin-rev 9s linear infinite;pointer-events:none}}
+@keyframes eg-ring-spin{{from{{transform:rotate(0)}}to{{transform:rotate(360deg)}}}}
+@keyframes eg-ring-spin-rev{{from{{transform:rotate(360deg)}}to{{transform:rotate(0)}}}}
+
+.eg-energy-field{{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}}
+.eg-energy-field span{{position:absolute;bottom:-6%;width:3px;height:3px;border-radius:50%;
+  background:var(--cyan);box-shadow:0 0 6px var(--cyan),0 0 12px rgba(34,231,255,.7);opacity:0;
+  animation:eg-energy-rise linear infinite}}
+@keyframes eg-energy-rise{{0%{{opacity:0;bottom:-6%}}12%{{opacity:.9}}88%{{opacity:.35}}100%{{opacity:0;bottom:106%}}}}
+.eg-wrap{{position:relative;z-index:1}}
+/* ===== ERATGUARD ENERGY FLOW V1 END ===== */
+
+
 
 
 
@@ -20484,10 +20519,11 @@ html,body{{
 </style>
 </head>
 <body>
+<div class="eg-energy-field" id="eg-energy-field"></div>
 <div class="eg-wrap">
   <div class="eg-top">
     <div class="eg-brand">
-      <div class="eg-logo">E</div>
+      <div class="eg-logo-wrap"><span class="eg-ring-a"></span><span class="eg-ring-b"></span><div class="eg-logo">E</div></div>
       <div class="eg-title">
         <b>Koruma Merkezi</b>
       </div>
