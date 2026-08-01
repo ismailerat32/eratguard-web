@@ -3335,22 +3335,22 @@ def get_plan_info(plan):
         "starter_monthly": {
             "label": "Starter Shield",
             "period": "Aylık",
-            "price": "150 TL / ay"
+            "price": "299 TL / ay"
         },
         "pro_yearly": {
             "label": "Shield Pro+",
             "period": "Yıllık",
-            "price": "1000 TL / yıl"
+            "price": "2500 TL / yıl"
         },
         "lifetime": {
             "label": "Lifetime Shield",
             "period": "Tek sefer",
-            "price": "2000 TL"
+            "price": "5000 TL"
         },
         "pro_monthly": {
             "label": "Starter Shield",
             "period": "Aylık",
-            "price": "150 TL / ay"
+            "price": "299 TL / ay"
         }
     }
     return plans.get(plan, plans["pro_yearly"])
