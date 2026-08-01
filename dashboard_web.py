@@ -21367,6 +21367,33 @@ def _eg_vites2f_license_center_html():
         username = "Erat@32"
         plan = "PRO"
 
+    plans_catalog = [
+        {"key": "starter_monthly", "label": "Starter Shield", "period": "Aylik", "price": "150 TL", "unit": "/ ay", "desc": "Temel SMS koruma ve spam filtresi."},
+        {"key": "pro_yearly", "label": "Shield Pro+", "period": "Yillik", "price": "1000 TL", "unit": "/ yil", "desc": "Tam AI analiz, gelismis raporlama ve oncelikli destek."},
+        {"key": "lifetime", "label": "Lifetime Shield", "period": "Tek seferlik", "price": "2000 TL", "unit": "", "desc": "Omur boyu tam erisim, tum gelecek guncellemeler dahil."},
+    ]
+
+    plan_upper = (plan or "").upper()
+    plan_cards_html = ""
+    for p in plans_catalog:
+        is_current = plan_upper in (p["label"].upper(), p["key"].upper())
+        card_class = "eg-plan-card current" if is_current else "eg-plan-card"
+        if is_current:
+            action_html = '<span class="eg-plan-btn active">AKTIF PAKET</span>'
+        else:
+            action_html = '<a class="eg-plan-btn buy" href="/u/checkout?plan=' + p["key"] + '">Bu Pakete Gec</a>'
+        plan_cards_html += (
+            '<div class="' + card_class + '">'
+            '<div class="eg-plan-head">'
+            '<div><div class="eg-plan-name">' + p["label"] + '</div>'
+            '<div class="eg-plan-period">' + p["period"] + '</div></div>'
+            '<div class="eg-plan-price">' + p["price"] + '<span style="font-size:11px;color:var(--muted)">' + p["unit"] + '</span></div>'
+            '</div>'
+            '<div class="eg-plan-desc">' + p["desc"] + '</div>'
+            + action_html +
+            '</div>'
+        )
+
     return f"""<!doctype html>
 <html lang="tr">
 <head>
@@ -21378,6 +21405,7 @@ def _eg_vites2f_license_center_html():
   --green:#23ff89;
   --cyan:#22e7ff;
   --yellow:#ffd166;
+  --gold:#f5c451;
   --text:#f2fff6;
   --muted:rgba(242,255,246,.64);
   --line:rgba(35,255,137,.18);
@@ -21395,7 +21423,7 @@ html,body{{
   font-family:Arial,Helvetica,sans-serif;
   overflow-x:hidden;
 }}
-.eg-wrap{{min-height:100vh;padding:22px 18px 34px}}
+.eg-wrap{{min-height:100vh;padding:22px 18px 34px;position:relative;z-index:1}}
 .eg-top{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}}
 .eg-brand{{display:flex;align-items:center;gap:12px}}
 .eg-logo{{
@@ -21420,6 +21448,7 @@ html,body{{
 .eg-hero h1{{margin:0 0 8px;font-size:31px;letter-spacing:-1.2px;line-height:1}}
 .eg-hero p{{margin:0;color:var(--muted);font-size:13px;line-height:1.55}}
 .eg-license{{
+  position:relative;overflow:hidden;
   border:1px solid rgba(35,255,137,.22);
   border-radius:30px;
   padding:20px;
@@ -21427,6 +21456,10 @@ html,body{{
   box-shadow:0 0 40px rgba(35,255,137,.08), inset 0 0 26px rgba(35,255,137,.04);
   margin-bottom:15px;
 }}
+.eg-license::after{{content:"";position:absolute;top:-60%;left:-25%;width:35%;height:220%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.09),transparent);
+  animation:eg-shimmer 5s ease-in-out infinite;pointer-events:none}}
+@keyframes eg-shimmer{{0%{{transform:translateX(-40%)}}100%{{transform:translateX(430%)}}}}
 .eg-license .label{{font-size:10px;font-weight:1000;letter-spacing:.18em;color:var(--cyan);margin-bottom:8px}}
 .eg-license .plan{{font-size:42px;font-weight:1000;letter-spacing:-2px;line-height:.95;color:var(--green)}}
 .eg-license .state{{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.5}}
@@ -21443,6 +21476,22 @@ html,body{{
 .green{{color:var(--green)}}
 .cyan{{color:var(--cyan)}}
 .yellow{{color:var(--yellow)}}
+.eg-section-title{{margin:26px 0 4px;font-size:15px;font-weight:1000;letter-spacing:-.2px}}
+.eg-section-sub{{margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.5}}
+.eg-plans{{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px}}
+.eg-plan-card{{position:relative;border-radius:24px;padding:18px;border:1px solid rgba(245,196,81,.24);
+  background:linear-gradient(180deg,rgba(245,196,81,.08),rgba(2,13,10,.74));
+  box-shadow:inset 0 0 20px rgba(245,196,81,.05)}}
+.eg-plan-card.current{{border-color:rgba(35,255,137,.5);
+  box-shadow:0 0 30px rgba(35,255,137,.15),inset 0 0 20px rgba(35,255,137,.08)}}
+.eg-plan-head{{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}}
+.eg-plan-name{{font-size:16px;font-weight:1000}}
+.eg-plan-period{{font-size:11px;color:var(--muted);margin-top:2px}}
+.eg-plan-price{{font-size:21px;font-weight:1000;color:var(--gold);white-space:nowrap}}
+.eg-plan-desc{{font-size:12px;color:var(--muted);margin:10px 0 14px;line-height:1.5}}
+.eg-plan-btn{{display:block;text-align:center;text-decoration:none;border-radius:16px;padding:12px;font-size:13px;font-weight:1000}}
+.eg-plan-btn.buy{{background:linear-gradient(135deg,var(--gold),#ffe6a8);color:#1a1200}}
+.eg-plan-btn.active{{background:rgba(35,255,137,.14);color:var(--green);border:1px solid rgba(35,255,137,.4)}}
 .eg-list{{
   border:1px solid rgba(34,231,255,.16);
   border-radius:26px;
@@ -21481,7 +21530,6 @@ html,body{{
   .eg-grid{{grid-template-columns:1fr 1fr;gap:10px}}
   .eg-card{{padding:13px;border-radius:21px}}
 }}
-
 .eg-logo-wrap-l{{position:relative;width:42px;height:42px;flex-shrink:0}}
 .eg-logo-wrap-l .eg-logo{{position:relative;z-index:2}}
 .eg-ring-a-l{{position:absolute;inset:-9px;border-radius:50%;
@@ -21496,7 +21544,6 @@ html,body{{
   background:#f5c451;box-shadow:0 0 6px #f5c451,0 0 12px #f5c451b0;opacity:0;
   animation:eg-energy-rise-l linear infinite}}
 @keyframes eg-energy-rise-l{{0%{{opacity:0;bottom:-6%}}12%{{opacity:.9}}88%{{opacity:.35}}100%{{opacity:0;bottom:106%}}}}
-.eg-wrap{{position:relative;z-index:1}}
 </style>
 </head>
 <body>
@@ -21514,54 +21561,58 @@ html,body{{
 
   <section class="eg-hero">
     <h1>Lisans aktif.</h1>
-    <p>{username} hesabının koruma, AI analiz ve rapor özellikleri PRO lisans üzerinden yönetilir.</p>
+    <p>{username} hesabinin koruma, AI analiz ve rapor ozellikleri PRO lisans uzerinden yonetilir.</p>
   </section>
 
   <section class="eg-license">
-    <div class="label">AKTİF PAKET</div>
+    <div class="label">AKTIF PAKET</div>
     <div class="plan">{plan}</div>
-    <div class="state">Bu hesap için EratGuard güvenlik katmanları aktif durumda.</div>
+    <div class="state">Bu hesap icin EratGuard guvenlik katmanlari aktif durumda.</div>
   </section>
 
   <div class="eg-grid">
     <div class="eg-card">
       <div class="k">KORUMA</div>
-      <div class="v green">AÇIK</div>
+      <div class="v green">ACIK</div>
     </div>
     <div class="eg-card">
-      <div class="k">AI ANALİZ</div>
-      <div class="v cyan">AÇIK</div>
+      <div class="k">AI ANALIZ</div>
+      <div class="v cyan">ACIK</div>
     </div>
     <div class="eg-card">
       <div class="k">RAPORLAR</div>
-      <div class="v green">AÇIK</div>
+      <div class="v green">ACIK</div>
     </div>
     <div class="eg-card">
       <div class="k">DURUM</div>
-      <div class="v yellow">GEÇERLİ</div>
+      <div class="v yellow">GECERLI</div>
     </div>
   </div>
 
+  <div class="eg-section-title">Paketler ve Yukseltme</div>
+  <p class="eg-section-sub">Ihtiyacina gore koruma seviyeni degistir. Tum paketler ayni gun icinde aktif olur.</p>
+  <div class="eg-plans">
+    {plan_cards_html}
+  </div>
+
   <section class="eg-list">
-    <div class="eg-row"><b>Kullanıcı</b><span>{username}</span></div>
+    <div class="eg-row"><b>Kullanici</b><span>{username}</span></div>
     <div class="eg-row"><b>Lisans tipi</b><span>{plan}</span></div>
-    <div class="eg-row"><b>Admin bağlantısı</b><span>HAZIR</span></div>
-    <div class="eg-row"><b>Sistem erişimi</b><span>AKTİF</span></div>
-    <!-- ERATGUARD VITES-4C SETTINGS SMS CONTROL LINK START -->
+    <div class="eg-row"><b>Admin baglantisi</b><span>HAZIR</span></div>
+    <div class="eg-row"><b>Sistem erisimi</b><span>AKTIF</span></div>
     <a class="eg-row" href="/native/sms-control" style="text-decoration:none;color:inherit;">
-      <b>Varsayılan SMS</b><span>HAZIRLIK</span>
+      <b>Varsayilan SMS</b><span>HAZIRLIK</span>
     </a>
-    <!-- ERATGUARD VITES-4C SETTINGS SMS CONTROL LINK END -->
   </section>
 
   <div class="eg-actions">
-    <a class="eg-btn" href="/u/protection">Koruma Merkezine Git <span>→</span></a>
-    <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>→</span></a>
+    <a class="eg-btn" href="/u/protection">Koruma Merkezine Git <span>&rarr;</span></a>
+    <a class="eg-btn" href="/u/reports">Rapor Merkezine Git <span>&rarr;</span></a>
   </div>
 
-  <a class="eg-back" href="/u/eg-panel">← Ana Ekrana Dön</a>
+  <a class="eg-back" href="/u/eg-panel">&larr; Ana Ekrana Don</a>
 
-  <div class="eg-note">EratGuard Lisans Merkezi, PRO erişim ve kullanıcı yetkilerini tek ekranda gösterir.</div>
+  <div class="eg-note">EratGuard Lisans Merkezi, PRO erisim, paket secenekleri ve kullanici yetkilerini tek ekranda gosterir.</div>
 </div>
 <script>
 (function(){{
