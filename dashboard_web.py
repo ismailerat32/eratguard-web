@@ -21368,28 +21368,66 @@ def _eg_vites2f_license_center_html():
         plan = "PRO"
 
     plans_catalog = [
-        {"key": "starter_monthly", "label": "Starter Shield", "period": "Aylik", "price": "150 TL", "unit": "/ ay", "desc": "Temel SMS koruma ve spam filtresi."},
-        {"key": "pro_yearly", "label": "Shield Pro+", "period": "Yillik", "price": "1000 TL", "unit": "/ yil", "desc": "Tam AI analiz, gelismis raporlama ve oncelikli destek."},
-        {"key": "lifetime", "label": "Lifetime Shield", "period": "Tek seferlik", "price": "2000 TL", "unit": "", "desc": "Omur boyu tam erisim, tum gelecek guncellemeler dahil."},
+        {
+            "key": "starter_monthly", "label": "Starter Shield", "period": "Aylik",
+            "price": "299 TL", "unit": "/ ay", "badge": None,
+            "features": ["Temel SMS koruma", "Spam filtresi", "Gunluk tarama raporu", "E-posta destek"],
+        },
+        {
+            "key": "pro_yearly", "label": "Shield Pro+", "period": "Yillik",
+            "price": "2500 TL", "unit": "/ yil", "badge": "EN POPULER",
+            "features": ["Tam AI risk analizi", "Gelismis raporlama", "Sinirsiz tarama", "Oncelikli destek", "Yillik planla tasarruf"],
+        },
+        {
+            "key": "lifetime", "label": "Lifetime Shield", "period": "Tek seferlik",
+            "price": "5000 TL", "unit": "", "badge": None,
+            "features": ["Omur boyu tam erisim", "Tum gelecek guncellemeler", "VIP oncelikli destek", "Aile hesabi ekleme"],
+        },
     ]
 
     plan_upper = (plan or "").upper()
+    if plan_upper == "PRO":
+        current_key = "pro_yearly"
+    else:
+        current_key = None
+        for p in plans_catalog:
+            if plan_upper in (p["label"].upper(), p["key"].upper()):
+                current_key = p["key"]
+                break
+
     plan_cards_html = ""
     for p in plans_catalog:
-        is_current = plan_upper in (p["label"].upper(), p["key"].upper())
-        card_class = "eg-plan-card current" if is_current else "eg-plan-card"
+        is_current = p["key"] == current_key
+        classes = "eg-plan-card"
+        if is_current:
+            classes += " current"
+        if p["badge"]:
+            classes += " popular"
+
+        badge_html = ""
+        if is_current:
+            badge_html = '<span class="eg-plan-tag active-tag">MEVCUT PAKETINIZ</span>'
+        elif p["badge"]:
+            badge_html = '<span class="eg-plan-tag popular-tag">' + p["badge"] + '</span>'
+
         if is_current:
             action_html = '<span class="eg-plan-btn active">AKTIF PAKET</span>'
         else:
             action_html = '<a class="eg-plan-btn buy" href="/u/checkout?plan=' + p["key"] + '">Bu Pakete Gec</a>'
+
+        features_html = "".join(
+            '<li><span class="eg-check">&#10003;</span>' + feat + '</li>' for feat in p["features"]
+        )
+
         plan_cards_html += (
-            '<div class="' + card_class + '">'
+            '<div class="' + classes + '">'
+            + badge_html +
             '<div class="eg-plan-head">'
             '<div><div class="eg-plan-name">' + p["label"] + '</div>'
             '<div class="eg-plan-period">' + p["period"] + '</div></div>'
-            '<div class="eg-plan-price">' + p["price"] + '<span style="font-size:11px;color:var(--muted)">' + p["unit"] + '</span></div>'
+            '<div class="eg-plan-price">' + p["price"] + '<span class="eg-plan-unit">' + p["unit"] + '</span></div>'
             '</div>'
-            '<div class="eg-plan-desc">' + p["desc"] + '</div>'
+            '<ul class="eg-plan-features">' + features_html + '</ul>'
             + action_html +
             '</div>'
         )
@@ -21476,22 +21514,35 @@ html,body{{
 .green{{color:var(--green)}}
 .cyan{{color:var(--cyan)}}
 .yellow{{color:var(--yellow)}}
-.eg-section-title{{margin:26px 0 4px;font-size:15px;font-weight:1000;letter-spacing:-.2px}}
-.eg-section-sub{{margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.5}}
-.eg-plans{{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px}}
-.eg-plan-card{{position:relative;border-radius:24px;padding:18px;border:1px solid rgba(245,196,81,.24);
-  background:linear-gradient(180deg,rgba(245,196,81,.08),rgba(2,13,10,.74));
-  box-shadow:inset 0 0 20px rgba(245,196,81,.05)}}
+.eg-section-title{{margin:26px 0 4px;font-size:16px;font-weight:1000;letter-spacing:-.2px}}
+.eg-section-sub{{margin:0 0 16px;color:var(--muted);font-size:12px;line-height:1.5}}
+.eg-plans{{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:18px}}
+.eg-plan-card{{position:relative;border-radius:26px;padding:20px;border:1px solid rgba(245,196,81,.22);
+  background:linear-gradient(180deg,rgba(245,196,81,.06),rgba(2,13,10,.76));
+  box-shadow:inset 0 0 20px rgba(245,196,81,.04)}}
+.eg-plan-card.popular{{border-color:rgba(245,196,81,.55);
+  box-shadow:0 0 34px rgba(245,196,81,.18),inset 0 0 22px rgba(245,196,81,.08);
+  transform:scale(1.015)}}
 .eg-plan-card.current{{border-color:rgba(35,255,137,.5);
   box-shadow:0 0 30px rgba(35,255,137,.15),inset 0 0 20px rgba(35,255,137,.08)}}
-.eg-plan-head{{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}}
-.eg-plan-name{{font-size:16px;font-weight:1000}}
+.eg-plan-tag{{position:absolute;top:-11px;left:20px;font-size:10px;font-weight:1000;letter-spacing:.1em;
+  padding:5px 12px;border-radius:999px}}
+.eg-plan-tag.popular-tag{{background:linear-gradient(135deg,var(--gold),#ffe6a8);color:#1a1200}}
+.eg-plan-tag.active-tag{{background:rgba(35,255,137,.9);color:#00170b}}
+.eg-plan-head{{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:4px}}
+.eg-plan-name{{font-size:17px;font-weight:1000}}
 .eg-plan-period{{font-size:11px;color:var(--muted);margin-top:2px}}
-.eg-plan-price{{font-size:21px;font-weight:1000;color:var(--gold);white-space:nowrap}}
-.eg-plan-desc{{font-size:12px;color:var(--muted);margin:10px 0 14px;line-height:1.5}}
-.eg-plan-btn{{display:block;text-align:center;text-decoration:none;border-radius:16px;padding:12px;font-size:13px;font-weight:1000}}
+.eg-plan-price{{font-size:24px;font-weight:1000;color:var(--gold);white-space:nowrap}}
+.eg-plan-unit{{font-size:11px;color:var(--muted);font-weight:700}}
+.eg-plan-features{{list-style:none;margin:14px 0 16px;padding:0;display:flex;flex-direction:column;gap:8px}}
+.eg-plan-features li{{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text)}}
+.eg-check{{color:var(--green);font-weight:1000;font-size:13px}}
+.eg-plan-btn{{display:block;text-align:center;text-decoration:none;border-radius:16px;padding:13px;font-size:13px;font-weight:1000}}
 .eg-plan-btn.buy{{background:linear-gradient(135deg,var(--gold),#ffe6a8);color:#1a1200}}
 .eg-plan-btn.active{{background:rgba(35,255,137,.14);color:var(--green);border:1px solid rgba(35,255,137,.4)}}
+.eg-trust{{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 18px;font-size:11px;color:var(--muted)}}
+.eg-trust span{{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  border-radius:999px;padding:7px 11px}}
 .eg-list{{
   border:1px solid rgba(34,231,255,.16);
   border-radius:26px;
@@ -21570,6 +21621,17 @@ html,body{{
     <div class="state">Bu hesap icin EratGuard guvenlik katmanlari aktif durumda.</div>
   </section>
 
+  <div class="eg-section-title">Paketler ve Yukseltme</div>
+  <p class="eg-section-sub">Ihtiyacina gore koruma seviyeni degistir. Tum paketler ayni gun icinde aktif olur.</p>
+  <div class="eg-plans">
+    {plan_cards_html}
+  </div>
+  <div class="eg-trust">
+    <span>&#128274; Guvenli Odeme</span>
+    <span>&#8635; Istedigin An Iptal Et</span>
+    <span>&#9889; Aninda Aktivasyon</span>
+  </div>
+
   <div class="eg-grid">
     <div class="eg-card">
       <div class="k">KORUMA</div>
@@ -21587,12 +21649,6 @@ html,body{{
       <div class="k">DURUM</div>
       <div class="v yellow">GECERLI</div>
     </div>
-  </div>
-
-  <div class="eg-section-title">Paketler ve Yukseltme</div>
-  <p class="eg-section-sub">Ihtiyacina gore koruma seviyeni degistir. Tum paketler ayni gun icinde aktif olur.</p>
-  <div class="eg-plans">
-    {plan_cards_html}
   </div>
 
   <section class="eg-list">
