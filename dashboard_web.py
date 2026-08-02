@@ -21437,164 +21437,167 @@ def _eg_vites2f_license_center_html():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>EratGuard PRO - Vites-2F Lisans Merkezi</title>
+<title>EratGuard PRO - Lisans Merkezi</title>
 <style>
 :root{{
   --green:#23ff89;
   --cyan:#22e7ff;
-  --yellow:#ffd166;
   --gold:#f5c451;
-  --text:#f2fff6;
-  --muted:rgba(242,255,246,.64);
-  --line:rgba(35,255,137,.18);
-  --card:rgba(4,18,12,.74);
+  --gold-soft:#e6b84a;
+  --text:#f4fff7;
+  --muted:rgba(244,255,247,.58);
+  --line:rgba(245,196,81,.16);
+  --card:rgba(9,20,14,.82);
 }}
 *{{box-sizing:border-box}}
 html,body{{
   margin:0;
   min-height:100%;
   background:
-    radial-gradient(circle at 82% 18%,rgba(34,231,255,.15),transparent 34%),
-    radial-gradient(circle at 14% 88%,rgba(35,255,137,.13),transparent 40%),
-    linear-gradient(135deg,#020705,#030d09 48%,#010403);
+    radial-gradient(circle at 84% 14%,rgba(245,196,81,.09),transparent 36%),
+    radial-gradient(circle at 10% 90%,rgba(35,255,137,.08),transparent 42%),
+    linear-gradient(150deg,#050b07,#03100a 55%,#020604);
   color:var(--text);
-  font-family:Arial,Helvetica,sans-serif;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
+  letter-spacing:.1px;
 }}
-.eg-wrap{{min-height:100vh;padding:22px 18px 34px;position:relative;z-index:1}}
-.eg-top{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}}
-.eg-brand{{display:flex;align-items:center;gap:12px}}
+.eg-wrap{{min-height:100vh;padding:24px 20px 40px;position:relative;z-index:1;max-width:560px;margin:0 auto}}
+.eg-top{{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:26px}}
+.eg-brand{{display:flex;align-items:center;gap:13px}}
 .eg-logo{{
-  width:42px;height:42px;border-radius:15px;display:grid;place-items:center;
-  background:linear-gradient(135deg,var(--green),var(--cyan));
-  color:#00170b;font-weight:1000;
-  box-shadow:0 0 28px rgba(35,255,137,.22);
+  width:40px;height:40px;border-radius:13px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--gold),#fff0c2);
+  color:#20160a;font-weight:800;font-size:15px;
+  box-shadow:0 4px 20px rgba(245,196,81,.2);
 }}
-.eg-title small{{display:block;color:var(--cyan);font-size:10px;font-weight:1000;letter-spacing:.18em}}
-.eg-title b{{display:block;font-size:17px;letter-spacing:-.2px}}
+.eg-title small{{display:block;color:var(--gold);font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}}
+.eg-title b{{display:block;font-size:16px;font-weight:700;letter-spacing:-.1px}}
 .eg-pill{{
-  border:1px solid var(--line);border-radius:999px;padding:9px 11px;
-  background:rgba(3,18,10,.55);font-size:10px;font-weight:1000;
-  letter-spacing:.12em;color:var(--green);white-space:nowrap;
+  border:1px solid rgba(245,196,81,.28);border-radius:999px;padding:7px 13px;
+  background:rgba(245,196,81,.06);font-size:10px;font-weight:700;
+  letter-spacing:.1em;color:var(--gold);white-space:nowrap;text-transform:uppercase;
 }}
 .eg-hero{{
-  border:1px solid var(--line);border-radius:30px;padding:22px;
-  background:linear-gradient(180deg,rgba(4,22,14,.82),rgba(2,8,6,.72));
-  box-shadow:0 18px 70px rgba(0,0,0,.38), inset 0 0 28px rgba(35,255,137,.04);
-  margin-bottom:16px;
+  border:1px solid rgba(255,255,255,.06);border-radius:22px;padding:26px 24px;
+  background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0));
+  margin-bottom:18px;
 }}
-.eg-hero h1{{margin:0 0 8px;font-size:31px;letter-spacing:-1.2px;line-height:1}}
-.eg-hero p{{margin:0;color:var(--muted);font-size:13px;line-height:1.55}}
+.eg-hero h1{{margin:0 0 10px;font-size:27px;font-weight:800;letter-spacing:-.6px;line-height:1.12}}
+.eg-hero p{{margin:0;color:var(--muted);font-size:14px;line-height:1.6;font-weight:400}}
 .eg-license{{
   position:relative;overflow:hidden;
-  border:1px solid rgba(35,255,137,.22);
-  border-radius:30px;
-  padding:20px;
-  background:linear-gradient(180deg,rgba(35,255,137,.10),rgba(2,13,10,.70));
-  box-shadow:0 0 40px rgba(35,255,137,.08), inset 0 0 26px rgba(35,255,137,.04);
-  margin-bottom:15px;
+  border:1px solid rgba(245,196,81,.22);
+  border-radius:22px;
+  padding:24px;
+  background:linear-gradient(165deg,rgba(245,196,81,.07),rgba(9,20,14,.9));
+  margin-bottom:18px;
 }}
-.eg-license::after{{content:"";position:absolute;top:-60%;left:-25%;width:35%;height:220%;
-  background:linear-gradient(100deg,transparent,rgba(255,255,255,.09),transparent);
-  animation:eg-shimmer 5s ease-in-out infinite;pointer-events:none}}
-@keyframes eg-shimmer{{0%{{transform:translateX(-40%)}}100%{{transform:translateX(430%)}}}}
-.eg-license .label{{font-size:10px;font-weight:1000;letter-spacing:.18em;color:var(--cyan);margin-bottom:8px}}
-.eg-license .plan{{font-size:42px;font-weight:1000;letter-spacing:-2px;line-height:.95;color:var(--green)}}
-.eg-license .state{{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.5}}
-.eg-grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}}
+.eg-license .label{{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--gold);margin-bottom:10px;text-transform:uppercase}}
+.eg-license .plan{{font-size:34px;font-weight:800;letter-spacing:-1px;line-height:1;color:var(--text)}}
+.eg-license .state{{margin-top:12px;color:var(--muted);font-size:13px;line-height:1.55;font-weight:400}}
+.eg-grid{{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}}
 .eg-card{{
-  border:1px solid var(--line);
-  border-radius:24px;
-  padding:15px;
+  border:1px solid rgba(255,255,255,.05);
+  border-radius:18px;
+  padding:16px;
   background:var(--card);
-  box-shadow:inset 0 0 20px rgba(35,255,137,.035);
 }}
-.eg-card .k{{font-size:10px;font-weight:1000;letter-spacing:.16em;color:var(--muted);margin-bottom:8px}}
-.eg-card .v{{font-size:17px;font-weight:1000}}
+.eg-card .k{{font-size:9.5px;font-weight:700;letter-spacing:.14em;color:var(--muted);margin-bottom:9px;text-transform:uppercase}}
+.eg-card .v{{font-size:15px;font-weight:700}}
 .green{{color:var(--green)}}
 .cyan{{color:var(--cyan)}}
-.yellow{{color:var(--yellow)}}
-.eg-section-title{{margin:26px 0 4px;font-size:16px;font-weight:1000;letter-spacing:-.2px}}
-.eg-section-sub{{margin:0 0 16px;color:var(--muted);font-size:12px;line-height:1.5}}
-.eg-plans{{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:18px}}
-.eg-plan-card{{position:relative;border-radius:26px;padding:20px;border:1px solid rgba(245,196,81,.22);
-  background:linear-gradient(180deg,rgba(245,196,81,.06),rgba(2,13,10,.76));
-  box-shadow:inset 0 0 20px rgba(245,196,81,.04)}}
-.eg-plan-card.popular{{border-color:rgba(245,196,81,.55);
-  box-shadow:0 0 34px rgba(245,196,81,.18),inset 0 0 22px rgba(245,196,81,.08);
-  transform:scale(1.015)}}
-.eg-plan-card.current{{border-color:rgba(35,255,137,.5);
-  box-shadow:0 0 30px rgba(35,255,137,.15),inset 0 0 20px rgba(35,255,137,.08)}}
-.eg-plan-tag{{position:absolute;top:-11px;left:20px;font-size:10px;font-weight:1000;letter-spacing:.1em;
-  padding:5px 12px;border-radius:999px}}
-.eg-plan-tag.popular-tag{{background:linear-gradient(135deg,var(--gold),#ffe6a8);color:#1a1200}}
-.eg-plan-tag.active-tag{{background:rgba(35,255,137,.9);color:#00170b}}
-.eg-plan-head{{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:4px}}
-.eg-plan-name{{font-size:17px;font-weight:1000}}
-.eg-plan-period{{font-size:11px;color:var(--muted);margin-top:2px}}
-.eg-plan-price{{font-size:24px;font-weight:1000;color:var(--gold);white-space:nowrap}}
-.eg-plan-unit{{font-size:11px;color:var(--muted);font-weight:700}}
-.eg-plan-features{{list-style:none;margin:14px 0 16px;padding:0;display:flex;flex-direction:column;gap:8px}}
-.eg-plan-features li{{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text)}}
-.eg-check{{color:var(--green);font-weight:1000;font-size:13px}}
-.eg-plan-btn{{display:block;text-align:center;text-decoration:none;border-radius:16px;padding:13px;font-size:13px;font-weight:1000}}
-.eg-plan-btn.buy{{background:linear-gradient(135deg,var(--gold),#ffe6a8);color:#1a1200}}
-.eg-plan-btn.active{{background:rgba(35,255,137,.14);color:var(--green);border:1px solid rgba(35,255,137,.4)}}
-.eg-trust{{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 18px;font-size:11px;color:var(--muted)}}
-.eg-trust span{{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
-  border-radius:999px;padding:7px 11px}}
+.gold-text{{color:var(--gold)}}
+.eg-section-title{{margin:32px 0 5px;font-size:17px;font-weight:800;letter-spacing:-.3px}}
+.eg-section-sub{{margin:0 0 18px;color:var(--muted);font-size:13px;line-height:1.55;font-weight:400}}
+.eg-plans{{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:20px}}
+.eg-plan-card{{position:relative;border-radius:20px;padding:22px;border:1px solid rgba(255,255,255,.06);
+  background:var(--card)}}
+.eg-plan-card.popular{{border-color:rgba(245,196,81,.4);
+  background:linear-gradient(165deg,rgba(245,196,81,.06),var(--card))}}
+.eg-plan-card.current{{border-color:rgba(35,255,137,.35);
+  background:linear-gradient(165deg,rgba(35,255,137,.06),var(--card))}}
+.eg-plan-tag{{position:absolute;top:-10px;left:22px;font-size:9.5px;font-weight:700;letter-spacing:.08em;
+  padding:5px 12px;border-radius:999px;text-transform:uppercase}}
+.eg-plan-tag.popular-tag{{background:linear-gradient(135deg,var(--gold),#fff0c2);color:#20160a}}
+.eg-plan-tag.active-tag{{background:var(--green);color:#04220f}}
+.eg-plan-head{{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-top:6px}}
+.eg-plan-name{{font-size:16.5px;font-weight:800;letter-spacing:-.2px}}
+.eg-plan-period{{font-size:11.5px;color:var(--muted);margin-top:3px;font-weight:400}}
+.eg-plan-price{{font-size:23px;font-weight:800;color:var(--gold);white-space:nowrap;letter-spacing:-.4px}}
+.eg-plan-unit{{font-size:11px;color:var(--muted);font-weight:500}}
+.eg-plan-features{{list-style:none;margin:16px 0 18px;padding:0;display:flex;flex-direction:column;gap:9px}}
+.eg-plan-features li{{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text);font-weight:400}}
+.eg-check{{color:var(--green);font-weight:800;font-size:12px;flex-shrink:0}}
+.eg-plan-btn{{display:block;text-align:center;text-decoration:none;border-radius:14px;padding:14px;font-size:13.5px;font-weight:700}}
+.eg-plan-btn.buy{{background:linear-gradient(135deg,var(--gold),#fff0c2);color:#20160a}}
+.eg-plan-btn.active{{background:rgba(35,255,137,.1);color:var(--green);border:1px solid rgba(35,255,137,.3)}}
+.eg-pay{{border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:22px;background:var(--card);margin-bottom:18px}}
+.eg-pay-methods{{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}}
+.eg-pay-method{{border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:13px 8px;text-align:center;background:rgba(255,255,255,.015)}}
+.eg-pay-method .ic{{font-size:19px;margin-bottom:6px}}
+.eg-pay-method .lbl{{font-size:10.5px;color:var(--muted);font-weight:600}}
+.eg-secure{{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05)}}
+.eg-secure .ic{{font-size:15px}}
+.eg-secure .txt{{font-size:11.5px;color:var(--muted);line-height:1.5;font-weight:400}}
+.eg-trust{{display:flex;flex-wrap:wrap;gap:9px;margin:6px 0 20px}}
+.eg-trust span{{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);
+  background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);
+  border-radius:999px;padding:8px 12px;font-weight:500}}
 .eg-list{{
-  border:1px solid rgba(34,231,255,.16);
-  border-radius:26px;
-  background:rgba(2,13,10,.66);
-  padding:15px;
-  margin-top:14px;
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:20px;
+  background:var(--card);
+  padding:18px;
+  margin-top:16px;
 }}
 .eg-row{{
   display:flex;
   justify-content:space-between;
   gap:12px;
-  padding:12px 0;
-  border-top:1px solid rgba(255,255,255,.06);
+  padding:13px 0;
+  border-top:1px solid rgba(255,255,255,.05);
 }}
 .eg-row:first-child{{border-top:0}}
-.eg-row b{{font-size:13px}}
-.eg-row span{{font-size:12px;color:var(--green);font-weight:1000;text-align:right}}
-.eg-actions{{display:grid;grid-template-columns:1fr;gap:11px;margin-top:16px}}
+.eg-row b{{font-size:13px;font-weight:600}}
+.eg-row span{{font-size:12px;color:var(--gold);font-weight:700;text-align:right}}
+.eg-actions{{display:grid;grid-template-columns:1fr;gap:11px;margin-top:18px}}
 .eg-btn{{
   display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:var(--text);
-  border:1px solid rgba(34,231,255,.16);border-radius:22px;padding:15px 16px;
-  background:rgba(2,13,10,.66);font-size:13px;font-weight:1000;letter-spacing:.02em;
+  border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:16px 18px;
+  background:var(--card);font-size:13.5px;font-weight:600;
 }}
-.eg-btn span{{color:var(--cyan)}}
+.eg-btn span{{color:var(--gold)}}
 .eg-back{{
-  margin-top:16px;display:inline-flex;text-decoration:none;color:#00170b;
-  background:linear-gradient(135deg,var(--green),var(--cyan));
-  border-radius:999px;padding:12px 16px;font-size:12px;font-weight:1000;
-  box-shadow:0 0 28px rgba(35,255,137,.16);
+  margin-top:18px;display:inline-flex;text-decoration:none;color:#20160a;
+  background:linear-gradient(135deg,var(--gold),#fff0c2);
+  border-radius:999px;padding:13px 18px;font-size:12.5px;font-weight:700;
 }}
-.eg-note{{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.55}}
+.eg-note{{margin-top:16px;color:var(--muted);font-size:11.5px;line-height:1.6;font-weight:400}}
 @media(max-width:420px){{
-  .eg-wrap{{padding:18px 14px 28px}}
-  .eg-hero h1{{font-size:28px}}
-  .eg-license .plan{{font-size:38px}}
-  .eg-grid{{grid-template-columns:1fr 1fr;gap:10px}}
-  .eg-card{{padding:13px;border-radius:21px}}
+  .eg-wrap{{padding:20px 16px 32px}}
+  .eg-hero{{padding:22px 20px}}
+  .eg-hero h1{{font-size:24px}}
+  .eg-license .plan{{font-size:30px}}
+  .eg-grid{{gap:9px}}
+  .eg-card{{padding:14px;border-radius:16px}}
+  .eg-pay-methods{{gap:7px}}
 }}
-.eg-logo-wrap-l{{position:relative;width:42px;height:42px;flex-shrink:0}}
+.eg-logo-wrap-l{{position:relative;width:40px;height:40px;flex-shrink:0}}
 .eg-logo-wrap-l .eg-logo{{position:relative;z-index:2}}
-.eg-ring-a-l{{position:absolute;inset:-9px;border-radius:50%;
-  border:1.5px solid #f5c45188;border-top-color:transparent;border-bottom-color:transparent;
+.eg-ring-a-l{{position:absolute;inset:-8px;border-radius:50%;
+  border:1.3px solid #f5c45177;border-top-color:transparent;border-bottom-color:transparent;
   animation:eg-ring-spin-l 5s linear infinite;pointer-events:none}}
-.eg-ring-b-l{{position:absolute;inset:-17px;border-radius:50%;
-  border:1px dashed #f5c45155;animation:eg-ring-spin-rev-l 9s linear infinite;pointer-events:none}}
+.eg-ring-b-l{{position:absolute;inset:-15px;border-radius:50%;
+  border:1px dashed #f5c45144;animation:eg-ring-spin-rev-l 9s linear infinite;pointer-events:none}}
 @keyframes eg-ring-spin-l{{from{{transform:rotate(0)}}to{{transform:rotate(360deg)}}}}
 @keyframes eg-ring-spin-rev-l{{from{{transform:rotate(360deg)}}to{{transform:rotate(0)}}}}
 .eg-energy-field-l{{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}}
-.eg-energy-field-l span{{position:absolute;bottom:-6%;width:3px;height:3px;border-radius:50%;
-  background:#f5c451;box-shadow:0 0 6px #f5c451,0 0 12px #f5c451b0;opacity:0;
+.eg-energy-field-l span{{position:absolute;bottom:-6%;width:2.5px;height:2.5px;border-radius:50%;
+  background:#f5c451;box-shadow:0 0 5px #f5c451,0 0 10px #f5c451a0;opacity:0;
   animation:eg-energy-rise-l linear infinite}}
-@keyframes eg-energy-rise-l{{0%{{opacity:0;bottom:-6%}}12%{{opacity:.9}}88%{{opacity:.35}}100%{{opacity:0;bottom:106%}}}}
+@keyframes eg-energy-rise-l{{0%{{opacity:0;bottom:-6%}}12%{{opacity:.7}}88%{{opacity:.25}}100%{{opacity:0;bottom:106%}}}}
 </style>
 </head>
 <body>
@@ -21604,6 +21607,7 @@ html,body{{
     <div class="eg-brand">
       <div class="eg-logo-wrap-l"><span class="eg-ring-a-l"></span><span class="eg-ring-b-l"></span><div class="eg-logo">L</div></div>
       <div class="eg-title">
+        <small>EratGuard</small>
         <b>Lisans Merkezi</b>
       </div>
     </div>
@@ -21611,44 +21615,59 @@ html,body{{
   </div>
 
   <section class="eg-hero">
-    <h1>Lisans aktif.</h1>
+    <h1>Lisansiniz aktif.</h1>
     <p>{username} hesabinin koruma, AI analiz ve rapor ozellikleri PRO lisans uzerinden yonetilir.</p>
   </section>
 
   <section class="eg-license">
-    <div class="label">AKTIF PAKET</div>
+    <div class="label">Aktif Paket</div>
     <div class="plan">{plan}</div>
     <div class="state">Bu hesap icin EratGuard guvenlik katmanlari aktif durumda.</div>
   </section>
+
+  <div class="eg-grid">
+    <div class="eg-card">
+      <div class="k">Koruma</div>
+      <div class="v green">Acik</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">AI Analiz</div>
+      <div class="v cyan">Acik</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">Raporlar</div>
+      <div class="v green">Acik</div>
+    </div>
+    <div class="eg-card">
+      <div class="k">Durum</div>
+      <div class="v gold-text">Gecerli</div>
+    </div>
+  </div>
 
   <div class="eg-section-title">Paketler ve Yukseltme</div>
   <p class="eg-section-sub">Ihtiyacina gore koruma seviyeni degistir. Tum paketler ayni gun icinde aktif olur.</p>
   <div class="eg-plans">
     {plan_cards_html}
   </div>
+
+  <section class="eg-pay">
+    <div class="eg-section-title" style="margin-top:0">Odeme Yontemleri</div>
+    <p class="eg-section-sub" style="margin-bottom:6px">Secilen pakete gore tum yontemler tek adimda islenir.</p>
+    <div class="eg-pay-methods">
+      <div class="eg-pay-method"><div class="ic">&#128179;</div><div class="lbl">Kredi Karti</div></div>
+      <div class="eg-pay-method"><div class="ic">&#127974;</div><div class="lbl">Banka / EFT</div></div>
+      <div class="eg-pay-method"><div class="ic">&#128241;</div><div class="lbl">Mobil Odeme</div></div>
+    </div>
+    <div class="eg-secure">
+      <span class="ic">&#128274;</span>
+      <span class="txt">256-bit SSL ile korunur. Kart bilgileriniz EratGuard tarafindan saklanmaz, islem guvenli odeme altyapisi uzerinden gerceklesir.</span>
+    </div>
+  </section>
+
   <div class="eg-trust">
     <span>&#128274; Guvenli Odeme</span>
     <span>&#8635; Istedigin An Iptal Et</span>
     <span>&#9889; Aninda Aktivasyon</span>
-  </div>
-
-  <div class="eg-grid">
-    <div class="eg-card">
-      <div class="k">KORUMA</div>
-      <div class="v green">ACIK</div>
-    </div>
-    <div class="eg-card">
-      <div class="k">AI ANALIZ</div>
-      <div class="v cyan">ACIK</div>
-    </div>
-    <div class="eg-card">
-      <div class="k">RAPORLAR</div>
-      <div class="v green">ACIK</div>
-    </div>
-    <div class="eg-card">
-      <div class="k">DURUM</div>
-      <div class="v yellow">GECERLI</div>
-    </div>
   </div>
 
   <section class="eg-list">
@@ -21668,13 +21687,13 @@ html,body{{
 
   <a class="eg-back" href="/u/eg-panel">&larr; Ana Ekrana Don</a>
 
-  <div class="eg-note">EratGuard Lisans Merkezi, PRO erisim, paket secenekleri ve kullanici yetkilerini tek ekranda gosterir.</div>
+  <div class="eg-note">EratGuard Lisans Merkezi, PRO erisim, paket secenekleri, odeme yontemleri ve kullanici yetkilerini tek ekranda gosterir.</div>
 </div>
 <script>
 (function(){{
   var box = document.getElementById('eg-energy-field-l');
   if(!box) return;
-  var n = 14, out = '';
+  var n = 12, out = '';
   for(var i=0;i<n;i++){{
     var left = (Math.random()*94+3).toFixed(1);
     var dur = (4 + Math.random()*3).toFixed(2);
