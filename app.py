@@ -1801,7 +1801,12 @@ def api_stats():
             "status": "success",
             "total": len(logs),
             "spam": spam,
-            "temiz": temiz
+            "temiz": temiz,
+            "blocked_count": spam,
+            "safe_count": temiz,
+            "reported_count": 0,
+            "security_percent": (0 if len(logs)==0 else round((temiz/len(logs))*100)),
+            "protection_status": ("Yüksek" if spam>10 else "Orta" if spam>3 else "Düşük")
         })
 
     except Exception as e:
