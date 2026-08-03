@@ -17,7 +17,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .vignette{position:absolute;inset:0;pointer-events:none;z-index:0;box-shadow:inset 0 0 90px 20px rgba(0,0,0,0.55)}
 
 .header{position:relative;z-index:1;padding:34px 16px 20px}
-.header-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:16px}
+.header-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:18px}
 .badge-active{display:flex;align-items:center;gap:8px;border-radius:10px;padding:8px 11px;
   background:rgba(45,255,160,0.1);border:1px solid rgba(45,255,160,0.55)}
 .badge-active i{color:var(--green);font-size:15px}
@@ -51,7 +51,7 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .threat-card .v{font-size:12px;font-weight:600;color:var(--green)}
 
 /* radial mind-map stage — max size for phone */
-.radial-stage{position:relative;z-index:1;width:min(100vw,600px);aspect-ratio:1/1;margin:130px auto 40px}
+.radial-stage{position:relative;z-index:1;width:min(90vw,540px);aspect-ratio:1/1;margin:130px auto 40px}
 .radial-ambient{position:absolute;inset:-14%;z-index:0;pointer-events:none;
   background:radial-gradient(circle at 50% 45%, rgba(34,211,238,0.22), rgba(45,255,160,0.06) 45%, transparent 68%);
   filter:blur(30px)}
@@ -121,11 +121,13 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 .core-caption .s{font-size:10px;color:rgba(148,168,160,0.55)}
 
 .stats{position:relative;z-index:1;padding:16px 16px 0}
-.stats-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;border-radius:20px;padding:16px 11px;
-  background:rgba(255,255,255,0.03);border:1px solid rgba(45,255,160,0.18)}
+.stats-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;border-radius:20px;padding:18px 12px;
+  background:linear-gradient(180deg,rgba(45,255,160,0.05),rgba(255,255,255,0.02));border:1px solid rgba(45,255,160,0.22);
+  box-shadow:0 8px 24px -8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)}
 .stat{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0}
-.stat .ic{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  background:rgba(45,255,160,0.12);border:1px solid rgba(45,255,160,0.4)}
+.stat .ic{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 35% 30%,rgba(45,255,160,0.22),rgba(45,255,160,0.08));border:1px solid rgba(45,255,160,0.45);
+  box-shadow:0 0 12px rgba(45,255,160,0.18)}
 .stat .ic i{color:var(--green);font-size:15px}
 .stat .v{font-size:16px;font-weight:700;color:#eaf4f0;line-height:1}
 .stat .u{font-size:9px;color:rgba(148,168,160,0.5);line-height:1}
@@ -296,21 +298,21 @@ button{font-family:inherit;background:none;border:none;color:inherit;cursor:poin
 <script>
 const MODULES = [
   { id:1, title:'Spam Koruması', sub:"Gelen SMS'leri akıllıca filtrele", icon:'fa-shield-halved', route:'/u/protection',
-    rows:[['Durum','Aktif']] },
+    color:'#2dffa0', rows:[['Durum','Aktif']] },
   { id:2, title:'AI Analiz', sub:'Yapay zeka ile akıllı analiz', icon:'fa-brain', route:'/u/analysis',
-    rows:[] },
+    color:'#a78bfa', rows:[] },
   { id:3, title:'Risk Tarama', sub:'Tehlikeleri tara, güvende kal', icon:'fa-satellite-dish', route:'/u/sms-risk-test',
-    rows:[['Toplam tarama','{{ metrics.total }}'],['Durum','Aktif']] },
+    color:'#ff7a4a', rows:[['Toplam tarama','{{ metrics.total }}'],['Durum','Aktif']] },
   { id:4, title:'Engellenenler', sub:'Engellenen numaralar ve mesajlar', icon:'fa-ban', route:'/u/blocked',
-    rows:[['Toplam engellenen','{{ metrics.blocked }}']] },
+    color:'#ff4d5e', rows:[['Toplam engellenen','{{ metrics.blocked }}']] },
   { id:5, title:'SMS Merkezi', sub:'Tüm mesajların yönetim merkezi', icon:'fa-comments', route:'/u/sms/actions',
-    rows:[['Toplam işlem','{{ metrics.total }}']] },
+    color:'#22d3ee', rows:[['Toplam işlem','{{ metrics.total }}']] },
   { id:6, title:'Lisans', sub:'Lisans bilgileri ve durumu', icon:'fa-award', route:'/u/license',
-    rows:[['Lisans','PRO']] },
+    color:'#f5c451', rows:[['Lisans','PRO']] },
   { id:7, title:'Raporlar', sub:'Detaylı istatistikler ve raporlar', icon:'fa-chart-column', route:'/u/reports',
-    rows:[] },
+    color:'#2dd4bf', rows:[] },
   { id:8, title:'Bildirimler', sub:'Sistem bildirimleri ve uyarılar', icon:'fa-bell', route:'/u/notifications',
-    rows:[] },
+    color:'#ffa64d', rows:[] },
 ];
 
 (function renderParticles(){
@@ -331,9 +333,9 @@ const MODULES = [
   const nodesEl = document.getElementById('eg-nodes');
   const linesEl = document.getElementById('eg-radial-lines');
   const total = MODULES.length;
-  const nodeRadius = 42;
-  const lineRadius = 44;
-  const dotRadius = 27;
+  const nodeRadius = 38;
+  const lineRadius = 40;
+  const dotRadius = 25;
   let nodesHtml = '';
   let linesHtml = '';
 
@@ -347,9 +349,12 @@ const MODULES = [
     const dy = (50 + dotRadius*Math.sin(angle)).toFixed(2);
 
     linesHtml += `<line x1="50" y1="50" x2="${lx}" y2="${ly}"/><circle cx="${dx}" cy="${dy}" r="0.9"/>`;
+    const c = mod.color || '#22e7ff';
     nodesHtml += `
     <button class="node" style="--x:${nx}%;--y:${ny}%;--delay:${i*90}ms" onclick="openSheet(${mod.id})">
-      <span class="node-circle"><i class="fa-solid ${mod.icon}"></i></span>
+      <span class="node-circle" style="border-color:${c};box-shadow:0 0 12px ${c}88,0 0 24px ${c}44,inset 0 0 16px ${c}22">
+        <i class="fa-solid ${mod.icon}" style="color:${c};filter:drop-shadow(0 0 4px ${c})"></i>
+      </span>
       <span class="node-label">${mod.title}</span>
     </button>`;
   });
