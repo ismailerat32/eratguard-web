@@ -2681,7 +2681,7 @@ def radial():
     }
 
     return render_template(
-        "radial_menu.html",
+        "eg_panel_v2.html",
         current_plan=current_plan,
         license_target=license_target,
         panel_target=panel_target,
@@ -4842,7 +4842,7 @@ def user_test_payment_complete_hardcore():
 def ss_dev_radial_user_preview():
     if os.environ.get("FLASK_DEBUG", "0") != "1":
         return "Not Found", 404
-    return render_template("radial_menu.html")
+    return render_template("eg_panel_v2.html")
 # ===== ERATGUARD USER RADIAL PREVIEW DEV ONLY END =====
 
 
