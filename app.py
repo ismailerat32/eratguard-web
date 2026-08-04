@@ -4845,8 +4845,8 @@ def user_test_payment_complete_hardcore():
 # ===== ERATGUARD USER RADIAL PREVIEW DEV ONLY START =====
 @app.route("/dev/radial-user-preview")
 def ss_dev_radial_user_preview():
-    if os.environ.get("FLASK_DEBUG", "0") != "1":
-        return "Not Found", 404
+#    if os.environ.get("FLASK_DEBUG", "0") != "1":
+#        return "Not Found", 404
     return render_template("eg_panel_v2.html")
 # ===== ERATGUARD USER RADIAL PREVIEW DEV ONLY END =====
 

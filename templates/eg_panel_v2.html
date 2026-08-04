@@ -641,6 +641,20 @@ if(data.security_percent)document.querySelector(".ring-pct").textContent=data.se
 loadStats();
 setInterval(loadStats,3000);
 
+async function loadLogs(){
+try{
+const res=await fetch("/api/logs");
+const data=await res.json();
+const box=document.getElementById("liveLogs");
+if(box&&data.logs){
+box.innerHTML=data.logs.slice(0,5).map(l=>`<div style="margin:6px 0"><b>${l.event||"-"}</b><br><span style="color:#7fa3ad">${l.message||""}</span></div>`).join("");
+}
+}catch(e){console.log(e);}
+}
+loadLogs();
+setInterval(loadLogs,5000);
+
+
 </script>
 
 </body>
