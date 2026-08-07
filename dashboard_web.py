@@ -81,7 +81,9 @@ def _ss_get_last_scan_time():
 
 
 
+from admin import admin_bp
 app = Flask(__name__)
+app.register_blueprint(admin_bp)
 
 
 
@@ -92,40 +94,8 @@ def eratguard_admin_v8_priority_guard_fix():
     try:
         path = request.path.rstrip("/") or "/"
 
-        admin_home_paths = {
-            "/ac",
-            "/admin",
-            "/admin/dashboard",
-            "/admin/radial",
-            "/admin/command",
-            "/admin/command-center",
-            "/admin/user-center",
-            "/admin/kullanici",
-            "/admin/kullanici-merkezi",
-        }
-
-        if path in admin_home_paths:
-            return render_template("admin_command_center.html")
-
-        if path.startswith("/admin/v8/"):
-            module_key = path.split("/admin/v8/", 1)[1].strip("/").split("/", 1)[0]
-            try:
-                data = _eg_admin_v8_rows(module_key)
-            except Exception:
-                data = None
-            if data:
-                return render_template("admin_module_page.html", **data)
-            return render_template("admin_command_center.html")
-
-        if path.startswith("/admin/v7/"):
-            module_key = path.split("/admin/v7/", 1)[1].strip("/").split("/", 1)[0]
-            try:
-                data = _eg_admin_v8_rows(module_key)
-            except Exception:
-                data = None
-            if data:
-                return render_template("admin_module_page.html", **data)
-            return render_template("admin_command_center.html")
+        # Legacy Admin V7/V8 priority guard kaldırıldı.
+        # Admin yönlendirmeleri artık Blueprint tarafından yönetiliyor.
 
     except Exception as e:
         print("ADMIN_V8_PRIORITY_GUARD_ERROR:", e, flush=True)
@@ -3630,83 +3600,11 @@ def ss_live_admin_app_start():
         return redirect("/admin/dashboard")
     return redirect("/ss-admin-access")
 
-@app.route("/admin")
-@app.route("/admin/")
-def ss_live_admin_home():
-    if not (
-        session.get("logged_in") and (
-            session.get("is_admin") or session.get("role") == "admin" or session.get("username") == "admin"
-        )
-    ):
-        return redirect("/ss-admin-access")
-    return redirect("/admin/dashboard")
 
-@app.route("/admin/dashboard")
-def ss_live_admin_dashboard():
-    if not (
-        session.get("logged_in") and (
-            session.get("is_admin") or session.get("role") == "admin" or session.get("username") == "admin"
-        )
-    ):
-        return redirect("/ss-admin-access")
-    try:
-        return render_template("admin_dashboard.html", admin_stats=_eg_default_admin_stats(), users=load_users(), recent_logins=_eg_recent_audit_logs(5), recent_actions=_eg_recent_audit_logs(5))
-    except Exception as e:
-        return f"<h2>EratGuard ADMIN</h2><p>Dashboard yüklenemedi: {e}</p>", 500
+# ===== OLD ADMIN ROUTES REMOVED =====
+# Admin artık Blueprint tarafından yönetiliyor.
+# Blueprint: admin/routes.py
 
-@app.route("/__eratguard_live_version")
-def ss_live_version_probe():
-    return "EratGuard live: dashboard_web admin routes active 2026-05-05", 200
-# ===== ERATGUARD LIVE ADMIN APK ROUTES END =====
-
-# ===== ERATGUARD ADMIN ALL SLICE SAFE CATCHALL START =====
-@app.route("/admin/<path:anything>", methods=["GET", "POST"])
-def ss_live_admin_all_slice_catchall(anything):
-    # Admin session yoksa admin girişe dön
-    if not (
-        session.get("logged_in") and (
-            session.get("is_admin")
-            or session.get("role") == "admin"
-            or session.get("username") == "admin"
-        )
-    ):
-        return redirect("/ss-admin-access")
-
-    slug = str(anything or "").strip().lower()
-
-    template_map = {
-        "dashboard": ("admin_dashboard.html", {}),
-        "panel": ("admin_panel.html", {"users": [], "upgrade_requests": [], "audit_logs": _eg_recent_audit_logs(12)}),
-        "users": ("admin_panel.html", {"users": [], "upgrade_requests": []}),
-        "licenses": ("admin_licenses.html", {}),
-        "license": ("admin_licenses.html", {}),
-        "payment-requests": ("admin_payment_requests.html", {"requests": []}),
-        "payments": ("admin_payment_requests.html", {"requests": []}),
-        "spam-logs": ("admin_spam_logs.html", {"spam_logs": []}),
-        "security": ("admin_spam_logs.html", {"spam_logs": []}),
-        "overview": ("admin_overview.html", {"stats": {}, "recent_logs": []}),
-        "reports": ("admin_overview.html", {"stats": {}, "recent_logs": []}),
-        "whitelist": ("whitelist.html", {"whitelist": []}),
-        "notifications": ("whitelist.html", {"whitelist": []}),
-        "settings": ("admin_settings.html", {"settings": {}}),
-        "system": ("admin_system.html", {}),
-    }
-
-    tpl, ctx = template_map.get(slug, ("admin_dashboard.html", {}))
-
-    try:
-        return render_template(tpl, **ctx)
-    except Exception as e:
-        return f"""
-        <html><head><meta charset="UTF-8"><title>EratGuard ADMIN</title></head>
-        <body style="background:#020806;color:white;font-family:Arial;padding:24px;">
-          <h2>EratGuard ADMIN</h2>
-          <p>Bu admin bölümü hazırlanıyor: <b>{slug}</b></p>
-          <p style="opacity:.7">Detay: {e}</p>
-          <p><a style="color:#8cff5a" href="/admin/dashboard">Admin Dashboard'a dön</a></p>
-        </body></html>
-        """, 200
-# ===== ERATGUARD ADMIN ALL SLICE SAFE CATCHALL END =====
 
 # ===== ERATGUARD FAST ADMIN SLICE PAGES START =====
 # DISABLED FINAL:
@@ -11787,69 +11685,14 @@ except Exception as _boot_err:
 
 
 # ===== ERATGUARD STAGE4U CLAUDE PANEL PREVIEW START =====
-# Claude admin panelini ana dashboard'a almadan önce güvenli preview route.
+# RETIRED:
+# Eski Claude preview template'i artık mevcut değil.
+# Eski bağlantıları kırmamak için ana admin dashboard'a yönlendirilir.
 try:
-    from flask import render_template as _eg4u_render_template
+    from flask import redirect as _eg4u_redirect
 
     def _eg_stage4u_claude_panel_preview():
-        try:
-            stats = {
-                "users": 0,
-                "licenses": 0,
-                "payments": 0,
-                "blocked": 0,
-                "threats": 0,
-                "logs": 0,
-                "notifications": 0,
-            }
-
-            if "_eg_real_admin_dashboard_stats" in globals():
-                try:
-                    live_stats = _eg_real_admin_dashboard_stats()
-                    if isinstance(live_stats, dict):
-                        stats.update(live_stats)
-                except Exception as _eg4u_stats_err:
-                    print("ERATGUARD STAGE4U STATS ERROR:", _eg4u_stats_err)
-
-            def _eg4u_to_int(value, default=0):
-                try:
-                    if value is None:
-                        return default
-                    raw = str(value).strip()
-                    if raw == "":
-                        return default
-                    raw = raw.replace(",", "").replace(".", "")
-                    return int(float(raw))
-                except Exception:
-                    return default
-
-            for _eg4u_key in ("users", "licenses", "payments", "blocked", "threats", "logs", "notifications"):
-                stats[_eg4u_key] = _eg4u_to_int(stats.get(_eg4u_key), 0)
-
-            return _eg4u_render_template(
-                "admin_dashboard_claude.html",
-                admin_stats=stats,
-                brand="EratGuard PRO",
-                current_user="admin",
-                username="admin",
-                page_title="Dashboard",
-            )
-        except Exception as _eg4u_err:
-            import traceback as _eg4u_traceback
-            _eg4u_detail = _eg4u_traceback.format_exc()
-            print("ERATGUARD STAGE4U CLAUDE PREVIEW RENDER ERROR:", _eg4u_detail)
-            return (
-                "<!doctype html><html lang='tr'><head><meta charset='UTF-8'>"
-                "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-                "<title>EratGuard Claude Panel Preview</title></head><body>"
-                "<h1>EratGuard Claude Panel Preview</h1>"
-                f"<p>Preview yüklenemedi: {_eg4u_err}</p>"
-                "<pre style='white-space:pre-wrap;background:#111;color:#eee;padding:12px;border-radius:12px;'>"
-                f"{_eg4u_detail}"
-                "</pre>"
-                "<p><a href='/admin/dashboard'>Admin Dashboard</a></p>"
-                "</body></html>"
-            ), 500
+        return _eg4u_redirect("/admin/dashboard", code=302)
 
     try:
         app.add_url_rule(
@@ -11859,10 +11702,10 @@ try:
             methods=["GET"],
         )
     except Exception as _eg4u_route_err:
-        print("ERATGUARD STAGE4U CLAUDE PANEL ROUTE ERROR:", _eg4u_route_err)
+        print("ERATGUARD STAGE4U RETIRED PREVIEW ROUTE ERROR:", _eg4u_route_err)
 
 except Exception as _eg4u_boot_err:
-    print("ERATGUARD STAGE4U CLAUDE PANEL PREVIEW ERROR:", _eg4u_boot_err)
+    print("ERATGUARD STAGE4U RETIRED PREVIEW ERROR:", _eg4u_boot_err)
 # ===== ERATGUARD STAGE4U CLAUDE PANEL PREVIEW END =====
 
 
@@ -13114,8 +12957,21 @@ try:
             if username and isinstance(user, dict):
                 return bool(user_is_admin)
 
-            # Kullanıcı datası bulunamazsa sadece açık admin session kabul.
-            return bool(username.lower() == "admin" and (role == "admin" or session_is_admin))
+            # Kullanıcı datası bulunamazsa:
+            # 1) klasik gerçek admin session kabul edilir.
+            # 2) mobil admin session yalnız doğrulanmış HMAC cookie ile kabul edilir.
+            if username.lower() == "admin" and (role == "admin" or session_is_admin):
+                return True
+
+            if username == "eg_admin_mobile" and role == "admin" and session_is_admin:
+                try:
+                    cookie_ok_fn = globals().get("_ss_admin_cookie_ok_final")
+                    if callable(cookie_ok_fn) and cookie_ok_fn():
+                        return True
+                except Exception:
+                    pass
+
+            return False
 
         except Exception:
             return False
@@ -25369,39 +25225,9 @@ except Exception as _eg_aab2_err:
 
 
 
-# === ERATGUARD ADMIN COMMAND CENTER V1 ===
-def _eg_admin_command_center_v1():
-    try:
-        return render_template("admin_command_center.html")
-    except Exception:
-        return """
-        <html><body style='background:#020817;color:#dff7ff;font-family:Arial;padding:40px'>
-        <h1>EratGuard Admin Command Center</h1>
-        <p>Admin panel template yüklenemedi.</p>
-        </body></html>
-        """
+# ===== LEGACY COMMAND CENTER REMOVED =====
+# Yeni HUD Command Center admin Blueprint tarafından yönetiliyor.
 
-@app.route("/admin")
-@app.route("/admin/")
-@app.route("/admin/dashboard")
-@app.route("/admin/radial")
-@app.route("/admin/command")
-@app.route("/admin/command-center")
-def eg_admin_command_center_v1_route():
-    return _eg_admin_command_center_v1()
-
-@app.route("/admin/users")
-@app.route("/admin/licenses")
-@app.route("/admin/reports")
-@app.route("/admin/blocked")
-@app.route("/admin/ai")
-@app.route("/admin/system")
-@app.route("/admin/feedback")
-@app.route("/admin/support")
-@app.route("/admin/releases")
-@app.route("/admin/privacy")
-def eg_admin_command_center_v1_safe_pages():
-    return _eg_admin_command_center_v1()
 # === /ERATGUARD ADMIN COMMAND CENTER V1 ===
 
 
@@ -26025,116 +25851,18 @@ except Exception as _eg6k8_boot_err:
 # ===== ERATGUARD STAGE6K ADMIN COOKIE SESSION HYDRATE END =====
 
 # ===== ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE START =====
-# Not:
-# - ss_admin_mobile cookie sadece başarılı /ss-admin-access girişinde set edilir.
-# - Bazı session/gate zincirlerinde Flask session okunmadan önce admin gate redirect yapıyor.
-# - Bu patch admin path'lerinde cookie varsa session'ı admin'e yükseltir.
-try:
-    from flask import request as _eg6k10_request
-    from flask import session as _eg6k10_session
-
-    def _eg6k10_force_accept_admin_cookie():
-        try:
-            path = str(getattr(_eg6k10_request, "path", "") or "")
-            if not (path == "/admin" or path == "/admin/" or path.startswith("/admin/")):
-                return None
-
-            cookie = str(_eg6k10_request.cookies.get("ss_admin_mobile") or "").strip()
-
-            # Cookie yoksa dokunma.
-            if not cookie:
-                return None
-
-            # Başarılı login cookie'si uzun hex token olarak setleniyor.
-            # Bu cookie yalnızca /ss-admin-access başarılı olduğunda üretildiği için admin session hydrate edilir.
-            if len(cookie) >= 32:
-                _eg6k10_session["logged_in"] = True
-                _eg6k10_session["username"] = str(_eg6k10_session.get("username") or "eg_admin_mobile")
-                _eg6k10_session["role"] = "admin"
-                _eg6k10_session["is_admin"] = True
-
-            return None
-        except Exception as _eg6k10_err:
-            print("ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE ERROR:", _eg6k10_err)
-            return None
-
-    try:
-        funcs = app.before_request_funcs.setdefault(None, [])
-        funcs[:] = [
-            f for f in funcs
-            if getattr(f, "__name__", "") != "_eg6k10_force_accept_admin_cookie"
-        ]
-        funcs.insert(0, _eg6k10_force_accept_admin_cookie)
-        print("ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE ACTIVE")
-    except Exception as _eg6k10_insert_err:
-        print("ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE INSERT ERROR:", _eg6k10_insert_err)
-
-except Exception as _eg6k10_boot_err:
-    print("ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE BOOT ERROR:", _eg6k10_boot_err)
+# SECURITY RETIRED:
+# Eski hotfix yalnız cookie uzunluğuna bakarak admin session üretiyordu.
+# Admin cookie doğrulaması STAGE6K8 doğrulamalı token mekanizmasına bırakıldı.
 # ===== ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE END =====
 
 # ===== ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE START =====
-# Son kilit çözümü:
-# - /ss-admin-access başarılıysa ss_admin_mobile cookie set edilir.
-# - /admin/dashboard bu cookie ile gelirse, başka gate'e takılmadan dashboard HTML döndürülür.
-try:
-    from flask import request as _eg6k12_request
-    from flask import session as _eg6k12_session
-    from flask import render_template as _eg6k12_render_template
-    from flask import make_response as _eg6k12_make_response
-    from flask import redirect as _eg6k12_redirect
-
-    def _eg6k12_direct_admin_dashboard_bridge():
-        try:
-            path = str(getattr(_eg6k12_request, "path", "") or "").rstrip("/") or "/"
-
-            if path not in ("/admin", "/admin/dashboard"):
-                return None
-
-            cookie = str(_eg6k12_request.cookies.get("ss_admin_mobile") or "").strip()
-            if not cookie or len(cookie) < 32:
-                return None
-
-            _eg6k12_session["logged_in"] = True
-            _eg6k12_session["username"] = str(_eg6k12_session.get("username") or "eg_admin_mobile")
-            _eg6k12_session["role"] = "admin"
-            _eg6k12_session["is_admin"] = True
-
-            if path == "/admin":
-                return _eg6k12_redirect("/admin/dashboard")
-
-            try:
-                html = _eg6k12_render_template("admin_dashboard.html", admin_stats=_eg_default_admin_stats(), users=load_users(), recent_logins=_eg_recent_audit_logs(5), recent_actions=_eg_recent_audit_logs(5))
-            except Exception as _tpl_err:
-                print("ERATGUARD STAGE6K DIRECT DASHBOARD TEMPLATE ERROR:", _tpl_err)
-                html = """<!doctype html><html><head><meta charset="utf-8"><title>EratGuard Admin</title></head>
-<body style="background:#020806;color:#f4fff3;font-family:Arial;padding:24px">
-<h1>EratGuard Admin Dashboard</h1>
-<p>Admin oturumu aktif. Dashboard template yüklenemedi.</p>
-<p><a style="color:#8fff59" href="/admin/users">Kullanıcılar</a></p>
-</body></html>"""
-
-            resp = _eg6k12_make_response(html)
-            resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-            return resp
-
-        except Exception as _eg6k12_err:
-            print("ERATGUARD STAGE6K DIRECT DASHBOARD BRIDGE ERROR:", _eg6k12_err)
-            return None
-
-    try:
-        funcs = app.before_request_funcs.setdefault(None, [])
-        funcs[:] = [
-            f for f in funcs
-            if getattr(f, "__name__", "") != "_eg6k12_direct_admin_dashboard_bridge"
-        ]
-        funcs.insert(0, _eg6k12_direct_admin_dashboard_bridge)
-        print("ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE ACTIVE")
-    except Exception as _insert_err:
-        print("ERATGUARD STAGE6K DIRECT DASHBOARD BRIDGE INSERT ERROR:", _insert_err)
-
-except Exception as _boot_err:
-    print("ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE BOOT ERROR:", _boot_err)
+# SECURITY RETIRED:
+# Bu eski bridge yalnız cookie varlığı/uzunluğu ile admin session
+# üretebildiği için privilege-escalation riski oluşturuyordu.
+#
+# Doğrulanmış mobil admin cookie -> session dönüşümü yalnızca
+# STAGE6K8 doğrulamalı token mekanizmasına bırakılmıştır.
 # ===== ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE END =====
 
 # ===== ERATGUARD STAGE6K15 ULTRA SLIM ADMIN FIT MODE START =====
@@ -34615,6 +34343,13 @@ def eratguard_final_admin_separation_bridge():
             return redirect("/admin/dashboard", code=302)
 
         if path == "/admin/dashboard":
+            # SECURITY FIX:
+            # Bu bridge auth guard'lardan önce çalıştığı için burada
+            # admin yetkisi doğrulanmadan template render edilmemeli.
+            #
+            # Yetkilendirmeyi aşağıdaki gerçek admin guard zincirine bırak.
+            return None
+
             # Mevcut admin template varsa doğrudan bas.
             # Yoksa minimal güvenli admin shell döndür.
             try:
@@ -35380,488 +35115,10 @@ except Exception as _eg_hv1b_err:
     print("ERATGUARD HARDENING V1B PRIVACY PRIORITY FIX ERROR:", _eg_hv1b_err)
 # === /ERATGUARD HARDENING V1B PRIVACY PRIORITY FIX ===
 
-# === ERATGUARD ADMIN BLUE COMMAND CENTER FINAL FORCE OVERRIDE ===
-# Bu blok en sonda kalmalı: eski yeşil admin/user center route'larını mavi admin command center'a zorlar.
-try:
-    def _eg_admin_blue_final_force_page():
-        try:
-            return render_template("admin_command_center.html")
-        except Exception:
-            return """
-            <!doctype html>
-            <html><head><meta name="viewport" content="width=device-width,initial-scale=1">
-            <title>EratGuard Admin Command Center</title></head>
-            <body style="background:#020817;color:#dff7ff;font-family:Arial;padding:32px">
-            <h1>EratGuard Admin Command Center</h1>
-            <p>Blue admin panel active.</p>
-            </body></html>
-            """
 
-    _eg_admin_blue_targets = {
-        "/admin",
-        "/admin/",
-        "/admin/dashboard",
-        "/admin/radial",
-        "/admin/command",
-        "/admin/command-center",
-        "/admin/users",
-        "/admin/licenses",
-        "/admin/reports",
-        "/admin/blocked",
-        "/admin/ai",
-        "/admin/system",
-        "/admin/feedback",
-        "/admin/support",
-        "/admin/releases",
-        "/admin/privacy",
-    }
-
-    # Mevcut eski endpoint'leri aynı URL üzerinde mavi template'e çevir.
-    for _eg_rule in list(app.url_map.iter_rules()):
-        try:
-            if str(_eg_rule.rule) in _eg_admin_blue_targets:
-                app.view_functions[_eg_rule.endpoint] = _eg_admin_blue_final_force_page
-        except Exception:
-            pass
-
-    @app.route("/admin-blue")
-    @app.route("/admin-blue/")
-    @app.route("/admin-blue/dashboard")
-    def eg_admin_blue_direct_final_route():
-        return _eg_admin_blue_final_force_page()
-
-    print("ERATGUARD ADMIN BLUE COMMAND CENTER FINAL FORCE ACTIVE", flush=True)
-except Exception as _eg_admin_blue_final_e:
-    print("ERATGUARD ADMIN BLUE COMMAND CENTER FINAL FORCE ERROR:", repr(_eg_admin_blue_final_e), flush=True)
-# === /ERATGUARD ADMIN BLUE COMMAND CENTER FINAL FORCE OVERRIDE ===
-
-# === ERATGUARD ADMIN V5 FORCE ROUTE LOCK ===
-# Old green admin/user-center pages must not appear as the admin home.
-@app.route("/admin")
-@app.route("/admin/")
-@app.route("/admin/dashboard")
-@app.route("/admin/radial")
-@app.route("/admin/command")
-@app.route("/admin/command-center")
-@app.route("/admin/users")
-@app.route("/admin/user")
-@app.route("/admin/user-center")
-@app.route("/admin/kullanici")
-@app.route("/admin/kullanici-merkezi")
-@app.route("/ac")
-@app.route("/ac/")
-@app.route("/ac/admin")
-@app.route("/ac/dashboard")
-def eratguard_admin_v5_force_route_lock():
-    return render_template("admin_command_center.html")
-
-# === ERATGUARD ADMIN HUD V7 MODULE PAGES ===
-_ADMIN_V7_MODULES = {
-    "users": {
-        "title": "Kullanıcılar",
-        "desc": "Kullanıcı yönetimi, rol kontrolü, admin erişimi ve oturum izleme merkezi.",
-        "stat1": "0", "label1": "Toplam kullanıcı",
-        "stat2": "0", "label2": "Aktif",
-        "stat3": "0", "label3": "Admin",
-        "stat4": "0", "label4": "Banlı",
-        "action": "Kullanıcı modülü açıldı",
-    },
-    "licenses": {
-        "title": "Lisanslar",
-        "desc": "PRO aktivasyonları, deneme planları ve lisans anahtarı durumu.",
-        "stat1": "PRO", "label1": "Plan",
-        "stat2": "OK", "label2": "Lisans sistemi",
-        "stat3": "0", "label3": "Aktif lisans",
-        "stat4": "0", "label4": "Deneme",
-        "action": "Lisans kontrol paneli açıldı",
-    },
-    "reports": {
-        "title": "SMS Raporları",
-        "desc": "Spam trafik, engelleme oranı, rapor matrisi ve SMS olay kayıtları.",
-        "stat1": "1.247", "label1": "SMS",
-        "stat2": "98%", "label2": "Koruma",
-        "stat3": "24H", "label3": "Periyot",
-        "stat4": "OK", "label4": "Rapor",
-        "action": "SMS rapor modülü açıldı",
-    },
-    "blocked": {
-        "title": "Engellenenler",
-        "desc": "Engellenen SMS, numara, filtre kararı ve spam liste yönetimi.",
-        "stat1": "17", "label1": "Numara",
-        "stat2": "24", "label2": "Spam",
-        "stat3": "OK", "label3": "Filtre",
-        "stat4": "AI", "label4": "Destek",
-        "action": "Engellenenler paneli açıldı",
-    },
-    "ai": {
-        "title": "AI Analiz",
-        "desc": "AI skor katmanı, spam tahmini ve model sinyalleri izleme merkezi.",
-        "stat1": "98%", "label1": "Skor",
-        "stat2": "AI", "label2": "Motor",
-        "stat3": "12", "label3": "Sinyal",
-        "stat4": "OK", "label4": "Durum",
-        "action": "AI analiz modülü açıldı",
-    },
-    "system": {
-        "title": "Sistem Sağlığı",
-        "desc": "Sunucu, uptime, bağlantı, servis sağlığı ve durum izleme.",
-        "stat1": "OK", "label1": "Sistem",
-        "stat2": "LIVE", "label2": "Servis",
-        "stat3": "200", "label3": "HTTP",
-        "stat4": "UP", "label4": "Uptime",
-        "action": "Sistem sağlığı modülü açıldı",
-    },
-    "feedback": {
-        "title": "Geri Bildirim",
-        "desc": "Kullanıcı geri bildirimleri, topluluk sinyalleri ve mesaj takibi.",
-        "stat1": "0", "label1": "Yeni",
-        "stat2": "OK", "label2": "Kanal",
-        "stat3": "BETA", "label3": "Topluluk",
-        "stat4": "LIVE", "label4": "İzleme",
-        "action": "Geri bildirim modülü açıldı",
-    },
-    "support": {
-        "title": "Destek",
-        "desc": "Destek talepleri, hata bildirimleri ve işlem kuyruğu.",
-        "stat1": "0", "label1": "Açık",
-        "stat2": "0", "label2": "Bekleyen",
-        "stat3": "OK", "label3": "Destek",
-        "stat4": "LIVE", "label4": "Kuyruk",
-        "action": "Destek modülü açıldı",
-    },
-    "release": {
-        "title": "Yayın Durumu",
-        "desc": "Play Console, AAB, upload key reset, gizlilik ve sürüm hazırlığı.",
-        "stat1": "AAB", "label1": "Hazır",
-        "stat2": "SDK34", "label2": "Target",
-        "stat3": "RESET", "label3": "Upload key",
-        "stat4": "WAIT", "label4": "2 Temmuz",
-        "action": "Yayın durumu modülü açıldı",
-    },
-    "privacy": {
-        "title": "Gizlilik",
-        "desc": "SMS izinleri, gizlilik politikası, veri satışı yok beyanı ve Play uyumluluğu.",
-        "stat1": "SMS", "label1": "İzinler",
-        "stat2": "OK", "label2": "Privacy",
-        "stat3": "NO", "label3": "Veri satışı",
-        "stat4": "PLAY", "label4": "Uyum",
-        "action": "Gizlilik modülü açıldı",
-    },
-}
-
-@app.route("/admin/v7/<module_key>")
-def eratguard_admin_v7_module_page(module_key):
-    data = _ADMIN_V7_MODULES.get(module_key)
-    if not data:
-        return render_template("admin_command_center.html")
-    return render_template("admin_module_page.html", **data)
-
-# === ERATGUARD ADMIN HUD V8 REAL MODULE ROUTES ===
-def _eg_admin_v8_rows(module_key):
-    common_checks = [
-        {"name": "Admin tema", "value": "BLUE HUD V8", "state": "ok"},
-        {"name": "Ana komuta merkezi", "value": "/ac OK", "state": "ok"},
-        {"name": "Session ayrımı", "value": "ADMIN / USER", "state": "ok"},
-    ]
-
-    modules = {
-        "users": {
-            "title": "Kullanıcılar",
-            "desc": "Kullanıcı yönetimi, rol kontrolü, admin erişimi, ban durumu ve oturum izleme merkezi.",
-            "stat1": "0", "label1": "Toplam kullanıcı",
-            "stat2": "0", "label2": "Aktif kullanıcı",
-            "stat3": "0", "label3": "Admin hesabı",
-            "stat4": "0", "label4": "Banlı kullanıcı",
-            "primary_label": "Kullanıcı Listesini Aç",
-            "primary_href": "/admin/users",
-            "checks": common_checks + [
-                {"name": "Kullanıcı veri dosyası", "value": "Hazır", "state": "ok"},
-                {"name": "Ban kontrolü", "value": "Aktif", "state": "ok"},
-                {"name": "Rol kontrolü", "value": "Aktif", "state": "ok"},
-            ],
-            "logs": [
-                {"text": "Kullanıcı modülü açıldı", "time": "LIVE"},
-                {"text": "Admin HUD yönlendirmesi korundu", "time": "OK"},
-                {"text": "Eski yeşil sayfa ayrımı kontrol edildi", "time": "V8"},
-            ],
-        },
-        "licenses": {
-            "title": "Lisanslar",
-            "desc": "PRO aktivasyonları, deneme planları, lisans anahtarı durumu ve kullanıcı plan kontrolü.",
-            "stat1": "PRO", "label1": "Ana plan",
-            "stat2": "OK", "label2": "Lisans sistemi",
-            "stat3": "0", "label3": "Aktif lisans",
-            "stat4": "0", "label4": "Deneme lisans",
-            "primary_label": "Lisans Merkezini Aç",
-            "primary_href": "/admin/licenses",
-            "checks": common_checks + [
-                {"name": "PRO plan etiketi", "value": "Hazır", "state": "ok"},
-                {"name": "Lisans aktivasyon", "value": "Aktif", "state": "ok"},
-                {"name": "Demo/Trial ayrımı", "value": "Kontrol", "state": "warn"},
-            ],
-            "logs": [
-                {"text": "Lisans modülü açıldı", "time": "LIVE"},
-                {"text": "PRO aktivasyon kontrolü hazır", "time": "OK"},
-                {"text": "Lisans sayfaları mavi HUD içinde izleniyor", "time": "V8"},
-            ],
-        },
-        "reports": {
-            "title": "SMS Raporları",
-            "desc": "Spam trafik, engelleme oranı, rapor matrisi ve SMS olay kayıtları izleme merkezi.",
-            "stat1": "1.247", "label1": "SMS izleme",
-            "stat2": "98%", "label2": "Koruma oranı",
-            "stat3": "24H", "label3": "Rapor periyodu",
-            "stat4": "OK", "label4": "Rapor sistemi",
-            "primary_label": "Raporları Aç",
-            "primary_href": "/admin/reports",
-            "checks": common_checks + [
-                {"name": "SMS rapor endpoint", "value": "Hazır", "state": "ok"},
-                {"name": "Spam analizi", "value": "Aktif", "state": "ok"},
-                {"name": "Haftalık özet", "value": "Hazır", "state": "ok"},
-            ],
-            "logs": [
-                {"text": "SMS rapor modülü açıldı", "time": "LIVE"},
-                {"text": "Spam trafik kartları hazır", "time": "OK"},
-                {"text": "Rapor merkezi admin HUD'a bağlandı", "time": "V8"},
-            ],
-        },
-        "blocked": {
-            "title": "Engellenenler",
-            "desc": "Engellenen SMS, numara, filtre kararı ve spam liste yönetimi.",
-            "stat1": "17", "label1": "Engelli numara",
-            "stat2": "24", "label2": "Engelli spam",
-            "stat3": "AI", "label3": "Filtre desteği",
-            "stat4": "OK", "label4": "Liste durumu",
-            "primary_label": "Engellenenleri Aç",
-            "primary_href": "/admin/blocked",
-            "checks": common_checks + [
-                {"name": "Engel listesi", "value": "Hazır", "state": "ok"},
-                {"name": "Spam kayıtları", "value": "Aktif", "state": "ok"},
-                {"name": "Filtre kararları", "value": "İzleniyor", "state": "ok"},
-            ],
-            "logs": [
-                {"text": "Engellenenler modülü açıldı", "time": "LIVE"},
-                {"text": "Spam ve numara blokları ayrıldı", "time": "OK"},
-                {"text": "Admin kontrol kartı hazır", "time": "V8"},
-            ],
-        },
-        "ai": {
-            "title": "AI Analiz",
-            "desc": "AI skor katmanı, spam tahmini, model sinyalleri ve karar izleme merkezi.",
-            "stat1": "98%", "label1": "AI skor",
-            "stat2": "12", "label2": "Sinyal",
-            "stat3": "LIVE", "label3": "Analiz",
-            "stat4": "OK", "label4": "Model durumu",
-            "primary_label": "AI Analizi Aç",
-            "primary_href": "/admin/ai",
-            "checks": common_checks + [
-                {"name": "AI skor motoru", "value": "Aktif", "state": "ok"},
-                {"name": "Spam sinyalleri", "value": "İzleniyor", "state": "ok"},
-                {"name": "Yanlış pozitif kontrolü", "value": "Hazır", "state": "warn"},
-            ],
-            "logs": [
-                {"text": "AI analiz modülü açıldı", "time": "LIVE"},
-                {"text": "Model sinyalleri admin ekranına bağlandı", "time": "OK"},
-                {"text": "Spam skor katmanı hazır", "time": "V8"},
-            ],
-        },
-        "system": {
-            "title": "Sistem Sağlığı",
-            "desc": "Sunucu, route health, uptime, servis sağlığı ve admin/user ayrımı kontrol merkezi.",
-            "stat1": "200", "label1": "Route OK",
-            "stat2": "UP", "label2": "Servis",
-            "stat3": "LIVE", "label3": "İzleme",
-            "stat4": "OK", "label4": "Sistem",
-            "primary_label": "Sistem Kontrolüne Dön",
-            "primary_href": "/ac?v=hud8",
-            "checks": common_checks + [
-                {"name": "/radial", "value": "OK", "state": "ok"},
-                {"name": "/privacy", "value": "OK", "state": "ok"},
-                {"name": "/admin/v8/system", "value": "OK", "state": "ok"},
-            ],
-            "logs": [
-                {"text": "Sistem sağlığı modülü açıldı", "time": "LIVE"},
-                {"text": "Admin ve user route ayrımı korunuyor", "time": "OK"},
-                {"text": "V8 sistem kontrol görünümü hazır", "time": "V8"},
-            ],
-        },
-        "feedback": {
-            "title": "Geri Bildirim",
-            "desc": "Kullanıcı geri bildirimleri, topluluk sinyalleri ve mesaj takibi.",
-            "stat1": "0", "label1": "Yeni mesaj",
-            "stat2": "BETA", "label2": "Topluluk",
-            "stat3": "LIVE", "label3": "İzleme",
-            "stat4": "OK", "label4": "Kanal",
-            "primary_label": "Geri Bildirimleri Aç",
-            "primary_href": "/admin/feedback",
-            "checks": common_checks + [
-                {"name": "Feedback kuyruğu", "value": "Hazır", "state": "ok"},
-                {"name": "Topluluk modu", "value": "Beta", "state": "warn"},
-                {"name": "Kullanıcı sinyali", "value": "İzleniyor", "state": "ok"},
-            ],
-            "logs": [
-                {"text": "Geri bildirim modülü açıldı", "time": "LIVE"},
-                {"text": "Topluluk sinyalleri hazırlandı", "time": "OK"},
-                {"text": "Feedback merkezi V8 görünümünde", "time": "V8"},
-            ],
-        },
-        "support": {
-            "title": "Destek",
-            "desc": "Destek talepleri, hata bildirimleri ve işlem kuyruğu.",
-            "stat1": "0", "label1": "Açık talep",
-            "stat2": "0", "label2": "Bekleyen",
-            "stat3": "LIVE", "label3": "Kuyruk",
-            "stat4": "OK", "label4": "Destek",
-            "primary_label": "Destek Kuyruğunu Aç",
-            "primary_href": "/admin/support",
-            "checks": common_checks + [
-                {"name": "Destek merkezi", "value": "Hazır", "state": "ok"},
-                {"name": "Hata bildirimi", "value": "İzleniyor", "state": "ok"},
-                {"name": "Cevap kuyruğu", "value": "Boş", "state": "ok"},
-            ],
-            "logs": [
-                {"text": "Destek modülü açıldı", "time": "LIVE"},
-                {"text": "İşlem kuyruğu kontrol edildi", "time": "OK"},
-                {"text": "Destek kartı V8'e bağlandı", "time": "V8"},
-            ],
-        },
-        "release": {
-            "title": "Yayın Durumu",
-            "desc": "Play Console, AAB, upload key reset, SDK 34, privacy policy ve sürüm hazırlığı kontrol merkezi.",
-            "stat1": "AAB", "label1": "Hazır paket",
-            "stat2": "SDK34", "label2": "Target SDK",
-            "stat3": "RESET", "label3": "Upload key",
-            "stat4": "02 TEM", "label4": "Geçerlilik",
-            "primary_label": "Yayın Checklist",
-            "primary_href": "/admin/v8/release",
-            "checks": common_checks + [
-                {"name": "Upload key reset", "value": "2 Temmuz 2026 bekleniyor", "state": "warn"},
-                {"name": "AAB dosyası", "value": "Hazır", "state": "ok"},
-                {"name": "Privacy URL", "value": "/privacy OK", "state": "ok"},
-                {"name": "Package", "value": "com.eratguard.app", "state": "ok"},
-                {"name": "Yeni sertifika", "value": "70:B6:57...23:02", "state": "ok"},
-            ],
-            "logs": [
-                {"text": "Yayın durumu modülü açıldı", "time": "LIVE"},
-                {"text": "Google upload key reset talebi alındı", "time": "OK"},
-                {"text": "Yeni anahtar 2 Temmuz 2026 sonrası geçerli", "time": "WAIT"},
-            ],
-        },
-        "privacy": {
-            "title": "Gizlilik",
-            "desc": "SMS izinleri, gizlilik politikası, veri satışı yok beyanı ve Google Play uyumluluk checklist merkezi.",
-            "stat1": "SMS", "label1": "İzinler",
-            "stat2": "OK", "label2": "Privacy URL",
-            "stat3": "NO", "label3": "Veri satışı",
-            "stat4": "PLAY", "label4": "Uyumluluk",
-            "primary_label": "Privacy Policy Aç",
-            "primary_href": "/privacy",
-            "checks": common_checks + [
-                {"name": "RECEIVE_SMS", "value": "Beyan hazır", "state": "ok"},
-                {"name": "READ_SMS", "value": "Beyan hazır", "state": "ok"},
-                {"name": "SEND_SMS", "value": "Kontrol edilmeli", "state": "warn"},
-                {"name": "Veri satışı", "value": "Yok", "state": "ok"},
-                {"name": "Privacy route", "value": "/privacy OK", "state": "ok"},
-            ],
-            "logs": [
-                {"text": "Gizlilik modülü açıldı", "time": "LIVE"},
-                {"text": "SMS permission checklist hazır", "time": "OK"},
-                {"text": "Play uyumluluk kartı V8'e bağlandı", "time": "V8"},
-            ],
-        },
-    }
-    return modules.get(module_key)
-
-@app.route("/admin/v8/<module_key>")
-def eratguard_admin_v8_module_page(module_key):
-    data = _eg_admin_v8_rows(module_key)
-    if not data:
-        return render_template("admin_command_center.html")
-    return render_template("admin_module_page.html", **data)
-
-# Keep V7 module URLs alive, but render latest V8 module UI.
-@app.route("/admin/v7/<module_key>")
-def eratguard_admin_v7_module_page_latest(module_key):
-    data = _eg_admin_v8_rows(module_key)
-    if not data:
-        return render_template("admin_command_center.html")
-    return render_template("admin_module_page.html", **data)
-
-# === ERATGUARD ADMIN HUD V9 SAFE MODULE ROUTES ===
-# These routes intentionally avoid /admin/* because old admin guards may redirect there.
-@app.before_request
-def eratguard_admin_v9_safe_module_guard():
-    try:
-        path = request.path.rstrip("/") or "/"
-
-        if path in {"/ac", "/eg-admin", "/eg-admin-v9", "/eg-admin-v8"}:
-            return render_template("admin_command_center.html")
-
-        if path.startswith("/eg-admin-v8/") or path.startswith("/eg-admin-v9/"):
-            if path.startswith("/eg-admin-v8/"):
-                module_key = path.split("/eg-admin-v8/", 1)[1].strip("/").split("/", 1)[0]
-            else:
-                module_key = path.split("/eg-admin-v9/", 1)[1].strip("/").split("/", 1)[0]
-
-            try:
-                data = _eg_admin_v8_rows(module_key)
-            except Exception as e:
-                print("ADMIN_V9_SAFE_MODULE_DATA_ERROR:", e, flush=True)
-                data = None
-
-            if data:
-                return render_template("admin_module_page.html", **data)
-
-            return render_template("admin_command_center.html")
-
-    except Exception as e:
-        print("ADMIN_V9_SAFE_MODULE_GUARD_ERROR:", e, flush=True)
-        return None
-
-@app.route("/eg-admin-v8/<module_key>")
-@app.route("/eg-admin-v9/<module_key>")
-def eratguard_admin_v9_safe_module_page(module_key):
-    data = _eg_admin_v8_rows(module_key)
-    if not data:
-        return render_template("admin_command_center.html")
-    return render_template("admin_module_page.html", **data)
-# === ERATGUARD ADMIN HUD V9 SAFE MODULE ROUTES END ===
-
-# === ERATGUARD ADMIN V10 3D SAFE MODULE ALIAS ===
-@app.before_request
-def eratguard_admin_v10_3d_safe_alias_guard():
-    try:
-        path = request.path.rstrip("/") or "/"
-        if path in {"/eg-admin-3d", "/eg-admin-v10-3d"}:
-            return render_template("admin_command_center.html")
-
-        if path.startswith("/eg-admin-3d/") or path.startswith("/eg-admin-v10-3d/"):
-            prefix = "/eg-admin-3d/" if path.startswith("/eg-admin-3d/") else "/eg-admin-v10-3d/"
-            module_key = path.split(prefix, 1)[1].strip("/").split("/", 1)[0]
-
-            try:
-                data = _eg_admin_v8_rows(module_key)
-            except Exception:
-                data = None
-
-            if data:
-                return render_template("admin_module_page.html", **data)
-            return render_template("admin_command_center.html")
-    except Exception as e:
-        print("ADMIN_V10_3D_ALIAS_ERROR:", e, flush=True)
-        return None
-
-@app.route("/eg-admin-3d/<module_key>")
-@app.route("/eg-admin-v10-3d/<module_key>")
-def eratguard_admin_v10_3d_safe_module_page(module_key):
-    data = _eg_admin_v8_rows(module_key)
-    if not data:
-        return render_template("admin_command_center.html")
-    return render_template("admin_module_page.html", **data)
-# === ERATGUARD ADMIN V10 3D SAFE MODULE ALIAS END ===
-
-
-
+# ===== ADMIN BLUE COMMAND CENTER REMOVED =====
+# Legacy Admin Blue sistemi tamamen kaldırıldı.
+# Yeni admin yapısı admin Blueprint altında geliştiriliyor.
 
 from datetime import timedelta as _eg_timedelta
 
