@@ -12455,7 +12455,10 @@ try:
                     _eg_sec3_session.get("logged_in")
                     or _eg_sec3_session.get("is_admin")
                     or _eg_sec3_session.get("role") == "admin"
-                    or _eg_sec3_request.cookies.get("ss_admin_mobile")
+                    or (
+                        callable(globals().get("_ss_admin_cookie_ok_final"))
+                        and globals()["_ss_admin_cookie_ok_final"]()
+                    )
                 ):
                     return _eg_sec3_redirect("/ss-admin-access", code=302)
 
@@ -12495,7 +12498,10 @@ try:
                     _eg_users2_session.get("logged_in")
                     or _eg_users2_session.get("is_admin")
                     or _eg_users2_session.get("role") == "admin"
-                    or _eg_users2_request.cookies.get("ss_admin_mobile")
+                    or (
+                        callable(globals().get("_ss_admin_cookie_ok_final"))
+                        and globals()["_ss_admin_cookie_ok_final"]()
+                    )
                 ):
                     return _eg_users2_redirect("/ss-admin-access", code=302)
 
@@ -12543,7 +12549,10 @@ try:
                 _eg_live_session.get("logged_in")
                 or _eg_live_session.get("is_admin")
                 or _eg_live_session.get("role") == "admin"
-                or _eg_live_request.cookies.get("ss_admin_mobile")
+                or (
+                    callable(globals().get("_ss_admin_cookie_ok_final"))
+                    and globals()["_ss_admin_cookie_ok_final"]()
+                )
             )
         except Exception:
             return False
@@ -35207,3 +35216,559 @@ try:
 except Exception as _eg_true_final_err:
     print("ERATGUARD TRUE FINAL RADIAL LOCK ERROR:", _eg_true_final_err)
 # ===== ERATGUARD TRUE FINAL RADIAL -> EG-PANEL LOCK END =====
+
+
+# ===== ERATGUARD NEW ADMIN RUNTIME QUARANTINE V1 START =====
+#
+# Legacy SpamShield/EratGuard admin middleware'lerini runtime zincirinden
+# çıkarır. Kullanıcı middleware'lerine dokunmaz.
+#
+# Yeni admin kaynağı:
+#     admin/routes.py
+#
+# Bu blok geçiş aşamasıdır. Legacy kaynak kod fiziksel olarak daha sonra
+# temizlenecektir.
+#
+try:
+    from admin.routes import dashboard as _eg_new_admin_dashboard
+
+    _eg_admin_legacy_before_request_names = {
+        "eratguard_final_admin_separation_bridge",
+        "_eg6k8_hydrate_admin_session_from_cookie",
+        "_eg_al2_admin_access_reset_gate",
+        "_eg_al1_strict_admin_gate",
+        "_eg6d_old_admin_access_bridge",
+        "_eg6b_command_tree_admin_gate",
+        "_eg5c_hot_force_api_router",
+        "_eg5a_admin_auth_gate",
+        "_eg_stage4j_prepend_single_admin_guard",
+        "_eg_stage4f_admin_root_before_request_redirect",
+        "_eg_stage4j_single_admin_entry_guard",
+    }
+
+    _eg_admin_before_funcs = app.before_request_funcs.get(None, [])
+
+    _eg_admin_removed_before_funcs = []
+
+    _eg_admin_kept_before_funcs = []
+
+    for _eg_admin_fn in _eg_admin_before_funcs:
+        _eg_admin_fn_name = getattr(_eg_admin_fn, "__name__", "")
+
+        if _eg_admin_fn_name in _eg_admin_legacy_before_request_names:
+            _eg_admin_removed_before_funcs.append(_eg_admin_fn_name)
+        else:
+            _eg_admin_kept_before_funcs.append(_eg_admin_fn)
+
+    app.before_request_funcs[None] = _eg_admin_kept_before_funcs
+
+    # Blueprint kaydedildikten sonra dashboard_web.py tarafından değiştirilmiş
+    # admin.dashboard endpoint'ini gerçek yeni Blueprint fonksiyonuna geri bağla.
+    if "admin.dashboard" in app.view_functions:
+        app.view_functions["admin.dashboard"] = _eg_new_admin_dashboard
+
+    print(
+        "ERATGUARD NEW ADMIN RUNTIME QUARANTINE V1 ACTIVE:",
+        ", ".join(_eg_admin_removed_before_funcs),
+        flush=True,
+    )
+
+except Exception as _eg_admin_quarantine_error:
+    print(
+        "ERATGUARD NEW ADMIN RUNTIME QUARANTINE V1 ERROR:",
+        repr(_eg_admin_quarantine_error),
+        flush=True,
+    )
+# ===== ERATGUARD NEW ADMIN RUNTIME QUARANTINE V1 END =====
+
+
+# ===== ERATGUARD NEW ADMIN RUNTIME QUARANTINE V2 START =====
+# Legacy LIVE-DATA admin fan renderer artık yeni /admin Blueprint alanına
+# müdahale etmeyecek.
+try:
+    _eg_admin_v2_remove = {
+        "_eg_live_render_fan_page",
+    }
+
+    _eg_admin_v2_funcs = app.before_request_funcs.get(None, [])
+
+    _eg_admin_v2_removed = [
+        getattr(fn, "__name__", "")
+        for fn in _eg_admin_v2_funcs
+        if getattr(fn, "__name__", "") in _eg_admin_v2_remove
+    ]
+
+    app.before_request_funcs[None] = [
+        fn for fn in _eg_admin_v2_funcs
+        if getattr(fn, "__name__", "") not in _eg_admin_v2_remove
+    ]
+
+    print(
+        "ERATGUARD NEW ADMIN RUNTIME QUARANTINE V2 ACTIVE:",
+        ", ".join(_eg_admin_v2_removed) or "NONE",
+        flush=True,
+    )
+
+except Exception as _eg_admin_qv2_error:
+    print(
+        "ERATGUARD NEW ADMIN RUNTIME QUARANTINE V2 ERROR:",
+        repr(_eg_admin_qv2_error),
+        flush=True,
+    )
+# ===== ERATGUARD NEW ADMIN RUNTIME QUARANTINE V2 END =====
+
+
+# =====================================================================
+# ERATGUARD NEW ADMIN RUNTIME QUARANTINE V3 START
+#
+# Amaç:
+# Yeni admin/ Blueprint alanının alt modüllerine müdahale eden eski
+# before_request admin renderer/bridge katmanlarını runtime zincirinden
+# çıkarmak.
+#
+# Kullanıcı tarafındaki genel guard'lara dokunulmaz.
+# =====================================================================
+
+try:
+    _eg_admin_legacy_module_interceptors_v3 = {
+        "_eg_users2_force_user_center_first",
+        "_eg_security3_force_security_center_first",
+        "_eg_stage4r_hotfix_admin_notifications",
+        "_eg_stage4r_before_request",
+        "_eg_stage4o_notifications_json_route",
+        "_eg_stage4n_prepend_notifications_route",
+        "_eg_stage4l_license_route_hotfix",
+        "_eg_stage4l_real_module_route_guard",
+    }
+
+    _eg_admin_removed_v3 = []
+
+    _eg_before_v3 = app.before_request_funcs.get(None, [])
+
+    for _eg_fn_v3 in list(_eg_before_v3):
+        _eg_name_v3 = getattr(_eg_fn_v3, "__name__", "")
+
+        if _eg_name_v3 in _eg_admin_legacy_module_interceptors_v3:
+            _eg_before_v3.remove(_eg_fn_v3)
+            _eg_admin_removed_v3.append(_eg_name_v3)
+
+    print(
+        "ERATGUARD NEW ADMIN RUNTIME QUARANTINE V3 ACTIVE:",
+        ", ".join(_eg_admin_removed_v3)
+        if _eg_admin_removed_v3
+        else "NONE"
+    )
+
+except Exception as _eg_admin_quarantine_v3_error:
+    print(
+        "ERATGUARD NEW ADMIN RUNTIME QUARANTINE V3 ERROR:",
+        _eg_admin_quarantine_v3_error
+    )
+
+# ERATGUARD NEW ADMIN RUNTIME QUARANTINE V3 END
+
+# ============================================================
+# ERATGUARD USER AUTH PRIORITY LOCK V1
+# Existing strict user auth guard must run before legacy
+# before_request render/override bridges.
+# ============================================================
+
+try:
+    _eg_user_auth_priority_funcs = app.before_request_funcs.setdefault(None, [])
+
+    if "_eg_strict_user_auth_guard_final" in globals():
+        _eg_user_auth_priority_guard = _eg_strict_user_auth_guard_final
+
+        # Remove every existing registration of the same function.
+        _eg_user_auth_priority_funcs[:] = [
+            fn for fn in _eg_user_auth_priority_funcs
+            if fn is not _eg_user_auth_priority_guard
+        ]
+
+        # Absolute first responder.
+        _eg_user_auth_priority_funcs.insert(
+            0,
+            _eg_user_auth_priority_guard
+        )
+
+        print(
+            "ERATGUARD USER AUTH PRIORITY LOCK V1 ACTIVE:",
+            _eg_user_auth_priority_funcs[0].__name__
+        )
+
+except Exception as _eg_user_auth_priority_error:
+    print(
+        "ERATGUARD USER AUTH PRIORITY LOCK V1 ERROR:",
+        repr(_eg_user_auth_priority_error)
+    )
+
+# ============================================================
+# ERATGUARD USER AUTH RESPONSE LOCK V1
+#
+# Final response boundary for protected user routes.
+# Legacy after_request renderers may rewrite redirect responses.
+# This lock executes LAST and restores the authentication
+# redirect whenever no valid user session exists.
+# ============================================================
+
+def _eg_user_auth_response_lock_v1(response):
+    try:
+        path = (request.path or "").rstrip("/") or "/"
+
+        public_paths = {
+            "/",
+            "/landing",
+            "/login",
+            "/register",
+            "/logout",
+            "/forgot-password",
+            "/forgot",
+            "/reset-password-code",
+            "/privacy",
+            "/gizlilik",
+            "/terms",
+            "/mesafeli-satis",
+            "/refund",
+            "/iade",
+            "/contact",
+            "/iletisim",
+            "/health",
+            "/ping",
+            "/status",
+            "/splash",
+            "/app-start",
+            "/ss-admin-access",
+            "/favicon.ico",
+        }
+
+        if path in public_paths:
+            return response
+
+        if path.startswith("/static/"):
+            return response
+
+        if path.startswith("/api/system-resources"):
+            return response
+
+        # Admin authentication is handled separately.
+        if path.startswith("/admin") or path.startswith("/ss-admin"):
+            return response
+
+        protected_prefixes = (
+            "/u",
+            "/dashboard",
+            "/home",
+            "/user",
+            "/main",
+            "/radial",
+            "/protection",
+            "/koruma",
+            "/reports",
+            "/report",
+            "/rapor",
+            "/blocked",
+            "/block",
+            "/analysis",
+            "/analyze",
+            "/analiz",
+            "/notifications",
+            "/notification",
+            "/bildirim",
+            "/settings",
+            "/ayarlar",
+            "/community",
+            "/topluluk",
+            "/license",
+            "/lisans",
+            "/pricing",
+            "/checkout",
+            "/payment",
+            "/odeme",
+            "/satin-al",
+        )
+
+        if not path.startswith(protected_prefixes):
+            return response
+
+        has_user_session = bool(
+            session.get("logged_in")
+            and session.get("username")
+        )
+
+        if has_user_session:
+            return response
+
+        # Do not trust a legacy after_request-modified response.
+        # Rebuild the auth redirect from scratch.
+        locked = redirect("/login?auth_required=1")
+
+        locked.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, max-age=0"
+        )
+        locked.headers["Pragma"] = "no-cache"
+
+        return locked
+
+    except Exception as _eg_user_auth_response_lock_error:
+        try:
+            print(
+                "ERATGUARD USER AUTH RESPONSE LOCK V1 ERROR:",
+                repr(_eg_user_auth_response_lock_error),
+                flush=True,
+            )
+        except Exception:
+            pass
+
+        return response
+
+
+try:
+    _eg_user_auth_response_funcs = app.after_request_funcs.setdefault(
+        None, []
+    )
+
+    # Avoid duplicate registration if module is reloaded.
+    _eg_user_auth_response_funcs[:] = [
+        fn for fn in _eg_user_auth_response_funcs
+        if getattr(fn, "__name__", "") !=
+        "_eg_user_auth_response_lock_v1"
+    ]
+
+    # Flask executes after_request handlers in reverse order.
+    # Index 0 therefore executes LAST.
+    _eg_user_auth_response_funcs.insert(
+        0,
+        _eg_user_auth_response_lock_v1
+    )
+
+    print(
+        "ERATGUARD USER AUTH RESPONSE LOCK V1 ACTIVE:",
+        _eg_user_auth_response_funcs[0].__name__
+    )
+
+except Exception as _eg_user_auth_response_register_error:
+    print(
+        "ERATGUARD USER AUTH RESPONSE LOCK V1 REGISTER ERROR:",
+        repr(_eg_user_auth_response_register_error)
+    )
+
+# =============================================================================
+# ERATGUARD USER AUTH LIFECYCLE LOCK V2
+# Disable legacy FAN-12P automatic user-session creation.
+#
+# Authentication must ONLY be established by the real login flow.
+# =============================================================================
+
+try:
+    _eg_auth_v2_before = app.before_request_funcs.get(None, [])
+
+    _eg_auth_v2_removed = []
+
+    for _eg_auth_v2_func in list(_eg_auth_v2_before):
+        if getattr(_eg_auth_v2_func, "__name__", "") == "_eg_fan12p_user_session_bridge":
+            _eg_auth_v2_before.remove(_eg_auth_v2_func)
+            _eg_auth_v2_removed.append(
+                getattr(_eg_auth_v2_func, "__name__", "<unknown>")
+            )
+
+    print(
+        "ERATGUARD USER AUTH LIFECYCLE LOCK V2 ACTIVE:",
+        ", ".join(_eg_auth_v2_removed) if _eg_auth_v2_removed else "legacy bridge already absent",
+        flush=True
+    )
+
+except Exception as _eg_auth_v2_err:
+    print(
+        "ERATGUARD USER AUTH LIFECYCLE LOCK V2 ERROR:",
+        repr(_eg_auth_v2_err),
+        flush=True
+    )
+
+
+# =============================================================================
+# ERATGUARD FINAL ADMIN AUTH BOUNDARY V1
+# =============================================================================
+# Purpose:
+#   Single authoritative runtime boundary for /admin* and /api/admin*.
+#
+# Rules:
+#   - /admin/login and /admin/static/* remain public.
+#   - Anonymous / normal users cannot access admin HTML pages.
+#   - Admin API returns 403 for non-admin sessions.
+#   - Real-admin decision is delegated to _eg_al1_is_real_admin().
+#   - This guard is forced to before_request index 0.
+# =============================================================================
+
+try:
+    from flask import request as _eg_fab_request
+    from flask import redirect as _eg_fab_redirect
+    from flask import abort as _eg_fab_abort
+    from werkzeug.exceptions import HTTPException as _eg_fab_HTTPException
+
+    def _eg_final_admin_auth_boundary_v1():
+        try:
+            raw_path = str(
+                getattr(_eg_fab_request, "path", "") or ""
+            )
+            path = raw_path.rstrip("/") or "/"
+
+            is_admin_page = (
+                path == "/admin"
+                or path.startswith("/admin/")
+            )
+
+            is_admin_api = (
+                path == "/api/admin"
+                or path.startswith("/api/admin/")
+            )
+
+            if not (is_admin_page or is_admin_api):
+                return None
+
+            # -------------------------------------------------------------
+            # Public admin resources
+            # -------------------------------------------------------------
+            if (
+                path == "/admin/login"
+                or path.startswith("/admin/static/")
+            ):
+                return None
+
+            # -------------------------------------------------------------
+            # Authoritative real-admin verification
+            # -------------------------------------------------------------
+            # Strict admin verification:
+            # Session must explicitly carry ALL admin authentication flags,
+            # and the persisted user record must independently confirm admin.
+            #
+            # username="admin" alone is NEVER sufficient.
+            try:
+                from flask import session as _eg_fab_session
+
+                username = str(
+                    _eg_fab_session.get("username") or ""
+                ).strip()
+
+                role = str(
+                    _eg_fab_session.get("role") or ""
+                ).strip().lower()
+
+                logged_in = (
+                    _eg_fab_session.get("logged_in") is True
+                )
+
+                session_is_admin = (
+                    _eg_fab_session.get("is_admin") is True
+                )
+
+                strict_session_ok = (
+                    logged_in
+                    and bool(username)
+                    and role == "admin"
+                    and session_is_admin
+                )
+
+                persisted_admin_ok = False
+
+                if strict_session_ok:
+                    try:
+                        users = load_users()
+                        user = users.get(username) if isinstance(users, dict) else None
+
+                        if isinstance(user, dict):
+                            persisted_role = str(
+                                user.get("role") or ""
+                            ).strip().lower()
+
+                            persisted_admin_ok = (
+                                persisted_role == "admin"
+                                or user.get("is_admin") is True
+                            )
+
+                    except Exception:
+                        persisted_admin_ok = False
+
+                is_real_admin = bool(
+                    strict_session_ok
+                    and persisted_admin_ok
+                )
+
+            except Exception:
+                is_real_admin = False
+
+            if is_real_admin:
+                return None
+
+            # -------------------------------------------------------------
+            # API: never redirect; deny directly.
+            # -------------------------------------------------------------
+            if is_admin_api:
+                return _eg_fab_abort(403)
+
+            # -------------------------------------------------------------
+            # HTML admin pages: go to dedicated admin access flow.
+            #
+            # IMPORTANT:
+            # Do NOT redirect to /dashboard or /radial.
+            # This prevents admin/user redirect-loop coupling.
+            # -------------------------------------------------------------
+            next_path = raw_path if raw_path.startswith("/") else "/admin/dashboard"
+
+            return _eg_fab_redirect(
+                "/ss-admin-access?next=" + next_path,
+                code=302
+            )
+
+        except _eg_fab_HTTPException:
+            # Flask/Werkzeug HTTP control-flow exceptions (403, etc.)
+            # must reach Flask unchanged. Never swallow abort().
+            raise
+
+        except Exception as _eg_fab_err:
+            # Fail closed for unexpected admin-boundary errors.
+            try:
+                path = str(
+                    getattr(_eg_fab_request, "path", "") or ""
+                ).rstrip("/") or "/"
+
+                if path == "/api/admin" or path.startswith("/api/admin/"):
+                    return _eg_fab_abort(403)
+
+                if path == "/admin" or path.startswith("/admin/"):
+                    return _eg_fab_redirect("/ss-admin-access", code=302)
+
+            except Exception:
+                pass
+
+            return None
+
+
+    # ---------------------------------------------------------------------
+    # Runtime registration:
+    # remove duplicates and force this boundary to absolute priority.
+    # ---------------------------------------------------------------------
+    _eg_fab_funcs = app.before_request_funcs.setdefault(None, [])
+
+    _eg_fab_funcs[:] = [
+        fn for fn in _eg_fab_funcs
+        if getattr(fn, "__name__", "") != "_eg_final_admin_auth_boundary_v1"
+    ]
+
+    _eg_fab_funcs.insert(0, _eg_final_admin_auth_boundary_v1)
+
+    print(
+        "ERATGUARD FINAL ADMIN AUTH BOUNDARY V1 ACTIVE:",
+        "index=0",
+        flush=True
+    )
+
+except Exception as _eg_fab_boot_err:
+    print(
+        "ERATGUARD FINAL ADMIN AUTH BOUNDARY V1 BOOT ERROR:",
+        repr(_eg_fab_boot_err),
+        flush=True
+    )
+
+# =============================================================================
+# ERATGUARD FINAL ADMIN AUTH BOUNDARY V1 END
+# =============================================================================
