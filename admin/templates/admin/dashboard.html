@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>EratGuard Command Center</title>
+
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/dashboard.css') }}">
+
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/panels.css') }}">
+
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/eva.css') }}">
+
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/animations.css') }}">
+
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/responsive.css') }}">
+</head>
+
+<body>
+
+<div class="eg-shell">
+
+
+<!-- ERATGUARD CLEAN PANEL: LEGACY TOP SURFACE REMOVED -->
+
+<!-- =========================================================
+     ERATGUARD CLEAN ADMIN SURFACE
+     Reference panel rebuild starts here.
+     ========================================================= -->
+
+<main class="eg-clean-admin-surface" id="eg-clean-admin-surface">
+
+<!-- =========================================================
+     ERATGUARD REFERENCE COMMAND CENTER V1
+     CLEAN REBUILD
+     ========================================================= -->
+
+<section class="eg-ref-console">
+
+    <nav class="eg-ref-nav" aria-label="Admin command navigation">
+
+        <a href="{{ url_for('admin.dashboard') }}" class="is-active">
+            <span class="eg-ref-nav-icon">⌂</span>
+            <b>OVERVIEW</b>
+        </a>
+
+        <a href="{{ url_for('admin.users') }}">
+            <span class="eg-ref-nav-icon">♙</span>
+            <b>USERS</b>
+        </a>
+
+        <a href="{{ url_for('admin.licenses_center') }}">
+            <span class="eg-ref-nav-icon">◇</span>
+            <b>LICENSES</b>
+        </a>
+
+        <a href="{{ url_for('admin.system_center') }}">
+            <span class="eg-ref-nav-icon">▣</span>
+            <b>DEVICES</b>
+        </a>
+
+        <a href="{{ url_for('admin.notifications_center') }}">
+            <span class="eg-ref-nav-icon">♢</span>
+            <b>NOTIFICATIONS</b>
+        </a>
+
+        <a href="{{ url_for('admin.settings_center') }}">
+            <span class="eg-ref-nav-icon">⚙</span>
+            <b>SETTINGS</b>
+        </a>
+
+        <div class="eg-ref-system">
+            <span>SYSTEM STATUS</span>
+            <strong>
+                <i></i>
+                {{ admin_stats.system|default("ONLINE") }}
+            </strong>
+        </div>
+
+    </nav>
+
+
+    <div class="eg-ref-title">
+        <span>AI CORE · ERATGUARD ENGINE</span>
+    </div>
+
+
+    <section class="eg-ref-core">
+
+        <div class="eg-ref-orbit orbit-1"></div>
+        <div class="eg-ref-orbit orbit-2"></div>
+        <div class="eg-ref-orbit orbit-3"></div>
+        <div class="eg-ref-orbit orbit-4"></div>
+
+        <div class="eg-ref-line line-ai"></div>
+        <div class="eg-ref-line line-network"></div>
+        <div class="eg-ref-line line-firewall"></div>
+        <div class="eg-ref-line line-devices"></div>
+        <div class="eg-ref-line line-quarantine"></div>
+        <div class="eg-ref-line line-reports"></div>
+        <div class="eg-ref-line line-licenses"></div>
+        <div class="eg-ref-line line-sms"></div>
+
+
+        <a href="{{ url_for('admin.security_center') }}"
+           class="eg-ref-node node-ai">
+            <span class="node-icon node-icon-ai" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <path d="M32 13v38"/>
+  <path d="M31 18c-3-7-13-7-16 0-6 1-8 9-4 13-5 5-2 14 5 15 1 7 10 9 15 4"/>
+  <path d="M33 18c3-7 13-7 16 0 6 1 8 9 4 13 5 5 2 14-5 15-1 7-10 9-15 4"/>
+  <path d="M17 25c5 0 8 3 8 7"/>
+  <path d="M47 25c-5 0-8 3-8 7"/>
+  <path d="M17 40c5 0 8-3 8-7"/>
+  <path d="M47 40c-5 0-8-3-8-7"/>
+</svg>
+</span>
+            <b>AI ANALYSIS</b>
+        </a>
+
+
+        <a href="{{ url_for('admin.system_center') }}"
+           class="eg-ref-node node-network">
+            <span class="node-icon node-icon-network" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="21"/>
+  <path d="M11 32h42"/>
+  <path d="M32 11c8 7 12 14 12 21S40 46 32 53"/>
+  <path d="M32 11c-8 7-12 14-12 21s4 14 12 21"/>
+  <path d="M15 21h34"/>
+  <path d="M15 43h34"/>
+</svg>
+</span>
+            <b>NETWORK</b>
+        </a>
+
+
+        <a href="{{ url_for('admin.security_center') }}"
+           class="eg-ref-node node-firewall">
+            <span class="node-icon node-icon-firewall" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <path d="M32 8 50 15v15c0 13-7 21-18 27C21 51 14 43 14 30V15z"/>
+  <path d="M34 18c2 7-5 9-2 15 2-4 6-5 8-9 5 8 7 14 3 20-3 5-8 8-13 8-8 0-14-6-14-14 0-7 4-12 10-18-1 6 1 9 4 11 0-5 0-9 4-13z"/>
+</svg>
+</span>
+            <b>FIREWALL</b>
+        </a>
+
+
+        <a href="{{ url_for('admin.users') }}"
+           class="eg-ref-node node-devices">
+            <span class="node-icon node-icon-devices" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <rect x="20" y="8" width="25" height="48" rx="3"/>
+  <rect x="24" y="14" width="17" height="32" rx="1"/>
+  <path d="M28 51h9"/>
+  <path d="m27 38 5-6 4 4 6-9"/>
+</svg>
+</span>
+            <b>DEVICES</b>
+        </a>
+
+
+        <a href="{{ url_for('admin.security_center') }}"
+           class="eg-ref-node node-quarantine">
+            <span class="node-icon node-icon-quarantine" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="5"/>
+  <circle cx="32" cy="32" r="18"/>
+
+  <path d="M29 27
+           C22 26 17 21 17 14
+           C25 11 32 15 35 22
+           C32 22 29 24 29 27Z"/>
+
+  <path d="M37 29
+           C41 23 48 21 54 25
+           C54 34 49 39 41 40
+           C42 36 40 32 37 29Z"/>
+
+  <path d="M34 37
+           C38 43 37 50 31 55
+           C23 51 20 44 24 37
+           C27 39 31 39 34 37Z"/>
+</svg>
+</span>
+            <b>QUARANTINE</b>
+        </a>
+
+
+        <a href="{{ url_for('admin.security_center') }}"
+           class="eg-ref-node node-reports">
+            <span class="node-icon node-icon-reports" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <path d="M12 52h40"/>
+  <rect x="16" y="36" width="8" height="16" rx="1"/>
+  <rect x="28" y="27" width="8" height="25" rx="1"/>
+  <rect x="40" y="17" width="8" height="35" rx="1"/>
+</svg>
+</span>
+            <b>REPORTS</b>
+        </a>
+
+
+        <a href="{{ url_for('admin.licenses_center') }}"
+           class="eg-ref-node node-licenses">
+            <span class="node-icon node-icon-licenses" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <path d="M32 8 50 15v15c0 13-7 21-18 27C21 51 14 43 14 30V15z"/>
+  <path d="m21 32 7 7 15-16"/>
+</svg>
+</span>
+            <b>LICENSES</b>
+        </a>
+
+
+        <a href="{{ url_for('admin.spam_logs_center') }}"
+           class="eg-ref-node node-sms">
+            <span class="node-icon node-icon-sms" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <path d="M12 14h40a5 5 0 0 1 5 5v24a5 5 0 0 1-5 5H29L17 56v-8h-5a5 5 0 0 1-5-5V19a5 5 0 0 1 5-5z"/>
+  <circle cx="22" cy="31" r="2.5" class="node-icon-fill"/>
+  <circle cx="32" cy="31" r="2.5" class="node-icon-fill"/>
+  <circle cx="42" cy="31" r="2.5" class="node-icon-fill"/>
+</svg>
+</span>
+            <b>SMS SHIELD</b>
+        </a>
+
+
+        <div class="eg-ref-center">
+
+            <div class="eg-ref-center-shell">
+
+                <div class="eg-ref-center-inner">
+
+                    <strong>EG</strong>
+
+                    <span>ERATGUARD</span>
+
+                    <small>AI CORE</small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="eg-ref-status">
+
+        <div class="eg-ref-status-engine">
+
+            <span>ENGINE STATUS</span>
+
+            <strong>
+                <i></i>
+                {{ admin_stats.engine_status|default("OPTIMAL") }}
+            </strong>
+
+            <div class="eg-ref-wave">
+                <i></i><i></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i><i></i>
+            </div>
+
+        </div>
+
+
+        <div class="eg-ref-status-threat">
+
+            <span>THREAT LEVEL</span>
+
+            <strong>
+                {{ admin_stats.threat_level|default("LOW") }}
+            </strong>
+
+            <div class="eg-ref-threat-meter">
+                <i class="safe"></i>
+                <i class="safe"></i>
+                <i class="safe"></i>
+                <i class="warn"></i>
+                <i class="warn"></i>
+                <i class="danger"></i>
+                <i class="danger"></i>
+            </div>
+
+        </div>
+
+
+        <div class="eg-ref-status-uptime">
+
+            <span>UPTIME</span>
+
+            <strong>
+                {{ admin_stats.uptime|default("00:00:00") }}
+            </strong>
+
+            <div class="eg-ref-wave">
+                <i></i><i></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i><i></i>
+            </div>
+
+        </div>
+
+    </section>
+
+</section>
+
+<!-- /ERATGUARD REFERENCE COMMAND CENTER V1 -->
+
+</main>
+
+</div><!-- /.eg-shell -->
+
+<script src="{{ url_for('admin.static', filename='js/dashboard.js') }}"></script>
+
+</body>
+</html>
