@@ -572,6 +572,488 @@ body::before{
   .page-wrap{padding:14px 12px}
   .topbar{padding:0 12px}
 }
+
+/* ============================================================
+   ERATGUARD PHASE 7B.3 MISSION CONTROL VISUAL CORE V1
+   ============================================================ */
+
+.eg-mission{
+  position:relative;
+  overflow:hidden;
+  min-height:570px;
+  margin:0 0 14px;
+  border:1px solid var(--b1);
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 50% 45%,
+      rgba(0,200,240,.09) 0,
+      rgba(0,200,240,.025) 25%,
+      transparent 53%),
+    linear-gradient(180deg,
+      rgba(7,16,29,.96),
+      rgba(4,10,20,.98));
+  box-shadow:
+    inset 0 0 80px rgba(0,0,0,.34),
+    0 16px 45px rgba(0,0,0,.18);
+}
+
+.eg-mission::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.16;
+  background-image:
+    linear-gradient(rgba(0,200,240,.16) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,200,240,.16) 1px,transparent 1px);
+  background-size:34px 34px;
+  mask-image:radial-gradient(circle at center,#000 0,transparent 76%);
+}
+
+.eg-mission::after{
+  content:"";
+  position:absolute;
+  left:8%;
+  right:8%;
+  top:0;
+  height:1px;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(0,200,240,.85),
+    transparent
+  );
+  box-shadow:0 0 18px rgba(0,200,240,.55);
+}
+
+.eg-mission-head{
+  position:relative;
+  z-index:5;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  padding:18px 20px 0;
+}
+
+.eg-mission-kicker{
+  font-family:var(--fmn);
+  font-size:9px;
+  letter-spacing:.22em;
+  color:var(--ac);
+}
+
+.eg-mission-title{
+  margin-top:4px;
+  font-family:var(--fhd);
+  font-size:16px;
+  font-weight:800;
+  letter-spacing:.05em;
+  color:var(--tx);
+}
+
+.eg-mission-state{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:6px 9px;
+  border:1px solid rgba(0,232,150,.2);
+  border-radius:20px;
+  background:rgba(0,232,150,.045);
+  color:var(--gr);
+  font-family:var(--fmn);
+  font-size:9px;
+  letter-spacing:.1em;
+}
+
+.eg-mission-state-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:var(--gr);
+  box-shadow:0 0 10px var(--gr);
+  animation:egCorePulse 1.8s infinite;
+}
+
+.eg-core-stage{
+  position:relative;
+  width:min(720px,100%);
+  height:430px;
+  margin:0 auto;
+}
+
+.eg-orbit{
+  position:absolute;
+  left:50%;
+  top:50%;
+  border:1px solid rgba(0,200,240,.13);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+
+.eg-orbit.o1{
+  width:210px;
+  height:210px;
+  border-color:rgba(0,200,240,.25);
+  box-shadow:
+    0 0 35px rgba(0,200,240,.04),
+    inset 0 0 35px rgba(0,200,240,.035);
+}
+
+.eg-orbit.o2{
+  width:330px;
+  height:330px;
+}
+
+.eg-orbit.o3{
+  width:410px;
+  height:410px;
+  border-style:dashed;
+  opacity:.52;
+}
+
+.eg-cross-x,
+.eg-cross-y{
+  position:absolute;
+  left:50%;
+  top:50%;
+  pointer-events:none;
+  opacity:.12;
+  background:linear-gradient(
+    90deg,
+    transparent,
+    var(--ac),
+    transparent
+  );
+}
+
+.eg-cross-x{
+  width:430px;
+  height:1px;
+  transform:translate(-50%,-50%);
+}
+
+.eg-cross-y{
+  width:1px;
+  height:430px;
+  transform:translate(-50%,-50%);
+  background:linear-gradient(
+    transparent,
+    var(--ac),
+    transparent
+  );
+}
+
+.eg-core{
+  position:absolute;
+  z-index:4;
+  left:50%;
+  top:50%;
+  width:152px;
+  height:152px;
+  transform:translate(-50%,-50%) rotate(45deg);
+  border:1px solid rgba(0,200,240,.72);
+  border-radius:27%;
+  background:
+    radial-gradient(circle at 35% 30%,
+      rgba(110,235,255,.16),
+      transparent 36%),
+    linear-gradient(145deg,
+      rgba(8,34,50,.98),
+      rgba(3,14,26,.98));
+  box-shadow:
+    0 0 18px rgba(0,200,240,.25),
+    0 0 55px rgba(0,200,240,.13),
+    inset 0 0 30px rgba(0,200,240,.08);
+}
+
+.eg-core::before,
+.eg-core::after{
+  content:"";
+  position:absolute;
+  inset:12px;
+  border:1px solid rgba(0,200,240,.18);
+  border-radius:24%;
+}
+
+.eg-core::after{
+  inset:25px;
+  border-style:dashed;
+  opacity:.65;
+}
+
+.eg-core-inner{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  transform:rotate(-45deg);
+}
+
+.eg-core-logo{
+  font-family:var(--fhd);
+  font-size:38px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:-.07em;
+  color:#e8fbff;
+  text-shadow:
+    0 0 8px rgba(0,200,240,.8),
+    0 0 22px rgba(0,200,240,.35);
+}
+
+.eg-core-name{
+  margin-top:7px;
+  font-family:var(--fmn);
+  font-size:8px;
+  letter-spacing:.22em;
+  color:var(--ac);
+}
+
+.eg-core-sub{
+  margin-top:3px;
+  font-family:var(--fmn);
+  font-size:7px;
+  letter-spacing:.15em;
+  color:var(--tm);
+}
+
+.eg-node{
+  position:absolute;
+  z-index:6;
+  width:104px;
+  height:62px;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(0,200,240,.20);
+  border-radius:12px;
+  background:linear-gradient(
+    145deg,
+    rgba(10,28,43,.96),
+    rgba(5,15,27,.97)
+  );
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.25),
+    inset 0 1px rgba(255,255,255,.025);
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease;
+}
+
+.eg-node:hover{
+  transform:translate(-50%,-50%) scale(1.05);
+  border-color:var(--node,var(--ac));
+  box-shadow:
+    0 0 20px color-mix(in srgb,var(--node,var(--ac)) 22%,transparent),
+    0 10px 25px rgba(0,0,0,.28);
+}
+
+.eg-node-icon{
+  color:var(--node,var(--ac));
+  font-size:18px;
+  line-height:1;
+  text-shadow:0 0 9px currentColor;
+}
+
+
+/* ============================================================
+   ERATGUARD ACTIVE COMMAND CENTER SVG ICONS V22
+   ICON VISUAL ONLY - NODE/RADAR GEOMETRY UNTOUCHED
+   ============================================================ */
+.eg-node-icon.eg-svg-icon{
+  width:22px;
+  height:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1;
+  color:var(--node,var(--ac));
+  filter:drop-shadow(0 0 5px currentColor);
+}
+
+.eg-node-icon.eg-svg-icon svg{
+  display:block;
+  width:22px;
+  height:22px;
+  overflow:visible;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2.4;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.eg-node-icon.eg-svg-icon .eg-svg-fill{
+  fill:currentColor;
+  stroke:none;
+}
+
+.eg-node-name{
+  margin-top:6px;
+  font-family:var(--fmn);
+  font-size:8px;
+  letter-spacing:.09em;
+  color:var(--tx);
+  white-space:nowrap;
+}
+
+.eg-node-state{
+  margin-top:2px;
+  font-family:var(--fmn);
+  font-size:6px;
+  letter-spacing:.12em;
+  color:var(--node,var(--ac));
+}
+
+.eg-n1{left:50%;top:7%;--node:var(--ac)}
+.eg-n2{left:75%;top:20%;--node:var(--pu)}
+.eg-n3{left:85%;top:50%;--node:var(--or)}
+.eg-n4{left:75%;top:80%;--node:var(--gr)}
+.eg-n5{left:50%;top:93%;--node:var(--ac)}
+.eg-n6{left:25%;top:80%;--node:var(--yl)}
+.eg-n7{left:15%;top:50%;--node:var(--rd)}
+.eg-n8{left:25%;top:20%;--node:var(--gr)}
+
+.eg-core-hud{
+  position:relative;
+  z-index:5;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  padding:0 18px 18px;
+}
+
+.eg-hud-item{
+  min-width:0;
+  padding:10px 12px;
+  border:1px solid var(--b1);
+  border-radius:10px;
+  background:rgba(6,18,31,.72);
+}
+
+.eg-hud-label{
+  font-family:var(--fmn);
+  font-size:7px;
+  letter-spacing:.16em;
+  color:var(--td);
+}
+
+.eg-hud-value{
+  margin-top:4px;
+  font-family:var(--fhd);
+  font-size:13px;
+  font-weight:800;
+  color:var(--gr);
+}
+
+.eg-hud-value.warn{
+  color:var(--or);
+}
+
+.eg-hud-value.ac{
+  color:var(--ac);
+}
+
+.eg-hud-line{
+  height:2px;
+  margin-top:7px;
+  border-radius:4px;
+  background:var(--b1);
+  overflow:hidden;
+}
+
+.eg-hud-line::after{
+  content:"";
+  display:block;
+  width:92%;
+  height:100%;
+  background:linear-gradient(90deg,var(--ac),var(--gr));
+  box-shadow:0 0 8px rgba(0,200,240,.5);
+}
+
+@keyframes egCorePulse{
+  0%,100%{opacity:.45;transform:scale(.85)}
+  50%{opacity:1;transform:scale(1.18)}
+}
+
+@media(max-width:760px){
+  .eg-mission{
+    min-height:510px;
+    border-radius:14px;
+  }
+
+  .eg-mission-head{
+    padding:14px 14px 0;
+  }
+
+  .eg-mission-title{
+    font-size:13px;
+  }
+
+  .eg-mission-state{
+    font-size:7px;
+  }
+
+  .eg-core-stage{
+    height:380px;
+    transform:scale(.88);
+    transform-origin:center top;
+    margin-bottom:-40px;
+  }
+
+  .eg-core-hud{
+    grid-template-columns:1fr 1fr 1fr;
+    padding:0 10px 12px;
+    gap:5px;
+  }
+
+  .eg-hud-item{
+    padding:8px;
+  }
+
+  .eg-hud-label{
+    font-size:6px;
+  }
+
+  .eg-hud-value{
+    font-size:10px;
+  }
+}
+
+@media(max-width:480px){
+  .eg-mission{
+    min-height:475px;
+  }
+
+  .eg-mission-kicker{
+    font-size:7px;
+  }
+
+  .eg-mission-state{
+    padding:5px 7px;
+  }
+
+  .eg-core-stage{
+    width:430px;
+    max-width:none;
+    left:50%;
+    margin-left:-215px;
+    transform:scale(.72);
+    transform-origin:center top;
+    margin-bottom:-105px;
+  }
+
+  .eg-core-hud{
+    margin-top:0;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -590,11 +1072,11 @@ body::before{
       <div class="cmd-section-lbl">Sayfalar</div>
       <div class="cmd-item" data-action="page:dashboard"><span class="cmd-item-icon">⬡</span><span class="cmd-item-lbl">Dashboard</span></div>
       <div class="cmd-item" data-action="page:analytics"><span class="cmd-item-icon">◈</span><span class="cmd-item-lbl">Analitik</span></div>
-      <div class="cmd-item" data-action="page:users"><span class="cmd-item-icon">◎</span><span class="cmd-item-lbl">Kullanıcılar</span></div>
-      <div class="cmd-item" data-action="page:licenses"><span class="cmd-item-icon">◇</span><span class="cmd-item-lbl">Lisanslar</span></div>
-      <div class="cmd-item" data-action="page:payments"><span class="cmd-item-icon">▣</span><span class="cmd-item-lbl">Ödemeler</span></div>
-      <div class="cmd-item" data-action="page:logs"><span class="cmd-item-icon">▤</span><span class="cmd-item-lbl">Güvenlik Logları</span></div>
-      <div class="cmd-item" data-action="page:settings"><span class="cmd-item-icon">◉</span><span class="cmd-item-lbl">Ayarlar</span></div>
+      <div class="cmd-item" data-action="url:/admin/users"><span class="cmd-item-icon">◎</span><span class="cmd-item-lbl">Kullanıcılar</span></div>
+      <div class="cmd-item" data-action="url:/admin/licenses"><span class="cmd-item-icon">◇</span><span class="cmd-item-lbl">Lisanslar</span></div>
+      <div class="cmd-item" data-action="url:/admin/payment-requests"><span class="cmd-item-icon">▣</span><span class="cmd-item-lbl">Ödemeler</span></div>
+      <div class="cmd-item" data-action="url:/admin/security"><span class="cmd-item-icon">▤</span><span class="cmd-item-lbl">Güvenlik Logları</span></div>
+      <div class="cmd-item" data-action="url:/admin/system"><span class="cmd-item-icon">◉</span><span class="cmd-item-lbl">Ayarlar</span></div>
     </div>
   </div>
 </div>
@@ -619,7 +1101,7 @@ body::before{
     <div class="ritem" data-page="users"><span class="ri">◎</span><span class="rl">Kullanıcılar</span></div>
     <div class="ritem" data-page="licenses"><span class="ri">◇</span><span class="rl">Lisanslar</span></div>
     <div class="ritem" data-page="payments" id="rail-pay"><span class="ri">▣</span><span class="rl">Ödemeler</span>
-      {% if admin_stats.payments|default(0) > 0 %}<span class="rbadge">{{ admin_stats.payments|default(0) }}</span>{% endif %}
+      {% if admin_stats.pending_payments|default(admin_stats.payments|default(0)) > 0 %}<span class="rbadge">{{ admin_stats.pending_payments|default(admin_stats.payments|default(0)) }}</span>{% endif %}
     </div>
     <div class="ritem" data-page="logs"><span class="ri">▤</span><span class="rl">Güvenlik Logları</span></div>
     <div class="ritem" data-page="settings"><span class="ri">◉</span><span class="rl">Ayarlar</span></div>
@@ -647,8 +1129,8 @@ body::before{
         <span>⌘ Komut</span>
         <kbd>K</kbd>
       </button>
-      <button class="tb-icobtn" id="msg-btn" title="Mesajlar">✉<span class="tb-dot" id="msg-dot">2</span></button>
-      <button class="tb-icobtn" id="notif-btn" title="Bildirimler">◎<span class="tb-dot" id="notif-dot">2</span></button>
+      <button class="tb-icobtn" id="msg-btn" title="Mesajlar">✉<span class="tb-dot" id="msg-dot" style="display:none">0</span></button>
+      <button class="tb-icobtn" id="notif-btn" title="Bildirim Merkezi" onclick="window.location.href='/admin/notifications'">◎{% if admin_stats.notifications|default(0) > 0 %}<span class="tb-dot" id="notif-dot">{{ admin_stats.notifications|default(0) }}</span>{% endif %}</button>
       <div class="tb-clock">
         <span class="tb-status-dot"></span>
         <span id="clk">--:--:--</span>
@@ -669,29 +1151,195 @@ body::before{
         </div>
       </div>
 
+      <!-- =====================================================
+           ERATGUARD PHASE 7B.3 MISSION CONTROL VISUAL CORE V1
+           ===================================================== -->
+      <section class="eg-mission">
+
+        <div class="eg-mission-head">
+          <div>
+            <div class="eg-mission-kicker">ERATGUARD ENGINE</div>
+            <div class="eg-mission-title">AI SECURITY COMMAND CORE</div>
+          </div>
+
+          <div class="eg-mission-state">
+            <span class="eg-mission-state-dot"></span>
+            SYSTEM ONLINE
+          </div>
+        </div>
+
+        <div class="eg-core-stage">
+
+          <div class="eg-cross-x"></div>
+          <div class="eg-cross-y"></div>
+
+          <div class="eg-orbit o3"></div>
+          <div class="eg-orbit o2"></div>
+          <div class="eg-orbit o1"></div>
+
+          <div class="eg-core">
+            <div class="eg-core-inner">
+              <div class="eg-core-logo">EG</div>
+              <div class="eg-core-name">ERATGUARD</div>
+              <div class="eg-core-sub">AI CORE</div>
+            </div>
+          </div>
+
+          <div class="eg-node eg-n1">
+            <div class="eg-node-icon eg-svg-icon" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <path d="M32 12v40"/>
+  <path d="M31 17c-4-7-14-6-16 2-6 1-8 10-3 14-5 6-1 15 6 15 2 7 11 7 14 2"/>
+  <path d="M33 17c4-7 14-6 16 2 6 1 8 10 3 14 5 6 1 15-6 15-2 7-11 7-14 2"/>
+  <path d="M17 25c4 0 7 2 8 6"/>
+  <path d="M47 25c-4 0-7 2-8 6"/>
+  <path d="M17 40c4 0 7-2 8-6"/>
+  <path d="M47 40c-4 0-7-2-8-6"/>
+</svg>
+</div>
+            <div class="eg-node-name">AI ANALYSIS</div>
+            <div class="eg-node-state">ACTIVE</div>
+          </div>
+
+          <div class="eg-node eg-n2">
+            <div class="eg-node-icon eg-svg-icon" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="21"/>
+  <path d="M11 32h42"/>
+  <path d="M32 11c8 7 12 14 12 21S40 46 32 53"/>
+  <path d="M32 11c-8 7-12 14-12 21s4 14 12 21"/>
+  <path d="M15 21h34"/>
+  <path d="M15 43h34"/>
+</svg>
+</div>
+            <div class="eg-node-name">NETWORK</div>
+            <div class="eg-node-state">MONITORING</div>
+          </div>
+
+          <div class="eg-node eg-n3">
+            <div class="eg-node-icon eg-svg-icon" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <path d="M32 8 50 15v15c0 13-7 21-18 27C21 51 14 43 14 30V15z"/>
+  <path d="M34 18c2 7-5 9-2 15 2-4 6-5 8-9 5 8 7 14 3 20-3 5-8 8-13 8-8 0-14-6-14-14 0-7 4-12 10-18-1 6 1 9 4 11 0-5 0-9 4-13z"/>
+</svg>
+</div>
+            <div class="eg-node-name">FIREWALL</div>
+            <div class="eg-node-state">PROTECTED</div>
+          </div>
+
+          <div class="eg-node eg-n4">
+            <div class="eg-node-icon eg-svg-icon" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <rect x="19" y="9" width="27" height="46" rx="3"/>
+  <rect x="24" y="15" width="17" height="28" rx="1"/>
+  <path d="M28 48h9"/>
+  <path d="m28 34 4-5 4 3 5-7"/>
+</svg>
+</div>
+            <div class="eg-node-name">DEVICES</div>
+            <div class="eg-node-state">SECURE</div>
+          </div>
+
+          <div class="eg-node eg-n5">
+            <div class="eg-node-icon eg-svg-icon" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <path d="M13 52h39"/>
+  <rect x="16" y="34" width="7" height="18" rx="1"/>
+  <rect x="28" y="25" width="7" height="27" rx="1"/>
+  <rect x="40" y="15" width="7" height="37" rx="1"/>
+</svg>
+</div>
+            <div class="eg-node-name">REPORTS</div>
+            <div class="eg-node-state">READY</div>
+          </div>
+
+          <div class="eg-node eg-n6">
+            <div class="eg-node-icon eg-svg-icon" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <path d="M32 8 50 15v15c0 13-7 21-18 27C21 51 14 43 14 30V15z"/>
+  <path d="m22 32 7 7 14-16"/>
+</svg>
+</div>
+            <div class="eg-node-name">LICENSES</div>
+            <div class="eg-node-state">VALID</div>
+          </div>
+
+          <div class="eg-node eg-n7">
+            <div class="eg-node-icon eg-svg-icon" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="5"/>
+  <path d="M29 27c-7-1-12-6-12-13 8-3 15 1 18 8"/>
+  <path d="M37 29c4-6 11-8 17-4 0 9-5 14-13 15"/>
+  <path d="M34 37c4 6 3 13-3 18-8-4-11-11-7-18"/>
+  <circle cx="32" cy="32" r="18"/>
+</svg>
+</div>
+            <div class="eg-node-name">QUARANTINE</div>
+            <div class="eg-node-state">GUARDED</div>
+          </div>
+
+          <div class="eg-node eg-n8">
+            <div class="eg-node-icon eg-svg-icon" aria-hidden="true">
+<svg viewBox="0 0 64 64">
+  <path d="M12 14h40a5 5 0 0 1 5 5v24a5 5 0 0 1-5 5H29L17 56v-8h-5a5 5 0 0 1-5-5V19a5 5 0 0 1 5-5z"/>
+  <circle cx="22" cy="31" r="2.5" class="eg-svg-fill"/>
+  <circle cx="32" cy="31" r="2.5" class="eg-svg-fill"/>
+  <circle cx="42" cy="31" r="2.5" class="eg-svg-fill"/>
+</svg>
+</div>
+            <div class="eg-node-name">SMS SHIELD</div>
+            <div class="eg-node-state">ACTIVE</div>
+          </div>
+
+        </div>
+
+        <div class="eg-core-hud">
+
+          <div class="eg-hud-item">
+            <div class="eg-hud-label">ENGINE STATUS</div>
+            <div class="eg-hud-value">● OPERATIONAL</div>
+            <div class="eg-hud-line"></div>
+          </div>
+
+          <div class="eg-hud-item">
+            <div class="eg-hud-label">THREAT LEVEL</div>
+            <div class="eg-hud-value warn">LOW / GUARDED</div>
+            <div class="eg-hud-line"></div>
+          </div>
+
+          <div class="eg-hud-item">
+            <div class="eg-hud-label">PRODUCTION HEALTH</div>
+            <div class="eg-hud-value ac">{{ admin_stats.system_score|default(100) }}%</div>
+            <div class="eg-hud-line"></div>
+          </div>
+
+        </div>
+
+      </section>
+
       <!-- STAT CARDS -->
       <div class="stat-grid">
         <div class="scard" style="--c:var(--ac)"><div class="scard-glow"></div>
           <div class="scard-lbl"><span class="scard-spark live-badge-ac">◎</span> KULLANICI</div>
-          <div class="scard-val" id="sc-users">{{ admin_stats.users|default(0) }}</div>
+          <div class="scard-val" id="sc-users">{{ admin_stats.active_users|default(admin_stats.users|default(0)) }}</div>
           <div class="scard-sub" style="color:var(--ac)">aktif sistem</div>
           <div class="scard-spark" id="ssp-users"></div>
         </div>
         <div class="scard" style="--c:var(--rd)"><div class="scard-glow" style="background:radial-gradient(circle,var(--rd),transparent 70%)"></div>
           <div class="scard-lbl">⬡ TEHDİT</div>
-          <div class="scard-val" id="sc-threats">{{ admin_stats.blocked|default(0) }}</div>
+          <div class="scard-val" id="sc-threats">{{ admin_stats.security_warnings|default(admin_stats.blocked|default(0)) }}</div>
           <div class="scard-sub" style="color:var(--rd)">↑ toplam engel</div>
           <div class="scard-spark" id="ssp-threats"></div>
         </div>
         <div class="scard" style="--c:var(--gr)"><div class="scard-glow" style="background:radial-gradient(circle,var(--gr),transparent 70%)"></div>
           <div class="scard-lbl">◇ LİSANS</div>
-          <div class="scard-val" id="sc-lic">{{ admin_stats.licenses|default(0) }}</div>
+          <div class="scard-val" id="sc-lic">{{ admin_stats.total_licenses|default(admin_stats.licenses|default(0)) }}</div>
           <div class="scard-sub" style="color:var(--gr)">aktif lisans</div>
           <div class="scard-spark" id="ssp-lic"></div>
         </div>
         <div class="scard" style="--c:var(--or)"><div class="scard-glow" style="background:radial-gradient(circle,var(--or),transparent 70%)"></div>
           <div class="scard-lbl">▣ BEKL. ÖDEME</div>
-          <div class="scard-val" id="sc-pay">{{ admin_stats.payments|default(0) }}</div>
+          <div class="scard-val" id="sc-pay">{{ admin_stats.pending_payments|default(admin_stats.payments|default(0)) }}</div>
           <div class="scard-sub" style="color:var(--or)" id="sc-pay-sub">onay bekliyor</div>
           <div class="scard-spark" id="ssp-pay"></div>
         </div>
@@ -748,10 +1396,10 @@ body::before{
     <div class="page-wrap" id="page-analytics" style="display:none">
       <div class="phd"><div><h1>Analitik</h1><p>Son 30 gün · canlı</p></div></div>
       <div class="stat-grid">
-        <div class="scard" style="--c:var(--rd)"><div class="scard-lbl">Toplam Engelleme</div><div class="scard-val">{{ admin_stats.blocked|default(0) }}</div><div class="scard-sub" style="color:var(--rd)">↑ +12%</div></div>
+        <div class="scard" style="--c:var(--rd)"><div class="scard-lbl">Toplam Engelleme</div><div class="scard-val">{{ admin_stats.blocked|default(0) }}</div><div class="scard-sub" style="color:var(--rd)">canlı güvenlik verisi</div></div>
         <div class="scard" style="--c:var(--ac)"><div class="scard-lbl">Aktif Kullanıcı</div><div class="scard-val" id="an-active">{{ admin_stats.users|default(0) }}</div><div class="scard-sub" style="color:var(--ac)">anlık</div></div>
-        <div class="scard" style="--c:var(--gr)"><div class="scard-lbl">Ort. Yanıt</div><div class="scard-val">142ms</div><div class="scard-sub" style="color:var(--gr)">-8ms dünden</div></div>
-        <div class="scard" style="--c:var(--pu)"><div class="scard-lbl">Uptime</div><div class="scard-val">99.9%</div><div class="scard-sub" style="color:var(--pu)">SLA ✓</div></div>
+        <div class="scard" style="--c:var(--gr)"><div class="scard-lbl">Ort. Yanıt</div><div class="scard-val">{{ admin_stats.ops_score|default(0) }}%</div><div class="scard-sub" style="color:var(--gr)">operasyon sağlığı</div></div>
+        <div class="scard" style="--c:var(--pu)"><div class="scard-lbl">Uptime</div><div class="scard-val">{{ admin_stats.system_score|default(0) }}%</div><div class="scard-sub" style="color:var(--pu)">production health</div></div>
       </div>
       <div class="card"><div class="card-hd">30 Günlük Tehdit Akışı</div><div class="bchart" id="month-chart" style="height:80px"></div></div>
       <div class="two-col">
@@ -824,11 +1472,11 @@ body::before{
       </div>
       <div class="settings-sec">
         <div class="card-hd">⬡ Güvenlik</div>
-        <div class="settings-row"><span class="sk">CSRF Koruması</span><span class="sv ok">Aktif ✓</span></div>
+        <div class="settings-row"><span class="sk">Admin Auth Boundary</span><span class="sv ok">Aktif ✓</span></div>
         <div class="settings-row"><span class="sk">Rate Limiting</span><span class="sv ok">Aktif ✓</span></div>
-        <div class="settings-row"><span class="sk">Güvenlik Başlıkları</span><span class="sv ok">Aktif ✓</span></div>
-        <div class="settings-row"><span class="sk">Session Secure</span><span class="sv ok">Aktif ✓</span></div>
-        <div class="settings-row"><span class="sk">2FA Admin</span><span class="sv warn">Planlandı</span></div>
+        <div class="settings-row"><span class="sk">API Fail-Closed</span><span class="sv ok">Aktif ✓</span></div>
+        <div class="settings-row"><span class="sk">Admin / User İzolasyonu</span><span class="sv ok">Aktif ✓</span></div>
+        <div class="settings-row"><span class="sk">Production Health</span><span class="sv ok">{{ admin_stats.system_score|default(0) }}%</span></div>
       </div>
       <div class="settings-sec">
         <div class="card-hd">◈ E-posta</div>
@@ -850,7 +1498,7 @@ body::before{
 
   <!-- STATUS BAR -->
   <footer class="statusbar">
-    <span class="sb-ok">● SİSTEM SAĞLIKLI</span>
+    <span class="sb-ok">● {{ admin_stats.system|default("ONLINE") }} · {{ admin_stats.health|default("HEALTHY") }}</span>
     <span>CPU: <span id="sb-cpu">—</span></span>
     <span>MEM: <span id="sb-mem">—</span></span>
     <span>AKTİF: {{ admin_stats.users|default(0) }}</span>
@@ -946,7 +1594,7 @@ var FEED=[
   {c:C.or,msg:"Yeni ödeme talebi: <strong>can_b</strong> — ₺299",t:"8 dk"},
   {c:C.ac,msg:"Yeni kayıt: <strong>selin_t</strong>",t:"1 sa"},
   {c:C.rd,msg:"IP engellendi: <strong>185.220.101.47</strong>",t:"1 sa"},
-  {c:C.ac,msg:"Lisans yenilendi: <strong>ahmet_k</strong>",t:"3 sa"},
+  /* Phase 7C: static demo activity removed. */
   {c:C.gr,msg:"Sistem sağlık kontrolü başarılı",t:"4 sa"},
 ];
 var NOTIFS=[
@@ -957,9 +1605,9 @@ var NOTIFS=[
   {type:"info",icon:"◈",msg:"Lisans yenileme tamamlandı.",t:"3 sa önce",read:true,c:C.ac},
 ];
 var MSGS=[
-  {id:1,user:"Kullanıcı A",t:"09:12",unread:true,thread:[{f:"u",txt:"Dashboard tehdit sayısı hakkında sorum var."}]},
-  {id:2,user:"Kullanıcı B",t:"08:55",unread:true,thread:[{f:"u",txt:"PRO üyelik ödemesi yaptım, onay bekliyor."}]},
-  {id:3,user:"Kullanıcı C",t:"Dün",unread:false,thread:[{f:"u",txt:"Sistem harika çalışıyor!"},{f:"a",txt:"Teşekkürler, iyi kullanımlar!"}]},
+
+
+
 ];
 var LOGS=[
   {level:"WARN",ip:"185.220.101.47",msg:"Rate limit triggered on /login",user:"—",t:"08:43:21"},
@@ -1241,7 +1889,7 @@ function submitAddUser(){
 // ═══════════════════════════════════════════
 // API DATA LOADING
 // ═══════════════════════════════════════════
-function apiFetch(path){return fetch(path,{credentials:"include"}).then(function(r){if(r.status===401||r.status===403){window.location.href="/ss-admin-access";return null;}return r.json().catch(function(){return null;})}).catch(function(){return null;})}
+function apiFetch(path){return fetch(path,{credentials:"include"}).then(function(r){if(r.status===401||r.status===403){window.location.href="/admin/login";return null;}return r.json().catch(function(){return null;})}).catch(function(){return null;})}
 function loadUsers(){
   return apiFetch("/api/admin/users").then(function(r){
     if(r&&Array.isArray(r))USERS=r;
@@ -1251,7 +1899,7 @@ function loadUsers(){
   });
 }
 function loadPayments(){
-  return apiFetch("/api/admin/payment-requests-json").then(function(r){
+  return apiFetch("/api/admin/payment-requests").then(function(r){
     if(r&&Array.isArray(r))PAYMENTS=r;
     else if(r&&r.requests)PAYMENTS=r.requests;
     renderPayments();
@@ -1455,6 +2103,32 @@ loadLicenses();
   var mb=document.getElementById("msg-dot"),mm=MSGS.filter(function(m){return m.unread}).length;
   if(mb){mb.textContent=mm;mb.style.display=mm?"flex":"none";}
 })();
+
+/* ERATGUARD PHASE 7B COMMAND CENTER */
+document.addEventListener("click", function(e) {
+    var item = e.target.closest && e.target.closest(
+        ".cmd-item[data-action^='url:']"
+    );
+
+    if (!item) return;
+
+    e.preventDefault();
+
+    var action = item.getAttribute("data-action") || "";
+    var target = action.substring(4);
+
+    if (target.indexOf("/admin/") === 0) {
+        window.location.href = target;
+    }
+});
+
+window.EG_PHASE7B_COMMAND_CENTER = true;
+
+</script>
+
+<!-- ERATGUARD PHASE 7C FINAL PRODUCT COMPLETION -->
+<script>
+window.EG_PHASE7C_FINAL_PRODUCT = true;
 </script>
 </body>
 </html>

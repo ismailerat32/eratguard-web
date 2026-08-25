@@ -1,11 +1,25 @@
 import re
 
+OFFICIAL_DOMAINS = {
+    "akbank": ["akbank.com"],
+    "garanti": ["garanti.com.tr"],
+    "ziraat": ["ziraatbank.com.tr"],
+    "halkbank": ["halkbank.com.tr"],
+    "isbank": ["isbank.com.tr"],
+    "edevlet": ["turkiye.gov.tr"],
+    "e-devlet": ["turkiye.gov.tr"],
+    "sgk": ["sgk.gov.tr"],
+    "gib": ["gib.gov.tr"],
+    "ptt": ["ptt.gov.tr"],
+}
+
+
 SPAM_WORDS = {
-    "kazan": 2,
-    "kazandınız": 3,
-    "kazandiniz": 3,
-    "ödül": 3,
-    "odul": 3,
+    "kazan": 5,
+    "kazandınız": 6,
+    "kazandiniz": 6,
+    "ödül": 5,
+    "odul": 5,
     "bedava": 3,
     "ücretsiz": 2,
     "ucretsiz": 2,
@@ -29,7 +43,7 @@ SPAM_WORDS = {
     "anket": 2,
     "katıl": 2,
     "katil": 2,
-    "hemen": 1,
+    "hemen": 3,
     "son gün": 2,
     "son gun": 2,
     "özel": 1,
@@ -102,8 +116,82 @@ def analiz_et(text, sender=""):
             reasons.append(f"safe:{word}-{weight}")
 
     if "http" in clean or "www" in clean or ".com" in clean:
-        score += 4
-        reasons.append("link+4")
+        score += 8
+
+        reasons.append("link+8")
+
+    m = re.search(r'https?://([^/\s]+)', clean)
+    if m:
+        domain = m.group(1).lower()
+
+        trusted_domain = False
+
+        for kurum, domains in OFFICIAL_DOMAINS.items():
+            if kurum in clean:
+                if any(domain.endswith(d) for d in domains):
+                    trusted_domain = True
+                else:
+                    score += 20
+                    reasons.append(f"fake_domain:{kurum}+20")
+                    break
+
+        if trusted_domain and "link+8" in reasons:
+            score -= 8
+            reasons.remove("link+8")
+
+
+    # URL Risk Engine v1
+    if m:
+        # IP adresiyle link
+        if re.match(r'^\d{1,3}(?:\.\d{1,3}){3}$', domain):
+            score += 15
+            reasons.append("ip_link+15")
+
+        # URL kısaltıcıları
+        elif domain.endswith((
+            "bit.ly",
+            "tinyurl.com",
+            "t.co",
+            "rb.gy",
+            "cutt.ly",
+            "is.gd"
+        )):
+            score += 10
+            reasons.append("short_url+10")
+
+
+        # Unicode / IDN (Punycode) domain
+        if domain.startswith("xn--"):
+            score += 12
+            reasons.append("idn_domain+12")
+
+        # Şüpheli TLD
+        elif domain.endswith((
+            ".xyz",
+            ".top",
+            ".click",
+            ".live",
+            ".shop"
+        )):
+            score += 8
+            reasons.append("suspicious_tld+8")
+
+
+    if ("http" in clean or "www" in clean or ".com" in clean):
+        if any(x in clean for x in ["ödül","odul","kazandınız","kazandiniz"]):
+            score += 10
+            reasons.append("reward+link+10")
+
+        if any(x in clean for x in ["hemen","acil","tıklayın","tiklayin"]):
+            score += 8
+            reasons.append("urgent+link+8")
+
+        if (not trusted_domain) and any(x in clean for x in [
+            "ziraat","akbank","garanti","isbank",
+            "vakif","vakıf","halkbank"
+        ]):
+            score += 15
+            reasons.append("bank+link+15")
 
     if "%" in raw:
         score += 2
@@ -132,7 +220,7 @@ def analiz_et(text, sender=""):
         reasons.append("kisa_supheli+1")
 
     # Güvenli banka işlemleri negatifte kalırsa spam olmasın
-    is_spam = score >= 3
+    is_spam = score >= 8
 
     return {
         "spam": is_spam,

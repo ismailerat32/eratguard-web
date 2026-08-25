@@ -1,293 +1,53 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>EratGuard</title>
-  <style>
-    :root{
-      --bg1:#020817;
-      --bg2:#071a3a;
-      --card:rgba(9,18,40,.88);
-      --line:rgba(96,165,250,.18);
-      --text:#eef4ff;
-      --muted:#9fb6d9;
-      --blue1:#3b82f6;
-      --blue2:#60a5fa;
-      --soft:rgba(255,255,255,.05);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EratGuard</title>
 
-    *{
-      box-sizing:border-box;
-      -webkit-tap-highlight-color:transparent;
-    }
-
-    html,body{
-      margin:0;
-      min-height:100%;
-      font-family:Arial,Helvetica,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top, rgba(59,130,246,.20), transparent 30%),
-        radial-gradient(circle at 85% 85%, rgba(34,197,94,.08), transparent 22%),
-        linear-gradient(180deg,var(--bg1),var(--bg2));
-      overflow-x:hidden;
-    }
-
-    .glow{
-      position:fixed;
-      inset:0;
-      pointer-events:none;
-      background:
-        radial-gradient(circle at 50% 8%, rgba(96,165,250,.14), transparent 20%),
-        radial-gradient(circle at 20% 70%, rgba(59,130,246,.08), transparent 22%);
-      filter:blur(18px);
-    }
-
-    .wrap{
-      position:relative;
-      z-index:1;
-      max-width:430px;
-      margin:0 auto;
-      padding:28px 14px 34px;
-      text-align:center;
-    }
-
-    .hero{
-      padding:6px 4px 12px;
-    }
-
-    .logo{
-      width:92px;
-      height:92px;
-      margin:10px auto 18px;
-      border-radius:26px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:38px;
-      font-weight:900;
-      background:linear-gradient(135deg,#3b82f6,#60a5fa);
-      box-shadow:
-        0 18px 38px rgba(59,130,246,.34),
-        0 0 28px rgba(96,165,250,.18);
-    }
-
-    h1{
-      margin:0;
-      font-size:48px;
-      font-weight:900;
-      letter-spacing:.2px;
-      text-shadow:0 8px 30px rgba(0,0,0,.28);
-    }
-
-    .sub{
-      margin:14px auto 22px;
-      color:var(--muted);
-      font-size:18px;
-      line-height:1.6;
-      max-width:350px;
-    }
-
-    .buttons{
-      display:flex;
-      gap:12px;
-      margin-top:22px;
-      flex-wrap:wrap;
-      justify-content:center;
-    }
-
-    .btn{
-      text-decoration:none;
-      padding:16px 18px;
-      border-radius:18px;
-      font-weight:900;
-      min-width:150px;
-      text-align:center;
-      display:inline-block;
-      transition:transform .16s ease, box-shadow .16s ease, border-color .16s ease;
-    }
-
-    .btn:active{
-      transform:scale(.98);
-    }
-
-    .primary{
-      background:linear-gradient(135deg,#3b82f6,#60a5fa);
-      color:#fff;
-      box-shadow:0 14px 30px rgba(59,130,246,.26);
-    }
-
-    .secondary{
-      background:rgba(255,255,255,.05);
-      color:#dbeafe;
-      border:1px solid rgba(255,255,255,.08);
-      backdrop-filter:blur(10px);
-    }
-
-    .section{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:28px;
-      padding:20px 16px 18px;
-      box-shadow:
-        0 18px 60px rgba(0,0,0,.24),
-        inset 0 1px 0 rgba(255,255,255,.03);
-      text-align:left;
-      margin-top:18px;
-      backdrop-filter:blur(10px);
-    }
-
-    .section h2{
-      margin:2px 0 16px;
-      font-size:28px;
-      color:#fff;
-      text-align:center;
-    }
-
-    .feature{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      background:var(--soft);
-      border:1px solid rgba(255,255,255,.04);
-      border-radius:18px;
-      padding:16px 14px;
-      margin-bottom:12px;
-      color:#d6e3f8;
-      line-height:1.45;
-      font-size:16px;
-    }
-
-    .feature .icon{
-      width:36px;
-      text-align:center;
-      font-size:24px;
-      flex:0 0 36px;
-    }
-
-    .trust{
-      margin-top:18px;
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-    }
-
-    .trust-box{
-      background:rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.05);
-      border-radius:18px;
-      padding:12px 8px;
-      text-align:center;
-    }
-
-    .trust-box strong{
-      display:block;
-      font-size:20px;
-      margin-bottom:4px;
-    }
-
-    .trust-box span{
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.3;
-    }
-
-    @media (max-width:390px){
-      h1{font-size:42px}
-      .sub{font-size:16px}
-      .logo{width:84px;height:84px;font-size:34px}
-      .trust{grid-template-columns:1fr}
-    }
-  
-/* ERATGUARD_COPYRIGHT_STYLE_START */
-.ss-copyright{
-  margin:18px auto 8px;
-  text-align:center;
-  color:rgba(255,255,255,.48);
-  font-size:12px;
-  font-weight:700;
-  letter-spacing:.2px;
-  line-height:1.35;
-}
-.ss-copyright a{
-  color:rgba(32,240,138,.78);
-  text-decoration:none;
-  font-weight:900;
-}
-.ss-copyright a:hover{
-  text-decoration:underline;
-}
-@media(max-width:480px){
-  .ss-copyright{
-    margin-top:14px;
-    font-size:11px;
-  }
-}
-/* ERATGUARD_COPYRIGHT_STYLE_END */
-
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
 </head>
+
 <body>
-  <div class="glow"></div>
 
-  <div class="wrap">
-    <section class="hero">
-      <div class="logo">SS</div>
-      <h1>EratGuard</h1>
-      <div class="sub">Akıllı SMS koruma, lisans yönetimi ve güvenli kullanıcı deneyimini tek merkezde sunar.</div>
+<div id="bg"></div>
 
-      <div class="buttons">
-        <a class="btn primary" href="/login">Giriş Yap</a>
-        <a class="btn secondary" href="/register">Hesap Oluştur</a>
-      </div>
-    </section>
+<div class="hero">
 
-    <section class="section">
-      <h2>Neler sunuyor?</h2>
-
-      <div class="feature">
-        <div class="icon">🛡️</div>
-        <div>Spam ve istenmeyen içerik kontrolü</div>
-      </div>
-
-      <div class="feature">
-        <div class="icon">🔑</div>
-        <div>Trial ve Pro lisans yönetimi</div>
-      </div>
-
-      <div class="feature">
-        <div class="icon">📊</div>
-        <div>Yönetim paneli ve rapor ekranları</div>
-      </div>
-
-      <div class="feature">
-        <div class="icon">📱</div>
-        <div>Mobil uyumlu modern arayüz</div>
-      </div>
-
-      <div class="trust">
-        <div class="trust-box">
-          <strong>Hızlı</strong>
-          <span>Akıcı mobil deneyim</span>
-        </div>
-        <div class="trust-box">
-          <strong>Güvenli</strong>
-          <span>Lisans ve erişim kontrolü</span>
-        </div>
-        <div class="trust-box">
-          <strong>Modern</strong>
-          <span>Premium arayüz yapısı</span>
-        </div>
-      </div>
-    </section>
-  </div>
-
-<!-- ERATGUARD_COPYRIGHT_BLOCK_START -->
-<div class="ss-copyright">
-  © 2026 EratGuard PRO · Tüm hakları saklıdır. · <a href="/u/legal">Telif ve Yasal Bildirim</a>
+<div class="logo">
+🛡
 </div>
-<!-- ERATGUARD_COPYRIGHT_BLOCK_END -->
+
+<h1>ERATGUARD</h1>
+
+<p>
+Telefonunu AI destekli gerçek zamanlı spam korumasıyla güvene al.
+</p>
+
+<div class="buttons">
+
+<a href="/login" class="btn primary">
+Giriş Yap
+</a>
+
+<a href="/register" class="btn">
+Hesap Oluştur
+</a>
+
+</div>
+
+<div class="features">
+
+<div>✓ AI Spam Koruması</div>
+<div>✓ Link Analizi</div>
+<div>✓ Risk Puanlama</div>
+<div>✓ Gerçek Zamanlı Koruma</div>
+
+</div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/landing.js') }}"></script>
 
 </body>
 </html>

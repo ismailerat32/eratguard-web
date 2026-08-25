@@ -87,91 +87,8 @@ app.register_blueprint(admin_bp)
 
 
 
-# === ERATGUARD ADMIN V8 PRIORITY GUARD FIX ===
-# This guard must be near the top of the app, before old user-panel redirects.
-@app.before_request
-def eratguard_admin_v8_priority_guard_fix():
-    try:
-        path = request.path.rstrip("/") or "/"
-
-        # Legacy Admin V7/V8 priority guard kaldırıldı.
-        # Admin yönlendirmeleri artık Blueprint tarafından yönetiliyor.
-
-    except Exception as e:
-        print("ADMIN_V8_PRIORITY_GUARD_ERROR:", e, flush=True)
-        return None
-# === ERATGUARD ADMIN V8 PRIORITY GUARD FIX END ===
 
 
-# ERATGUARD_SINGLE_USER_PANEL_RADIAL_12P_ROUTE_LOCK_START
-# Yayın kararı:
-# Kullanıcı tarafında tek ana panel = EratGuard Signature Radial 12P.
-# Eski kullanıcı dashboard/fan/panel/app-start yolları yayında /radial'e yönlenir.
-@app.before_request
-def eratguard_single_user_panel_radial_12p_route_lock():
-    try:
-        from flask import request, redirect
-
-        raw_path = request.path or "/"
-        path = raw_path.rstrip("/") or "/"
-
-        # Admin, statik dosya, API ve sistem dosyalarına dokunma.
-        safe_prefixes = (
-            "/admin",
-            "/static",
-            "/assets",
-            "/api",
-            "/favicon.ico",
-            "/robots.txt"
-        )
-
-        for prefix in safe_prefixes:
-            if path == prefix or path.startswith(prefix + "/"):
-                return None
-
-        # Kullanıcı tarafında kafa karıştıran eski ana panel yolları.
-        legacy_user_panels = {
-            "/",
-            "/home",
-            "/dashboard",
-            "/user",
-            "/panel",
-            "/console",
-            "/living",
-            "/live",
-
-            "/app-start",
-            "/radial-menu",
-            "/radial-demo",
-
-            "/fan",
-            "/fan12p",
-            "/fan-12p",
-            "/fan_12p",
-
-            "/radial_live",
-            "/radial-live",
-
-            "/user/dashboard",
-            "/user/home",
-            "/user/panel",
-
-            "/u/dashboard",
-            "/u/home",
-            "/u/panel",
-            "/u/console",
-            "/u/fan",
-            "/u/fan12p",
-            "/u/radial_live"
-        }
-
-        if path in legacy_user_panels:
-            return redirect("/radial", code=302)
-
-        return None
-    except Exception:
-        return None
-# ERATGUARD_SINGLE_USER_PANEL_RADIAL_12P_ROUTE_LOCK_END
 
 
 # ===== ERATGUARD STABLE SESSION SECRET START =====
@@ -1279,18 +1196,20 @@ def add_user():
 
 @app.route("/users")
 def users():
+    """
+    Legacy admin users URL.
+
+    Canonical admin user management lives at /admin/users.
+    Keep this route only as a compatibility redirect so old
+    bookmarks/links do not break.
+    """
     if not login_required():
         return redirect(url_for("login"))
+
     if not admin_required():
         return redirect(url_for("index"))
 
-    return render_template(
-        "users.html",
-        users=load_users(),
-        username=session.get("username", "admin"),
-        t=load_locale(get_lang()),
-        lang=get_lang()
-    )
+    return redirect("/admin/users")
 
 
 @app.route("/toggle-user/<target_username>", methods=["POST"])
@@ -1377,47 +1296,17 @@ def splash_admin():
 
 @app.route("/")
 def index():
+    """
+    Legacy root compatibility endpoint.
+
+    Canonical authenticated user home lives at /dashboard.
+    Keep endpoint name ``index`` so historical url_for("index")
+    callers remain valid without rendering the retired dashboard.html.
+    """
     if not login_required():
         return redirect(url_for("login"))
 
-    logs = parse_logs()
-    status_filter = request.args.get("status", "").strip().upper()
-    category_filter = request.args.get("category", "").strip().upper()
-    sender_filter = request.args.get("sender", "").strip().lower()
-
-    filtered = []
-    for log in logs:
-        if status_filter and log["status"].upper() != status_filter:
-            continue
-        if category_filter and log["category"].upper() != category_filter:
-            continue
-        if sender_filter and sender_filter not in log["sender"].lower():
-            continue
-        filtered.append(log)
-
-    watchlist = load_json_dict(WATCHLIST_FILE)
-    blocklist = load_json_dict(BLOCKLIST_FILE)
-
-    summary = {
-        "watchlist_count": len(watchlist),
-        "blocklist_count": len(blocklist),
-        "last_blocked": get_last_blocked(blocklist)
-    }
-
-    return render_template(
-        "dashboard.html",
-        logs=filtered,
-        watchlist=watchlist,
-        blocklist=blocklist,
-        summary=summary,
-        status_filter=status_filter,
-        category_filter=category_filter,
-        sender_filter=sender_filter,
-        username=session.get("username", "admin"),
-        role=session.get("role", "user"),
-        t=load_locale(get_lang()),
-        lang=get_lang()
-    )
+    return redirect("/dashboard")
 
 
 @app.route("/unblock/<sender>", methods=["POST"])
@@ -1777,6 +1666,7 @@ def _eg_reset_validate_passwords(new_password, confirm_password):
     return None
 
 
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
 def eg_final_reset_password_token(token):
     from utils.reset_utils import find_valid_token_record, mark_token_used
 
@@ -1844,7 +1734,7 @@ def eg_admin_forgot_mail_diagnostic():
     )
 
     if not is_admin_ok:
-        return redirect("/ss-admin-access")
+        return redirect("/admin/login")
 
     def _mask_email(v):
         v = str(v or "").strip()
@@ -2141,7 +2031,8 @@ def forgot_password_live():
             try:
                 raw_token = create_reset_token(username)
                 reset_link = url_for("eg_final_reset_password_token", token=raw_token, _external=True)
-                reset_code = create_reset_code(username)
+                # Same recovery request: preserve the link created immediately above.
+                reset_code = create_reset_code(username, invalidate=False)
 
                 try:
                     _ss_titanium_event_for_user(username, "password_reset_requested", {
@@ -2222,18 +2113,6 @@ def radial():
     return redirect("/u/eg-panel")
 
 
-# ===== ERATGUARD USER PANEL CLEAN RESET V1 REDIRECT START =====
-# Eski kullanıcı dashboard varyasyonları kafa karıştırmasın:
-# tek ana kullanıcı paneli /radial Signature Radial V1 olarak kilitlenir.
-@app.before_request
-def _eg_user_panel_clean_reset_v1_redirect():
-    try:
-        path = request.path or ""
-        if path in ("/dashboard", "/u/dashboard"):
-            return redirect("/radial")
-    except Exception:
-        return None
-# ===== ERATGUARD USER PANEL CLEAN RESET V1 REDIRECT END =====
 
 
 
@@ -3598,7 +3477,7 @@ def ss_live_admin_app_start():
         session.get("is_admin") or session.get("role") == "admin" or session.get("username") == "admin"
     ):
         return redirect("/admin/dashboard")
-    return redirect("/ss-admin-access")
+    return redirect("/admin/login")
 
 
 # ===== OLD ADMIN ROUTES REMOVED =====
@@ -9093,7 +8972,6 @@ def eratguard_beta_rate_limit_guard():
             return None
 
         rules = {
-            "/ss-admin-access": ("admin-login", 8, 15 * 60),
             "/login": ("user-login", 12, 15 * 60),
             "/forgot-password": ("forgot-password", 5, 15 * 60),
             "/forgot": ("forgot-password-alias", 5, 15 * 60),
@@ -9225,7 +9103,7 @@ def eg_admin_license_requests_live():
 @app.route("/admin/license-request/approve/<order_no>", methods=["POST", "GET"])
 def eg_admin_approve_license_request(order_no):
     if not _eg_admin_request_ok():
-        return redirect("/ss-admin-access")
+        return redirect("/admin/login")
 
     requests_data = _eg_load_payment_requests()
     users = load_users()
@@ -9274,7 +9152,7 @@ def eg_admin_approve_license_request(order_no):
 @app.route("/admin/license-request/reject/<order_no>", methods=["POST", "GET"])
 def eg_admin_reject_license_request(order_no):
     if not _eg_admin_request_ok():
-        return redirect("/ss-admin-access")
+        return redirect("/admin/login")
 
     requests_data = _eg_load_payment_requests()
     changed = False
@@ -9640,7 +9518,7 @@ def _eg_admin_users_redirect(ok="done", extra=""):
 @app.route("/admin/add-user", methods=["POST"])
 def eg_premium_admin_add_user_action():
     if not _eg_admin_users_action_ok():
-        return redirect("/ss-admin-access")
+        return redirect("/admin/login")
 
     username = (request.form.get("username") or "").strip()
     email = (request.form.get("email") or "").strip()
@@ -9711,7 +9589,7 @@ def eg_premium_admin_add_user_action():
 @app.route("/admin/update-license/<target_username>", methods=["POST"])
 def eg_premium_admin_update_license_action(target_username):
     if not _eg_admin_users_action_ok():
-        return redirect("/ss-admin-access")
+        return redirect("/admin/login")
 
     license_type = (request.form.get("license_type") or "trial").strip().lower()
     license_expiry = (request.form.get("license_expiry") or "").strip()
@@ -9758,7 +9636,7 @@ def eg_premium_admin_update_license_action(target_username):
 @app.route("/admin/generate-license/<target_username>", methods=["POST"])
 def eg_premium_admin_generate_license_action(target_username):
     if not _eg_admin_users_action_ok():
-        return redirect("/ss-admin-access")
+        return redirect("/admin/login")
 
     try:
         users = load_users()
@@ -9797,7 +9675,7 @@ def eg_premium_admin_generate_license_action(target_username):
 @app.route("/admin/approve-upgrade/<target_username>", methods=["POST"])
 def eg_premium_admin_approve_upgrade_action(target_username):
     if not _eg_admin_users_action_ok():
-        return redirect("/ss-admin-access")
+        return redirect("/admin/login")
 
     try:
         users = load_users()
@@ -9838,7 +9716,7 @@ def eg_premium_admin_approve_upgrade_action(target_username):
 @app.route("/admin/toggle-ban/<target_username>", methods=["POST"])
 def eg_premium_admin_toggle_ban_action(target_username):
     if not _eg_admin_users_action_ok():
-        return redirect("/ss-admin-access")
+        return redirect("/admin/login")
 
     try:
         users = load_users()
@@ -9899,7 +9777,7 @@ def eg_premium_admin_user_detail_page(target_username):
         admin_ok = False
 
     if not admin_ok:
-        return redirect("/ss-admin-access")
+        return redirect("/admin/login")
 
     import html as _eg_html
     import json as _eg_json
@@ -10382,461 +10260,30 @@ except Exception as _eg_admin_root_redirect_error:
 
 
 
-# ===== ERATGUARD ADMIN BEFORE REQUEST REDIRECT START =====
-# En güçlü /admin fix:
-# Flask route seçmeden önce /admin ve /admin/ adreslerini çalışan premium grid dashboard'a yönlendirir.
-try:
-    from flask import request as _eg_stage4f_request
-    from flask import redirect as _eg_stage4f_redirect
-
-    @app.before_request
-    def _eg_stage4f_admin_root_before_request_redirect():
-        try:
-            _path = str(getattr(_eg_stage4f_request, "path", "") or "").rstrip("/")
-            if _path == "/admin":
-                return _eg_stage4f_redirect("/admin/dashboard", code=302)
-        except Exception:
-            return None
-
-except Exception as _eg_stage4f_before_redirect_error:
-    print("ERATGUARD ADMIN BEFORE REQUEST REDIRECT ERROR:", _eg_stage4f_before_redirect_error)
-# ===== ERATGUARD ADMIN BEFORE REQUEST REDIRECT END =====
-
-
-
-
-# ===== ERATGUARD STAGE4J SINGLE ADMIN ENTRY LOCK START =====
-# Amaç:
-# - Eski radial/splash/alternatif admin girişleri kafa karıştırmasın.
-# - Tek ana admin girişi: /admin/dashboard
-# - Silmek yerine route seviyesinde rafa kaldırır.
-try:
-    from flask import request as _eg4j_request
-    from flask import redirect as _eg4j_redirect
-
-    @app.before_request
-    def _eg_stage4j_single_admin_entry_guard():
-        try:
-            _path = str(getattr(_eg4j_request, "path", "") or "").rstrip("/")
-
-            if _path in (
-                "/splash_admin",
-                "/radial",
-                "/radial-menu",
-                "/radial-demo",
-            ):
-                return _eg4j_redirect("/admin/dashboard", code=302)
-
-            if _path == "/admin/payments":
-                return _eg4j_redirect("/admin/payment-requests", code=302)
-
-            if _path in ("/admin/generated-licenses", "/admin/license-manager"):
-                return _eg4j_redirect("/admin/licenses", code=302)
-
-            if _path == "/admin/security":
-                # SECURITY-2: /admin/security artik gercek admin_security.html sayfasina gitmeli.
-                return None
-
-        except Exception:
-            return None
-
-except Exception as _eg_stage4j_single_admin_entry_error:
-    print("ERATGUARD STAGE4J SINGLE ADMIN ENTRY LOCK ERROR:", _eg_stage4j_single_admin_entry_error)
-# ===== ERATGUARD STAGE4J SINGLE ADMIN ENTRY LOCK END =====
-
-
-
-
-# ===== ERATGUARD STAGE4J PREPEND ADMIN GUARD START =====
-# En öncelikli redirect guard:
-# Bazı eski before_request blokları /radial, /admin/payments, /admin/security için önce cevap döndürüyordu.
-# Bu guard Flask before_request listesine en baştan yerleşir.
-try:
-    from flask import request as _eg4j_pre_request
-    from flask import redirect as _eg4j_pre_redirect
-
-    def _eg_stage4j_prepend_single_admin_guard():
-        try:
-            _path = str(getattr(_eg4j_pre_request, "path", "") or "").rstrip("/")
-
-            if _path in (
-                "/radial",
-                "/radial-menu",
-                "/radial-demo",
-                "/splash_admin",
-            ):
-                return _eg4j_pre_redirect("/admin/dashboard", code=302)
-
-            if _path == "/admin/payments":
-                return _eg4j_pre_redirect("/admin/payment-requests", code=302)
-
-            if _path in ("/admin/security", "/admin/generated-licenses", "/admin/license-manager"):
-                if _path == "/admin/security":
-                    # SECURITY-2: Eski analiz/overview yonlendirmesi kapatildi.
-                    return None
-                return _eg4j_pre_redirect("/admin/licenses", code=302)
-
-        except Exception:
-            return None
-
-    try:
-        _eg_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg_funcs[:] = [f for f in _eg_funcs if getattr(f, "__name__", "") != "_eg_stage4j_prepend_single_admin_guard"]
-        _eg_funcs.insert(0, _eg_stage4j_prepend_single_admin_guard)
-    except Exception as _eg_prepend_err:
-        print("ERATGUARD STAGE4J PREPEND INSERT ERROR:", _eg_prepend_err)
-
-except Exception as _eg_stage4j_prepend_error:
-    print("ERATGUARD STAGE4J PREPEND ADMIN GUARD ERROR:", _eg_stage4j_prepend_error)
-# ===== ERATGUARD STAGE4J PREPEND ADMIN GUARD END =====
-
-
-
-
-# ===== ERATGUARD STAGE4L REAL MODULE ROUTE LOCK START =====
-# Amaç:
-# - 8 modül dashboard linklerinin gerçek admin modül sayfalarına gitmesini garanti eder.
-# - Dashboard fallback'e düşen modülleri düzeltir.
-# - Sadece GET isteklerini yakalar; POST/form işlemlerini bozmaz.
-try:
-    from flask import request as _eg4l_request
-    from flask import render_template as _eg4l_render_template
-
-    def _eg_stage4l_real_module_route_guard():
-        try:
-            if str(getattr(_eg4l_request, "method", "GET")).upper() != "GET":
-                return None
-
-            _path = str(getattr(_eg4l_request, "path", "") or "").rstrip("/")
-
-            if _path in ("/admin/panel", "/admin/users"):
-                return _eg4l_render_template(
-                    "admin_panel.html",
-                    users={},
-                    upgrade_requests=[],
-                    audit_logs=[],
-                    brand="EratGuard PRO",
-                )
-
-            if _path in ("/admin/licenses", "/admin/license"):
-                return _eg4l_render_template(
-                    "admin_licenses.html",
-                    brand="EratGuard PRO",
-                    licenses={},
-                    generated_licenses={},
-                    users={},
-                    license_requests=[],
-                    payment_requests=[],
-                    error="",
-                    success="",
-                    new_license_key="",
-                )
-
-            if _path == "/admin/spam-logs":
-                return _eg4l_render_template(
-                    "admin_spam_logs.html",
-                    spam_logs=[],
-                    brand="EratGuard PRO",
-                )
-
-            if _path == "/admin/settings":
-                return _eg4l_render_template(
-                    "admin_settings.html",
-                    settings={},
-                    brand="EratGuard PRO",
-                )
-
-            if _path == "/admin/whitelist":
-                return _eg4l_render_template(
-                    "admin_whitelist.html",
-                    whitelist=[],
-                    brand="EratGuard PRO",
-                )
-
-            if _path == "/admin/notifications":
-                return _eg4l_render_template(
-                    "admin_notifications.html",
-                    notifications=[],
-                    notification_stats={
-                        "total": 0,
-                        "today": 0,
-                        "critical": 0,
-                    },
-                    brand="EratGuard PRO",
-                )
-
-        except Exception as _eg4l_err:
-            print("ERATGUARD STAGE4L MODULE ROUTE GUARD ERROR:", _eg4l_err)
-            return None
-
-    try:
-        _eg4l_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg4l_funcs[:] = [f for f in _eg4l_funcs if getattr(f, "__name__", "") != "_eg_stage4l_real_module_route_guard"]
-        _eg4l_funcs.insert(0, _eg_stage4l_real_module_route_guard)
-    except Exception as _eg4l_insert_err:
-        print("ERATGUARD STAGE4L MODULE ROUTE INSERT ERROR:", _eg4l_insert_err)
-
-except Exception as _eg_stage4l_boot_error:
-    print("ERATGUARD STAGE4L REAL MODULE ROUTE LOCK ERROR:", _eg_stage4l_boot_error)
-# ===== ERATGUARD STAGE4L REAL MODULE ROUTE LOCK END =====
-
-
-
-
-# ===== ERATGUARD STAGE4L LICENSE ROUTE HOTFIX START =====
-# Amaç:
-# - /admin/licenses dashboard fallback'e düşmesin.
-# - Lisans merkezi ya gerçek template ile açılsın ya da güvenli EratGuard fallback göstersin.
-# - Sadece GET isteklerini yakalar; POST lisans işlemlerini bozmaz.
-try:
-    from flask import request as _eg4l_lic_request
-    from flask import render_template as _eg4l_lic_render_template
-
-    def _eg_stage4l_license_route_hotfix():
-        try:
-            if str(getattr(_eg4l_lic_request, "method", "GET")).upper() != "GET":
-                return None
-
-            _path = str(getattr(_eg4l_lic_request, "path", "") or "").rstrip("/")
-
-            if _path not in ("/admin/licenses", "/admin/license"):
-                return None
-
-            try:
-                return _eg4l_lic_render_template(
-                    "admin_licenses.html",
-                    brand="EratGuard PRO",
-                    licenses={},
-                    generated_licenses={},
-                    users={},
-                    license_requests=[],
-                    payment_requests=[],
-                    error="",
-                    success="",
-                    new_license_key="",
-                    admin_stats={
-                        "users": 0,
-                        "licenses": 0,
-                        "blocked": 0,
-                        "notifications": 0,
-                        "system_health": "OK",
-                    },
-                )
-            except Exception as _lic_tpl_err:
-                return (
-                    "<!doctype html><html lang='tr'><head><meta charset='UTF-8'>"
-                    "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-                    "<title>EratGuard ADMIN Lisans Merkezi</title>"
-                    "<style>"
-                    "body{margin:0;background:#05070d;color:#f7fff4;font-family:Arial,sans-serif}"
-                    ".wrap{max-width:980px;margin:0 auto;padding:18px}"
-                    ".hero{border:1px solid rgba(141,255,63,.25);border-radius:24px;padding:20px;background:linear-gradient(180deg,#081421,#05070d)}"
-                    "h1{margin:0;font-size:32px}.muted{color:#a6b8c8}.card{margin-top:16px;border:1px solid rgba(80,145,255,.22);border-radius:18px;padding:16px;background:#0b1628}"
-                    ".btn{display:inline-block;margin-top:14px;padding:10px 14px;border-radius:999px;background:rgba(141,255,63,.12);border:1px solid rgba(141,255,63,.28);color:#d9ffc7;text-decoration:none;font-weight:900}"
-                    "</style></head><body><div class='wrap'>"
-                    "<section class='hero'><h1>💳 EratGuard ADMIN Lisans Merkezi</h1>"
-                    "<p class='muted'>Lisans yönetimi güvenli fallback ile açıldı. Template hata detayı arşive alınmadan canlı kullanıcıya gösterilmez.</p>"
-                    "<a class='btn' href='/admin/dashboard'>← Admin Dashboard</a></section>"
-                    "<div class='card'><b>Lisans Merkezi Aktif</b><p class='muted'>Bu sayfa dashboard fallback değildir; lisans modülü için güvenli admin ekranıdır.</p></div>"
-                    "</div></body></html>"
-                )
-
-        except Exception as _eg4l_lic_err:
-            print("ERATGUARD STAGE4L LICENSE HOTFIX ERROR:", _eg4l_lic_err)
-            return None
-
-    try:
-        _eg4l_lic_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg4l_lic_funcs[:] = [f for f in _eg4l_lic_funcs if getattr(f, "__name__", "") != "_eg_stage4l_license_route_hotfix"]
-        _eg4l_lic_funcs.insert(0, _eg_stage4l_license_route_hotfix)
-    except Exception as _eg4l_lic_insert_err:
-        print("ERATGUARD STAGE4L LICENSE HOTFIX INSERT ERROR:", _eg4l_lic_insert_err)
-
-except Exception as _eg_stage4l_license_boot_error:
-    print("ERATGUARD STAGE4L LICENSE ROUTE HOTFIX ERROR:", _eg_stage4l_license_boot_error)
-# ===== ERATGUARD STAGE4L LICENSE ROUTE HOTFIX END =====
-
-
-
-
-# ===== ERATGUARD STAGE4N PREPEND NOTIFICATIONS ROUTE START =====
-# /admin/notifications için eski Stage 4L placeholder guard'ını ezer.
-# Sadece GET isteklerini yakalar; POST form akışı daha sonra gerçek kayıt mantığına bağlanacak.
-try:
-    from flask import request as _eg4n_request
-    from flask import render_template as _eg4n_render_template
-
-    def _eg_stage4n_prepend_notifications_route():
-        try:
-            if str(getattr(_eg4n_request, "method", "GET")).upper() != "GET":
-                return None
-
-            _path = str(getattr(_eg4n_request, "path", "") or "").rstrip("/")
-            if _path != "/admin/notifications":
-                return None
-
-            return _eg4n_render_template(
-                "admin_notifications.html",
-                notifications=[],
-                notification_stats={
-                    "total": 0,
-                    "today": 0,
-                    "critical": 0,
-                },
-                brand="EratGuard PRO",
-            )
-        except Exception as _eg4n_err:
-            print("ERATGUARD STAGE4N NOTIFICATIONS ROUTE ERROR:", _eg4n_err)
-            return None
-
-    try:
-        _eg4n_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg4n_funcs[:] = [
-            f for f in _eg4n_funcs
-            if getattr(f, "__name__", "") != "_eg_stage4n_prepend_notifications_route"
-        ]
-        _eg4n_funcs.insert(0, _eg_stage4n_prepend_notifications_route)
-    except Exception as _eg4n_insert_err:
-        print("ERATGUARD STAGE4N NOTIFICATIONS INSERT ERROR:", _eg4n_insert_err)
-
-except Exception as _eg4n_boot_error:
-    print("ERATGUARD STAGE4N PREPEND NOTIFICATIONS ROUTE ERROR:", _eg4n_boot_error)
-# ===== ERATGUARD STAGE4N PREPEND NOTIFICATIONS ROUTE END =====
-
-
-
-
-# ===== ERATGUARD STAGE4O NOTIFICATIONS JSON STORAGE START =====
-# Amaç:
-# - /admin/notifications formunu gerçek JSON kayıt sistemine bağlar.
-# - GET: data/admin_notifications.json içinden son bildirimleri gösterir.
-# - POST: title/priority/target/message değerlerini güvenli şekilde kaydeder.
-try:
-    from flask import request as _eg4o_request
-    from flask import render_template as _eg4o_render_template
-    import json as _eg4o_json
-    from pathlib import Path as _eg4o_Path
-    from datetime import datetime as _eg4o_datetime
-
-    _EG4O_NOTIFICATIONS_FILE = _eg4o_Path("data/admin_notifications.json")
-
-    def _eg4o_load_notifications():
-        try:
-            _EG4O_NOTIFICATIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
-            if not _EG4O_NOTIFICATIONS_FILE.exists():
-                _EG4O_NOTIFICATIONS_FILE.write_text("[]", encoding="utf-8")
-            data = _eg4o_json.loads(_EG4O_NOTIFICATIONS_FILE.read_text(encoding="utf-8") or "[]")
-            if isinstance(data, list):
-                return data
-            return []
-        except Exception as _load_err:
-            print("ERATGUARD STAGE4O LOAD NOTIFICATIONS ERROR:", _load_err)
-            return []
-
-    def _eg4o_save_notifications(items):
-        try:
-            _EG4O_NOTIFICATIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
-            _EG4O_NOTIFICATIONS_FILE.write_text(
-                _eg4o_json.dumps(items, ensure_ascii=False, indent=2),
-                encoding="utf-8"
-            )
-            return True
-        except Exception as _save_err:
-            print("ERATGUARD STAGE4O SAVE NOTIFICATIONS ERROR:", _save_err)
-            return False
-
-    def _eg4o_notification_stats(items):
-        today = _eg4o_datetime.now().strftime("%Y-%m-%d")
-        return {
-            "total": len(items),
-            "today": sum(1 for x in items if str(x.get("created_at", "")).startswith(today)),
-            "critical": sum(1 for x in items if str(x.get("priority", "")).lower() == "critical"),
-        }
-
-    def _eg4o_render_notifications(success="", error=""):
-        items = _eg4o_load_notifications()
-        # En yeni kayıtlar üstte, maksimum 50 kayıt göster.
-        display_items = list(reversed(items[-50:]))
-        return _eg4o_render_template(
-            "admin_notifications.html",
-            notifications=display_items,
-            notification_stats=_eg4o_notification_stats(items),
-            success=success,
-            error=error,
-            brand="EratGuard PRO",
-        )
-
-    def _eg_stage4o_notifications_json_route():
-        try:
-            _path = str(getattr(_eg4o_request, "path", "") or "").rstrip("/")
-            if _path != "/admin/notifications":
-                return None
-
-            method = str(getattr(_eg4o_request, "method", "GET")).upper()
-
-            if method == "GET":
-                return _eg4o_render_notifications()
-
-            if method == "POST":
-                form = getattr(_eg4o_request, "form", {}) or {}
-
-                title = str(form.get("title", "")).strip()
-                priority = str(form.get("priority", "normal")).strip().lower()
-                target = str(form.get("target", "all")).strip().lower()
-                message = str(form.get("message", "")).strip()
-
-                allowed_priorities = {"normal", "high", "critical"}
-                allowed_targets = {"all", "premium", "admin"}
-
-                if priority not in allowed_priorities:
-                    priority = "normal"
-                if target not in allowed_targets:
-                    target = "all"
-
-                if not title or not message:
-                    return _eg4o_render_notifications(error="Başlık ve mesaj zorunludur.")
-
-                items = _eg4o_load_notifications()
-                now = _eg4o_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-                item = {
-                    "id": "EG-NOTIF-" + _eg4o_datetime.now().strftime("%Y%m%d%H%M%S"),
-                    "title": title[:160],
-                    "priority": priority,
-                    "target": target,
-                    "message": message[:1200],
-                    "created_at": now,
-                    "status": "created",
-                }
-
-                items.append(item)
-                # Dosya büyümesini engelle: son 300 kayıt sakla.
-                items = items[-300:]
-
-                if not _eg4o_save_notifications(items):
-                    return _eg4o_render_notifications(error="Bildirim kaydedilemedi.")
-
-                return _eg4o_render_notifications(success="Bildirim başarıyla kaydedildi.")
-
-            return None
-
-        except Exception as _eg4o_route_err:
-            print("ERATGUARD STAGE4O NOTIFICATIONS ROUTE ERROR:", _eg4o_route_err)
-            return None
-
-    try:
-        _eg4o_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg4o_funcs[:] = [
-            f for f in _eg4o_funcs
-            if getattr(f, "__name__", "") != "_eg_stage4o_notifications_json_route"
-        ]
-        _eg4o_funcs.insert(0, _eg_stage4o_notifications_json_route)
-    except Exception as _eg4o_insert_err:
-        print("ERATGUARD STAGE4O NOTIFICATIONS INSERT ERROR:", _eg4o_insert_err)
-
-except Exception as _eg4o_boot_error:
-    print("ERATGUARD STAGE4O NOTIFICATIONS JSON STORAGE ERROR:", _eg4o_boot_error)
-# ===== ERATGUARD STAGE4O NOTIFICATIONS JSON STORAGE END =====
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -11224,462 +10671,10 @@ except Exception as _eg4q_boot_err:
 
 
 
-# ===== ERATGUARD STAGE4R NOTIFICATION MANAGEMENT START =====
-# Amaç:
-# - Admin bildirimlerini arşivleme, geri alma ve silme yönetimi ekler.
-# - Kullanıcı tarafında archived bildirimleri gizler.
-try:
-    from flask import request as _eg4r_request
-    from flask import render_template as _eg4r_render_template
-    from flask import session as _eg4r_session
-    import json as _eg4r_json
-    from pathlib import Path as _eg4r_Path
-    from datetime import datetime as _eg4r_datetime
 
-    _EG4R_NOTIFICATIONS_FILE = _eg4r_Path("data/admin_notifications.json")
-    _EG4R_USERS_FILE = _eg4r_Path("data/users.json")
-    _EG4R_LICENSES_FILE = _eg4r_Path("data/licenses.json")
 
-    def _eg4r_load_json(path, fallback):
-        try:
-            if not path.exists():
-                return fallback
-            data = _eg4r_json.loads(path.read_text(encoding="utf-8") or "")
-            return data
-        except Exception as _err:
-            print("ERATGUARD STAGE4R LOAD JSON ERROR:", path, _err)
-            return fallback
 
-    def _eg4r_save_notifications(items):
-        try:
-            _EG4R_NOTIFICATIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
-            _EG4R_NOTIFICATIONS_FILE.write_text(
-                _eg4r_json.dumps(items, ensure_ascii=False, indent=2),
-                encoding="utf-8"
-            )
-            return True
-        except Exception as _err:
-            print("ERATGUARD STAGE4R SAVE ERROR:", _err)
-            return False
 
-    def _eg4r_load_notifications():
-        data = _eg4r_load_json(_EG4R_NOTIFICATIONS_FILE, [])
-        return data if isinstance(data, list) else []
-
-    def _eg4r_stats(items):
-        active = [x for x in items if isinstance(x, dict) and str(x.get("status", "created")).lower() != "archived"]
-        return {
-            "total": len(active),
-            "today": sum(1 for x in active if str(x.get("created_at", "")).startswith(_eg4r_datetime.now().strftime("%Y-%m-%d"))),
-            "critical": sum(1 for x in active if str(x.get("priority", "")).lower() == "critical"),
-        }
-
-    def _eg4r_render_admin(success="", error=""):
-        items = _eg4r_load_notifications()
-        display_items = list(reversed(items[-80:]))
-        return _eg4r_render_template(
-            "admin_notifications.html",
-            notifications=display_items,
-            notification_stats=_eg4r_stats(items),
-            success=success,
-            error=error,
-            brand="EratGuard PRO",
-        )
-
-    def _eg4r_admin_manage_route():
-        try:
-            _path = str(getattr(_eg4r_request, "path", "") or "").rstrip("/")
-            if _path != "/admin/notifications":
-                return None
-
-            method = str(getattr(_eg4r_request, "method", "GET")).upper()
-
-            if method == "GET":
-                return _eg4r_render_admin()
-
-            if method != "POST":
-                return None
-
-            form = getattr(_eg4r_request, "form", {}) or {}
-            action = str(form.get("action", "")).strip().lower()
-            notification_id = str(form.get("notification_id", "")).strip()
-
-            # Yeni bildirim oluşturma POST'unu Stage 4O'ya bırak.
-            if action not in ("archive", "restore", "delete"):
-                return None
-
-            if not notification_id:
-                return _eg4r_render_admin(error="Bildirim ID bulunamadı.")
-
-            items = _eg4r_load_notifications()
-            found = False
-            new_items = []
-
-            for item in items:
-                if not isinstance(item, dict):
-                    new_items.append(item)
-                    continue
-
-                if str(item.get("id", "")).strip() == notification_id:
-                    found = True
-
-                    if action == "archive":
-                        item["status"] = "archived"
-                        item["archived_at"] = _eg4r_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        new_items.append(item)
-
-                    elif action == "restore":
-                        item["status"] = "created"
-                        item.pop("archived_at", None)
-                        new_items.append(item)
-
-                    elif action == "delete":
-                        # Bilerek eklemiyoruz: JSON’dan kaldırılır.
-                        continue
-                else:
-                    new_items.append(item)
-
-            if not found:
-                return _eg4r_render_admin(error="Bildirim bulunamadı.")
-
-            if not _eg4r_save_notifications(new_items):
-                return _eg4r_render_admin(error="Bildirim güncellenemedi.")
-
-            if action == "archive":
-                return _eg4r_render_admin(success="Bildirim arşivlendi.")
-            if action == "restore":
-                return _eg4r_render_admin(success="Bildirim tekrar aktif edildi.")
-            if action == "delete":
-                return _eg4r_render_admin(success="Bildirim silindi.")
-
-            return _eg4r_render_admin()
-
-        except Exception as _err:
-            print("ERATGUARD STAGE4R ADMIN ROUTE ERROR:", _err)
-            return None
-
-    def _eg4r_date_active(value):
-        try:
-            if not value:
-                return False
-            exp = _eg4r_datetime.strptime(str(value).strip()[:10], "%Y-%m-%d").date()
-            return exp >= _eg4r_datetime.now().date()
-        except Exception:
-            return False
-
-    def _eg4r_current_user_is_premium():
-        try:
-            username = str(_eg4r_session.get("username") or "").strip()
-            role = str(_eg4r_session.get("role") or "").lower().strip()
-            is_admin = bool(_eg4r_session.get("is_admin")) or role == "admin" or username.lower() == "admin"
-
-            if is_admin:
-                return True
-            if not username:
-                return False
-
-            users = _eg4r_load_json(_EG4R_USERS_FILE, {})
-            licenses = _eg4r_load_json(_EG4R_LICENSES_FILE, {})
-            user = {}
-
-            if isinstance(users, dict):
-                user = users.get(username) or users.get(username.lower()) or {}
-
-            if not isinstance(user, dict):
-                user = {}
-
-            if user.get("active") is False:
-                return False
-
-            premium_types = {"pro", "premium", "lifetime", "admin", "pro_monthly", "pro_yearly"}
-            license_type = str(user.get("license_type") or user.get("license_mode") or user.get("plan") or "").lower().strip()
-
-            if license_type in premium_types:
-                return True
-
-            license_key = str(user.get("license_key") or "").strip().upper()
-            if not license_key or license_key == "NONE":
-                return False
-
-            for date_key in ("expires_at", "license_expiry", "expiry"):
-                if _eg4r_date_active(user.get(date_key)):
-                    return True
-
-            if isinstance(licenses, dict):
-                lic = licenses.get(license_key)
-                if isinstance(lic, dict):
-                    status = str(lic.get("status") or "").lower()
-                    used = lic.get("used")
-                    lic_user = str(lic.get("username") or lic.get("used_by") or "").strip()
-                    lic_type = str(lic.get("license_type") or lic.get("type") or lic.get("plan") or "").lower().strip()
-
-                    if lic_type in premium_types and (status in ("active", "used", "approved") or used is True or lic_user == username):
-                        return True
-
-                    for date_key in ("license_expiry", "expiry", "expires_at"):
-                        if _eg4r_date_active(lic.get(date_key)) and (status in ("active", "used", "approved") or used is True or lic_user == username):
-                            return True
-
-            return False
-        except Exception as _err:
-            print("ERATGUARD STAGE4R PREMIUM CHECK ERROR:", _err)
-            return False
-
-    def _eg4r_user_items():
-        items = _eg4r_load_notifications()
-        premium_user = _eg4r_current_user_is_premium()
-        visible = []
-
-        for item in items:
-            if not isinstance(item, dict):
-                continue
-
-            if str(item.get("status", "created")).lower() == "archived":
-                continue
-
-            target = str(item.get("target", "all")).lower().strip()
-
-            if target == "admin":
-                continue
-
-            if target == "premium" and not premium_user:
-                continue
-
-            visible.append(item)
-
-        return list(reversed(visible[-50:]))
-
-    def _eg4r_user_stats(items):
-        return {
-            "total": len(items),
-            "high": sum(1 for x in items if str(x.get("priority", "")).lower() == "high"),
-            "critical": sum(1 for x in items if str(x.get("priority", "")).lower() == "critical"),
-        }
-
-    def _eg4r_render_user(**kwargs):
-        try:
-            items = _eg4r_user_items()
-            return _eg4r_render_template(
-                "user_notifications_admin_feed.html",
-                notifications=items,
-                notification_stats=_eg4r_user_stats(items),
-                brand="EratGuard PRO",
-            )
-        except Exception as _err:
-            print("ERATGUARD STAGE4R USER RENDER ERROR:", _err)
-            return None
-
-    def _eg_stage4r_before_request():
-        try:
-            _path = str(getattr(_eg4r_request, "path", "") or "").rstrip("/")
-            _method = str(getattr(_eg4r_request, "method", "GET")).upper()
-
-            if _path == "/admin/notifications":
-                result = _eg4r_admin_manage_route()
-                if result is not None:
-                    return result
-
-            if _path == "/u/notifications" and _method == "GET":
-                return _eg4r_render_user()
-
-            return None
-        except Exception as _err:
-            print("ERATGUARD STAGE4R BEFORE ERROR:", _err)
-            return None
-
-    try:
-        _eg4r_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg4r_funcs[:] = [
-            f for f in _eg4r_funcs
-            if getattr(f, "__name__", "") != "_eg_stage4r_before_request"
-        ]
-        _eg4r_funcs.insert(0, _eg_stage4r_before_request)
-    except Exception as _err:
-        print("ERATGUARD STAGE4R INSERT ERROR:", _err)
-
-    try:
-        for _eg4r_rule in list(app.url_map.iter_rules()):
-            _rule = str(_eg4r_rule.rule).rstrip("/")
-            if _rule == "/u/notifications":
-                app.view_functions[_eg4r_rule.endpoint] = _eg4r_render_user
-    except Exception as _err:
-        print("ERATGUARD STAGE4R ROUTE MAP ERROR:", _err)
-
-except Exception as _eg4r_boot_err:
-    print("ERATGUARD STAGE4R NOTIFICATION MANAGEMENT ERROR:", _eg4r_boot_err)
-# ===== ERATGUARD STAGE4R NOTIFICATION MANAGEMENT END =====
-
-
-
-
-# ===== ERATGUARD STAGE4R HOTFIX CREATE MANAGEMENT ROUTE START =====
-# Amaç:
-# - /admin/notifications POST create işlemini de yönetim butonlu Stage 4R renderer'a bağlar.
-# - Böylece bildirim oluşturulduktan sonra Arşivle/Sil butonları kesin görünür.
-try:
-    from flask import request as _eg4r_hot_request
-    from flask import render_template as _eg4r_hot_render_template
-    import json as _eg4r_hot_json
-    from pathlib import Path as _eg4r_hot_Path
-    from datetime import datetime as _eg4r_hot_datetime
-
-    _EG4R_HOT_FILE = _eg4r_hot_Path("data/admin_notifications.json")
-
-    def _eg4r_hot_load():
-        try:
-            _EG4R_HOT_FILE.parent.mkdir(parents=True, exist_ok=True)
-            if not _EG4R_HOT_FILE.exists():
-                _EG4R_HOT_FILE.write_text("[]", encoding="utf-8")
-            data = _eg4r_hot_json.loads(_EG4R_HOT_FILE.read_text(encoding="utf-8") or "[]")
-            return data if isinstance(data, list) else []
-        except Exception as _err:
-            print("ERATGUARD STAGE4R HOT LOAD ERROR:", _err)
-            return []
-
-    def _eg4r_hot_save(items):
-        try:
-            _EG4R_HOT_FILE.parent.mkdir(parents=True, exist_ok=True)
-            _EG4R_HOT_FILE.write_text(
-                _eg4r_hot_json.dumps(items, ensure_ascii=False, indent=2),
-                encoding="utf-8"
-            )
-            return True
-        except Exception as _err:
-            print("ERATGUARD STAGE4R HOT SAVE ERROR:", _err)
-            return False
-
-    def _eg4r_hot_stats(items):
-        active = [
-            x for x in items
-            if isinstance(x, dict) and str(x.get("status", "created")).lower() != "archived"
-        ]
-        today = _eg4r_hot_datetime.now().strftime("%Y-%m-%d")
-        return {
-            "total": len(active),
-            "today": sum(1 for x in active if str(x.get("created_at", "")).startswith(today)),
-            "critical": sum(1 for x in active if str(x.get("priority", "")).lower() == "critical"),
-        }
-
-    def _eg4r_hot_render(success="", error=""):
-        items = _eg4r_hot_load()
-        return _eg4r_hot_render_template(
-            "admin_notifications.html",
-            notifications=list(reversed(items[-80:])),
-            notification_stats=_eg4r_hot_stats(items),
-            success=success,
-            error=error,
-            brand="EratGuard PRO",
-        )
-
-    def _eg_stage4r_hotfix_admin_notifications():
-        try:
-            path = str(getattr(_eg4r_hot_request, "path", "") or "").rstrip("/")
-            if path != "/admin/notifications":
-                return None
-
-            method = str(getattr(_eg4r_hot_request, "method", "GET")).upper()
-            if method == "GET":
-                return _eg4r_hot_render()
-
-            if method != "POST":
-                return None
-
-            form = getattr(_eg4r_hot_request, "form", {}) or {}
-            action = str(form.get("action", "")).strip().lower()
-            items = _eg4r_hot_load()
-
-            if action in ("archive", "restore", "delete"):
-                notification_id = str(form.get("notification_id", "")).strip()
-                if not notification_id:
-                    return _eg4r_hot_render(error="Bildirim ID bulunamadı.")
-
-                found = False
-                new_items = []
-
-                for item in items:
-                    if not isinstance(item, dict):
-                        new_items.append(item)
-                        continue
-
-                    if str(item.get("id", "")).strip() == notification_id:
-                        found = True
-                        if action == "archive":
-                            item["status"] = "archived"
-                            item["archived_at"] = _eg4r_hot_datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                            new_items.append(item)
-                        elif action == "restore":
-                            item["status"] = "created"
-                            item.pop("archived_at", None)
-                            new_items.append(item)
-                        elif action == "delete":
-                            continue
-                    else:
-                        new_items.append(item)
-
-                if not found:
-                    return _eg4r_hot_render(error="Bildirim bulunamadı.")
-
-                if not _eg4r_hot_save(new_items):
-                    return _eg4r_hot_render(error="Bildirim güncellenemedi.")
-
-                if action == "archive":
-                    return _eg4r_hot_render(success="Bildirim arşivlendi.")
-                if action == "restore":
-                    return _eg4r_hot_render(success="Bildirim tekrar aktif edildi.")
-                if action == "delete":
-                    return _eg4r_hot_render(success="Bildirim silindi.")
-
-            # Create action: action boşsa veya create ise yeni bildirim oluştur.
-            title = str(form.get("title", "")).strip()
-            priority = str(form.get("priority", "normal")).strip().lower()
-            target = str(form.get("target", "all")).strip().lower()
-            message = str(form.get("message", "")).strip()
-
-            if not title or not message:
-                return _eg4r_hot_render(error="Başlık ve mesaj zorunludur.")
-
-            if priority not in {"normal", "high", "critical"}:
-                priority = "normal"
-
-            if target not in {"all", "premium", "admin"}:
-                target = "all"
-
-            now = _eg4r_hot_datetime.now()
-            item = {
-                "id": "EG-NOTIF-" + now.strftime("%Y%m%d%H%M%S%f"),
-                "title": title[:160],
-                "priority": priority,
-                "target": target,
-                "message": message[:1200],
-                "created_at": now.strftime("%Y-%m-%d %H:%M:%S"),
-                "status": "created",
-            }
-
-            items.append(item)
-            items = items[-300:]
-
-            if not _eg4r_hot_save(items):
-                return _eg4r_hot_render(error="Bildirim kaydedilemedi.")
-
-            return _eg4r_hot_render(success="Bildirim başarıyla kaydedildi.")
-
-        except Exception as _err:
-            print("ERATGUARD STAGE4R HOTFIX ADMIN ROUTE ERROR:", _err)
-            return None
-
-    try:
-        _eg4r_hot_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg4r_hot_funcs[:] = [
-            f for f in _eg4r_hot_funcs
-            if getattr(f, "__name__", "") != "_eg_stage4r_hotfix_admin_notifications"
-        ]
-        _eg4r_hot_funcs.insert(0, _eg_stage4r_hotfix_admin_notifications)
-    except Exception as _err:
-        print("ERATGUARD STAGE4R HOTFIX INSERT ERROR:", _err)
-
-except Exception as _boot_err:
-    print("ERATGUARD STAGE4R HOTFIX CREATE MANAGEMENT ROUTE ERROR:", _boot_err)
-# ===== ERATGUARD STAGE4R HOTFIX CREATE MANAGEMENT ROUTE END =====
 
 
 
@@ -11711,160 +10706,6 @@ except Exception as _eg4u_boot_err:
 
 
 
-# ===== ERATGUARD STAGE5A HARD ADMIN AUTH LOCK START =====
-# Amaç:
-# - /admin/login route'unun yanlışlıkla dashboard göstermesini engeller.
-# - /admin, /admin/dashboard ve /admin/* yollarını admin session olmadan kapatır.
-# - Yetkisiz kullanıcıyı gerçek /admin/login sayfasına yönlendirir.
-try:
-    from flask import request as _eg5a_request
-    from flask import session as _eg5a_session
-    from flask import redirect as _eg5a_redirect
-    from flask import render_template as _eg5a_render_template
-    from flask import make_response as _eg5a_make_response
-    import html as _eg5a_html
-
-    def _eg5a_is_admin_session():
-        try:
-            username = str(_eg5a_session.get("username") or "").strip().lower()
-            role = str(_eg5a_session.get("role") or "").strip().lower()
-
-            if bool(_eg5a_session.get("is_admin")):
-                return True
-
-            if role == "admin":
-                return True
-
-            if username == "admin" or username.startswith("eg_admin_"):
-                return True
-
-            # APK/WebView ve mobil tarayıcı için kalıcı admin cookie kabulü.
-            try:
-                mobile_cookie = str(_eg5a_request.cookies.get("ss_admin_mobile") or "").strip()
-                token_func = globals().get("_ss_admin_cookie_token_final")
-                expected = str(token_func() if callable(token_func) else "").strip()
-                if mobile_cookie and expected and mobile_cookie == expected:
-                    return True
-            except Exception as _cookie_err:
-                print("ERATGUARD STAGE5A ADMIN COOKIE CHECK WARN:", _cookie_err)
-
-            return False
-        except Exception as _err:
-            print("ERATGUARD STAGE5A SESSION CHECK ERROR:", _err)
-            return False
-
-    def _eg5a_real_admin_login_page():
-        try:
-            # Varsa gerçek admin_login.html kullan.
-            return _eg5a_render_template(
-                "admin_login.html",
-                brand="EratGuard PRO",
-                error="",
-                next=str(_eg5a_request.args.get("next") or "/admin/dashboard"),
-            )
-        except Exception as _err:
-            print("ERATGUARD STAGE5A ADMIN LOGIN TEMPLATE ERROR:", _err)
-
-            next_url = _eg5a_html.escape(str(_eg5a_request.args.get("next") or "/admin/dashboard"))
-            return """<!doctype html>
-<html lang="tr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>EratGuard Admin Login</title>
-<style>
-body{margin:0;min-height:100vh;display:grid;place-items:center;background:#050810;color:#e8f4ff;font-family:Arial,sans-serif}
-.card{width:min(420px,92vw);border:1px solid rgba(0,200,240,.22);border-radius:24px;background:#0a1020;padding:26px;box-shadow:0 24px 70px rgba(0,0,0,.42)}
-h1{margin:0 0 8px;font-size:30px}
-p{color:#91a8c2}
-label{display:block;margin-top:14px;color:#91a8c2;font-weight:800}
-input{width:100%;box-sizing:border-box;margin-top:7px;padding:13px;border-radius:13px;border:1px solid #203555;background:#050810;color:#e8f4ff}
-button{width:100%;margin-top:18px;padding:14px;border:0;border-radius:14px;background:#00c8f0;color:#031018;font-weight:1000}
-</style>
-</head>
-<body>
-<form class="card" method="post" action="/admin/login">
-<h1>EratGuard Admin</h1>
-<p>Admin erişimi için giriş yap.</p>
-<input type="hidden" name="next" value=\"""" + next_url + """\">
-<label>Kullanıcı adı</label>
-<input name="username" autocomplete="username" required>
-<label>Şifre</label>
-<input name="password" type="password" autocomplete="current-password" required>
-<button type="submit">Giriş Yap</button>
-</form>
-<script>
-(function(){{
-  var box = document.getElementById('eg-energy-field');
-  if(!box) return;
-  var n = 16, html = '';
-  for(var i=0;i<n;i++){{
-    var left = (Math.random()*94+3).toFixed(1);
-    var dur = (4 + Math.random()*3).toFixed(2);
-    var delay = (Math.random()*5).toFixed(2);
-    html += '<span style="left:'+left+'%;animation-duration:'+dur+'s;animation-delay:'+delay+'s"></span>';
-  }}
-  box.innerHTML = html;
-}})();
-</script>
-</body>
-</html>"""
-
-    def _eg5a_admin_auth_gate():
-        try:
-            path = str(getattr(_eg5a_request, "path", "") or "")
-            clean = path.rstrip("/") or "/"
-
-            if not (clean == "/admin" or clean.startswith("/admin/")):
-                return None
-
-            # Statik dosyalara dokunma.
-            if (
-                clean.startswith("/static")
-                or clean.startswith("/admin/static")
-                or clean.endswith((".css", ".js", ".png", ".jpg", ".jpeg", ".svg", ".ico", ".webp", ".woff", ".woff2"))
-            ):
-                return None
-
-            # Login sayfasını dashboard override'dan kurtar.
-            if clean == "/admin/login":
-                if str(_eg5a_request.method).upper() == "GET":
-                    resp = _eg5a_make_response(_eg5a_real_admin_login_page())
-                    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-                    return resp
-
-                # POST login akışını mevcut backend'e bırak.
-                return None
-
-            # Logout mevcut backend'e kalabilir.
-            if clean == "/admin/logout":
-                return None
-
-            # Admin session varsa geç.
-            if _eg5a_is_admin_session():
-                return None
-
-            # Yetkisiz admin erişimini login'e at.
-            return _eg5a_redirect("/admin/login?next=" + path)
-
-        except Exception as _err:
-            print("ERATGUARD STAGE5A ADMIN AUTH GATE ERROR:", _err)
-            return None
-
-    try:
-        _eg5a_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg5a_funcs[:] = [
-            f for f in _eg5a_funcs
-            if getattr(f, "__name__", "") != "_eg5a_admin_auth_gate"
-        ]
-        _eg5a_funcs.insert(0, _eg5a_admin_auth_gate)
-        print("ERATGUARD STAGE5A HARD ADMIN AUTH LOCK ACTIVE")
-    except Exception as _err:
-        print("ERATGUARD STAGE5A INSERT ERROR:", _err)
-
-except Exception as _boot_err:
-    print("ERATGUARD STAGE5A HARD ADMIN AUTH LOCK BOOT ERROR:", _boot_err)
-# ===== ERATGUARD STAGE5A HARD ADMIN AUTH LOCK END =====
 
 
 
@@ -12176,951 +11017,20 @@ except Exception as _boot_err:
 
 
 
-# ===== ERATGUARD STAGE5C HOTFIX FORCE API ROUTER START =====
-# Amaç:
-# - Canlı ortamda 404 dönen /api/admin/stats/users/licenses/payments yollarını
-#   before_request seviyesinde kesin yakalar.
-# - Admin session yoksa 403 döndürür.
-# - Sahte veri üretmez; Stage 5C gerçek JSON fonksiyonlarını kullanır.
-try:
-    from flask import request as _eg5c_hot_request
-    from flask import jsonify as _eg5c_hot_jsonify
-    from flask import session as _eg5c_hot_session
 
-    def _eg5c_hot_is_admin():
-        try:
-            username = str(_eg5c_hot_session.get("username") or "").strip().lower()
-            role = str(_eg5c_hot_session.get("role") or "").strip().lower()
-            return bool(_eg5c_hot_session.get("is_admin")) or role == "admin" or username == "admin"
-        except Exception:
-            return False
 
-    def _eg5c_hot_forbidden():
-        return _eg5c_hot_jsonify({"ok": False, "error": "admin_login_required"}), 403
 
-    def _eg5c_hot_force_api_router():
-        try:
-            path = str(getattr(_eg5c_hot_request, "path", "") or "").rstrip("/")
 
-            route_map = {
-                "/api/admin/stats": "_eg5c_stats",
-                "/api/admin/users": "_eg5c_user_items",
-                "/api/admin/licenses": "_eg5c_license_items",
-                "/api/admin/payments": "_eg5c_payment_items",
-                "/api/admin/payment-requests": "_eg5c_payment_items",
-                "/api/admin/security-logs": "_eg5c_security_log_items",
-                "/api/admin/activity": "_eg5c_activity_items",
-                "/api/admin/dashboard-series": "_eg5c_dashboard_series",
-            }
 
-            if path not in route_map:
-                return None
 
-            if not _eg5c_hot_is_admin():
-                return _eg5c_hot_forbidden()
 
-            fn_name = route_map[path]
-            fn = globals().get(fn_name)
 
-            if not callable(fn):
-                return _eg5c_hot_jsonify({
-                    "ok": False,
-                    "error": "stage5c_function_missing",
-                    "function": fn_name,
-                }), 500
 
-            data = fn()
 
-            if path == "/api/admin/stats":
-                return _eg5c_hot_jsonify(data)
 
-            if path == "/api/admin/users":
-                return _eg5c_hot_jsonify({"ok": True, "users": data})
 
-            if path == "/api/admin/licenses":
-                return _eg5c_hot_jsonify({"ok": True, "licenses": data})
 
-            if path in ("/api/admin/payments", "/api/admin/payment-requests"):
-                return _eg5c_hot_jsonify({"ok": True, "requests": data})
 
-            if path == "/api/admin/security-logs":
-                return _eg5c_hot_jsonify({"ok": True, "logs": data})
-
-            if path == "/api/admin/activity":
-                return _eg5c_hot_jsonify({"ok": True, "activity": data})
-
-            if path == "/api/admin/dashboard-series":
-                return _eg5c_hot_jsonify(data)
-
-            return None
-
-        except Exception as _err:
-            print("ERATGUARD STAGE5C HOTFIX API ROUTER ERROR:", _err)
-            return _eg5c_hot_jsonify({"ok": False, "error": str(_err)}), 500
-
-    try:
-        _eg5c_hot_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg5c_hot_funcs[:] = [
-            f for f in _eg5c_hot_funcs
-            if getattr(f, "__name__", "") != "_eg5c_hot_force_api_router"
-        ]
-        _eg5c_hot_funcs.insert(0, _eg5c_hot_force_api_router)
-        print("ERATGUARD STAGE5C HOTFIX FORCE API ROUTER ACTIVE")
-    except Exception as _err:
-        print("ERATGUARD STAGE5C HOTFIX ROUTER INSERT ERROR:", _err)
-
-except Exception as _boot_err:
-    print("ERATGUARD STAGE5C HOTFIX FORCE API ROUTER BOOT ERROR:", _boot_err)
-# ===== ERATGUARD STAGE5C HOTFIX FORCE API ROUTER END =====
-
-
-
-
-# ===== ERATGUARD STAGE6B COMMAND TREE ADMIN ROUTE START =====
-try:
-    from flask import request as _eg6b_request
-    from flask import session as _eg6b_session
-    from flask import redirect as _eg6b_redirect
-    from flask import render_template as _eg6b_render_template
-    import re as _eg6b_re
-
-    def _eg6b_is_admin_session():
-        try:
-            username = str(_eg6b_session.get("username") or "").strip().lower()
-            role = str(_eg6b_session.get("role") or "").strip().lower()
-            return bool(_eg6b_session.get("is_admin")) or role == "admin" or username == "admin"
-        except Exception:
-            return False
-
-    def _eg6b_to_int(v, default=0):
-        try:
-            if v is None:
-                return default
-            raw = str(v).strip()
-            if raw == "":
-                return default
-            found = _eg6b_re.findall(r"-?\d+", raw.replace(",", ""))
-            if not found:
-                return default
-            return int(found[0])
-        except Exception:
-            return default
-
-    def _eg6b_clean_stats():
-        stats = {
-            "users": 0,
-            "licenses": 0,
-            "payments": 0,
-            "blocked": 0,
-            "spam_logs": 0,
-            "notifications": 0,
-        }
-
-        try:
-            fn = globals().get("_eg_real_admin_dashboard_stats")
-            if callable(fn):
-                data = fn()
-                if isinstance(data, dict):
-                    stats.update(data)
-        except Exception as _err:
-            print("ERATGUARD STAGE6B REAL STATS ERROR:", _err)
-
-        try:
-            fn = globals().get("_eg_default_admin_stats")
-            if callable(fn):
-                data = fn()
-                if isinstance(data, dict):
-                    for k, v in data.items():
-                        if k not in stats or _eg6b_to_int(stats.get(k), 0) == 0:
-                            stats[k] = v
-        except Exception as _err:
-            print("ERATGUARD STAGE6B DEFAULT STATS ERROR:", _err)
-
-        for k in ("users", "licenses", "payments", "blocked", "spam_logs", "notifications"):
-            stats[k] = _eg6b_to_int(stats.get(k), 0)
-
-        return stats
-
-    def _eg6b_command_tree_admin_gate():
-        try:
-            path = str(getattr(_eg6b_request, "path", "") or "").rstrip("/") or "/"
-
-            if path not in ("/admin", "/admin/dashboard"):
-                return None
-
-            if not _eg6b_is_admin_session():
-                return _eg6b_redirect("/admin/login?next=" + path)
-
-            if path == "/admin":
-                return _eg6b_redirect("/admin/dashboard")
-
-            return _eg6b_render_template(
-                "admin_dashboard.html",
-                admin_stats=_eg6b_clean_stats(),
-                brand="EratGuard PRO",
-                current_user=str(_eg6b_session.get("username") or "admin"),
-                username=str(_eg6b_session.get("username") or "admin"),
-                page_title="Command Tree",
-            )
-        except Exception as _err:
-            print("ERATGUARD STAGE6B COMMAND TREE ROUTE ERROR:", _err)
-            return None
-
-    try:
-        _eg6b_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg6b_funcs[:] = [
-            f for f in _eg6b_funcs
-            if getattr(f, "__name__", "") != "_eg6b_command_tree_admin_gate"
-        ]
-        _eg6b_funcs.insert(0, _eg6b_command_tree_admin_gate)
-        print("ERATGUARD STAGE6B COMMAND TREE ADMIN ROUTE ACTIVE")
-    except Exception as _err:
-        print("ERATGUARD STAGE6B ROUTE INSERT ERROR:", _err)
-
-except Exception as _boot_err:
-    print("ERATGUARD STAGE6B COMMAND TREE ADMIN ROUTE BOOT ERROR:", _boot_err)
-# ===== ERATGUARD STAGE6B COMMAND TREE ADMIN ROUTE END =====
-
-
-
-# ===== ERATGUARD STAGE6D OLD ADMIN ACCESS BRIDGE START =====
-# Amaç:
-# - Eski /ss-admin-access ve /ss-admin-app-start yollarını yeni EratGuard admin akışına bağlar.
-# - Eski APK/WebView path'i canlı domainde kullanılırsa boşa düşmez.
-# - Eski EratGuard isimli panel üretmez.
-try:
-    from flask import request as _eg6d_request
-    from flask import redirect as _eg6d_redirect
-    from flask import session as _eg6d_session
-    from flask import url_for as _eg6d_url_for
-
-    def _eg6d_is_admin_session():
-        try:
-            username = str(_eg6d_session.get("username") or "").strip().lower()
-            role = str(_eg6d_session.get("role") or "").strip().lower()
-            return bool(_eg6d_session.get("is_admin")) or role == "admin" or username == "admin"
-        except Exception:
-            return False
-
-    def _eg6d_old_admin_access_bridge():
-        try:
-            path = str(getattr(_eg6d_request, "path", "") or "").rstrip("/")
-
-            # CLEAN-1:
-            # /ss-admin-access gerçek admin login route'una bırakılır.
-            # Eski bridge burayı /admin/login veya /login tarafına itemez.
-            if path == "/ss-admin-access":
-                return None
-
-            if path not in ("/ss-admin-app-start", "/admin-access"):
-                return None
-
-            if _eg6d_is_admin_session():
-                return _eg6d_redirect("/admin/dashboard")
-
-            return _eg6d_redirect("/ss-admin-access")
-        except Exception:
-            return None
-
-    try:
-        _eg6d_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg6d_funcs[:] = [
-            f for f in _eg6d_funcs
-            if getattr(f, "__name__", "") != "_eg6d_old_admin_access_bridge"
-        ]
-        _eg6d_funcs.insert(0, _eg6d_old_admin_access_bridge)
-        print("ERATGUARD STAGE6D OLD ADMIN ACCESS BRIDGE ACTIVE")
-    except Exception as _err:
-        print("ERATGUARD STAGE6D BRIDGE INSERT ERROR:", _err)
-
-except Exception as _boot_err:
-    print("ERATGUARD STAGE6D OLD ADMIN ACCESS BRIDGE BOOT ERROR:", _boot_err)
-# ===== ERATGUARD STAGE6D OLD ADMIN ACCESS BRIDGE END =====
-
-
-# === ERATGUARD SECURITY-3 PREPEND FORCE REAL SECURITY CENTER ===
-# /admin/security eski dashboard/overview bridge'lerine yakalanmadan gerçek güvenlik sayfasını döndürür.
-try:
-    from flask import request as _eg_sec3_request
-    from flask import session as _eg_sec3_session
-    from flask import redirect as _eg_sec3_redirect
-    from flask import render_template as _eg_sec3_render_template
-
-    def _eg_security3_force_security_center_first():
-        try:
-            _path = str(getattr(_eg_sec3_request, "path", "") or "").rstrip("/")
-
-            if _path == "/admin/security":
-                if not (
-                    _eg_sec3_session.get("logged_in")
-                    or _eg_sec3_session.get("is_admin")
-                    or _eg_sec3_session.get("role") == "admin"
-                    or (
-                        callable(globals().get("_ss_admin_cookie_ok_final"))
-                        and globals()["_ss_admin_cookie_ok_final"]()
-                    )
-                ):
-                    return _eg_sec3_redirect("/ss-admin-access", code=302)
-
-                return _eg_sec3_render_template("admin_security.html")
-        except Exception:
-            return None
-
-    try:
-        _eg_sec3_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg_sec3_funcs[:] = [
-            f for f in _eg_sec3_funcs
-            if getattr(f, "__name__", "") != "_eg_security3_force_security_center_first"
-        ]
-        _eg_sec3_funcs.insert(0, _eg_security3_force_security_center_first)
-        print("ERATGUARD SECURITY-3 PREPEND FORCE REAL SECURITY CENTER ACTIVE")
-    except Exception as _eg_sec3_insert_err:
-        print("ERATGUARD SECURITY-3 INSERT ERROR:", _eg_sec3_insert_err)
-
-except Exception as _eg_sec3_err:
-    print("ERATGUARD SECURITY-3 ERROR:", _eg_sec3_err)
-# === /ERATGUARD SECURITY-3 PREPEND FORCE REAL SECURITY CENTER ===
-
-# === ERATGUARD USERS-2 PREPEND FORCE REAL USER CENTER ===
-# /admin/users eski kullanıcı sayfasına düşerse gerçek admin_users.html dosyasını döndürür.
-try:
-    from flask import request as _eg_users2_request
-    from flask import session as _eg_users2_session
-    from flask import redirect as _eg_users2_redirect
-    from flask import render_template as _eg_users2_render_template
-
-    def _eg_users2_force_user_center_first():
-        try:
-            _path = str(getattr(_eg_users2_request, "path", "") or "").rstrip("/")
-
-            if _path == "/admin/users":
-                if not (
-                    _eg_users2_session.get("logged_in")
-                    or _eg_users2_session.get("is_admin")
-                    or _eg_users2_session.get("role") == "admin"
-                    or (
-                        callable(globals().get("_ss_admin_cookie_ok_final"))
-                        and globals()["_ss_admin_cookie_ok_final"]()
-                    )
-                ):
-                    return _eg_users2_redirect("/ss-admin-access", code=302)
-
-                # Backend mevcut users değişkenini göndermiyorsa güvenli fallback
-                try:
-                    _users = globals().get("users", {})
-                    if not isinstance(_users, dict):
-                        _users = {}
-                except Exception:
-                    _users = {}
-
-                return _eg_users2_render_template("admin_users.html", users=_users)
-        except Exception:
-            return None
-
-    try:
-        _eg_users2_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg_users2_funcs[:] = [
-            f for f in _eg_users2_funcs
-            if getattr(f, "__name__", "") != "_eg_users2_force_user_center_first"
-        ]
-        _eg_users2_funcs.insert(0, _eg_users2_force_user_center_first)
-        print("ERATGUARD USERS-2 PREPEND FORCE REAL USER CENTER ACTIVE")
-    except Exception as _eg_users2_insert_err:
-        print("ERATGUARD USERS-2 INSERT ERROR:", _eg_users2_insert_err)
-
-except Exception as _eg_users2_err:
-    print("ERATGUARD USERS-2 ERROR:", _eg_users2_err)
-# === /ERATGUARD USERS-2 PREPEND FORCE REAL USER CENTER ===
-
-# === ERATGUARD LIVE-DATA-1 FAN PAGES JSON BINDING ===
-# Fan Interface sayfalarını gerçek data/*.json dosyalarına bağlar.
-# Sadece GET sayfa görüntülemelerini yakalar; POST onay/red/kaydet işlemlerine dokunmaz.
-try:
-    import json as _eg_live_json
-    from pathlib import Path as _eg_live_Path
-    from flask import request as _eg_live_request
-    from flask import session as _eg_live_session
-    from flask import redirect as _eg_live_redirect
-    from flask import render_template as _eg_live_render_template
-
-    def _eg_live_admin_ok():
-        try:
-            return bool(
-                _eg_live_session.get("logged_in")
-                or _eg_live_session.get("is_admin")
-                or _eg_live_session.get("role") == "admin"
-                or (
-                    callable(globals().get("_ss_admin_cookie_ok_final"))
-                    and globals()["_ss_admin_cookie_ok_final"]()
-                )
-            )
-        except Exception:
-            return False
-
-    def _eg_live_read_json(default, *paths):
-        for raw in paths:
-            try:
-                path = _eg_live_Path(str(raw))
-                if path.exists():
-                    txt = path.read_text(encoding="utf-8").strip()
-                    if not txt:
-                        return default
-                    return _eg_live_json.loads(txt)
-            except Exception:
-                pass
-        return default
-
-    def _eg_live_as_list(value):
-        try:
-            if isinstance(value, list):
-                return value
-            if isinstance(value, dict):
-                out = []
-                for k, v in value.items():
-                    if isinstance(v, dict):
-                        item = dict(v)
-                        item.setdefault("id", k)
-                        item.setdefault("key", k)
-                        out.append(item)
-                    else:
-                        out.append({"id": k, "key": k, "value": v})
-                return out
-        except Exception:
-            pass
-        return []
-
-    def _eg_live_users_dict():
-        raw = _eg_live_read_json({}, "data/users.json", "users.json")
-        if isinstance(raw, dict):
-            return raw
-        if isinstance(raw, list):
-            out = {}
-            for i, item in enumerate(raw):
-                if isinstance(item, dict):
-                    name = str(item.get("username") or item.get("name") or item.get("email") or f"user_{i}")
-                    out[name] = item
-            return out
-        return {}
-
-    def _eg_live_user_stats(users):
-        total = len(users) if isinstance(users, dict) else 0
-        active = 0
-        admins = 0
-        banned = 0
-
-        for _, u in (users or {}).items():
-            if not isinstance(u, dict):
-                continue
-
-            role = str(u.get("role", "")).lower()
-            if role == "admin" or u.get("is_admin") is True:
-                admins += 1
-
-            if u.get("is_banned") is True or u.get("banned") is True or str(u.get("status", "")).lower() in ("banned", "banli", "blocked"):
-                banned += 1
-
-            if u.get("active") is True or u.get("is_active") is True or str(u.get("status", "")).lower() in ("active", "aktif", "enabled"):
-                active += 1
-
-        return {"total": total, "active": active, "admins": admins, "banned": banned}
-
-    def _eg_live_license_items():
-        base = _eg_live_as_list(_eg_live_read_json([], "data/licenses.json", "licenses.json"))
-        generated = _eg_live_as_list(_eg_live_read_json([], "data/generated_licenses.json", "generated_licenses.json"))
-        items = []
-
-        for item in base + generated:
-            if isinstance(item, dict):
-                items.append(item)
-            else:
-                items.append({"key": str(item), "status": "HAZIR"})
-
-        return items
-
-    def _eg_live_license_stats(licenses):
-        total = len(licenses or [])
-        used = 0
-        empty = 0
-        expired = 0
-
-        for lic in licenses or []:
-            if not isinstance(lic, dict):
-                continue
-
-            username = lic.get("username") or lic.get("user") or lic.get("assigned_to") or lic.get("owner")
-            status = str(lic.get("status", "")).lower()
-
-            if username or status in ("used", "active", "aktif", "assigned"):
-                used += 1
-            else:
-                empty += 1
-
-            if status in ("expired", "süresi doldu", "suresi doldu"):
-                expired += 1
-
-        if total and used + empty == 0:
-            empty = total
-
-        return {"total": total, "used": used, "empty": empty, "expired": expired}
-
-    def _eg_live_payments():
-        raw = _eg_live_read_json([], "data/payment_requests.json", "payment_requests.json", "data/upgrade_requests.json")
-        return _eg_live_as_list(raw)
-
-    def _eg_live_spam_logs():
-        raw = _eg_live_read_json([], "data/spam_logs.json", "spam_logs.json", "data/logs.json", "logs.json")
-        return _eg_live_as_list(raw)
-
-    def _eg_live_settings():
-        raw = _eg_live_read_json({}, "data/settings.json", "settings.json")
-        return raw if isinstance(raw, dict) else {}
-
-    def _eg_live_admin_stats():
-        users = _eg_live_users_dict()
-        licenses = _eg_live_license_items()
-        payments = _eg_live_payments()
-        logs = _eg_live_spam_logs()
-        settings = _eg_live_settings()
-
-        us = _eg_live_user_stats(users)
-        ls = _eg_live_license_stats(licenses)
-
-        return {
-            "users": us.get("total", 0),
-            "active_users": us.get("active", 0),
-            "admin_users": us.get("admins", 0),
-            "banned_users": us.get("banned", 0),
-            "licenses": ls.get("total", 0),
-            "used_licenses": ls.get("used", 0),
-            "empty_licenses": ls.get("empty", 0),
-            "expired_licenses": ls.get("expired", 0),
-            "payments": len(payments),
-            "payment_requests": len(payments),
-            "spam_logs": len(logs),
-            "blocked": len(logs),
-            "notifications": len(_eg_live_as_list(_eg_live_read_json([], "data/admin_notifications.json", "admin_notifications.json"))),
-            "unread_notifications": 0,
-            "settings_count": len(settings),
-        }
-
-    def _eg_live_recent_events():
-        logs = _eg_live_as_list(_eg_live_read_json([], "data/admin_actions.json", "data/logs.json", "logs.json"))
-        return logs[:8] if isinstance(logs, list) else []
-
-    def _eg_live_render_fan_page():
-        try:
-            if str(getattr(_eg_live_request, "method", "GET")).upper() != "GET":
-                return None
-
-            path = str(getattr(_eg_live_request, "path", "") or "").rstrip("/")
-            if not path:
-                path = "/"
-
-            fan_paths = {
-                "/admin/dashboard": "admin_dashboard.html",
-                "/admin/users": "admin_users.html",
-                "/admin/licenses": "admin_licenses.html",
-                "/admin/payment-requests": "admin_payment_requests.html",
-                "/admin/security": "admin_security.html",
-                "/admin/spam-logs": "admin_spam_logs.html",
-                "/admin/settings": "admin_settings.html",
-            }
-
-            if path not in fan_paths:
-                return None
-
-            if not _eg_live_admin_ok():
-                return _eg_live_redirect("/ss-admin-access", code=302)
-
-            users = _eg_live_users_dict()
-            user_stats = _eg_live_user_stats(users)
-
-            licenses = _eg_live_license_items()
-            license_stats = _eg_live_license_stats(licenses)
-
-            payment_requests = _eg_live_payments()
-            spam_logs = _eg_live_spam_logs()
-            settings = _eg_live_settings()
-            stats = _eg_live_admin_stats()
-            recent = _eg_live_recent_events()
-
-            return _eg_live_render_template(
-                fan_paths[path],
-                admin_stats=stats,
-                users=users,
-                user_stats=user_stats,
-                licenses=licenses,
-                generated_licenses=licenses,
-                license_stats=license_stats,
-                payment_requests=payment_requests,
-                requests=payment_requests,
-                spam_logs=spam_logs,
-                settings=settings,
-                recent_logins=recent,
-                recent_actions=recent,
-                events=recent,
-                total_events=len(recent),
-                warning_events=0,
-                critical_events=0,
-            )
-        except Exception as _eg_live_render_err:
-            print("ERATGUARD LIVE-DATA-1 RENDER ERROR:", _eg_live_render_err)
-            return None
-
-    try:
-        _eg_live_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg_live_funcs[:] = [
-            f for f in _eg_live_funcs
-            if getattr(f, "__name__", "") != "_eg_live_render_fan_page"
-        ]
-        _eg_live_funcs.insert(0, _eg_live_render_fan_page)
-        print("ERATGUARD LIVE-DATA-1 FAN PAGES JSON BINDING ACTIVE")
-    except Exception as _eg_live_insert_err:
-        print("ERATGUARD LIVE-DATA-1 INSERT ERROR:", _eg_live_insert_err)
-
-except Exception as _eg_live_err:
-    print("ERATGUARD LIVE-DATA-1 ERROR:", _eg_live_err)
-# === /ERATGUARD LIVE-DATA-1 FAN PAGES JSON BINDING ===
-
-# === ERATGUARD USER-DASH-1 LIVE USER FAN LITE ===
-# Kullanıcı ana ekranını canlı data/*.json verisine bağlar.
-try:
-    import json as _eg_ud1_json
-    import html as _eg_ud1_html
-    from pathlib import Path as _eg_ud1_Path
-    from flask import session as _eg_ud1_session
-    from flask import redirect as _eg_ud1_redirect
-    from flask import render_template_string as _eg_ud1_render_template_string
-    from flask import make_response as _eg_ud1_make_response
-
-    def _eg_ud1_read_json(default, *paths):
-        for raw in paths:
-            try:
-                path = _eg_ud1_Path(str(raw))
-                if path.exists():
-                    txt = path.read_text(encoding="utf-8").strip()
-                    if not txt:
-                        return default
-                    return _eg_ud1_json.loads(txt)
-            except Exception:
-                pass
-        return default
-
-    def _eg_ud1_as_list(value):
-        try:
-            if isinstance(value, list):
-                return value
-            if isinstance(value, dict):
-                out = []
-                for k, v in value.items():
-                    if isinstance(v, dict):
-                        item = dict(v)
-                        item.setdefault("id", k)
-                        item.setdefault("key", k)
-                        out.append(item)
-                    else:
-                        out.append({"id": k, "value": v})
-                return out
-        except Exception:
-            pass
-        return []
-
-    def _eg_ud1_user(username):
-        users = _eg_ud1_read_json({}, "data/users.json", "users.json")
-        if isinstance(users, dict):
-            return users.get(username, {})
-        return {}
-
-    def _eg_ud1_user_spam(username):
-        logs = _eg_ud1_as_list(_eg_ud1_read_json([], "data/spam_logs.json", "spam_logs.json", "data/logs.json", "logs.json"))
-        user_logs = []
-        for item in logs:
-            if not isinstance(item, dict):
-                continue
-            owner = str(item.get("username") or item.get("user") or item.get("owner") or "").strip()
-            if owner == username:
-                user_logs.append(item)
-
-        # Kullanıcıya ait kayıt yoksa 0 göster; sistem geneliyle karıştırma.
-        spam_total = len(user_logs)
-        blocked_total = 0
-        for item in user_logs:
-            status = str(item.get("status") or item.get("result") or item.get("state") or "").lower()
-            if status in ("blocked", "block", "spam", "spammed", "engellendi", "engellenen", "sp"):
-                blocked_total += 1
-
-        return spam_total, blocked_total
-
-    def _eg_ud1_block_count(username):
-        raw = _eg_ud1_read_json([], "data/user_block_list.json", "data/user_blocklist.json", "data/blocklist.json", "data/user_quarantine.json")
-        if isinstance(raw, dict):
-            # Kullanıcıya özel alt liste varsa onu say
-            val = raw.get(username) or raw.get(str(username).lower())
-            if isinstance(val, list):
-                return len(val)
-            if isinstance(val, dict):
-                return len(val)
-            # Yoksa owner/username alanlı kayıtları say
-            total = 0
-            for _, v in raw.items():
-                if isinstance(v, dict) and str(v.get("username") or v.get("user") or "") == username:
-                    total += 1
-            return total
-        if isinstance(raw, list):
-            total = 0
-            for item in raw:
-                if isinstance(item, dict):
-                    owner = str(item.get("username") or item.get("user") or "").strip()
-                    if not owner or owner == username:
-                        total += 1
-            return total
-        return 0
-
-    def _eg_ud1_notifications(username):
-        raw = _eg_ud1_read_json([], "data/inbox.json", "data/admin_notifications.json", "data/user_notification_settings.json")
-        if isinstance(raw, dict):
-            val = raw.get(username) or raw.get(str(username).lower())
-            if isinstance(val, list):
-                return len(val)
-            if isinstance(val, dict):
-                return len(val)
-            return len(raw) if raw else 0
-        if isinstance(raw, list):
-            return len(raw)
-        return 0
-
-    def _eg_ud1_live_home():
-        # CLEAN-5C AST SAFE: eski duplicate dashboard gövdesi kaldırıldı.
-        # Aktif dashboard ve FAN-12P korunur.
-        try:
-            return _eg1c_dashboard_page()
-        except Exception:
-            return redirect('/dashboard')
-
-    try:
-        for _rule in list(app.url_map.iter_rules()):
-            if str(_rule) in [
-                "/dashboard",
-                "/home",
-                "/user",
-                "/main",
-                "/u/home",
-                "/u/dashboard",
-                "/u/home-final"
-            ]:
-                app.view_functions[_rule.endpoint] = _eg_ud1_live_home
-
-        print("ERATGUARD USER-DASH-1 LIVE USER FAN LITE ACTIVE")
-    except Exception as _eg_ud1_route_err:
-        print("ERATGUARD USER-DASH-1 ROUTE ERROR:", _eg_ud1_route_err)
-
-except Exception as _eg_ud1_err:
-    print("ERATGUARD USER-DASH-1 ERROR:", _eg_ud1_err)
-# === /ERATGUARD USER-DASH-1 LIVE USER FAN LITE ===
-
-# === ERATGUARD ADMIN-LOCK-1 STRICT ADMIN ONLY ===
-# Normal kullanıcı session'ı /admin ve /api/admin alanına giremez.
-# logged_in=True tek başına admin yetkisi sayılmaz.
-try:
-    import json as _eg_al1_json
-    from pathlib import Path as _eg_al1_Path
-    from flask import request as _eg_al1_request
-    from flask import session as _eg_al1_session
-    from flask import redirect as _eg_al1_redirect
-    from flask import abort as _eg_al1_abort
-
-    def _eg_al1_read_users():
-        for raw in ("data/users.json", "users.json"):
-            try:
-                path = _eg_al1_Path(raw)
-                if path.exists():
-                    txt = path.read_text(encoding="utf-8").strip()
-                    if not txt:
-                        return {}
-                    data = _eg_al1_json.loads(txt)
-                    return data if isinstance(data, dict) else {}
-            except Exception:
-                pass
-        return {}
-
-    def _eg_al1_is_real_admin():
-        try:
-            username = str(_eg_al1_session.get("username") or "").strip()
-            role = str(_eg_al1_session.get("role") or "").strip().lower()
-            session_is_admin = _eg_al1_session.get("is_admin") is True
-
-            users = _eg_al1_read_users()
-            user = users.get(username) if username else None
-
-            user_is_admin = False
-            if isinstance(user, dict):
-                user_role = str(user.get("role") or "").strip().lower()
-                user_is_admin = (
-                    user_role == "admin"
-                    or user.get("is_admin") is True
-                    or username.lower() == "admin"
-                )
-
-            # En güvenli kural:
-            # Session admin görünse bile kullanıcı datası admin değilse kabul etme.
-            if username and isinstance(user, dict):
-                return bool(user_is_admin)
-
-            # Kullanıcı datası bulunamazsa:
-            # 1) klasik gerçek admin session kabul edilir.
-            # 2) mobil admin session yalnız doğrulanmış HMAC cookie ile kabul edilir.
-            if username.lower() == "admin" and (role == "admin" or session_is_admin):
-                return True
-
-            if username == "eg_admin_mobile" and role == "admin" and session_is_admin:
-                try:
-                    cookie_ok_fn = globals().get("_ss_admin_cookie_ok_final")
-                    if callable(cookie_ok_fn) and cookie_ok_fn():
-                        return True
-                except Exception:
-                    pass
-
-            return False
-
-        except Exception:
-            return False
-
-    def _eg_al1_strict_admin_gate():
-        try:
-            path = str(getattr(_eg_al1_request, "path", "") or "").rstrip("/")
-            method = str(getattr(_eg_al1_request, "method", "GET") or "GET").upper()
-
-            is_admin_page = path == "/admin" or path.startswith("/admin/")
-            is_admin_api = path == "/api/admin" or path.startswith("/api/admin/")
-
-            if not (is_admin_page or is_admin_api):
-                return None
-
-            if _eg_al1_is_real_admin():
-                return None
-
-            # Normal kullanıcı admin sayfasına girmeye çalışırsa admin session flaglerini temizle.
-            # Kullanıcı oturumu kalsın; sadece admin yetkisi düşsün.
-            for k in ("is_admin", "role", "admin", "admin_ok", "admin_logged_in"):
-                try:
-                    _eg_al1_session.pop(k, None)
-                except Exception:
-                    pass
-
-            if is_admin_api:
-                return _eg_al1_abort(403)
-
-            return _eg_al1_redirect("/dashboard", code=302)
-
-        except Exception:
-            return None
-
-    try:
-        _eg_al1_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg_al1_funcs[:] = [
-            f for f in _eg_al1_funcs
-            if getattr(f, "__name__", "") != "_eg_al1_strict_admin_gate"
-        ]
-        _eg_al1_funcs.insert(0, _eg_al1_strict_admin_gate)
-        print("ERATGUARD ADMIN-LOCK-1 STRICT ADMIN ONLY ACTIVE")
-    except Exception as _eg_al1_insert_err:
-        print("ERATGUARD ADMIN-LOCK-1 INSERT ERROR:", _eg_al1_insert_err)
-
-except Exception as _eg_al1_err:
-    print("ERATGUARD ADMIN-LOCK-1 ERROR:", _eg_al1_err)
-# === /ERATGUARD ADMIN-LOCK-1 STRICT ADMIN ONLY ===
-
-# === ERATGUARD ADMIN-LOCK-2 ADMIN ACCESS SESSION RESET ===
-# Normal kullanıcı oturumu aktifken /ss-admin-access kullanıcı paneline dönmesin.
-# Admin giriş kapısı her zaman admin login akışına izin verir.
-try:
-    import json as _eg_al2_json
-    from pathlib import Path as _eg_al2_Path
-    from flask import request as _eg_al2_request
-    from flask import session as _eg_al2_session
-
-    def _eg_al2_read_users():
-        for raw in ("data/users.json", "users.json"):
-            try:
-                path = _eg_al2_Path(raw)
-                if path.exists():
-                    txt = path.read_text(encoding="utf-8").strip()
-                    if not txt:
-                        return {}
-                    data = _eg_al2_json.loads(txt)
-                    return data if isinstance(data, dict) else {}
-            except Exception:
-                pass
-        return {}
-
-    def _eg_al2_current_is_admin():
-        try:
-            username = str(_eg_al2_session.get("username") or "").strip()
-            if not username:
-                return False
-
-            users = _eg_al2_read_users()
-            user = users.get(username)
-
-            if isinstance(user, dict):
-                return bool(
-                    str(user.get("role") or "").lower() == "admin"
-                    or user.get("is_admin") is True
-                    or username.lower() == "admin"
-                )
-
-            return bool(
-                username.lower() == "admin"
-                and (
-                    str(_eg_al2_session.get("role") or "").lower() == "admin"
-                    or _eg_al2_session.get("is_admin") is True
-                )
-            )
-        except Exception:
-            return False
-
-    def _eg_al2_admin_access_reset_gate():
-        try:
-            path = str(getattr(_eg_al2_request, "path", "") or "").rstrip("/")
-
-            if path != "/ss-admin-access":
-                return None
-
-            # Eğer aktif oturum admin değilse, admin giriş kapısında kullanıcı session'ını temizle.
-            # Böylece testuser /ss-admin-access açınca /dashboard'a geri atılmaz.
-            if not _eg_al2_current_is_admin():
-                for k in (
-                    "logged_in",
-                    "username",
-                    "role",
-                    "is_admin",
-                    "admin",
-                    "admin_ok",
-                    "admin_logged_in"
-                ):
-                    try:
-                        _eg_al2_session.pop(k, None)
-                    except Exception:
-                        pass
-
-            return None
-        except Exception:
-            return None
-
-    try:
-        _eg_al2_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg_al2_funcs[:] = [
-            f for f in _eg_al2_funcs
-            if getattr(f, "__name__", "") != "_eg_al2_admin_access_reset_gate"
-        ]
-        _eg_al2_funcs.insert(0, _eg_al2_admin_access_reset_gate)
-        print("ERATGUARD ADMIN-LOCK-2 ADMIN ACCESS SESSION RESET ACTIVE")
-    except Exception as _eg_al2_insert_err:
-        print("ERATGUARD ADMIN-LOCK-2 INSERT ERROR:", _eg_al2_insert_err)
-
-except Exception as _eg_al2_err:
-    print("ERATGUARD ADMIN-LOCK-2 ERROR:", _eg_al2_err)
-# === /ERATGUARD ADMIN-LOCK-2 ADMIN ACCESS SESSION RESET ===
 
 # === ERATGUARD ADMIN-LOCK-3 FORCE ADMIN ACCESS ROUTE ===
 # /ss-admin-access hiçbir zaman kullanıcı login sayfasına düşmesin.
@@ -18577,551 +16487,6 @@ except Exception as _eg5e_err:
     print("ERATGUARD CORE-5E-FIX-1 OLD NOTIFICATION UI OVERRIDE ERROR:", _eg5e_err)
 # === /ERATGUARD CORE-5E-FIX-1 OLD NOTIFICATION UI OVERRIDE ===
 
-# === ERATGUARD CORE-5E-FIX-1C USER FAN NOTIFICATION FULL OVERRIDE ===
-# Amaç:
-# - /dashboard kullanıcı ekranını sağdan sola açılan 8'li yelpaze menü ile zorlamak.
-# - /u/notifications eski PRO NOTIFICATIONS ekranını tamamen yeni EratGuard UI ile değiştirmek.
-# - /u/notifications/manage koyu EratGuard UI hattında kalacak.
-try:
-    import html as _eg1c_html
-    import json as _eg1c_json
-    from pathlib import Path as _eg1c_Path
-    from flask import request as _eg1c_request, session as _eg1c_session, make_response as _eg1c_make_response
-
-    def _eg1c_user_name():
-        try:
-            return str(
-                _eg1c_session.get("username")
-                or _eg1c_session.get("user")
-                or _eg1c_session.get("email")
-                or "Kullanıcı"
-            ).strip()
-        except Exception:
-            return "Kullanıcı"
-
-    def _eg1c_count_notifications():
-        try:
-            paths = [
-                _eg1c_Path("data/user_notifications.json"),
-                _eg1c_Path("data/notifications.json"),
-                _eg1c_Path("data/admin_notifications.json"),
-            ]
-            total = high = critical = 0
-            for fp in paths:
-                if not fp.exists():
-                    continue
-                raw = fp.read_text(encoding="utf-8", errors="ignore").strip()
-                if not raw:
-                    continue
-                data = _eg1c_json.loads(raw)
-                if isinstance(data, dict):
-                    items = data.get("notifications") or data.get("items") or data.get("data") or []
-                    if isinstance(items, dict):
-                        items = list(items.values())
-                elif isinstance(data, list):
-                    items = data
-                else:
-                    items = []
-                if not isinstance(items, list):
-                    continue
-                total += len(items)
-                for it in items:
-                    if not isinstance(it, dict):
-                        continue
-                    pr = str(it.get("priority") or it.get("level") or it.get("type") or "").lower()
-                    if pr in ("high", "yüksek", "yuksek"):
-                        high += 1
-                    if pr in ("critical", "kritik", "danger", "red"):
-                        critical += 1
-            return total, high, critical
-        except Exception:
-            return 0, 0, 0
-
-    def _eg1c_base_css():
-        return """
-:root{
-  --bg:#020806;
-  --bg2:#03150c;
-  --card:#061d11;
-  --card2:#092817;
-  --line:rgba(35,255,137,.28);
-  --line2:rgba(0,229,255,.24);
-  --green:#23ff89;
-  --cyan:#22e7ff;
-  --yellow:#ffdf35;
-  --text:#f2fff6;
-  --muted:#a8b9ad;
-  --danger:#ff4d5e;
-}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
-body{
-  padding:20px 20px 110px;
-  background:
-    radial-gradient(circle at 80% 0%,rgba(35,255,137,.16),transparent 35%),
-    radial-gradient(circle at 0% 20%,rgba(0,229,255,.08),transparent 30%),
-    linear-gradient(180deg,#020806,#010403 70%);
-}
-a{text-decoration:none;color:inherit}
-.wrap{max-width:760px;margin:0 auto}
-.top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:20px;
-  padding-right:112px;
-}
-.brand{display:flex;align-items:center;gap:14px;min-width:0}
-.logo{
-  width:58px;height:58px;border-radius:20px;
-  display:grid;place-items:center;
-  background:linear-gradient(135deg,#1fffa0,#22e7ff,#8068ff);
-  color:#031008;font-size:30px;font-weight:950;
-  box-shadow:0 0 28px rgba(35,255,137,.18);
-}
-.brand h1{margin:0;font-size:26px;line-height:1;font-weight:950;letter-spacing:-1px}
-.brand h1 span{color:#65ff43}
-.brand p{margin:5px 0 0;color:var(--cyan);font-size:12px;font-weight:950;letter-spacing:.22em}
-.safe-pill{
-  display:inline-flex;align-items:center;gap:7px;
-  height:42px;padding:0 13px;border-radius:999px;
-  border:1px solid var(--line);
-  background:rgba(35,255,137,.08);
-  color:var(--green);font-weight:950;white-space:nowrap;
-}
-.hero{
-  border:1px solid var(--line);
-  border-radius:28px;
-  background:
-    radial-gradient(circle at 85% 0%,rgba(0,229,255,.12),transparent 34%),
-    linear-gradient(180deg,rgba(8,39,23,.96),rgba(2,15,8,.96));
-  padding:26px;
-  box-shadow:0 26px 70px rgba(0,0,0,.45);
-}
-.hero h2{margin:0 0 14px;font-size:36px;line-height:1.05;letter-spacing:-1.5px}
-.hero h2 span{color:var(--green)}
-.hero p{margin:0;color:var(--muted);font-size:18px;line-height:1.45;font-weight:800}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
-.stat{
-  min-height:94px;border-radius:22px;
-  border:1px solid rgba(35,255,137,.20);
-  background:rgba(0,0,0,.28);
-  display:flex;flex-direction:column;justify-content:center;align-items:center;
-}
-.stat b{font-size:30px;color:var(--green);line-height:1}
-.stat span{font-size:13px;color:var(--muted);font-weight:900;margin-top:8px;text-align:center}
-.section{
-  margin:34px 0 16px;
-  font-size:23px;
-  font-weight:950;
-  letter-spacing:.34em;
-}
-.section:after{
-  content:"";display:block;width:150px;height:8px;border-radius:99px;
-  background:linear-gradient(90deg,var(--green),#9cff5f);
-  margin-top:14px;
-}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.card{
-  min-height:146px;
-  border-radius:26px;
-  border:1px solid rgba(35,255,137,.25);
-  background:
-    radial-gradient(circle at 20% 0%,rgba(35,255,137,.10),transparent 45%),
-    linear-gradient(180deg,rgba(7,42,23,.90),rgba(2,18,9,.94));
-  padding:22px;
-  position:relative;
-  overflow:hidden;
-}
-.card .icon{
-  width:54px;height:54px;border-radius:19px;
-  display:grid;place-items:center;
-  background:rgba(35,255,137,.10);
-  border:1px solid rgba(35,255,137,.20);
-  font-size:27px;
-}
-.card .pill{
-  position:absolute;right:18px;top:24px;
-  padding:8px 14px;border-radius:999px;
-  background:rgba(35,255,137,.12);
-  border:1px solid rgba(35,255,137,.28);
-  color:#93ffad;font-weight:950;font-size:14px;
-}
-.card h3{font-size:28px;margin:16px 0 6px;line-height:1}
-.card p{margin:0;color:var(--muted);font-weight:900;font-size:15px}
-.empty{
-  margin-top:20px;
-  min-height:150px;
-  border-radius:28px;
-  border:1px dashed rgba(120,160,200,.28);
-  background:rgba(3,8,18,.70);
-  display:grid;place-items:center;
-  color:#a8b8d0;
-  font-size:20px;
-  font-weight:800;
-  text-align:center;
-  padding:24px;
-}
-.notice-list{display:grid;gap:12px;margin-top:18px}
-.notice{
-  border:1px solid rgba(35,255,137,.22);
-  border-radius:22px;
-  padding:18px;
-  background:rgba(0,0,0,.28);
-}
-.notice b{display:block;font-size:18px}
-.notice span{display:block;color:var(--muted);margin-top:6px;font-weight:800}
-.overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.45);
-  opacity:0;pointer-events:none;transition:.22s;z-index:1998;
-}
-.overlay.open{opacity:1;pointer-events:auto}
-.fan-handle{
-  position:fixed;
-  right:0;
-  top:50%;
-  transform:translateY(-50%);
-  width:52px;
-  height:132px;
-  border:1px solid rgba(35,255,137,.35);
-  border-right:0;
-  border-radius:24px 0 0 24px;
-  background:linear-gradient(180deg,#ffdf35,#23ff89);
-  color:#001a0a;
-  z-index:2001;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-direction:column;
-  font-weight:950;
-  box-shadow:0 20px 48px rgba(0,0,0,.38);
-}
-.fan-handle i{font-style:normal;font-size:28px;line-height:1}
-.fan-handle span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;letter-spacing:.12em}
-.fan{
-  position:fixed;
-  right:-270px;
-  top:50%;
-  width:270px;
-  height:590px;
-  transform:translateY(-50%);
-  z-index:2000;
-  transition:right .28s cubic-bezier(.2,.9,.2,1);
-  pointer-events:none;
-}
-.fan.open{right:0;pointer-events:auto}
-.fan-core{
-  position:absolute;
-  right:14px;
-  top:50%;
-  transform:translateY(-50%);
-  width:92px;height:92px;border-radius:50%;
-  display:grid;place-items:center;text-align:center;
-  color:var(--green);font-size:12px;font-weight:950;line-height:1.08;
-  border:1px solid rgba(35,255,137,.32);
-  background:radial-gradient(circle,rgba(35,255,137,.24),rgba(2,12,7,.96));
-  box-shadow:0 0 38px rgba(35,255,137,.15);
-}
-.fan-core span{display:block;color:var(--cyan);font-size:8px;letter-spacing:.14em;margin-top:3px}
-.fan-item{
-  position:absolute;
-  right:78px;
-  top:50%;
-  width:176px;
-  height:58px;
-  border-radius:18px 0 0 18px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:8px 12px;
-  border:1px solid rgba(35,255,137,.27);
-  background:linear-gradient(90deg,rgba(5,30,17,.98),rgba(12,62,35,.92));
-  box-shadow:0 12px 28px rgba(0,0,0,.32);
-  transform-origin:right center;
-}
-.fan-item:before{content:"";position:absolute;right:0;top:0;bottom:0;width:5px;background:var(--green)}
-.fan-ico{
-  width:38px;height:38px;border-radius:14px;display:grid;place-items:center;
-  background:rgba(35,255,137,.10);border:1px solid rgba(35,255,137,.18);
-  font-size:20px;flex-shrink:0;
-}
-.fan-item strong{display:block;font-size:13px;line-height:1}
-.fan-item small{display:block;color:var(--muted);font-size:10px;font-weight:800;margin-top:3px}
-.fan-item:nth-child(1){transform:translateY(-248px) rotate(-32deg)}
-.fan-item:nth-child(2){transform:translateY(-178px) rotate(-17deg)}
-.fan-item:nth-child(3){transform:translateY(-108px) rotate(-10deg)}
-.fan-item:nth-child(4){transform:translateY(-38px) rotate(-3deg)}
-.fan-item:nth-child(5){transform:translateY(32px) rotate(4deg)}
-.fan-item:nth-child(6){transform:translateY(102px) rotate(11deg)}
-.fan-item:nth-child(7){transform:translateY(172px) rotate(18deg)}
-.fan-item:nth-child(8){transform:translateY(242px) rotate(25deg)}
-.fan-close{
-  position:absolute;right:22px;bottom:8px;
-  width:72px;height:34px;border-radius:999px;border:1px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.08);color:var(--text);font-weight:950;
-}
-@media(max-width:520px){
-  body{padding:18px 20px 100px}
-  .top{padding-right:98px}
-  .brand h1{font-size:25px}
-  .logo{width:56px;height:56px}
-  .safe-pill{display:none}
-  .hero{padding:24px;border-radius:27px}
-  .hero h2{font-size:34px}
-  .hero p{font-size:17px}
-  .stats{grid-template-columns:1fr;gap:12px}
-  .grid{grid-template-columns:1fr 1fr;gap:12px}
-  .card{min-height:150px;padding:21px}
-  .card h3{font-size:27px}
-  .fan{height:560px}
-  .fan-item{width:170px;height:56px}
-}
-"""
-
-    def _eg1c_fan_html():
-        return """
-
-<!-- CLEAN-4: legacy egFanPanel removed -->
-
-"""
-
-    def _eg1c_dashboard_page():
-        # CLEAN-7C: aktif eski dashboard kaldırıldı. FAN-12P ana dashboard.
-        return '''<!doctype html>
-<html lang="tr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>EratGuard PRO - FAN-12P Command Center</title>
-<style>
-:root{--green:#23ff89;--cyan:#22e7ff;--text:#f2fff6;}
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;min-height:100%;overflow:hidden;color:var(--text);font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at 78% 50%,rgba(35,255,137,.18),transparent 34%),radial-gradient(circle at 16% 18%,rgba(34,231,255,.12),transparent 38%),linear-gradient(145deg,#020806,#03100a 55%,#020806);}
-.eg-clean7c-brand{position:fixed;left:24px;top:34px;z-index:1;pointer-events:none;}
-.eg-clean7c-logo{width:70px;height:70px;border-radius:24px;display:grid;place-items:center;margin-bottom:14px;background:linear-gradient(135deg,#23ff89,#22e7ff 58%,#6d7cff);color:#00170b;font-size:42px;font-weight:1000;box-shadow:0 18px 45px rgba(0,0,0,.35),0 0 28px rgba(35,255,137,.16);}
-.eg-clean7c-brand b{display:block;font-size:30px;font-weight:1000;letter-spacing:-1.2px;color:rgba(242,255,246,.96)}
-.eg-clean7c-brand b span{color:#23ff89}
-.eg-clean7c-brand small{display:block;margin-top:8px;font-size:11px;line-height:1.45;font-weight:1000;letter-spacing:.30em;color:#22e7ff;}
-.eg-clean7c-hint{position:fixed;left:24px;bottom:34px;z-index:1;max-width:260px;color:rgba(242,255,246,.46);font-size:12px;line-height:1.5;font-weight:850;pointer-events:none;}
-@media(max-width:420px){.eg-clean7c-brand{left:22px;top:34px}.eg-clean7c-logo{width:64px;height:64px;border-radius:22px;font-size:38px;margin-bottom:12px}.eg-clean7c-brand b{font-size:26px}.eg-clean7c-brand small{font-size:10px}.eg-clean7c-hint{left:22px;bottom:28px;font-size:11px;max-width:220px}}
-
-
-/* ===== ERATGUARD VITES-2A PREMIUM STATUS START ===== */
-.eg-clean7c-status{
-  position:fixed;
-  left:24px;
-  bottom:34px;
-  z-index:1;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  min-height:42px;
-  padding:10px 15px;
-  border-radius:999px;
-  border:1px solid rgba(35,255,137,.24);
-  background:rgba(3,18,10,.58);
-  color:rgba(242,255,246,.90);
-  font-family:Arial,Helvetica,sans-serif;
-  pointer-events:none;
-  box-shadow:0 0 30px rgba(35,255,137,.10), inset 0 0 18px rgba(35,255,137,.04);
-  backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-}
-.eg-clean7c-status .dot{
-  width:10px;
-  height:10px;
-  border-radius:999px;
-  background:#23ff89;
-  box-shadow:0 0 18px rgba(35,255,137,.80);
-}
-.eg-clean7c-status b{
-  font-size:11px;
-  font-weight:1000;
-  letter-spacing:.16em;
-  color:#f2fff6;
-}
-.eg-clean7c-status em{
-  font-style:normal;
-  font-size:10px;
-  font-weight:1000;
-  letter-spacing:.14em;
-  color:#22e7ff;
-}
-@media(max-width:420px){
-  .eg-clean7c-status{
-    left:22px;
-    bottom:28px;
-    padding:9px 12px;
-    gap:8px;
-  }
-  .eg-clean7c-status b{font-size:10px}
-  .eg-clean7c-status em{font-size:9px}
-}
-/* ===== ERATGUARD VITES-2A PREMIUM STATUS END ===== */
-
-</style>
-</head>
-<body>
-  <div class="eg-clean7c-brand">
-    <div class="eg-clean7c-logo">E</div>
-    <b>Erat<span>Guard</span></b>
-    <small>FAN-12P<br>COMMAND CENTER</small>
-  </div>
-  <div class="eg-clean7c-status">
-    <span class="dot"></span>
-    <b>KORUMA AKTİF</b>
-    <em>FAN-12P HAZIR</em>
-  </div>
-</body>
-</html>'''
-
-    def _eg1c_notifications_page():
-        total, high, critical = _eg1c_count_notifications()
-        username = _eg1c_html.escape(_eg1c_user_name())
-        html = f"""<!doctype html>
-<html lang="tr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>EratGuard PRO - Bildirim Komuta Merkezi</title>
-<style>{_eg1c_base_css()}</style>
-</head>
-<body>
-<div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <div class="logo">🔔</div>
-      <div>
-        <h1>Erat<span>Guard</span></h1>
-        <p>NOTIFICATION COMMAND</p>
-      </div>
-    </div>
-    <a class="safe-pill" href="/u/notifications/manage">Ayarlar</a>
-  </header>
-
-  <section class="hero">
-    <h2>Bildirim<br><span>komuta merkezi.</span></h2>
-    <p>Admin duyuruları, güvenlik uyarıları, lisans bilgilendirmeleri ve kritik risk akışı burada görünür. Bu ekran eski PRO NOTIFICATIONS sayfasının yerine zorlandı.</p>
-    <div class="stats">
-      <div class="stat"><b>{total}</b><span>Görünen bildirim</span></div>
-      <div class="stat"><b>{high}</b><span>Yüksek öncelik</span></div>
-      <div class="stat"><b>{critical}</b><span>Kritik uyarı</span></div>
-    </div>
-  </section>
-
-  <div class="section">AKIŞ</div>
-
-  <div class="empty">
-    Henüz gösterilecek bildirim yok.<br>
-    <small style="display:block;margin-top:10px;color:#6f829a;font-size:14px">Yelpaze menü sağ tarafta aktif.</small>
-  </div>
-</div>
-{_eg1c_fan_html()}
-<!-- CORE-5E-FIX-1C NOTIFICATIONS ACTIVE username={username} -->
-</body>
-</html>"""
-        resp = _eg1c_make_response(html)
-        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-        return resp
-
-    def _eg1c_notifications_manage_page():
-        username = _eg1c_html.escape(_eg1c_user_name())
-        html = f"""<!doctype html>
-<html lang="tr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>EratGuard PRO - Bildirim Ayarları</title>
-<style>{_eg1c_base_css()}
-.panel{{margin-top:20px;border:1px solid var(--line);border-radius:28px;background:linear-gradient(180deg,rgba(8,39,23,.96),rgba(2,15,8,.96));padding:20px}}
-.row{{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 0;border-bottom:1px solid rgba(255,255,255,.08)}}
-.row:last-child{{border-bottom:0}}
-.row b{{display:block;font-size:18px}}
-.row span{{display:block;color:var(--muted);font-size:14px;font-weight:800;margin-top:5px}}
-.toggle{{width:62px;height:34px;border-radius:999px;background:linear-gradient(90deg,var(--yellow),var(--green));position:relative;flex-shrink:0}}
-.toggle:after{{content:"";position:absolute;right:4px;top:4px;width:26px;height:26px;border-radius:50%;background:#00180a}}
-.actions{{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}}
-.btn{{height:54px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:950}}
-.primary{{background:linear-gradient(90deg,var(--yellow),var(--green));color:#00180a}}
-.secondary{{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13)}}
-@media(max-width:520px){{.actions{{grid-template-columns:1fr}}}}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <div class="logo">⚙️</div>
-      <div>
-        <h1>Erat<span>Guard</span></h1>
-        <p>NOTIFICATION SETTINGS</p>
-      </div>
-    </div>
-    <a class="safe-pill" href="/u/notifications">Geri</a>
-  </header>
-
-  <section class="hero">
-    <h2>Bildirim<br><span>ayarları.</span></h2>
-    <p>{username} için güvenlik uyarıları, lisans bildirimleri ve sistem duyuruları buradan yönetilir.</p>
-  </section>
-
-  <div class="panel">
-    <div class="row"><div><b>Bildirimler aktif</b><span>Genel EratGuard bildirimleri.</span></div><div class="toggle"></div></div>
-    <div class="row"><div><b>Güvenlik uyarıları</b><span>Risk, karantina, koruma ve analiz olayları.</span></div><div class="toggle"></div></div>
-    <div class="row"><div><b>Lisans bildirimleri</b><span>Aktivasyon, yenileme ve hesap durumu.</span></div><div class="toggle"></div></div>
-    <div class="row"><div><b>Admin duyuruları</b><span>Sistem ve ürün duyuruları.</span></div><div class="toggle"></div></div>
-    <div class="actions">
-      <a class="btn primary" href="/u/notifications?fresh=1">Kaydet</a>
-      <a class="btn secondary" href="/u/eg-panel">Panel</a>
-    </div>
-  </div>
-</div>
-{_eg1c_fan_html()}
-<!-- CORE-5E-FIX-1C NOTIFICATION MANAGE ACTIVE -->
-</body>
-</html>"""
-        resp = _eg1c_make_response(html)
-        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-        return resp
-
-    def _eg1c_user_override_bridge():
-        try:
-            path = str(_eg1c_request.path or "").rstrip("/") or "/"
-            method = str(_eg1c_request.method or "GET").upper()
-            if method != "GET":
-                return None
-
-            if path in ("/dashboard", "/u/dashboard"):
-                return _eg1c_dashboard_page()
-
-            if path == "/u/notifications":
-                return _eg1c_notifications_page()
-
-            if path in (
-                "/u/notifications/manage",
-                "/notifications/manage",
-                "/notification/manage",
-                "/notification-settings",
-                "/notifications/settings",
-            ):
-                return _eg1c_notifications_manage_page()
-
-        except Exception as _eg1c_req_err:
-            print("ERATGUARD CORE-5E-FIX-1C REQUEST ERROR:", _eg1c_req_err)
-        return None
-
-    try:
-        funcs = app.before_request_funcs.setdefault(None, [])
-        if _eg1c_user_override_bridge not in funcs:
-            funcs.insert(0, _eg1c_user_override_bridge)
-        print("ERATGUARD CORE-5E-FIX-1C USER FAN NOTIFICATION FULL OVERRIDE ACTIVE")
-    except Exception as _eg1c_insert_err:
-        print("ERATGUARD CORE-5E-FIX-1C INSERT ERROR:", _eg1c_insert_err)
-
-except Exception as _eg1c_err:
-    print("ERATGUARD CORE-5E-FIX-1C USER FAN NOTIFICATION FULL OVERRIDE ERROR:", _eg1c_err)
-# === /ERATGUARD CORE-5E-FIX-1C USER FAN NOTIFICATION FULL OVERRIDE ===
 
 
 # ===== ERATGUARD USER FAN-3 RIGHT-TO-LEFT MENU START =====
@@ -20114,109 +17479,6 @@ except Exception as e:
 
 
 
-# ===== ERATGUARD CLEAN-7B REAL FAN12P ONLY DASHBOARD START =====
-# /dashboard içinde eski iç dashboard yok. FAN-12P ana dashboard olarak kalır.
-try:
-    def _eg_clean7b_real_fan12p_only_dashboard():
-        return """<!doctype html>
-<html lang="tr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>EratGuard PRO - FAN-12P Command Center</title>
-<style>
-:root{
-  --green:#23ff89;
-  --cyan:#22e7ff;
-  --text:#f2fff6;
-}
-*{box-sizing:border-box}
-html,body{
-  margin:0;
-  width:100%;
-  min-height:100%;
-  overflow:hidden;
-  color:var(--text);
-  font-family:Arial,Helvetica,sans-serif;
-  background:
-    radial-gradient(circle at 78% 50%, rgba(35,255,137,.18), transparent 34%),
-    radial-gradient(circle at 16% 18%, rgba(34,231,255,.12), transparent 38%),
-    linear-gradient(145deg,#020806,#03100a 55%,#020806);
-}
-.eg-clean7b-brand{
-  position:fixed;
-  left:24px;
-  top:34px;
-  z-index:1;
-  pointer-events:none;
-}
-.eg-clean7b-logo{
-  width:70px;
-  height:70px;
-  border-radius:24px;
-  display:grid;
-  place-items:center;
-  margin-bottom:14px;
-  background:linear-gradient(135deg,#23ff89,#22e7ff 58%,#6d7cff);
-  color:#00170b;
-  font-size:42px;
-  font-weight:1000;
-  box-shadow:0 18px 45px rgba(0,0,0,.35),0 0 28px rgba(35,255,137,.16);
-}
-.eg-clean7b-brand b{
-  display:block;
-  font-size:30px;
-  font-weight:1000;
-  letter-spacing:-1.2px;
-  color:rgba(242,255,246,.96);
-}
-.eg-clean7b-brand b span{color:#23ff89}
-.eg-clean7b-brand small{
-  display:block;
-  margin-top:8px;
-  font-size:11px;
-  line-height:1.45;
-  font-weight:1000;
-  letter-spacing:.30em;
-  color:#22e7ff;
-}
-.eg-clean7b-hint{
-  position:fixed;
-  left:24px;
-  bottom:34px;
-  z-index:1;
-  max-width:260px;
-  color:rgba(242,255,246,.46);
-  font-size:12px;
-  line-height:1.5;
-  font-weight:850;
-  pointer-events:none;
-}
-@media(max-width:420px){
-  .eg-clean7b-brand{left:22px;top:34px}
-  .eg-clean7b-logo{width:64px;height:64px;border-radius:22px;font-size:38px;margin-bottom:12px}
-  .eg-clean7b-brand b{font-size:26px}
-  .eg-clean7b-brand small{font-size:10px}
-  .eg-clean7b-hint{left:22px;bottom:28px;font-size:11px;max-width:220px}
-}
-</style>
-</head>
-<body>
-  <div class="eg-clean7b-brand">
-    <div class="eg-clean7b-logo">E</div>
-    <b>Erat<span>Guard</span></b>
-    <small>FAN-12P<br>COMMAND CENTER</small>
-  </div>
-  <div class="eg-clean7b-hint">Sağdaki E MENÜ ile Koruma, Analiz, Rapor, Bildirim, Lisans, Topluluk ve Ayarlar bölümlerini aç.</div>
-</body>
-</html>"""
-
-    if "ss_user_alias_home_final" in app.view_functions:
-        app.view_functions["ss_user_alias_home_final"] = _eg_clean7b_real_fan12p_only_dashboard
-
-except Exception as e:
-    print("ERATGUARD CLEAN-7B REAL FAN12P ONLY DASHBOARD ERROR:", e)
-# ===== ERATGUARD CLEAN-7B REAL FAN12P ONLY DASHBOARD END =====
 
 
 
@@ -25539,11 +22801,629 @@ except Exception as _eg_price_error:
     print("ERATGUARD PRICING BILLING V26 ERROR:", _eg_price_error)
 # ERATGUARD_PRICING_BILLING_V26_END
 
+# =====================================================================
+# ERATGUARD_CANONICAL_LICENSE_ACTIVATION_LOCK_V1
+# /u/license POST -> canonical one-time license validator
+# GET/UI/pricing/admin/radial behavior untouched.
+# =====================================================================
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
-# ===== ERATGUARD APP RUN FINAL END =====
+def _eg_canonical_license_activation_lock_v1():
+    try:
+        if request.path != "/u/license":
+            return None
+
+        if str(request.method).upper() != "POST":
+            return None
+
+        return _eg_final_one_time_user_license()
+
+    except Exception as _eg_clal1_error:
+        print(
+            "ERATGUARD CANONICAL LICENSE ACTIVATION LOCK V1 ERROR:",
+            repr(_eg_clal1_error),
+            flush=True
+        )
+        return None
+
+
+try:
+    _eg_clal1_hooks = app.before_request_funcs.setdefault(None, [])
+
+    _eg_clal1_hooks[:] = [
+        fn for fn in _eg_clal1_hooks
+        if getattr(fn, "__name__", "")
+        != "_eg_canonical_license_activation_lock_v1"
+    ]
+
+    _eg_clal1_hooks.insert(
+        0,
+        _eg_canonical_license_activation_lock_v1
+    )
+
+    print(
+        "ERATGUARD CANONICAL LICENSE ACTIVATION LOCK V1 ACTIVE: "
+        "/u/license POST -> _eg_final_one_time_user_license"
+    )
+
+except Exception as _eg_clal1_register_error:
+    print(
+        "ERATGUARD CANONICAL LICENSE ACTIVATION LOCK V1 REGISTER ERROR:",
+        repr(_eg_clal1_register_error),
+        flush=True
+    )
+
+
+
+
+
+# =====================================================================
+# ERATGUARD_CANONICAL_COMMERCIAL_MODEL_V1
+# Phase 5B - single canonical plan / price / duration vocabulary.
+#
+# This layer is intentionally PURE:
+# - no file writes
+# - no user mutation
+# - no payment mutation
+# - no license mutation
+#
+# Mutation paths will consume this model in later gated phases.
+# =====================================================================
+
+ERATGUARD_CANONICAL_PLANS_V1 = {
+    "starter_monthly": {
+        "key": "starter_monthly",
+        "label": "Starter Shield",
+        "price_try": 299,
+        "price_text": "299 TL / ay",
+        "billing_period": "monthly",
+        "duration_days": 30,
+        "license_type": "pro",
+        "expires_mode": "days",
+    },
+
+    "pro_yearly": {
+        "key": "pro_yearly",
+        "label": "Shield Pro+",
+        "price_try": 2500,
+        "price_text": "2500 TL / yıl",
+        "billing_period": "yearly",
+        "duration_days": 365,
+        "license_type": "pro",
+        "expires_mode": "days",
+    },
+
+    "lifetime": {
+        "key": "lifetime",
+        "label": "Lifetime Shield",
+        "price_try": 5000,
+        "price_text": "5000 TL",
+        "billing_period": "lifetime",
+        "duration_days": None,
+        "license_type": "lifetime",
+        "expires_mode": "lifetime",
+        "expires_at": "2099-12-31",
+    },
+}
+
+
+ERATGUARD_CANONICAL_PLAN_ALIASES_V1 = {
+    "starter_monthly": "starter_monthly",
+    "starter": "starter_monthly",
+    "monthly": "starter_monthly",
+    "pro_monthly": "starter_monthly",
+    "aylik": "starter_monthly",
+
+    "pro_yearly": "pro_yearly",
+    "yearly": "pro_yearly",
+    "annual": "pro_yearly",
+    "pro": "pro_yearly",
+    "premium": "pro_yearly",
+    "yillik": "pro_yearly",
+
+    "lifetime": "lifetime",
+    "lifetime_shield": "lifetime",
+    "omurluk": "lifetime",
+}
+
+
+def _eg_canonical_plan_key_v1(plan):
+    raw = str(plan or "").strip().lower()
+
+    if not raw:
+        return "pro_yearly"
+
+    return ERATGUARD_CANONICAL_PLAN_ALIASES_V1.get(
+        raw,
+        "pro_yearly"
+    )
+
+
+def _eg_canonical_plan_v1(plan):
+    key = _eg_canonical_plan_key_v1(plan)
+
+    data = ERATGUARD_CANONICAL_PLANS_V1.get(
+        key,
+        ERATGUARD_CANONICAL_PLANS_V1["pro_yearly"]
+    )
+
+    return dict(data)
+
+
+def _eg_canonical_plan_expiry_v1(plan, now=None):
+    from datetime import datetime as _eg_ccm_datetime
+    from datetime import timedelta as _eg_ccm_timedelta
+
+    info = _eg_canonical_plan_v1(plan)
+
+    if info.get("expires_mode") == "lifetime":
+        return "2099-12-31"
+
+    days = int(info.get("duration_days") or 365)
+
+    base = now or _eg_ccm_datetime.now()
+
+    if hasattr(base, "date"):
+        base_date = base.date()
+    else:
+        base_date = base
+
+    return (
+        base_date + _eg_ccm_timedelta(days=days)
+    ).isoformat()
+
+
+def _eg_canonical_plan_public_v1(plan):
+    info = _eg_canonical_plan_v1(plan)
+
+    return {
+        "key": info["key"],
+        "label": info["label"],
+        "price": info["price_text"],
+        "price_try": info["price_try"],
+        "billing_period": info["billing_period"],
+        "duration_days": info["duration_days"],
+        "license_type": info["license_type"],
+    }
+
+# ===== ERATGUARD CANONICAL COMMERCIAL FLOW V1 START =====
+# Phase 5C
+# Canonical plan model -> checkout -> payment request -> admin approval
+# -> one-time activation metadata preservation.
+#
+# Existing data is NOT migrated here.
+
+def _eg_canonical_payment_plan_v1(raw_plan):
+    """
+    Normalize a commercial plan through the Phase 5B canonical model.
+    """
+    return _eg_canonical_plan_key_v1(raw_plan)
+
+
+def _eg_canonical_payment_snapshot_v1(raw_plan):
+    """
+    Stable commercial snapshot stored with a NEW payment request.
+    """
+    info = _eg_canonical_plan_v1(raw_plan)
+
+    return {
+        "plan": info["key"],
+        "plan_key": info["key"],
+        "plan_label": info["label"],
+        "plan_price": info["price_text"],
+        "plan_price_try": info["price_try"],
+        "billing_period": info["billing_period"],
+        "duration_days": info["duration_days"],
+        "license_type": info["license_type"],
+    }
+
+
+def _eg_canonical_payment_request_plan_v1(item):
+    """
+    Resolve plan from an existing payment request.
+
+    Unknown legacy/test plan values intentionally fall through the
+    Phase 5B canonical default (pro_yearly). No data migration occurs.
+    """
+    if not isinstance(item, dict):
+        item = {}
+
+    raw = (
+        item.get("plan_key")
+        or item.get("plan")
+        or "pro_yearly"
+    )
+
+    return _eg_canonical_plan_key_v1(raw)
+
+
+def _eg_canonical_apply_plan_to_user_v1(user, raw_plan, now=None):
+    """
+    Apply canonical commercial entitlement to a user record.
+    """
+    if not isinstance(user, dict):
+        user = {}
+
+    info = _eg_canonical_plan_v1(raw_plan)
+    expiry = _eg_canonical_plan_expiry_v1(info["key"], now=now)
+
+    user["active"] = True
+    user["plan"] = info["key"]
+    user["license_type"] = info["license_type"]
+    user["expires_at"] = expiry
+    user["license_expiry"] = expiry
+
+    return user
+
+
+def _eg_canonical_find_payment_license_v1(license_key, username=None):
+    """
+    Read-only lookup of an approved payment request by license key.
+    """
+    wanted = _eg_norm_license_key(license_key)
+
+    if not wanted:
+        return None
+
+    try:
+        items = _eg_load_payment_requests()
+    except Exception:
+        return None
+
+    if not isinstance(items, list):
+        return None
+
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+
+        item_key = _eg_norm_license_key(item.get("license_key"))
+
+        if item_key != wanted:
+            continue
+
+        item_user = str(item.get("username", "") or "").strip()
+
+        if username and item_user and item_user != str(username).strip():
+            continue
+
+        status = str(item.get("status", "") or "").lower()
+
+        if "approved" not in status:
+            continue
+
+        return item
+
+    return None
+
+
+# ------------------------------------------------------------------
+# Canonical checkout
+# ------------------------------------------------------------------
+
+def _eg_canonical_user_checkout_v1():
+    if not login_required():
+        return redirect(url_for("login"))
+
+    from datetime import datetime
+
+    username = session.get("username", "user")
+
+    raw_plan = request.values.get("plan", "pro_yearly")
+    plan_key = _eg_canonical_payment_plan_v1(raw_plan)
+    info = _eg_canonical_plan_v1(plan_key)
+
+    period_labels = {
+        "monthly": "Aylık",
+        "yearly": "Yıllık",
+        "lifetime": "Tek sefer",
+    }
+
+    plan_period = period_labels.get(
+        info.get("billing_period"),
+        str(info.get("billing_period") or "")
+    )
+
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip()
+        note = (request.form.get("note") or "").strip()
+        payment_method = (
+            request.form.get("payment_method")
+            or "manual_transfer"
+        ).strip()
+
+        requests_data = _eg_load_payment_requests()
+
+        if not isinstance(requests_data, list):
+            requests_data = []
+
+        order_no = _eg_next_order_no()
+        snapshot = _eg_canonical_payment_snapshot_v1(plan_key)
+
+        item = {
+            "order_no": order_no,
+            "created_at": datetime.now().isoformat(timespec="seconds"),
+            "username": username,
+            "email": email,
+
+            "plan": snapshot["plan"],
+            "plan_key": snapshot["plan_key"],
+            "plan_label": snapshot["plan_label"],
+            "plan_period": plan_period,
+            "plan_price": snapshot["plan_price"],
+            "plan_price_try": snapshot["plan_price_try"],
+            "billing_period": snapshot["billing_period"],
+            "duration_days": snapshot["duration_days"],
+            "license_type": snapshot["license_type"],
+
+            "payment_method": payment_method,
+            "provider": "manual_license_review",
+            "status": "payment_waiting",
+            "note": note,
+            "admin_note": "",
+            "license_key": "",
+        }
+
+        requests_data.append(item)
+        _eg_save_payment_requests(requests_data)
+
+        return redirect(
+            url_for(
+                "user_payment_success",
+                order_no=order_no
+            )
+        )
+
+    return render_template(
+        "checkout.html",
+        plan=plan_key,
+        plan_label=info["label"],
+        plan_period=plan_period,
+        plan_price=info["price_text"],
+        payment_provider="manual_license_review",
+        payment_ready=True,
+        message=(
+            "EratGuard lisans talebi oluşturun. "
+            "Talebiniz için benzersiz sipariş numarası üretilecek "
+            "ve ödeme onayı sonrası lisansınız hesabınıza "
+            "tanımlanacaktır."
+        )
+    )
+
+
+# ------------------------------------------------------------------
+# Canonical admin payment approval
+# ------------------------------------------------------------------
+
+def _eg_canonical_admin_approve_license_request_v1(order_no):
+    if not _eg_admin_request_ok():
+        return redirect("/admin/login")
+
+    requests_data = _eg_load_payment_requests()
+    users = load_users()
+
+    if not isinstance(requests_data, list):
+        requests_data = []
+
+    if not isinstance(users, dict):
+        users = {}
+
+    changed = False
+    approved_license = ""
+    approved_username = ""
+    approved_plan = ""
+
+    for item in requests_data:
+        if not isinstance(item, dict):
+            continue
+
+        if str(item.get("order_no", "")) != str(order_no):
+            continue
+
+        username = str(item.get("username", "") or "").strip()
+
+        if not username:
+            continue
+
+        user = users.get(username, {})
+
+        if not isinstance(user, dict):
+            user = {}
+
+        license_key = str(
+            item.get("license_key", "") or ""
+        ).strip().upper()
+
+        if not license_key:
+            license_key = generate_unique_license_key(users)
+
+        plan_key = _eg_canonical_payment_request_plan_v1(item)
+        info = _eg_canonical_plan_v1(plan_key)
+
+        user["license_key"] = license_key
+        _eg_canonical_apply_plan_to_user_v1(
+            user,
+            plan_key
+        )
+
+        users[username] = user
+
+        # Preserve the commercial snapshot on approval as well.
+        item["plan"] = plan_key
+        item["plan_key"] = plan_key
+        item["plan_label"] = info["label"]
+        item["plan_price"] = info["price_text"]
+        item["plan_price_try"] = info["price_try"]
+        item["billing_period"] = info["billing_period"]
+        item["duration_days"] = info["duration_days"]
+        item["license_type"] = info["license_type"]
+        item["expires_at"] = user["expires_at"]
+        item["license_expiry"] = user["license_expiry"]
+
+        item["status"] = "approved_license_assigned"
+        item["license_key"] = license_key
+        item["admin_note"] = (
+            "Admin onayıyla canonical lisans "
+            "kullanıcı hesabına tanımlandı."
+        )
+
+        changed = True
+        approved_license = license_key
+        approved_username = username
+        approved_plan = plan_key
+        break
+
+    if changed:
+        save_users(users)
+        _eg_save_payment_requests(requests_data)
+
+        try:
+            _eg_audit_log(
+                "admin_payment_request_approved",
+                approved_username,
+                {
+                    "order_no": order_no,
+                    "license_key": approved_license,
+                    "plan": approved_plan,
+                },
+                "info"
+            )
+        except Exception as e:
+            print(
+                "CANONICAL_ADMIN_PAYMENT_APPROVE_AUDIT_WARN:",
+                repr(e),
+                flush=True
+            )
+
+    return redirect("/admin/payment-requests")
+
+
+# ------------------------------------------------------------------
+# Canonical activation wrapper
+#
+# The existing validator owns the one-time-use lock.
+# We capture approved payment metadata before activation and restore
+# the canonical commercial entitlement after the legacy function
+# completes successfully.
+# ------------------------------------------------------------------
+
+_eg_phase5c_original_one_time_user_license_v1 = (
+    _eg_final_one_time_user_license
+)
+
+
+def _eg_canonical_one_time_user_license_v1():
+    if not login_required():
+        return redirect(url_for("login"))
+
+    username = session.get("username", "user")
+
+    payment_item = None
+    license_key = ""
+
+    if request.method == "POST":
+        license_key = _eg_norm_license_key(
+            request.form.get("license_key")
+        )
+
+        payment_item = _eg_canonical_find_payment_license_v1(
+            license_key,
+            username
+        )
+
+    response = _eg_phase5c_original_one_time_user_license_v1()
+
+    # Only restore metadata when this key belongs to an approved
+    # commercial payment request.
+    if request.method == "POST" and payment_item:
+        try:
+            users = load_users()
+
+            if isinstance(users, dict):
+                user = users.get(username, {})
+
+                if not isinstance(user, dict):
+                    user = {}
+
+                # Successful legacy activation writes this key into
+                # the user record. This is our success gate.
+                current_key = _eg_norm_license_key(
+                    user.get("license_key")
+                )
+
+                if current_key == license_key:
+                    plan_key = (
+                        _eg_canonical_payment_request_plan_v1(
+                            payment_item
+                        )
+                    )
+
+                    user["license_key"] = license_key
+
+                    _eg_canonical_apply_plan_to_user_v1(
+                        user,
+                        plan_key
+                    )
+
+                    users[username] = user
+                    save_users(users)
+
+        except Exception as e:
+            print(
+                "ERATGUARD CANONICAL ACTIVATION METADATA WARN:",
+                repr(e),
+                flush=True
+            )
+
+    return response
+
+
+# ------------------------------------------------------------------
+# Runtime bindings
+# ------------------------------------------------------------------
+
+try:
+    # Endpoint replacement avoids adding duplicate Flask routes.
+    if "user_checkout" in app.view_functions:
+        app.view_functions["user_checkout"] = (
+            _eg_canonical_user_checkout_v1
+        )
+
+    if "eg_admin_approve_license_request" in app.view_functions:
+        app.view_functions[
+            "eg_admin_approve_license_request"
+        ] = _eg_canonical_admin_approve_license_request_v1
+
+    # Direct symbol replacement is needed because the Phase 4
+    # before_request lock calls this global function by name.
+    _eg_final_one_time_user_license = (
+        _eg_canonical_one_time_user_license_v1
+    )
+
+    print(
+        "ERATGUARD CANONICAL COMMERCIAL FLOW V1 ACTIVE: "
+        "checkout -> payment -> approval -> activation"
+    )
+
+except Exception as _eg_ccfv1_error:
+    print(
+        "ERATGUARD CANONICAL COMMERCIAL FLOW V1 ERROR:",
+        repr(_eg_ccfv1_error),
+        flush=True
+    )
+
+# ===== ERATGUARD CANONICAL COMMERCIAL FLOW V1 END =====
+
+
+
+print(
+    "ERATGUARD CANONICAL COMMERCIAL MODEL V1 ACTIVE: "
+    "starter_monthly=299TL/30d, "
+    "pro_yearly=2500TL/365d, "
+    "lifetime=5000TL"
+)
+
+
+# ===== ERATGUARD APP RUN MOVED TO TRUE EOF BY PHASE 7D.18A =====
 
 
 # ===== ERATGUARD STAGE6J SAFE ADMIN AUTH DEBUG START =====
@@ -25583,281 +23463,7 @@ except Exception as _eg6j_debug_err:
 # ERATGUARD CLEANUP: duplicate STAGE6J debug block removed
 
 
-# ===== ERATGUARD STAGE6K FORCE SLIM ADMIN UI INJECT START =====
-try:
-    from flask import request as _eg6k_request
-    from flask import make_response as _eg6k_make_response
 
-    _EG6K_SLIM_ADMIN_CSS = r'''
-<style id="eratguard-admin-command-tree-slim-6k-force">
-@media (max-width:760px){
-  html,body{overflow-x:hidden!important}
-  body{font-size:14px!important;padding-bottom:92px!important}
-
-  main,
-  .eg-admin-shell,
-  .eg-command-shell,
-  .admin-shell,
-  .dashboard-shell{
-    padding-left:14px!important;
-    padding-right:14px!important;
-  }
-
-  section,
-  .hero,
-  .eg-hero,
-  .command-hero,
-  .admin-hero{
-    margin-bottom:14px!important;
-  }
-
-  .card,
-  .panel,
-  .eg-card,
-  .tree-card,
-  .stat-card,
-  .detail-card,
-  .command-card,
-  .admin-card,
-  [class*="card"],
-  [class*="panel"]{
-    border-radius:22px!important;
-    padding:16px!important;
-    margin-bottom:14px!important;
-    min-height:auto!important;
-  }
-
-  h1,
-  .title,
-  .hero-title,
-  .command-title{
-    font-size:38px!important;
-    line-height:1.02!important;
-    letter-spacing:-.045em!important;
-    margin-bottom:10px!important;
-  }
-
-  h2,
-  .section-title,
-  .tree-title{
-    font-size:28px!important;
-    line-height:1.08!important;
-  }
-
-  h3,
-  .card-title,
-  .node-title{
-    font-size:22px!important;
-    line-height:1.12!important;
-  }
-
-  p,
-  .subtitle,
-  .muted,
-  .desc,
-  .card-desc{
-    font-size:15px!important;
-    line-height:1.38!important;
-  }
-
-  .badge,
-  .chip,
-  .pill{
-    padding:7px 11px!important;
-    font-size:12.8px!important;
-    border-radius:999px!important;
-    margin:4px 0!important;
-  }
-
-  .stat-card,
-  .metric-card{
-    padding:16px!important;
-    min-height:130px!important;
-  }
-
-  .stat-card .value,
-  .metric-value,
-  .big-number{
-    font-size:38px!important;
-    line-height:1!important;
-  }
-
-  .node,
-  .tree-node,
-  .user-row,
-  .license-row,
-  .payment-row{
-    padding:12px!important;
-    border-radius:18px!important;
-    min-height:auto!important;
-  }
-
-  .node-icon,
-  .card-icon,
-  .user-avatar,
-  .avatar{
-    width:52px!important;
-    height:52px!important;
-    min-width:52px!important;
-    border-radius:17px!important;
-    font-size:27px!important;
-  }
-
-  .detail-panel,
-  .selected-detail,
-  .detail-card{
-    padding:16px!important;
-  }
-
-  .detail-grid,
-  .action-grid{
-    gap:10px!important;
-  }
-
-  .action-card,
-  .quick-action,
-  .module-card{
-    padding:14px!important;
-    border-radius:18px!important;
-    min-height:105px!important;
-  }
-
-  .bottom-nav,
-  .tabbar,
-  .mobile-nav,
-  .admin-bottom-nav{
-    left:12px!important;
-    right:12px!important;
-    bottom:10px!important;
-    height:68px!important;
-    border-radius:22px!important;
-    overflow:hidden!important;
-  }
-
-  .bottom-nav a,
-  .tabbar a,
-  .mobile-nav a,
-  .admin-bottom-nav a,
-  .nav-item{
-    min-height:68px!important;
-    padding:7px 5px!important;
-    font-size:13px!important;
-  }
-
-  .search,
-  .search-box,
-  input[type="search"]{
-    height:52px!important;
-    border-radius:18px!important;
-    font-size:17px!important;
-    padding:0 16px!important;
-  }
-
-  .admin-header,
-  .topbar,
-  .header{
-    min-height:72px!important;
-    padding:12px 16px!important;
-  }
-
-  .logout,
-  .logout-btn,
-  .btn-logout{
-    min-height:50px!important;
-    padding:10px 18px!important;
-    border-radius:17px!important;
-    font-size:17px!important;
-  }
-}
-</style>
-'''
-
-    @app.after_request
-    def _eg6k_force_slim_admin_ui(resp):
-        try:
-            path = str(getattr(_eg6k_request, "path", "") or "")
-            ctype = str(resp.headers.get("Content-Type", "") or "")
-
-            if path not in ("/admin", "/admin/", "/admin/dashboard"):
-                return resp
-
-            if "text/html" not in ctype.lower():
-                return resp
-
-            body = resp.get_data(as_text=True)
-
-            if "eratguard-admin-command-tree-slim-6k-force" in body:
-                return resp
-
-            if "</head>" in body:
-                body = body.replace("</head>", _EG6K_SLIM_ADMIN_CSS + "\n</head>", 1)
-            elif "</body>" in body:
-                body = body.replace("</body>", _EG6K_SLIM_ADMIN_CSS + "\n</body>", 1)
-            else:
-                body += _EG6K_SLIM_ADMIN_CSS
-
-            resp.set_data(body)
-            resp.headers["Content-Length"] = str(len(resp.get_data()))
-            resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-            return resp
-        except Exception as _eg6k_err:
-            print("ERATGUARD STAGE6K FORCE SLIM INJECT ERROR:", _eg6k_err)
-            return resp
-
-    print("ERATGUARD STAGE6K FORCE SLIM ADMIN UI INJECT ACTIVE")
-except Exception as _eg6k_boot_err:
-    print("ERATGUARD STAGE6K FORCE SLIM ADMIN UI INJECT BOOT ERROR:", _eg6k_boot_err)
-# ===== ERATGUARD STAGE6K FORCE SLIM ADMIN UI INJECT END =====
-
-# ===== ERATGUARD STAGE6K ADMIN COOKIE SESSION HYDRATE START =====
-# Amaç:
-# - /ss-admin-access başarılı girişte ss_admin_mobile cookie üretir.
-# - Bazı WebView/curl akışlarında Flask session gate'e yetişmeyebilir.
-# - Bu erken before_request, cookie doğruysa session'ı yeniden admin olarak hydrate eder.
-try:
-    from flask import request as _eg6k8_request
-    from flask import session as _eg6k8_session
-
-    def _eg6k8_hydrate_admin_session_from_cookie():
-        try:
-            path = str(getattr(_eg6k8_request, "path", "") or "")
-
-            if not (path == "/admin" or path == "/admin/" or path.startswith("/admin/")):
-                return None
-
-            mobile_cookie = str(_eg6k8_request.cookies.get("ss_admin_mobile") or "").strip()
-            if not mobile_cookie:
-                return None
-
-            token_func = globals().get("_ss_admin_cookie_token_final")
-            expected = str(token_func() if callable(token_func) else "").strip()
-
-            if expected and mobile_cookie == expected:
-                _eg6k8_session["logged_in"] = True
-                _eg6k8_session["username"] = str(_eg6k8_session.get("username") or "eg_admin_mobile")
-                _eg6k8_session["role"] = "admin"
-                _eg6k8_session["is_admin"] = True
-                return None
-
-            return None
-        except Exception as _eg6k8_err:
-            print("ERATGUARD STAGE6K COOKIE SESSION HYDRATE ERROR:", _eg6k8_err)
-            return None
-
-    try:
-        _eg6k8_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg6k8_funcs[:] = [
-            f for f in _eg6k8_funcs
-            if getattr(f, "__name__", "") != "_eg6k8_hydrate_admin_session_from_cookie"
-        ]
-        _eg6k8_funcs.insert(0, _eg6k8_hydrate_admin_session_from_cookie)
-        print("ERATGUARD STAGE6K ADMIN COOKIE SESSION HYDRATE ACTIVE")
-    except Exception as _eg6k8_insert_err:
-        print("ERATGUARD STAGE6K COOKIE SESSION HYDRATE INSERT ERROR:", _eg6k8_insert_err)
-
-except Exception as _eg6k8_boot_err:
-    print("ERATGUARD STAGE6K ADMIN COOKIE SESSION HYDRATE BOOT ERROR:", _eg6k8_boot_err)
-# ===== ERATGUARD STAGE6K ADMIN COOKIE SESSION HYDRATE END =====
 
 # ===== ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE START =====
 # SECURITY RETIRED:
@@ -25874,482 +23480,6 @@ except Exception as _eg6k8_boot_err:
 # STAGE6K8 doğrulamalı token mekanizmasına bırakılmıştır.
 # ===== ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE END =====
 
-# ===== ERATGUARD STAGE6K15 ULTRA SLIM ADMIN FIT MODE START =====
-try:
-    from flask import request as _eg6k15_request
-
-    _EG6K15_ULTRA_SLIM_CSS = r'''
-<style id="eratguard-admin-ultra-slim-fit-6k15">
-@media (max-width:760px){
-
-  html,body{
-    overflow-x:hidden!important;
-  }
-
-  body{
-    font-size:13px!important;
-    padding-bottom:104px!important;
-  }
-
-  /* Genel dış boşluğu azalt */
-  main,
-  .eg-admin-shell,
-  .eg-command-shell,
-  .admin-shell,
-  .dashboard-shell,
-  .wrap,
-  .container{
-    padding-left:12px!important;
-    padding-right:12px!important;
-  }
-
-  /* Üst header daha kısa */
-  .admin-header,
-  .topbar,
-  .header{
-    min-height:68px!important;
-    padding:10px 16px!important;
-  }
-
-  .admin-header h1,
-  .topbar h1,
-  .header h1{
-    font-size:28px!important;
-  }
-
-  .logout,
-  .logout-btn,
-  .btn-logout,
-  a[href*="logout"]{
-    min-height:50px!important;
-    padding:9px 16px!important;
-    border-radius:16px!important;
-    font-size:17px!important;
-  }
-
-  /* Hero kartı incelt */
-  .hero,
-  .eg-hero,
-  .command-hero,
-  .admin-hero,
-  [class*="hero"]{
-    padding:24px 20px!important;
-    margin-bottom:12px!important;
-    border-radius:24px!important;
-    min-height:auto!important;
-  }
-
-  .kicker,
-  .eyebrow{
-    font-size:13px!important;
-    letter-spacing:.36em!important;
-    line-height:1.25!important;
-    margin-bottom:12px!important;
-  }
-
-  h1,
-  .title,
-  .hero-title,
-  .command-title{
-    font-size:34px!important;
-    line-height:1.02!important;
-    letter-spacing:-.05em!important;
-    margin:0 0 12px!important;
-  }
-
-  .hero p,
-  .eg-hero p,
-  .command-hero p,
-  .admin-hero p,
-  .subtitle,
-  .desc{
-    font-size:17px!important;
-    line-height:1.36!important;
-    margin-bottom:14px!important;
-  }
-
-  .badge,
-  .chip,
-  .pill{
-    padding:7px 11px!important;
-    font-size:12.8px!important;
-    line-height:1.15!important;
-    margin:4px 0!important;
-    min-height:auto!important;
-  }
-
-  /* Metrik kartları kompakt */
-  .stats-grid,
-  .metric-grid,
-  .eg-stats,
-  .admin-stats{
-    display:grid!important;
-    grid-template-columns:1fr 1fr!important;
-    gap:10px!important;
-    margin-bottom:12px!important;
-  }
-
-  .stat-card,
-  .metric-card,
-  [class*="stat"],
-  [class*="metric"]{
-    padding:14px!important;
-    min-height:116px!important;
-    border-radius:20px!important;
-    margin-bottom:0!important;
-  }
-
-  .stat-card .icon,
-  .metric-card .icon,
-  .stat-card i,
-  .metric-card i{
-    width:50px!important;
-    height:50px!important;
-    min-width:50px!important;
-    border-radius:16px!important;
-    font-size:25px!important;
-    margin-bottom:10px!important;
-  }
-
-  .stat-card span,
-  .metric-card span{
-    font-size:11px!important;
-    line-height:1.15!important;
-  }
-
-  .stat-card b,
-  .metric-card b,
-  .stat-card .value,
-  .metric-value,
-  .big-number{
-    font-size:34px!important;
-    line-height:.95!important;
-  }
-
-  .stat-card small,
-  .metric-card small{
-    font-size:12.8px!important;
-    line-height:1.2!important;
-  }
-
-  /* Root / tree kartı sıkılaştır */
-  .card,
-  .panel,
-  .eg-card,
-  .tree-card,
-  .command-card,
-  .admin-card,
-  [class*="card"],
-  [class*="panel"]{
-    padding:14px!important;
-    border-radius:20px!important;
-    margin-bottom:12px!important;
-    min-height:auto!important;
-  }
-
-  h2,
-  .section-title,
-  .tree-title{
-    font-size:26px!important;
-    line-height:1.05!important;
-    margin-bottom:10px!important;
-  }
-
-  h3,
-  .card-title,
-  .node-title{
-    font-size:21px!important;
-    line-height:1.08!important;
-  }
-
-  p,
-  .muted,
-  .card-desc{
-    font-size:14px!important;
-    line-height:1.32!important;
-  }
-
-  .search,
-  .search-box,
-  input[type="search"]{
-    height:48px!important;
-    border-radius:17px!important;
-    font-size:15px!important;
-    padding:0 14px!important;
-    margin-bottom:12px!important;
-  }
-
-  /* Tree node satırları */
-  .tree,
-  .command-tree,
-  .node-list,
-  .users-list{
-    gap:9px!important;
-  }
-
-  .node,
-  .tree-node,
-  .user-row,
-  .license-row,
-  .payment-row,
-  [class*="node"],
-  [class*="row"]{
-    padding:10px 12px!important;
-    border-radius:16px!important;
-    min-height:auto!important;
-  }
-
-  .node-icon,
-  .card-icon,
-  .user-avatar,
-  .avatar{
-    width:46px!important;
-    height:50px!important;
-    min-width:46px!important;
-    border-radius:15px!important;
-    font-size:24px!important;
-  }
-
-  .user-row b,
-  .node b,
-  .tree-node b{
-    font-size:21px!important;
-    line-height:1.05!important;
-  }
-
-  .user-row span,
-  .node span,
-  .tree-node span{
-    font-size:13px!important;
-    line-height:1.2!important;
-  }
-
-  /* Detay panelini kısalt */
-  .detail-panel,
-  .selected-detail,
-  .detail-card,
-  [class*="detail"]{
-    padding:14px!important;
-    border-radius:20px!important;
-    margin-bottom:12px!important;
-  }
-
-  .detail-panel h2,
-  .selected-detail h2,
-  .detail-card h2{
-    font-size:30px!important;
-    line-height:1.05!important;
-  }
-
-  .detail-panel .avatar,
-  .selected-detail .avatar,
-  .detail-card .avatar{
-    width:56px!important;
-    height:56px!important;
-    min-width:56px!important;
-  }
-
-  .info,
-  .field,
-  .data-row,
-  .detail-row{
-    padding:12px!important;
-    border-radius:15px!important;
-    margin-bottom:9px!important;
-  }
-
-  .info span,
-  .field span,
-  .data-row span,
-  .detail-row span{
-    font-size:12.8px!important;
-  }
-
-  .info b,
-  .field b,
-  .data-row b,
-  .detail-row b{
-    font-size:17px!important;
-  }
-
-  /* Modül kutuları 2 kolon ama daha kısa */
-  .detail-grid,
-  .action-grid,
-  .module-grid{
-    display:grid!important;
-    grid-template-columns:1fr 1fr!important;
-    gap:10px!important;
-  }
-
-  .action-card,
-  .quick-action,
-  .module-card,
-  .module{
-    padding:13px!important;
-    border-radius:17px!important;
-    min-height:96px!important;
-  }
-
-  .action-card i,
-  .quick-action i,
-  .module-card i,
-  .module i{
-    font-size:25px!important;
-    margin-bottom:5px!important;
-  }
-
-  .action-card h3,
-  .quick-action h3,
-  .module-card h3,
-  .module b{
-    font-size:18px!important;
-    margin-bottom:4px!important;
-  }
-
-  .action-card p,
-  .quick-action p,
-  .module-card p,
-  .module span{
-    font-size:12.8px!important;
-    line-height:1.25!important;
-  }
-
-  .btn,
-  button,
-  .action-button,
-  .quick-btn{
-    min-height:48px!important;
-    padding:10px 14px!important;
-    border-radius:16px!important;
-    font-size:17px!important;
-    margin-bottom:8px!important;
-  }
-
-  /* Alt menü daha fit */
-  .bottom-nav,
-  .tabbar,
-  .mobile-nav,
-  .admin-bottom-nav{
-    left:10px!important;
-    right:10px!important;
-    bottom:9px!important;
-    height:64px!important;
-    border-radius:21px!important;
-    overflow:hidden!important;
-  }
-
-  .bottom-nav a,
-  .tabbar a,
-  .mobile-nav a,
-  .admin-bottom-nav a,
-  .nav-item{
-    min-height:64px!important;
-    padding:6px 4px!important;
-    font-size:12.8px!important;
-    line-height:1.05!important;
-  }
-
-  .bottom-nav .icon,
-  .tabbar .icon,
-  .mobile-nav .icon,
-  .nav-icon{
-    font-size:18px!important;
-    margin-bottom:2px!important;
-  }
-
-  /* Alt menü içerik üstüne binmesin */
-  body:after{
-    content:"";
-    display:block;
-    height:92px;
-  }
-}
-
-@media (max-width:420px){
-  h1,
-  .title,
-  .hero-title,
-  .command-title{
-    font-size:31px!important;
-  }
-
-  h2,
-  .section-title,
-  .tree-title{
-    font-size:24px!important;
-  }
-
-  .hero,
-  .eg-hero,
-  .command-hero,
-  .admin-hero,
-  [class*="hero"]{
-    padding:22px 18px!important;
-  }
-
-  .stat-card,
-  .metric-card,
-  [class*="stat"],
-  [class*="metric"]{
-    min-height:106px!important;
-  }
-
-  .stat-card b,
-  .metric-card b,
-  .stat-card .value,
-  .metric-value,
-  .big-number{
-    font-size:31px!important;
-  }
-
-  .node-icon,
-  .card-icon,
-  .user-avatar,
-  .avatar{
-    width:44px!important;
-    height:44px!important;
-    min-width:44px!important;
-  }
-}
-</style>
-'''
-
-    @app.after_request
-    def _eg6k15_ultra_slim_fit_inject(resp):
-        try:
-            path = str(getattr(_eg6k15_request, "path", "") or "")
-            ctype = str(resp.headers.get("Content-Type", "") or "")
-
-            if path not in ("/admin", "/admin/", "/admin/dashboard"):
-                return resp
-
-            if "text/html" not in ctype.lower():
-                return resp
-
-            body = resp.get_data(as_text=True)
-
-            if "eratguard-admin-ultra-slim-fit-6k15" in body:
-                return resp
-
-            if "</head>" in body:
-                body = body.replace("</head>", _EG6K15_ULTRA_SLIM_CSS + "\n</head>", 1)
-            elif "</body>" in body:
-                body = body.replace("</body>", _EG6K15_ULTRA_SLIM_CSS + "\n</body>", 1)
-            else:
-                body += _EG6K15_ULTRA_SLIM_CSS
-
-            resp.set_data(body)
-            resp.headers["Content-Length"] = str(len(resp.get_data()))
-            resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-            return resp
-        except Exception as _eg6k15_err:
-            print("ERATGUARD STAGE6K15 ULTRA SLIM INJECT ERROR:", _eg6k15_err)
-            return resp
-
-    print("ERATGUARD STAGE6K15 ULTRA SLIM ADMIN FIT MODE ACTIVE")
-except Exception as _eg6k15_boot_err:
-    print("ERATGUARD STAGE6K15 ULTRA SLIM ADMIN FIT MODE BOOT ERROR:", _eg6k15_boot_err)
-# ===== ERATGUARD STAGE6K15 ULTRA SLIM ADMIN FIT MODE END =====
 
 
 # ===== ERATGUARD HIDE AUTO SMS BADGE V3 START =====
@@ -27419,5956 +24549,6 @@ try:
 except Exception as _eg_sajr1_err:
     print("ERATGUARD SMS ACTION API JSON RESPONSE V1 BOOT ERROR:", _eg_sajr1_err)
 
-# === /ERATGUARD_SMS_ACTION_API_JSON_RESPONSE_V1 ===
-
-# ===== ERATGUARD CONTROLLED TRUE FAN-12P ROUTE LOCK START =====
-# Kontrollü temizlik sonrası kullanıcı ana girişleri sadece mevcut gerçek FAN-12P fonksiyonuna bağlanır.
-# Yeni HTML üretmez; dashboard_web.py içinde zaten bulunan "FAN-12P Command Center" kaynağını kullanır.
-
-try:
-    import inspect as _eg_fan12p_inspect
-
-    _eg_true_fan12p_func = None
-
-    for _eg_name, _eg_func in list(app.view_functions.items()):
-        try:
-            _eg_src = _eg_fan12p_inspect.getsource(_eg_func)
-        except Exception:
-            _eg_src = ""
-
-        if (
-            "FAN-12P Command Center" in _eg_src
-            and "FAN-12P HAZIR" in _eg_src
-            and "COMMAND CENTER" in _eg_src
-        ):
-            _eg_true_fan12p_func = _eg_func
-            print("ERATGUARD TRUE FAN-12P SOURCE FOUND:", _eg_name)
-            break
-
-    if _eg_true_fan12p_func is None:
-        print("ERATGUARD TRUE FAN-12P ROUTE LOCK WARNING: gerçek FAN-12P fonksiyonu bulunamadı.")
-    else:
-        _eg_lock_rules = [
-            "/dashboard",
-            "/u/dashboard",
-            "/app-start",
-            "/radial",
-            "/radial-menu",
-            "/radial-demo",
-        ]
-
-        for _eg_rule in list(app.url_map.iter_rules()):
-            if _eg_rule.rule in _eg_lock_rules:
-                app.view_functions[_eg_rule.endpoint] = _eg_true_fan12p_func
-                print("ERATGUARD TRUE FAN-12P ROUTE LOCKED:", _eg_rule.rule, "->", _eg_rule.endpoint)
-
-        for _eg_ep in [
-            "dashboard",
-            "user_dashboard",
-            "ss_user_alias_home_final",
-            "radial",
-            "radial_demo",
-            "app_start",
-            "user_home",
-            "home_dashboard",
-        ]:
-            if _eg_ep in app.view_functions:
-                app.view_functions[_eg_ep] = _eg_true_fan12p_func
-                print("ERATGUARD TRUE FAN-12P ENDPOINT LOCKED:", _eg_ep)
-
-        print("ERATGUARD CONTROLLED TRUE FAN-12P ROUTE LOCK ACTIVE")
-
-except Exception as _eg_route_lock_e:
-    print("ERATGUARD CONTROLLED TRUE FAN-12P ROUTE LOCK ERROR:", _eg_route_lock_e)
-# ===== ERATGUARD CONTROLLED TRUE FAN-12P ROUTE LOCK END =====
-
-# ===== ERATGUARD STEP5 APP-START HARD LOCK TO FAN-12P DASHBOARD START =====
-# /dashboard testte gerçek FAN-12P verdiği için /app-start aynı dashboard fonksiyonuna bağlanır.
-# Böylece APK giriş kapısı eski ekranı asla döndürmez.
-
-try:
-    _eg_dashboard_func = None
-    _eg_dashboard_endpoint = None
-
-    for _eg_rule in list(app.url_map.iter_rules()):
-        if _eg_rule.rule == "/dashboard":
-            _eg_dashboard_endpoint = _eg_rule.endpoint
-            _eg_dashboard_func = app.view_functions.get(_eg_dashboard_endpoint)
-            break
-
-    if _eg_dashboard_func is None:
-        print("ERATGUARD STEP5 APP-START LOCK ERROR: /dashboard endpoint bulunamadı")
-    else:
-        for _eg_rule in list(app.url_map.iter_rules()):
-            if _eg_rule.rule in ["/app-start", "/u/dashboard", "/radial", "/radial-menu", "/radial-demo"]:
-                app.view_functions[_eg_rule.endpoint] = _eg_dashboard_func
-                print("ERATGUARD STEP5 ROUTE LOCKED TO DASHBOARD:", _eg_rule.rule, "->", _eg_rule.endpoint)
-
-        for _eg_ep in ["app_start", "appStart", "start_app", "user_app_start"]:
-            if _eg_ep in app.view_functions:
-                app.view_functions[_eg_ep] = _eg_dashboard_func
-                print("ERATGUARD STEP5 ENDPOINT LOCKED TO DASHBOARD:", _eg_ep)
-
-        print("ERATGUARD STEP5 APP-START HARD LOCK ACTIVE:", _eg_dashboard_endpoint)
-
-except Exception as _eg_step5_e:
-    print("ERATGUARD STEP5 APP-START HARD LOCK ERROR:", _eg_step5_e)
-# ===== ERATGUARD STEP5 APP-START HARD LOCK TO FAN-12P DASHBOARD END =====
-
-# ===== ERATGUARD FAN-12P FINAL POLISH 12 SLICE START =====
-# Final polish:
-# - Eski üst bar "Koruma Geçmişi" dashboard içinde görünmez.
-# - VITES-5G etiketi FAN-12P olarak tekleştirilir.
-# - FAN-12P menüsü 8 dilimden 12 dilime tamamlanır.
-
-try:
-    import re as _eg_f12p_re
-    from flask import request as _eg_f12p_request
-    from flask import make_response as _eg_f12p_make_response
-
-    def _eg_fan12p_final_polish_response(response):
-        try:
-            path = (_eg_f12p_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html and "COMMAND CENTER" not in html:
-                return response
-
-            # 1) Yanlış üst başlık düzeltmesi.
-            html = html.replace("Koruma Geçmişi", "FAN-12P Command Center")
-
-            # 2) VITES görünür etiketlerini tekleştir.
-            html = html.replace("ERATGUARD VITES-5G", "ERATGUARD FAN-12P")
-            html = html.replace("ERATGUARD VITES-6A", "ERATGUARD FAN-12P")
-            html = html.replace("VITES-6A", "FAN-12P")
-            html = html.replace("VITES-5G", "FAN-12P")
-
-            # 3) 9-12 dilimleri yoksa ekle.
-            if "SMS Özet" not in html and "eg-user-fan3-panel" in html:
-                extra_items = """
-    <a class="eg-user-fan3-item i9" href="/u/sms-summary">
-      <b>📩</b><span><strong>SMS Özet</strong><small>Koruma özeti</small></span><em>09</em>
-    </a>
-    <a class="eg-user-fan3-item i10" href="/u/blocked-sms">
-      <b>🚫</b><span><strong>Blok SMS</strong><small>Engellenen merkez</small></span><em>10</em>
-    </a>
-    <a class="eg-user-fan3-item i11" href="/u/history">
-      <b>🕘</b><span><strong>Geçmiş</strong><small>Koruma geçmişi</small></span><em>11</em>
-    </a>
-    <a class="eg-user-fan3-item i12" href="/u/pro">
-      <b>⭐</b><span><strong>PRO</strong><small>Final özellikleri</small></span><em>12</em>
-    </a>
-"""
-                html = _eg_f12p_re.sub(
-                    r'(</nav>\s*<!-- ERATGUARD FAN-12P INTRO DIRECT START -->)',
-                    extra_items + r'\1',
-                    html,
-                    count=1,
-                    flags=_eg_f12p_re.S
-                )
-
-            # 4) Yeni 12 dilim için pozisyon CSS'i.
-            if "ERATGUARD FAN-12P FINAL 12 SLICE CSS" not in html:
-                css = """
-<style id="eg-fan12p-final-12-slice-css">
-/* ERATGUARD FAN-12P FINAL 12 SLICE CSS */
-.eg-user-fan3.open .i9{transform:translateX(-28px) translateY(-318px) rotate(34deg)}
-.eg-user-fan3.open .i10{transform:translateX(-28px) translateY(318px) rotate(-34deg)}
-.eg-user-fan3.open .i11{transform:translateX(-122px) translateY(-292px) rotate(43deg)}
-.eg-user-fan3.open .i12{transform:translateX(-122px) translateY(292px) rotate(-43deg)}
-@media(max-width:420px){
-  .eg-user-fan3.open .i9{transform:translateX(-18px) translateY(-292px) rotate(34deg)}
-  .eg-user-fan3.open .i10{transform:translateX(-18px) translateY(292px) rotate(-34deg)}
-  .eg-user-fan3.open .i11{transform:translateX(-104px) translateY(-268px) rotate(43deg)}
-  .eg-user-fan3.open .i12{transform:translateX(-104px) translateY(268px) rotate(-43deg)}
-}
-</style>
-"""
-                html = html.replace("</head>", css + "\n</head>", 1)
-
-            # 5) Intro bilgi haritasına 9-12 ekle.
-            if '"/u/sms-summary"' not in html and "var infoMap" in html:
-                html = html.replace(
-                    '"/u/settings": {icon:"⚙️", title:"Ayarlar", text:"Uygulama tercihleri, güvenlik bildirimleri ve kullanıcı deneyimi ayarlarını düzenler."}',
-                    '"/u/settings": {icon:"⚙️", title:"Ayarlar", text:"Uygulama tercihleri, güvenlik bildirimleri ve kullanıcı deneyimi ayarlarını düzenler."},\n'
-                    '    "/u/sms-summary": {icon:"📩", title:"SMS Koruma Özeti", text:"SMS risk motoru, analiz özeti ve son koruma durumunu gösterir."},\n'
-                    '    "/u/blocked-sms": {icon:"🚫", title:"Engellenen SMS Merkezi", text:"Engellenen mesajlar, blok kayıtları ve güvenlik aksiyonlarını yönetir."},\n'
-                    '    "/u/history": {icon:"🕘", title:"Koruma Geçmişi", text:"Koruma geçmişi, analiz kayıtları ve aksiyon geçmişini listeler."},\n'
-                    '    "/u/pro": {icon:"⭐", title:"PRO Merkezi", text:"Final özellikleri, premium erişim ve gelişmiş koruma seçeneklerini gösterir."}'
-                )
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_polish_inner_e:
-            print("ERATGUARD FAN-12P FINAL POLISH INNER ERROR:", _eg_f12p_polish_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_final_polish_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_final_polish_response"]
-        _eg_after_list.insert(0, _eg_fan12p_final_polish_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P FINAL POLISH 12 SLICE ACTIVE")
-
-except Exception as _eg_f12p_polish_e:
-    print("ERATGUARD FAN-12P FINAL POLISH 12 SLICE ERROR:", _eg_f12p_polish_e)
-# ===== ERATGUARD FAN-12P FINAL POLISH 12 SLICE END =====
-
-# ===== ERATGUARD FAN-12P FINAL POLISH V2 FORCE 12 ITEMS START =====
-# V1 CSS ekledi ama bazı canlı HTML varyantlarında 9-12 linkleri nav içine girmedi.
-# V2, eg-user-fan3-panel içindeki nav kapanışına 9-12 linklerini zorunlu ekler.
-
-try:
-    import re as _eg_f12p_v2_re
-    from flask import request as _eg_f12p_v2_request
-
-    def _eg_fan12p_final_polish_v2_response(response):
-        try:
-            path = (_eg_f12p_v2_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "eg-user-fan3-panel" not in html:
-                return response
-
-            html = html.replace("Koruma Geçmişi", "FAN-12P Command Center")
-            html = html.replace("ERATGUARD VITES-5G", "ERATGUARD FAN-12P")
-            html = html.replace("VITES-5G", "FAN-12P")
-
-            extra_items = """
-    <a class="eg-user-fan3-item i9" href="/u/sms-summary">
-      <b>📩</b><span><strong>SMS Özet</strong><small>Koruma özeti</small></span><em>09</em>
-    </a>
-    <a class="eg-user-fan3-item i10" href="/u/blocked-sms">
-      <b>🚫</b><span><strong>Blok SMS</strong><small>Engellenen merkez</small></span><em>10</em>
-    </a>
-    <a class="eg-user-fan3-item i11" href="/u/history">
-      <b>🕘</b><span><strong>Geçmiş</strong><small>Koruma geçmişi</small></span><em>11</em>
-    </a>
-    <a class="eg-user-fan3-item i12" href="/u/pro">
-      <b>⭐</b><span><strong>PRO</strong><small>Final özellikleri</small></span><em>12</em>
-    </a>
-"""
-
-            if "SMS Özet" not in html:
-                panel_pat = r'(<nav[^>]*class="[^"]*eg-user-fan3-panel[^"]*"[^>]*>)(.*?)(</nav>)'
-
-                def _eg_add_items(match):
-                    open_nav, body, close_nav = match.group(1), match.group(2), match.group(3)
-                    if "SMS Özet" in body or "i9" in body:
-                        return match.group(0)
-                    return open_nav + body + extra_items + close_nav
-
-                html, changed = _eg_f12p_v2_re.subn(
-                    panel_pat,
-                    _eg_add_items,
-                    html,
-                    count=1,
-                    flags=_eg_f12p_v2_re.S | _eg_f12p_v2_re.I
-                )
-
-                if changed == 0:
-                    html = html.replace("</nav>", extra_items + "</nav>", 1)
-
-            if "ERATGUARD FAN-12P FINAL 12 SLICE CSS V2" not in html:
-                css = """
-<style id="eg-fan12p-final-12-slice-css-v2">
-/* ERATGUARD FAN-12P FINAL 12 SLICE CSS V2 */
-.eg-user-fan3.open .i9{transform:translateX(-24px) translateY(-318px) rotate(34deg)!important}
-.eg-user-fan3.open .i10{transform:translateX(-24px) translateY(318px) rotate(-34deg)!important}
-.eg-user-fan3.open .i11{transform:translateX(-122px) translateY(-292px) rotate(43deg)!important}
-.eg-user-fan3.open .i12{transform:translateX(-122px) translateY(292px) rotate(-43deg)!important}
-@media(max-width:420px){
-  .eg-user-fan3.open .i9{transform:translateX(-16px) translateY(-292px) rotate(34deg)!important}
-  .eg-user-fan3.open .i10{transform:translateX(-16px) translateY(292px) rotate(-34deg)!important}
-  .eg-user-fan3.open .i11{transform:translateX(-104px) translateY(-268px) rotate(43deg)!important}
-  .eg-user-fan3.open .i12{transform:translateX(-104px) translateY(268px) rotate(-43deg)!important}
-}
-</style>
-"""
-                html = html.replace("</head>", css + "\n</head>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v2_inner_e:
-            print("ERATGUARD FAN-12P FINAL POLISH V2 INNER ERROR:", _eg_f12p_v2_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_final_polish_v2_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_final_polish_v2_response"]
-        _eg_after_list.insert(0, _eg_fan12p_final_polish_v2_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P FINAL POLISH V2 FORCE 12 ITEMS ACTIVE")
-
-except Exception as _eg_f12p_v2_e:
-    print("ERATGUARD FAN-12P FINAL POLISH V2 ERROR:", _eg_f12p_v2_e)
-# ===== ERATGUARD FAN-12P FINAL POLISH V2 FORCE 12 ITEMS END =====
-
-# ===== ERATGUARD FAN-12P FINAL POLISH V3 APP-START 12 ITEMS FIX START =====
-# /app-start HTML varyantında eg-user-fan3-panel sınıfı görünmediği için V2 bazı metinleri ekleyemedi.
-# V3, FAN-12P HTML içinde ilk nav kapanışına 9-12 dilimleri güvenli şekilde ekler.
-
-try:
-    from flask import request as _eg_f12p_v3_request
-
-    def _eg_fan12p_final_polish_v3_response(response):
-        try:
-            path = (_eg_f12p_v3_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-
-            if "FAN-12P" not in html and "COMMAND CENTER" not in html:
-                return response
-
-            html = html.replace("Koruma Geçmişi", "FAN-12P Command Center")
-            html = html.replace("ERATGUARD VITES-5G", "ERATGUARD FAN-12P")
-            html = html.replace("ERATGUARD VITES-6A", "ERATGUARD FAN-12P")
-            html = html.replace("VITES-5G", "FAN-12P")
-            html = html.replace("VITES-6A", "FAN-12P")
-
-            extra_items = """
-    <a class="eg-user-fan3-item i9" href="/u/sms-summary">
-      <b>📩</b><span><strong>SMS Özet</strong><small>Koruma özeti</small></span><em>09</em>
-    </a>
-    <a class="eg-user-fan3-item i10" href="/u/blocked-sms">
-      <b>🚫</b><span><strong>Blok SMS</strong><small>Engellenen merkez</small></span><em>10</em>
-    </a>
-    <a class="eg-user-fan3-item i11" href="/u/history">
-      <b>🕘</b><span><strong>Geçmiş</strong><small>Koruma geçmişi</small></span><em>11</em>
-    </a>
-    <a class="eg-user-fan3-item i12" href="/u/pro">
-      <b>⭐</b><span><strong>PRO</strong><small>Final özellikleri</small></span><em>12</em>
-    </a>
-"""
-
-            if "SMS Özet" not in html:
-                if "</nav>" in html:
-                    html = html.replace("</nav>", extra_items + "\n</nav>", 1)
-                elif "</body>" in html:
-                    html = html.replace("</body>", "<nav class=\"eg-user-fan3-panel\">" + extra_items + "</nav></body>", 1)
-
-            if "ERATGUARD FAN-12P FINAL 12 SLICE CSS V3" not in html:
-                css = """
-<style id="eg-fan12p-final-12-slice-css-v3">
-/* ERATGUARD FAN-12P FINAL 12 SLICE CSS V3 */
-.eg-user-fan3-item.i9,.eg-user-fan3-item.i10,.eg-user-fan3-item.i11,.eg-user-fan3-item.i12{
-  opacity:0;
-  pointer-events:none;
-}
-.eg-user-fan3.open .i9{
-  opacity:1!important;
-  pointer-events:auto!important;
-  transform:translateX(-24px) translateY(-318px) rotate(34deg)!important;
-}
-.eg-user-fan3.open .i10{
-  opacity:1!important;
-  pointer-events:auto!important;
-  transform:translateX(-24px) translateY(318px) rotate(-34deg)!important;
-}
-.eg-user-fan3.open .i11{
-  opacity:1!important;
-  pointer-events:auto!important;
-  transform:translateX(-122px) translateY(-292px) rotate(43deg)!important;
-}
-.eg-user-fan3.open .i12{
-  opacity:1!important;
-  pointer-events:auto!important;
-  transform:translateX(-122px) translateY(292px) rotate(-43deg)!important;
-}
-@media(max-width:420px){
-  .eg-user-fan3.open .i9{transform:translateX(-16px) translateY(-292px) rotate(34deg)!important}
-  .eg-user-fan3.open .i10{transform:translateX(-16px) translateY(292px) rotate(-34deg)!important}
-  .eg-user-fan3.open .i11{transform:translateX(-104px) translateY(-268px) rotate(43deg)!important}
-  .eg-user-fan3.open .i12{transform:translateX(-104px) translateY(268px) rotate(-43deg)!important}
-}
-</style>
-"""
-                html = html.replace("</head>", css + "\n</head>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v3_inner_e:
-            print("ERATGUARD FAN-12P FINAL POLISH V3 INNER ERROR:", _eg_f12p_v3_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_final_polish_v3_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_final_polish_v3_response"]
-        _eg_after_list.insert(0, _eg_fan12p_final_polish_v3_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P FINAL POLISH V3 APP-START 12 ITEMS ACTIVE")
-
-except Exception as _eg_f12p_v3_e:
-    print("ERATGUARD FAN-12P FINAL POLISH V3 ERROR:", _eg_f12p_v3_e)
-# ===== ERATGUARD FAN-12P FINAL POLISH V3 APP-START 12 ITEMS FIX END =====
-
-# ===== ERATGUARD FAN-12P FINAL POLISH V4 MOBILE 9-12 ALIGN START =====
-# 09/11 üst bara, 10/12 alt kısma taşmasın diye 9-12 dilimleri mobilde merkez fan çevresine alınır.
-
-try:
-    from flask import request as _eg_f12p_v4_request
-
-    def _eg_fan12p_final_polish_v4_response(response):
-        try:
-            path = (_eg_f12p_v4_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html or "eg-user-fan3" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P FINAL 12 SLICE CSS V4 MOBILE ALIGN" not in html:
-                css = """
-<style id="eg-fan12p-final-12-slice-css-v4-mobile-align">
-/* ERATGUARD FAN-12P FINAL 12 SLICE CSS V4 MOBILE ALIGN */
-
-/* V3'te üst/alt taşan 09-12 dilimleri ekran içine alınır. */
-.eg-user-fan3.open .i9{
-  opacity:1!important;
-  pointer-events:auto!important;
-  transform:translateX(-148px) translateY(-210px) rotate(28deg)!important;
-  z-index:39!important;
-}
-.eg-user-fan3.open .i10{
-  opacity:1!important;
-  pointer-events:auto!important;
-  transform:translateX(-148px) translateY(210px) rotate(-28deg)!important;
-  z-index:39!important;
-}
-.eg-user-fan3.open .i11{
-  opacity:1!important;
-  pointer-events:auto!important;
-  transform:translateX(-228px) translateY(-150px) rotate(38deg)!important;
-  z-index:38!important;
-}
-.eg-user-fan3.open .i12{
-  opacity:1!important;
-  pointer-events:auto!important;
-  transform:translateX(-228px) translateY(150px) rotate(-38deg)!important;
-  z-index:38!important;
-}
-
-@media(max-width:420px){
-  .eg-user-fan3.open .i9{
-    transform:translateX(-132px) translateY(-198px) rotate(28deg)!important;
-  }
-  .eg-user-fan3.open .i10{
-    transform:translateX(-132px) translateY(198px) rotate(-28deg)!important;
-  }
-  .eg-user-fan3.open .i11{
-    transform:translateX(-202px) translateY(-138px) rotate(38deg)!important;
-  }
-  .eg-user-fan3.open .i12{
-    transform:translateX(-202px) translateY(138px) rotate(-38deg)!important;
-  }
-}
-
-@media(max-width:380px){
-  .eg-user-fan3.open .i9{
-    transform:translateX(-118px) translateY(-188px) rotate(28deg)!important;
-  }
-  .eg-user-fan3.open .i10{
-    transform:translateX(-118px) translateY(188px) rotate(-28deg)!important;
-  }
-  .eg-user-fan3.open .i11{
-    transform:translateX(-186px) translateY(-130px) rotate(38deg)!important;
-  }
-  .eg-user-fan3.open .i12{
-    transform:translateX(-186px) translateY(130px) rotate(-38deg)!important;
-  }
-}
-</style>
-"""
-                html = html.replace("</head>", css + "\n</head>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v4_inner_e:
-            print("ERATGUARD FAN-12P FINAL POLISH V4 INNER ERROR:", _eg_f12p_v4_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_final_polish_v4_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_final_polish_v4_response"]
-        _eg_after_list.insert(0, _eg_fan12p_final_polish_v4_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P FINAL POLISH V4 MOBILE 9-12 ALIGN ACTIVE")
-
-except Exception as _eg_f12p_v4_e:
-    print("ERATGUARD FAN-12P FINAL POLISH V4 ERROR:", _eg_f12p_v4_e)
-# ===== ERATGUARD FAN-12P FINAL POLISH V4 MOBILE 9-12 ALIGN END =====
-
-# ===== ERATGUARD FAN-12P V6 PAPATYA CENTER LAYOUT START =====
-# Hedef imza tasarım:
-# Menü açılınca sağ yelpaze değil, merkezde papatya yaprakları gibi 12 dilim görünür.
-
-try:
-    from flask import request as _eg_f12p_v6_request
-
-    def _eg_fan12p_v6_papatya_response(response):
-        try:
-            path = (_eg_f12p_v6_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html or "eg-user-fan3" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V6 PAPATYA CENTER LAYOUT CSS" not in html:
-                css = """
-<style id="eg-fan12p-v6-papatya-center-layout">
-/* ERATGUARD FAN-12P V6 PAPATYA CENTER LAYOUT CSS */
-
-/* Kapalı durumda mevcut menü butonu korunur. Açılınca merkez papatya düzenine geçer. */
-.eg-user-fan3.open{
-  position:fixed!important;
-  left:50%!important;
-  top:68%!important;
-  right:auto!important;
-  bottom:auto!important;
-  width:1px!important;
-  height:1px!important;
-  transform:translate(-50%,-50%)!important;
-  z-index:9999!important;
-  overflow:visible!important;
-}
-
-/* Merkez MENÜ butonu */
-.eg-user-fan3.open .eg-user-fan3-toggle,
-.eg-user-fan3.open .menu-toggle,
-.eg-user-fan3.open button,
-.eg-user-fan3.open .fan-handle{
-  position:absolute!important;
-  left:0!important;
-  top:0!important;
-  transform:translate(-50%,-50%)!important;
-  z-index:10020!important;
-}
-
-/* Tüm yapraklar ortak final ölçü */
-.eg-user-fan3.open .eg-user-fan3-item{
-  position:absolute!important;
-  left:0!important;
-  top:0!important;
-  width:132px!important;
-  min-width:132px!important;
-  max-width:132px!important;
-  height:58px!important;
-  min-height:58px!important;
-  max-height:58px!important;
-  padding:7px 10px!important;
-  border-radius:22px!important;
-  opacity:1!important;
-  pointer-events:auto!important;
-  transform-origin:center center!important;
-  z-index:10000!important;
-  box-sizing:border-box!important;
-}
-
-/* Yazıların kompakt ve okunur kalması */
-.eg-user-fan3.open .eg-user-fan3-item strong{
-  font-size:12px!important;
-  line-height:1.05!important;
-  white-space:normal!important;
-}
-.eg-user-fan3.open .eg-user-fan3-item small{
-  font-size:8.5px!important;
-  line-height:1!important;
-  white-space:normal!important;
-}
-.eg-user-fan3.open .eg-user-fan3-item em{
-  font-size:11px!important;
-}
-
-/* 12 yaprak papatya koordinatları */
-.eg-user-fan3.open .i12{
-  transform:translate(-50%,-50%) translate(0px,-170px) rotate(90deg)!important;
-}
-.eg-user-fan3.open .i1{
-  transform:translate(-50%,-50%) translate(84px,-146px) rotate(60deg)!important;
-}
-.eg-user-fan3.open .i2{
-  transform:translate(-50%,-50%) translate(146px,-84px) rotate(30deg)!important;
-}
-.eg-user-fan3.open .i3{
-  transform:translate(-50%,-50%) translate(170px,0px) rotate(0deg)!important;
-}
-.eg-user-fan3.open .i4{
-  transform:translate(-50%,-50%) translate(146px,84px) rotate(-30deg)!important;
-}
-.eg-user-fan3.open .i5{
-  transform:translate(-50%,-50%) translate(84px,146px) rotate(-60deg)!important;
-}
-.eg-user-fan3.open .i6{
-  transform:translate(-50%,-50%) translate(0px,170px) rotate(-90deg)!important;
-}
-.eg-user-fan3.open .i7{
-  transform:translate(-50%,-50%) translate(-84px,146px) rotate(60deg)!important;
-}
-.eg-user-fan3.open .i8{
-  transform:translate(-50%,-50%) translate(-146px,84px) rotate(30deg)!important;
-}
-.eg-user-fan3.open .i9{
-  transform:translate(-50%,-50%) translate(-170px,0px) rotate(0deg)!important;
-}
-.eg-user-fan3.open .i10{
-  transform:translate(-50%,-50%) translate(-146px,-84px) rotate(-30deg)!important;
-}
-.eg-user-fan3.open .i11{
-  transform:translate(-50%,-50%) translate(-84px,-146px) rotate(-60deg)!important;
-}
-
-/* Android genişliği için biraz daha kompakt */
-@media(max-width:420px){
-  .eg-user-fan3.open{
-    top:68%!important;
-  }
-
-  .eg-user-fan3.open .eg-user-fan3-item{
-    width:120px!important;
-    min-width:120px!important;
-    max-width:120px!important;
-    height:54px!important;
-    min-height:54px!important;
-    max-height:54px!important;
-    padding:6px 9px!important;
-    border-radius:20px!important;
-  }
-
-  .eg-user-fan3.open .eg-user-fan3-item strong{
-    font-size:11px!important;
-  }
-  .eg-user-fan3.open .eg-user-fan3-item small{
-    font-size:8px!important;
-  }
-
-  .eg-user-fan3.open .i12{transform:translate(-50%,-50%) translate(0px,-150px) rotate(90deg)!important}
-  .eg-user-fan3.open .i1{transform:translate(-50%,-50%) translate(75px,-130px) rotate(60deg)!important}
-  .eg-user-fan3.open .i2{transform:translate(-50%,-50%) translate(130px,-75px) rotate(30deg)!important}
-  .eg-user-fan3.open .i3{transform:translate(-50%,-50%) translate(150px,0px) rotate(0deg)!important}
-  .eg-user-fan3.open .i4{transform:translate(-50%,-50%) translate(130px,75px) rotate(-30deg)!important}
-  .eg-user-fan3.open .i5{transform:translate(-50%,-50%) translate(75px,130px) rotate(-60deg)!important}
-  .eg-user-fan3.open .i6{transform:translate(-50%,-50%) translate(0px,150px) rotate(-90deg)!important}
-  .eg-user-fan3.open .i7{transform:translate(-50%,-50%) translate(-75px,130px) rotate(60deg)!important}
-  .eg-user-fan3.open .i8{transform:translate(-50%,-50%) translate(-130px,75px) rotate(30deg)!important}
-  .eg-user-fan3.open .i9{transform:translate(-50%,-50%) translate(-150px,0px) rotate(0deg)!important}
-  .eg-user-fan3.open .i10{transform:translate(-50%,-50%) translate(-130px,-75px) rotate(-30deg)!important}
-  .eg-user-fan3.open .i11{transform:translate(-50%,-50%) translate(-75px,-130px) rotate(-60deg)!important}
-}
-
-/* Çok dar cihazlarda hedef görsel gibi sıkı papatya */
-@media(max-width:380px){
-  .eg-user-fan3.open{
-    top:69%!important;
-  }
-
-  .eg-user-fan3.open .eg-user-fan3-item{
-    width:108px!important;
-    min-width:108px!important;
-    max-width:108px!important;
-    height:50px!important;
-    min-height:50px!important;
-    max-height:50px!important;
-    padding:5px 8px!important;
-  }
-
-  .eg-user-fan3.open .eg-user-fan3-item strong{
-    font-size:10px!important;
-  }
-  .eg-user-fan3.open .eg-user-fan3-item small{
-    font-size:7.5px!important;
-  }
-
-  .eg-user-fan3.open .i12{transform:translate(-50%,-50%) translate(0px,-136px) rotate(90deg)!important}
-  .eg-user-fan3.open .i1{transform:translate(-50%,-50%) translate(68px,-118px) rotate(60deg)!important}
-  .eg-user-fan3.open .i2{transform:translate(-50%,-50%) translate(118px,-68px) rotate(30deg)!important}
-  .eg-user-fan3.open .i3{transform:translate(-50%,-50%) translate(136px,0px) rotate(0deg)!important}
-  .eg-user-fan3.open .i4{transform:translate(-50%,-50%) translate(118px,68px) rotate(-30deg)!important}
-  .eg-user-fan3.open .i5{transform:translate(-50%,-50%) translate(68px,118px) rotate(-60deg)!important}
-  .eg-user-fan3.open .i6{transform:translate(-50%,-50%) translate(0px,136px) rotate(-90deg)!important}
-  .eg-user-fan3.open .i7{transform:translate(-50%,-50%) translate(-68px,118px) rotate(60deg)!important}
-  .eg-user-fan3.open .i8{transform:translate(-50%,-50%) translate(-118px,68px) rotate(30deg)!important}
-  .eg-user-fan3.open .i9{transform:translate(-50%,-50%) translate(-136px,0px) rotate(0deg)!important}
-  .eg-user-fan3.open .i10{transform:translate(-50%,-50%) translate(-118px,-68px) rotate(-30deg)!important}
-  .eg-user-fan3.open .i11{transform:translate(-50%,-50%) translate(-68px,-118px) rotate(-60deg)!important}
-}
-</style>
-"""
-                html = html.replace("</head>", css + "\n</head>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v6_inner_e:
-            print("ERATGUARD FAN-12P V6 PAPATYA INNER ERROR:", _eg_f12p_v6_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v6_papatya_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v6_papatya_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v6_papatya_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V6 PAPATYA CENTER LAYOUT ACTIVE")
-
-except Exception as _eg_f12p_v6_e:
-    print("ERATGUARD FAN-12P V6 PAPATYA CENTER LAYOUT ERROR:", _eg_f12p_v6_e)
-# ===== ERATGUARD FAN-12P V6 PAPATYA CENTER LAYOUT END =====
-
-# ===== ERATGUARD FAN-12P V7 PAPATYA PANEL UNCLIP FIX START =====
-# V6 merkez butonu doğru taşıdı; V7 panel/yaprak clipping sorununu çözer.
-# Açık durumda nav/panel görünür alanı sıfırlanır ve 12 yaprak merkez etrafında görünür kalır.
-
-try:
-    from flask import request as _eg_f12p_v7_request
-
-    def _eg_fan12p_v7_papatya_unclip_response(response):
-        try:
-            path = (_eg_f12p_v7_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html or "eg-user-fan3" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V7 PAPATYA PANEL UNCLIP CSS" not in html:
-                css = """
-<style id="eg-fan12p-v7-papatya-panel-unclip">
-/* ERATGUARD FAN-12P V7 PAPATYA PANEL UNCLIP CSS */
-
-/* Ana açık container: ekran ortası */
-.eg-user-fan3.open{
-  position:fixed!important;
-  left:50%!important;
-  top:67%!important;
-  right:auto!important;
-  bottom:auto!important;
-  width:0!important;
-  height:0!important;
-  transform:translate(-50%,-50%)!important;
-  overflow:visible!important;
-  contain:none!important;
-  z-index:99999!important;
-}
-
-/* İç panel / nav clipping kapatılır */
-.eg-user-fan3.open nav,
-.eg-user-fan3.open .eg-user-fan3-panel,
-.eg-user-fan3.open .fan-panel,
-.eg-user-fan3.open .menu-panel{
-  position:absolute!important;
-  left:0!important;
-  top:0!important;
-  right:auto!important;
-  bottom:auto!important;
-  width:0!important;
-  height:0!important;
-  min-width:0!important;
-  min-height:0!important;
-  max-width:none!important;
-  max-height:none!important;
-  overflow:visible!important;
-  contain:none!important;
-  opacity:1!important;
-  visibility:visible!important;
-  display:block!important;
-  pointer-events:auto!important;
-  transform:none!important;
-  z-index:100000!important;
-}
-
-/* Merkez buton önde */
-.eg-user-fan3.open .eg-user-fan3-toggle,
-.eg-user-fan3.open .menu-toggle,
-.eg-user-fan3.open .fan-handle,
-.eg-user-fan3.open button{
-  position:absolute!important;
-  left:0!important;
-  top:0!important;
-  transform:translate(-50%,-50%)!important;
-  z-index:100500!important;
-  opacity:1!important;
-  visibility:visible!important;
-}
-
-/* Tüm yaprak ortak yapı */
-.eg-user-fan3.open .eg-user-fan3-item{
-  position:absolute!important;
-  left:0!important;
-  top:0!important;
-  width:118px!important;
-  min-width:118px!important;
-  max-width:118px!important;
-  height:54px!important;
-  min-height:54px!important;
-  max-height:54px!important;
-  padding:6px 8px!important;
-  border-radius:22px!important;
-  box-sizing:border-box!important;
-  overflow:visible!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  transform-origin:center center!important;
-  z-index:100100!important;
-}
-
-.eg-user-fan3.open .eg-user-fan3-item strong{
-  font-size:10.5px!important;
-  line-height:1.05!important;
-}
-.eg-user-fan3.open .eg-user-fan3-item small{
-  font-size:7.5px!important;
-  line-height:1!important;
-}
-.eg-user-fan3.open .eg-user-fan3-item em{
-  font-size:10px!important;
-}
-
-/* Papatya koordinatları - kompakt, ekran içinde */
-.eg-user-fan3.open .i12{transform:translate(-50%,-50%) translate(0px,-136px) rotate(90deg)!important}
-.eg-user-fan3.open .i1{transform:translate(-50%,-50%) translate(68px,-118px) rotate(60deg)!important}
-.eg-user-fan3.open .i2{transform:translate(-50%,-50%) translate(118px,-68px) rotate(30deg)!important}
-.eg-user-fan3.open .i3{transform:translate(-50%,-50%) translate(136px,0px) rotate(0deg)!important}
-.eg-user-fan3.open .i4{transform:translate(-50%,-50%) translate(118px,68px) rotate(-30deg)!important}
-.eg-user-fan3.open .i5{transform:translate(-50%,-50%) translate(68px,118px) rotate(-60deg)!important}
-.eg-user-fan3.open .i6{transform:translate(-50%,-50%) translate(0px,136px) rotate(-90deg)!important}
-.eg-user-fan3.open .i7{transform:translate(-50%,-50%) translate(-68px,118px) rotate(60deg)!important}
-.eg-user-fan3.open .i8{transform:translate(-50%,-50%) translate(-118px,68px) rotate(30deg)!important}
-.eg-user-fan3.open .i9{transform:translate(-50%,-50%) translate(-136px,0px) rotate(0deg)!important}
-.eg-user-fan3.open .i10{transform:translate(-50%,-50%) translate(-118px,-68px) rotate(-30deg)!important}
-.eg-user-fan3.open .i11{transform:translate(-50%,-50%) translate(-68px,-118px) rotate(-60deg)!important}
-
-/* Çok küçük ekran */
-@media(max-width:380px){
-  .eg-user-fan3.open{top:68%!important}
-  .eg-user-fan3.open .eg-user-fan3-item{
-    width:106px!important;
-    min-width:106px!important;
-    max-width:106px!important;
-    height:48px!important;
-    min-height:48px!important;
-    max-height:48px!important;
-    padding:5px 7px!important;
-  }
-  .eg-user-fan3.open .i12{transform:translate(-50%,-50%) translate(0px,-124px) rotate(90deg)!important}
-  .eg-user-fan3.open .i1{transform:translate(-50%,-50%) translate(62px,-108px) rotate(60deg)!important}
-  .eg-user-fan3.open .i2{transform:translate(-50%,-50%) translate(108px,-62px) rotate(30deg)!important}
-  .eg-user-fan3.open .i3{transform:translate(-50%,-50%) translate(124px,0px) rotate(0deg)!important}
-  .eg-user-fan3.open .i4{transform:translate(-50%,-50%) translate(108px,62px) rotate(-30deg)!important}
-  .eg-user-fan3.open .i5{transform:translate(-50%,-50%) translate(62px,108px) rotate(-60deg)!important}
-  .eg-user-fan3.open .i6{transform:translate(-50%,-50%) translate(0px,124px) rotate(-90deg)!important}
-  .eg-user-fan3.open .i7{transform:translate(-50%,-50%) translate(-62px,108px) rotate(60deg)!important}
-  .eg-user-fan3.open .i8{transform:translate(-50%,-50%) translate(-108px,62px) rotate(30deg)!important}
-  .eg-user-fan3.open .i9{transform:translate(-50%,-50%) translate(-124px,0px) rotate(0deg)!important}
-  .eg-user-fan3.open .i10{transform:translate(-50%,-50%) translate(-108px,-62px) rotate(-30deg)!important}
-  .eg-user-fan3.open .i11{transform:translate(-50%,-50%) translate(-62px,-108px) rotate(-60deg)!important}
-}
-</style>
-"""
-                html = html.replace("</head>", css + "\n</head>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v7_inner_e:
-            print("ERATGUARD FAN-12P V7 PAPATYA INNER ERROR:", _eg_f12p_v7_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v7_papatya_unclip_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v7_papatya_unclip_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v7_papatya_unclip_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V7 PAPATYA PANEL UNCLIP ACTIVE")
-
-except Exception as _eg_f12p_v7_e:
-    print("ERATGUARD FAN-12P V7 PAPATYA PANEL UNCLIP ERROR:", _eg_f12p_v7_e)
-# ===== ERATGUARD FAN-12P V7 PAPATYA PANEL UNCLIP FIX END =====
-
-# ===== ERATGUARD FAN-12P V8 PAPATYA INLINE POSITION FORCE START =====
-# V7'de merkez doğru; bazı yapraklar eski CSS transformlarından etkilenip kümeleniyor.
-# V8, menü açılınca JS ile 12 yaprağı inline style olarak papatya koordinatlarına zorlar.
-
-try:
-    from flask import request as _eg_f12p_v8_request
-
-    def _eg_fan12p_v8_papatya_inline_response(response):
-        try:
-            path = (_eg_f12p_v8_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html or "eg-user-fan3" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V8 PAPATYA INLINE FORCE" not in html:
-                inject = """
-<style id="eg-fan12p-v8-papatya-inline-force-css">
-/* ERATGUARD FAN-12P V8 PAPATYA INLINE FORCE */
-.eg-user-fan3.open{
-  position:fixed!important;
-  left:50%!important;
-  top:67%!important;
-  right:auto!important;
-  bottom:auto!important;
-  width:0!important;
-  height:0!important;
-  transform:translate(-50%,-50%)!important;
-  overflow:visible!important;
-  contain:none!important;
-  z-index:999999!important;
-}
-.eg-user-fan3.open nav,
-.eg-user-fan3.open .eg-user-fan3-panel{
-  position:absolute!important;
-  left:0!important;
-  top:0!important;
-  width:0!important;
-  height:0!important;
-  overflow:visible!important;
-  contain:none!important;
-  display:block!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  transform:none!important;
-}
-.eg-user-fan3.open .eg-user-fan3-item{
-  position:absolute!important;
-  left:0!important;
-  top:0!important;
-  width:112px!important;
-  min-width:112px!important;
-  max-width:112px!important;
-  height:52px!important;
-  min-height:52px!important;
-  max-height:52px!important;
-  padding:5px 7px!important;
-  border-radius:21px!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  box-sizing:border-box!important;
-  z-index:100100!important;
-}
-.eg-user-fan3.open .eg-user-fan3-item strong{
-  font-size:10px!important;
-  line-height:1.05!important;
-}
-.eg-user-fan3.open .eg-user-fan3-item small{
-  font-size:7.2px!important;
-  line-height:1!important;
-}
-.eg-user-fan3.open .eg-user-fan3-item em{
-  font-size:10px!important;
-}
-</style>
-
-<script id="eg-fan12p-v8-papatya-inline-force-js">
-/* ERATGUARD FAN-12P V8 PAPATYA INLINE FORCE */
-(function(){
-  function q(sel, root){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
-
-  var coords = {
-    12:{x:0,y:-126,r:90},
-    1:{x:63,y:-109,r:60},
-    2:{x:109,y:-63,r:30},
-    3:{x:126,y:0,r:0},
-    4:{x:109,y:63,r:-30},
-    5:{x:63,y:109,r:-60},
-    6:{x:0,y:126,r:-90},
-    7:{x:-63,y:109,r:60},
-    8:{x:-109,y:63,r:30},
-    9:{x:-126,y:0,r:0},
-    10:{x:-109,y:-63,r:-30},
-    11:{x:-63,y:-109,r:-60}
-  };
-
-  function numOf(el, fallback){
-    var txt = (el.innerText || el.textContent || "");
-    var m = txt.match(/\\b(0?[1-9]|10|11|12)\\b/);
-    if(m){
-      var n = parseInt(m[1],10);
-      if(n >= 1 && n <= 12) return n;
-    }
-    var cls = el.className || "";
-    m = cls.match(/(?:^|\\s)i0?([1-9]|10|11|12)(?:\\s|$)/);
-    if(m){
-      var n2 = parseInt(m[1],10);
-      if(n2 >= 1 && n2 <= 12) return n2;
-    }
-    return fallback;
-  }
-
-  function applyPapatya(){
-    var root = document.querySelector(".eg-user-fan3");
-    if(!root || !root.classList.contains("open")) return;
-
-    root.style.setProperty("position","fixed","important");
-    root.style.setProperty("left","50%","important");
-    root.style.setProperty("top","67%","important");
-    root.style.setProperty("right","auto","important");
-    root.style.setProperty("bottom","auto","important");
-    root.style.setProperty("width","0","important");
-    root.style.setProperty("height","0","important");
-    root.style.setProperty("transform","translate(-50%,-50%)","important");
-    root.style.setProperty("overflow","visible","important");
-    root.style.setProperty("contain","none","important");
-    root.style.setProperty("z-index","999999","important");
-
-    q("nav,.eg-user-fan3-panel", root).forEach(function(panel){
-      panel.style.setProperty("position","absolute","important");
-      panel.style.setProperty("left","0","important");
-      panel.style.setProperty("top","0","important");
-      panel.style.setProperty("width","0","important");
-      panel.style.setProperty("height","0","important");
-      panel.style.setProperty("overflow","visible","important");
-      panel.style.setProperty("contain","none","important");
-      panel.style.setProperty("display","block","important");
-      panel.style.setProperty("opacity","1","important");
-      panel.style.setProperty("visibility","visible","important");
-      panel.style.setProperty("transform","none","important");
-      panel.style.setProperty("z-index","100000","important");
-    });
-
-    var items = q(".eg-user-fan3-item", root);
-    items.forEach(function(el, idx){
-      var n = numOf(el, idx + 1);
-      var c = coords[n] || coords[idx + 1];
-      if(!c) return;
-
-      el.classList.add("eg-papatya-v8-item");
-      el.style.setProperty("position","absolute","important");
-      el.style.setProperty("left","0","important");
-      el.style.setProperty("top","0","important");
-      el.style.setProperty("width","112px","important");
-      el.style.setProperty("min-width","112px","important");
-      el.style.setProperty("max-width","112px","important");
-      el.style.setProperty("height","52px","important");
-      el.style.setProperty("min-height","52px","important");
-      el.style.setProperty("max-height","52px","important");
-      el.style.setProperty("opacity","1","important");
-      el.style.setProperty("visibility","visible","important");
-      el.style.setProperty("pointer-events","auto","important");
-      el.style.setProperty("z-index","100100","important");
-      el.style.setProperty("transform-origin","center center","important");
-      el.style.setProperty(
-        "transform",
-        "translate(-50%,-50%) translate("+c.x+"px,"+c.y+"px) rotate("+c.r+"deg)",
-        "important"
-      );
-    });
-  }
-
-  function loopApply(){
-    applyPapatya();
-    setTimeout(applyPapatya, 40);
-    setTimeout(applyPapatya, 120);
-    setTimeout(applyPapatya, 260);
-  }
-
-  document.addEventListener("click", function(){
-    setTimeout(loopApply, 20);
-  }, true);
-
-  document.addEventListener("DOMContentLoaded", function(){
-    loopApply();
-    var root = document.querySelector(".eg-user-fan3");
-    if(root && window.MutationObserver){
-      new MutationObserver(loopApply).observe(root, {attributes:true, attributeFilter:["class","style"], subtree:true});
-    }
-  });
-
-  setInterval(applyPapatya, 900);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v8_inner_e:
-            print("ERATGUARD FAN-12P V8 PAPATYA INNER ERROR:", _eg_f12p_v8_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v8_papatya_inline_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v8_papatya_inline_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v8_papatya_inline_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V8 PAPATYA INLINE POSITION FORCE ACTIVE")
-
-except Exception as _eg_f12p_v8_e:
-    print("ERATGUARD FAN-12P V8 PAPATYA INLINE POSITION FORCE ERROR:", _eg_f12p_v8_e)
-# ===== ERATGUARD FAN-12P V8 PAPATYA INLINE POSITION FORCE END =====
-
-# ===== ERATGUARD FAN-12P V9 TAP TOGGLE FIX START =====
-# V8 sonrası bazı WebView cihazlarda MENÜ butonu görünüyor ama click/touch çalışmıyor.
-# V9, merkez/sağ MENÜ butonuna doğrudan touchstart + click toggle bağlar.
-
-try:
-    from flask import request as _eg_f12p_v9_request
-
-    def _eg_fan12p_v9_tap_toggle_response(response):
-        try:
-            path = (_eg_f12p_v9_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html or "eg-user-fan3" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V9 TAP TOGGLE FIX" not in html:
-                inject = """
-<style id="eg-fan12p-v9-tap-toggle-css">
-/* ERATGUARD FAN-12P V9 TAP TOGGLE FIX */
-.eg-user-fan3,
-.eg-user-fan3 *,
-.eg-user-fan3-toggle,
-.menu-toggle,
-.fan-handle{
-  touch-action:manipulation!important;
-}
-
-.eg-user-fan3:not(.open){
-  pointer-events:auto!important;
-  z-index:99999!important;
-}
-
-.eg-user-fan3:not(.open) .eg-user-fan3-toggle,
-.eg-user-fan3:not(.open) .menu-toggle,
-.eg-user-fan3:not(.open) .fan-handle,
-.eg-user-fan3:not(.open) button{
-  pointer-events:auto!important;
-  cursor:pointer!important;
-  z-index:100500!important;
-}
-
-.eg-user-fan3.open{
-  pointer-events:auto!important;
-}
-
-.eg-user-fan3.open .eg-user-fan3-toggle,
-.eg-user-fan3.open .menu-toggle,
-.eg-user-fan3.open .fan-handle,
-.eg-user-fan3.open button{
-  pointer-events:auto!important;
-  cursor:pointer!important;
-}
-</style>
-
-<script id="eg-fan12p-v9-tap-toggle-js">
-/* ERATGUARD FAN-12P V9 TAP TOGGLE FIX */
-(function(){
-  if(window.__EG_FAN12P_V9_TAP_READY__) return;
-  window.__EG_FAN12P_V9_TAP_READY__ = true;
-
-  function qs(sel, root){ return (root || document).querySelector(sel); }
-  function qsa(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
-
-  var coords = {
-    12:{x:0,y:-126,r:90},
-    1:{x:63,y:-109,r:60},
-    2:{x:109,y:-63,r:30},
-    3:{x:126,y:0,r:0},
-    4:{x:109,y:63,r:-30},
-    5:{x:63,y:109,r:-60},
-    6:{x:0,y:126,r:-90},
-    7:{x:-63,y:109,r:60},
-    8:{x:-109,y:63,r:30},
-    9:{x:-126,y:0,r:0},
-    10:{x:-109,y:-63,r:-30},
-    11:{x:-63,y:-109,r:-60}
-  };
-
-  function getRoot(){
-    return qs(".eg-user-fan3");
-  }
-
-  function getToggle(root){
-    if(!root) return null;
-    return qs(".eg-user-fan3-toggle", root) ||
-           qs(".menu-toggle", root) ||
-           qs(".fan-handle", root) ||
-           qs("button", root);
-  }
-
-  function numOf(el, fallback){
-    var txt = (el.innerText || el.textContent || "");
-    var m = txt.match(/\\b(0?[1-9]|10|11|12)\\b/);
-    if(m){
-      var n = parseInt(m[1],10);
-      if(n >= 1 && n <= 12) return n;
-    }
-    var cls = el.className || "";
-    m = cls.match(/(?:^|\\s)i0?([1-9]|10|11|12)(?:\\s|$)/);
-    if(m){
-      var n2 = parseInt(m[1],10);
-      if(n2 >= 1 && n2 <= 12) return n2;
-    }
-    return fallback;
-  }
-
-  function forcePapatya(){
-    var root = getRoot();
-    if(!root || !root.classList.contains("open")) return;
-
-    root.style.setProperty("position","fixed","important");
-    root.style.setProperty("left","50%","important");
-    root.style.setProperty("top","67%","important");
-    root.style.setProperty("right","auto","important");
-    root.style.setProperty("bottom","auto","important");
-    root.style.setProperty("width","0","important");
-    root.style.setProperty("height","0","important");
-    root.style.setProperty("transform","translate(-50%,-50%)","important");
-    root.style.setProperty("overflow","visible","important");
-    root.style.setProperty("contain","none","important");
-    root.style.setProperty("pointer-events","auto","important");
-    root.style.setProperty("z-index","999999","important");
-
-    qsa("nav,.eg-user-fan3-panel,.fan-panel,.menu-panel", root).forEach(function(panel){
-      panel.style.setProperty("position","absolute","important");
-      panel.style.setProperty("left","0","important");
-      panel.style.setProperty("top","0","important");
-      panel.style.setProperty("width","0","important");
-      panel.style.setProperty("height","0","important");
-      panel.style.setProperty("overflow","visible","important");
-      panel.style.setProperty("contain","none","important");
-      panel.style.setProperty("display","block","important");
-      panel.style.setProperty("opacity","1","important");
-      panel.style.setProperty("visibility","visible","important");
-      panel.style.setProperty("pointer-events","auto","important");
-      panel.style.setProperty("transform","none","important");
-      panel.style.setProperty("z-index","100000","important");
-    });
-
-    qsa(".eg-user-fan3-item", root).forEach(function(el, idx){
-      var n = numOf(el, idx + 1);
-      var c = coords[n] || coords[idx + 1];
-      if(!c) return;
-
-      el.style.setProperty("position","absolute","important");
-      el.style.setProperty("left","0","important");
-      el.style.setProperty("top","0","important");
-      el.style.setProperty("width","112px","important");
-      el.style.setProperty("min-width","112px","important");
-      el.style.setProperty("max-width","112px","important");
-      el.style.setProperty("height","52px","important");
-      el.style.setProperty("min-height","52px","important");
-      el.style.setProperty("max-height","52px","important");
-      el.style.setProperty("opacity","1","important");
-      el.style.setProperty("visibility","visible","important");
-      el.style.setProperty("pointer-events","auto","important");
-      el.style.setProperty("z-index","100100","important");
-      el.style.setProperty("transform-origin","center center","important");
-      el.style.setProperty(
-        "transform",
-        "translate(-50%,-50%) translate("+c.x+"px,"+c.y+"px) rotate("+c.r+"deg)",
-        "important"
-      );
-    });
-
-    var toggle = getToggle(root);
-    if(toggle){
-      toggle.style.setProperty("pointer-events","auto","important");
-      toggle.style.setProperty("z-index","100500","important");
-    }
-  }
-
-  function toggleMenu(ev){
-    var root = getRoot();
-    if(!root) return;
-
-    if(ev){
-      ev.preventDefault();
-      ev.stopPropagation();
-      if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
-    }
-
-    root.classList.toggle("open");
-
-    setTimeout(forcePapatya, 0);
-    setTimeout(forcePapatya, 40);
-    setTimeout(forcePapatya, 120);
-    setTimeout(forcePapatya, 260);
-  }
-
-  function bind(){
-    var root = getRoot();
-    if(!root) return false;
-
-    var toggle = getToggle(root);
-    if(!toggle) return false;
-
-    if(toggle.__EG_FAN12P_V9_BOUND__) return true;
-    toggle.__EG_FAN12P_V9_BOUND__ = true;
-
-    toggle.addEventListener("click", toggleMenu, true);
-    toggle.addEventListener("touchstart", toggleMenu, {capture:true, passive:false});
-
-    toggle.style.setProperty("pointer-events","auto","important");
-    toggle.style.setProperty("cursor","pointer","important");
-    toggle.style.setProperty("z-index","100500","important");
-
-    return true;
-  }
-
-  function boot(){
-    bind();
-    forcePapatya();
-
-    var root = getRoot();
-    if(root && window.MutationObserver && !root.__EG_FAN12P_V9_OBS__){
-      root.__EG_FAN12P_V9_OBS__ = true;
-      new MutationObserver(function(){
-        bind();
-        forcePapatya();
-      }).observe(root, {attributes:true, subtree:true, childList:true});
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", boot);
-  document.addEventListener("click", function(ev){
-    var root = getRoot();
-    if(!root) return;
-    var toggle = getToggle(root);
-    if(toggle && (ev.target === toggle || toggle.contains(ev.target))){
-      toggleMenu(ev);
-    }
-  }, true);
-
-  setInterval(boot, 700);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v9_inner_e:
-            print("ERATGUARD FAN-12P V9 TAP TOGGLE INNER ERROR:", _eg_f12p_v9_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v9_tap_toggle_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v9_tap_toggle_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v9_tap_toggle_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V9 TAP TOGGLE FIX ACTIVE")
-
-except Exception as _eg_f12p_v9_e:
-    print("ERATGUARD FAN-12P V9 TAP TOGGLE FIX ERROR:", _eg_f12p_v9_e)
-# ===== ERATGUARD FAN-12P V9 TAP TOGGLE FIX END =====
-
-# ===== ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX START =====
-# Ekrandaki MENÜ metni vardı ama gerçek button bulunmadı.
-# V10 görünmez katman kullanmaz; gerçek, görünen, tıklanabilir MENÜ butonu ekler.
-
-try:
-    from flask import request as _eg_f12p_v10_request
-
-    def _eg_fan12p_v10_real_button_response(response):
-        try:
-            path = (_eg_f12p_v10_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html or "eg-user-fan3-panel" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX" not in html:
-                inject = """
-<style id="eg-fan12p-v10-real-menu-button-css">
-/* ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX */
-
-/* Gerçek tıklanabilir MENÜ butonu */
-#eg-fan12p-real-menu-btn{
-  position:fixed!important;
-  right:18px!important;
-  top:50%!important;
-  width:94px!important;
-  height:94px!important;
-  border-radius:999px!important;
-  border:1px solid rgba(86,169,255,.85)!important;
-  background:
-    radial-gradient(circle at 35% 28%, rgba(132,205,255,.95), rgba(12,83,165,.92) 44%, rgba(3,21,56,.98) 76%)!important;
-  box-shadow:
-    0 0 0 2px rgba(46,255,141,.22),
-    0 0 22px rgba(63,160,255,.75),
-    0 0 34px rgba(35,255,137,.28)!important;
-  color:#fff!important;
-  z-index:2147483000!important;
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:center!important;
-  justify-content:center!important;
-  gap:2px!important;
-  cursor:pointer!important;
-  pointer-events:auto!important;
-  touch-action:manipulation!important;
-  -webkit-tap-highlight-color:transparent!important;
-  user-select:none!important;
-  padding:0!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-e{
-  width:48px!important;
-  height:48px!important;
-  border-radius:999px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  font-weight:900!important;
-  font-size:28px!important;
-  color:rgba(210,240,255,.9)!important;
-  border:2px solid rgba(154,219,255,.78)!important;
-  background:rgba(255,255,255,.08)!important;
-  line-height:1!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-label{
-  font-size:11px!important;
-  font-weight:900!important;
-  letter-spacing:.10em!important;
-  color:#eaf6ff!important;
-  line-height:1!important;
-}
-
-/* Açık durumda buton hedef imza görselindeki gibi merkezde */
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  left:50%!important;
-  top:67%!important;
-  right:auto!important;
-  transform:translate(-50%,-50%)!important;
-  z-index:2147483600!important;
-}
-
-/* Paneli body class ile açıyoruz; root class'a bağlı kalmıyoruz */
-body.eg-fan12p-v10-open .eg-user-fan3-panel{
-  position:fixed!important;
-  left:50%!important;
-  top:67%!important;
-  right:auto!important;
-  bottom:auto!important;
-  width:0!important;
-  height:0!important;
-  min-width:0!important;
-  min-height:0!important;
-  max-width:none!important;
-  max-height:none!important;
-  overflow:visible!important;
-  contain:none!important;
-  display:block!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  transform:translate(-50%,-50%)!important;
-  z-index:2147482500!important;
-}
-
-/* Kapalıyken itemlar görünmesin */
-body:not(.eg-fan12p-v10-open) .eg-user-fan3-panel .eg-user-fan3-item{
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-
-/* Açıkken ortak yaprak ölçüsü */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
-  position:absolute!important;
-  left:0!important;
-  top:0!important;
-  width:112px!important;
-  min-width:112px!important;
-  max-width:112px!important;
-  height:52px!important;
-  min-height:52px!important;
-  max-height:52px!important;
-  padding:5px 7px!important;
-  border-radius:21px!important;
-  box-sizing:border-box!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  z-index:2147482600!important;
-  transform-origin:center center!important;
-}
-
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
-  font-size:10px!important;
-  line-height:1.05!important;
-}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
-  font-size:7.2px!important;
-  line-height:1!important;
-}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item em{
-  font-size:10px!important;
-}
-
-/* Papatya koordinatları */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-126px) rotate(90deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(63px,-109px) rotate(60deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(109px,-63px) rotate(30deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(126px,0px) rotate(0deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(109px,63px) rotate(-30deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(63px,109px) rotate(-60deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,126px) rotate(-90deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-63px,109px) rotate(60deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-109px,63px) rotate(30deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-126px,0px) rotate(0deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-109px,-63px) rotate(-30deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-63px,-109px) rotate(-60deg)!important}
-</style>
-
-<script id="eg-fan12p-v10-real-menu-button-js">
-/* ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX */
-(function(){
-  if(window.__EG_FAN12P_V10_REAL_BUTTON_READY__) return;
-  window.__EG_FAN12P_V10_REAL_BUTTON_READY__ = true;
-
-  function makeButton(){
-    var btn = document.getElementById("eg-fan12p-real-menu-btn");
-    if(!btn){
-      btn = document.createElement("button");
-      btn.id = "eg-fan12p-real-menu-btn";
-      btn.type = "button";
-      btn.setAttribute("aria-label", "FAN-12P Menü");
-      btn.innerHTML = '<span class="eg-v10-e">E</span><span class="eg-v10-label">MENÜ</span>';
-      document.body.appendChild(btn);
-    }
-
-    if(!btn.__EG_FAN12P_V10_BOUND__){
-      btn.__EG_FAN12P_V10_BOUND__ = true;
-
-      function toggle(ev){
-        if(ev){
-          ev.preventDefault();
-          ev.stopPropagation();
-          if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
-        }
-        document.body.classList.toggle("eg-fan12p-v10-open");
-      }
-
-      btn.addEventListener("click", toggle, true);
-      btn.addEventListener("touchstart", toggle, {capture:true, passive:false});
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", makeButton);
-  setInterval(makeButton, 800);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v10_inner_e:
-            print("ERATGUARD FAN-12P V10 REAL MENU BUTTON INNER ERROR:", _eg_f12p_v10_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v10_real_button_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v10_real_button_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v10_real_button_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX ACTIVE")
-
-except Exception as _eg_f12p_v10_e:
-    print("ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX ERROR:", _eg_f12p_v10_e)
-# ===== ERATGUARD FAN-12P V10 REAL MENU BUTTON FIX END =====
-
-# ===== ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU START =====
-# V11: Çalışan V10 gerçek butonu korunur; yapraklar gerçek papatya/petal formuna alınır.
-
-try:
-    from flask import request as _eg_f12p_v11_request
-
-    def _eg_fan12p_v11_true_petal_response(response):
-        try:
-            path = (_eg_f12p_v11_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html or "eg-user-fan3-panel" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU" not in html:
-                inject = """
-<style id="eg-fan12p-v11-true-petal-css">
-/* ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU */
-
-/* V11 merkez ayarı */
-body.eg-fan12p-v10-open .eg-user-fan3-panel{
-  position:fixed!important;
-  left:50%!important;
-  top:68.5%!important;
-  width:0!important;
-  height:0!important;
-  transform:translate(-50%,-50%)!important;
-  overflow:visible!important;
-  contain:none!important;
-  display:block!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  z-index:2147482500!important;
-}
-
-/* Gerçek MENÜ butonu V11 merkez */
-#eg-fan12p-real-menu-btn{
-  width:88px!important;
-  height:88px!important;
-  right:18px!important;
-  top:50%!important;
-  border-radius:999px!important;
-  border:1px solid rgba(106,210,255,.95)!important;
-  background:
-    radial-gradient(circle at 34% 24%, rgba(157,228,255,.98), rgba(28,124,210,.96) 38%, rgba(3,24,70,.99) 78%)!important;
-  box-shadow:
-    0 0 0 2px rgba(35,255,137,.26),
-    0 0 18px rgba(62,177,255,.85),
-    0 0 30px rgba(26,255,144,.42)!important;
-  z-index:2147483600!important;
-}
-
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  left:50%!important;
-  top:68.5%!important;
-  right:auto!important;
-  transform:translate(-50%,-50%)!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-e{
-  width:48px!important;
-  height:48px!important;
-  font-size:28px!important;
-  border:2px solid rgba(166,229,255,.82)!important;
-  background:rgba(255,255,255,.09)!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-label{
-  font-size:11px!important;
-  letter-spacing:.11em!important;
-}
-
-/* Kapalıyken yapraklar tamamen kapalı */
-body:not(.eg-fan12p-v10-open) .eg-user-fan3-panel .eg-user-fan3-item{
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-  transform:translate(-50%,-50%) scale(.2)!important;
-}
-
-/* V11 gerçek yaprak gövdesi */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
-  position:absolute!important;
-  left:0!important;
-  top:0!important;
-
-  width:72px!important;
-  min-width:72px!important;
-  max-width:72px!important;
-  height:148px!important;
-  min-height:148px!important;
-  max-height:148px!important;
-
-  padding:10px 7px 12px!important;
-  box-sizing:border-box!important;
-  border-radius:42px 42px 34px 34px!important;
-
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:center!important;
-  justify-content:flex-start!important;
-  gap:4px!important;
-
-  overflow:hidden!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  z-index:2147482600!important;
-  transform-origin:center center!important;
-
-  background:
-    radial-gradient(circle at 50% 8%, rgba(38,255,151,.20), transparent 24%),
-    linear-gradient(180deg, rgba(8,39,84,.98), rgba(3,18,49,.98))!important;
-
-  border:1px solid rgba(29,244,151,.82)!important;
-  box-shadow:
-    inset 0 0 18px rgba(54,174,255,.22),
-    0 0 9px rgba(33,255,151,.75),
-    0 0 18px rgba(43,167,255,.44)!important;
-
-  color:#fff!important;
-  text-decoration:none!important;
-}
-
-/* Yaprak içi ikon ve metin */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item em{
-  order:2!important;
-  width:34px!important;
-  height:34px!important;
-  min-width:34px!important;
-  min-height:34px!important;
-  border-radius:999px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  font-style:normal!important;
-  font-size:22px!important;
-  line-height:1!important;
-  margin:6px 0 2px!important;
-  background:rgba(34,81,156,.72)!important;
-  box-shadow:0 0 10px rgba(50,171,255,.38)!important;
-}
-
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
-  order:3!important;
-  display:block!important;
-  width:100%!important;
-  text-align:center!important;
-  font-size:10.5px!important;
-  font-weight:900!important;
-  line-height:1.05!important;
-  color:#ffffff!important;
-  text-shadow:0 1px 5px rgba(0,0,0,.55)!important;
-  margin:1px 0 0!important;
-}
-
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
-  order:4!important;
-  display:block!important;
-  width:100%!important;
-  text-align:center!important;
-  font-size:7.4px!important;
-  font-weight:700!important;
-  line-height:1.05!important;
-  color:rgba(222,239,255,.88)!important;
-  margin:0!important;
-}
-
-/* Dış uç numarası */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::before{
-  content:""!important;
-  order:1!important;
-  width:30px!important;
-  height:30px!important;
-  border-radius:999px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  font-size:11px!important;
-  font-weight:900!important;
-  letter-spacing:.02em!important;
-  color:#2cff92!important;
-  border:1px solid rgba(46,255,146,.75)!important;
-  background:rgba(2,30,44,.86)!important;
-  box-shadow:0 0 9px rgba(46,255,146,.42)!important;
-}
-
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i1::before{content:"01"!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i2::before{content:"02"!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i3::before{content:"03"!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i4::before{content:"04"!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i5::before{content:"05"!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i6::before{content:"06"!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i7::before{content:"07"!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i8::before{content:"08"!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i9::before{content:"09"!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i10::before{content:"10"!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i11::before{content:"11"!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i12::before{content:"12"!important}
-
-/* V11 papatya koordinatları: uzun yaprak, merkezden dışarı */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-122px) rotate(0deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(61px,-106px) rotate(30deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(106px,-61px) rotate(60deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(122px,0px) rotate(90deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(106px,61px) rotate(120deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(61px,106px) rotate(150deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,122px) rotate(180deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-61px,106px) rotate(210deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-106px,61px) rotate(240deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-122px,0px) rotate(270deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-106px,-61px) rotate(300deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-61px,-106px) rotate(330deg)!important}
-
-/* Bağlantı çizgisi hissi */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::after{
-  content:""!important;
-  position:absolute!important;
-  left:50%!important;
-  bottom:-16px!important;
-  width:2px!important;
-  height:18px!important;
-  transform:translateX(-50%)!important;
-  background:linear-gradient(180deg, rgba(45,255,153,.7), rgba(58,183,255,.2))!important;
-  box-shadow:0 0 8px rgba(45,255,153,.7)!important;
-}
-
-/* Küçük ekranlar için daha kompakt */
-@media(max-width:390px){
-  body.eg-fan12p-v10-open .eg-user-fan3-panel,
-  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-    top:69%!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
-    width:66px!important;
-    min-width:66px!important;
-    max-width:66px!important;
-    height:136px!important;
-    min-height:136px!important;
-    max-height:136px!important;
-    padding:8px 6px 10px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item em{
-    width:30px!important;
-    height:30px!important;
-    min-width:30px!important;
-    min-height:30px!important;
-    font-size:19px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
-    font-size:9.4px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
-    font-size:6.8px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::before{
-    width:26px!important;
-    height:26px!important;
-    font-size:10px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-112px) rotate(0deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(56px,-97px) rotate(30deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(97px,-56px) rotate(60deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(112px,0px) rotate(90deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(97px,56px) rotate(120deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(56px,97px) rotate(150deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,112px) rotate(180deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-56px,97px) rotate(210deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-97px,56px) rotate(240deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-112px,0px) rotate(270deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-97px,-56px) rotate(300deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-56px,-97px) rotate(330deg)!important}
-}
-</style>
-
-<script id="eg-fan12p-v11-true-petal-js">
-/* ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU */
-(function(){
-  if(window.__EG_FAN12P_V11_TRUE_PETAL_READY__) return;
-  window.__EG_FAN12P_V11_TRUE_PETAL_READY__ = true;
-
-  function ensureV11(){
-    var btn = document.getElementById("eg-fan12p-real-menu-btn");
-    if(btn){
-      btn.setAttribute("data-fan12p-v11", "true");
-    }
-
-    var panel = document.querySelector(".eg-user-fan3-panel");
-    if(panel){
-      panel.setAttribute("data-fan12p-v11", "true");
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", ensureV11);
-  document.addEventListener("click", ensureV11, true);
-  setInterval(ensureV11, 900);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v11_inner_e:
-            print("ERATGUARD FAN-12P V11 TRUE PETAL INNER ERROR:", _eg_f12p_v11_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v11_true_petal_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v11_true_petal_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v11_true_petal_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU ACTIVE")
-
-except Exception as _eg_f12p_v11_e:
-    print("ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU ERROR:", _eg_f12p_v11_e)
-# ===== ERATGUARD FAN-12P V11 TRUE PETAL FINAL MENU END =====
-
-# ===== ERATGUARD FAN-12P V12 PETAL POLISH FIX START =====
-# V12: V11'de em numaraları ikon gibi büyümüştü. em küçük numara yapılır, b ikon yapılır, çift numara kapatılır.
-
-try:
-    from flask import request as _eg_f12p_v12_request
-
-    def _eg_fan12p_v12_petal_polish_response(response):
-        try:
-            path = (_eg_f12p_v12_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html or "eg-user-fan3-panel" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V12 PETAL POLISH FIX" not in html:
-                inject = """
-<style id="eg-fan12p-v12-petal-polish-css">
-/* ERATGUARD FAN-12P V12 PETAL POLISH FIX */
-
-/* Merkez biraz aşağı, daha kompakt */
-body.eg-fan12p-v10-open .eg-user-fan3-panel{
-  top:71%!important;
-}
-
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  top:71%!important;
-  width:82px!important;
-  height:82px!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-e{
-  width:44px!important;
-  height:44px!important;
-  font-size:26px!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-label{
-  font-size:10.5px!important;
-}
-
-/* V11 çift numara pseudo balonu kapat */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::before{
-  display:none!important;
-  content:none!important;
-}
-
-/* Yaprakları daha küçük ve temiz hale getir */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
-  width:62px!important;
-  min-width:62px!important;
-  max-width:62px!important;
-  height:126px!important;
-  min-height:126px!important;
-  max-height:126px!important;
-  padding:7px 5px 9px!important;
-  border-radius:36px 36px 30px 30px!important;
-  gap:3px!important;
-  overflow:hidden!important;
-}
-
-/* HTML içindeki gerçek ikon: <b> */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item b{
-  order:2!important;
-  width:30px!important;
-  height:30px!important;
-  min-width:30px!important;
-  min-height:30px!important;
-  border-radius:999px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  font-size:19px!important;
-  font-weight:400!important;
-  line-height:1!important;
-  font-style:normal!important;
-  margin:4px 0 2px!important;
-  background:rgba(34,81,156,.72)!important;
-  box-shadow:0 0 10px rgba(50,171,255,.36)!important;
-}
-
-/* HTML içindeki gerçek numara: <em> */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item em{
-  order:1!important;
-  width:28px!important;
-  height:28px!important;
-  min-width:28px!important;
-  min-height:28px!important;
-  border-radius:999px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  font-style:normal!important;
-  font-size:10.5px!important;
-  font-weight:900!important;
-  line-height:1!important;
-  color:#2cff92!important;
-  border:1px solid rgba(46,255,146,.78)!important;
-  background:rgba(2,30,44,.90)!important;
-  box-shadow:0 0 9px rgba(46,255,146,.46)!important;
-  margin:0!important;
-  padding:0!important;
-}
-
-/* Yazı bloğu */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item span{
-  order:3!important;
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:center!important;
-  justify-content:flex-start!important;
-  width:100%!important;
-  min-width:0!important;
-  margin:0!important;
-  padding:0!important;
-}
-
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
-  display:block!important;
-  width:100%!important;
-  text-align:center!important;
-  font-size:9.3px!important;
-  font-weight:900!important;
-  line-height:1.02!important;
-  color:#ffffff!important;
-  margin:0!important;
-}
-
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
-  display:block!important;
-  width:100%!important;
-  text-align:center!important;
-  font-size:6.5px!important;
-  font-weight:700!important;
-  line-height:1.02!important;
-  color:rgba(222,239,255,.86)!important;
-  margin:1px 0 0!important;
-}
-
-/* Daha dar papatya koordinatları */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-102px) rotate(0deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(51px,-88px) rotate(30deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(88px,-51px) rotate(60deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(102px,0px) rotate(90deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(88px,51px) rotate(120deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(51px,88px) rotate(150deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,102px) rotate(180deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-51px,88px) rotate(210deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-88px,51px) rotate(240deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-102px,0px) rotate(270deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-88px,-51px) rotate(300deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-51px,-88px) rotate(330deg)!important}
-
-/* Bağlantı çizgisi daha kısa */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::after{
-  bottom:-10px!important;
-  height:12px!important;
-}
-
-/* Küçük ekran ekstra sıkı */
-@media(max-width:390px){
-  body.eg-fan12p-v10-open .eg-user-fan3-panel,
-  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-    top:72%!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
-    width:58px!important;
-    min-width:58px!important;
-    max-width:58px!important;
-    height:118px!important;
-    min-height:118px!important;
-    max-height:118px!important;
-    padding:6px 4px 8px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item b{
-    width:28px!important;
-    height:28px!important;
-    min-width:28px!important;
-    min-height:28px!important;
-    font-size:18px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item em{
-    width:25px!important;
-    height:25px!important;
-    min-width:25px!important;
-    min-height:25px!important;
-    font-size:9.8px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
-    font-size:8.6px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
-    font-size:6px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-94px) rotate(0deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(47px,-81px) rotate(30deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(81px,-47px) rotate(60deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(94px,0px) rotate(90deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(81px,47px) rotate(120deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(47px,81px) rotate(150deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,94px) rotate(180deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-47px,81px) rotate(210deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-81px,47px) rotate(240deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-94px,0px) rotate(270deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-81px,-47px) rotate(300deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-47px,-81px) rotate(330deg)!important}
-}
-</style>
-
-<script id="eg-fan12p-v12-petal-polish-js">
-/* ERATGUARD FAN-12P V12 PETAL POLISH FIX */
-(function(){
-  if(window.__EG_FAN12P_V12_POLISH_READY__) return;
-  window.__EG_FAN12P_V12_POLISH_READY__ = true;
-
-  function mark(){
-    var panel = document.querySelector(".eg-user-fan3-panel");
-    if(panel) panel.setAttribute("data-fan12p-v12", "true");
-    var btn = document.getElementById("eg-fan12p-real-menu-btn");
-    if(btn) btn.setAttribute("data-fan12p-v12", "true");
-  }
-
-  document.addEventListener("DOMContentLoaded", mark);
-  document.addEventListener("click", mark, true);
-  setInterval(mark, 900);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v12_inner_e:
-            print("ERATGUARD FAN-12P V12 PETAL POLISH INNER ERROR:", _eg_f12p_v12_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v12_petal_polish_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v12_petal_polish_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v12_petal_polish_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V12 PETAL POLISH FIX ACTIVE")
-
-except Exception as _eg_f12p_v12_e:
-    print("ERATGUARD FAN-12P V12 PETAL POLISH FIX ERROR:", _eg_f12p_v12_e)
-# ===== ERATGUARD FAN-12P V12 PETAL POLISH FIX END =====
-
-# ===== ERATGUARD FAN-12P V13 FINAL LOCK MENU START =====
-# V13 FINAL: Eski hayalet menü görseli kapatılır, sadece gerçek V10 butonu kalır.
-# Yapraklar mini-final ölçüye alınır; taşma ve kart bindirme azaltılır.
-
-try:
-    from flask import request as _eg_f12p_v13_request
-
-    def _eg_fan12p_v13_final_lock_response(response):
-        try:
-            path = (_eg_f12p_v13_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html or "eg-user-fan3-panel" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V13 FINAL LOCK MENU" not in html:
-                inject = """
-<style id="eg-fan12p-v13-final-lock-css">
-/* ERATGUARD FAN-12P V13 FINAL LOCK MENU */
-
-/* Eski hayalet menü / sağdaki eski E görüntüsünü nötrle */
-.eg-user-fan3{
-  background:transparent!important;
-  border:0!important;
-  box-shadow:none!important;
-  outline:0!important;
-  pointer-events:none!important;
-}
-
-.eg-user-fan3::before,
-.eg-user-fan3::after{
-  display:none!important;
-  content:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-}
-
-.eg-user-fan3 > :not(.eg-user-fan3-panel){
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-
-/* Panel açıkken sadece yaprak paneli aktif */
-body.eg-fan12p-v10-open .eg-user-fan3-panel{
-  position:fixed!important;
-  left:50%!important;
-  top:73%!important;
-  width:0!important;
-  height:0!important;
-  transform:translate(-50%,-50%)!important;
-  overflow:visible!important;
-  contain:none!important;
-  display:block!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  z-index:2147482500!important;
-}
-
-/* Gerçek merkez buton: tek merkez */
-#eg-fan12p-real-menu-btn{
-  width:78px!important;
-  height:78px!important;
-  right:18px!important;
-  top:50%!important;
-  border-radius:999px!important;
-  border:1px solid rgba(121,222,255,.95)!important;
-  background:
-    radial-gradient(circle at 35% 22%, rgba(165,232,255,.98), rgba(25,121,210,.96) 38%, rgba(3,21,64,.99) 78%)!important;
-  box-shadow:
-    0 0 0 2px rgba(36,255,142,.24),
-    0 0 16px rgba(64,178,255,.82),
-    0 0 26px rgba(33,255,148,.38)!important;
-  z-index:2147483600!important;
-  pointer-events:auto!important;
-}
-
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  left:50%!important;
-  top:73%!important;
-  right:auto!important;
-  transform:translate(-50%,-50%)!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-e{
-  width:41px!important;
-  height:41px!important;
-  font-size:24px!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-label{
-  font-size:10px!important;
-  letter-spacing:.10em!important;
-}
-
-/* Kapalıyken yapraklar kesin kapalı */
-body:not(.eg-fan12p-v10-open) .eg-user-fan3-panel .eg-user-fan3-item{
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-
-/* Final mini yaprak */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
-  position:absolute!important;
-  left:0!important;
-  top:0!important;
-
-  width:54px!important;
-  min-width:54px!important;
-  max-width:54px!important;
-  height:108px!important;
-  min-height:108px!important;
-  max-height:108px!important;
-
-  padding:5px 4px 7px!important;
-  border-radius:32px 32px 27px 27px!important;
-  box-sizing:border-box!important;
-
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:center!important;
-  justify-content:flex-start!important;
-  gap:2px!important;
-
-  overflow:hidden!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  z-index:2147482600!important;
-  transform-origin:center center!important;
-
-  background:
-    radial-gradient(circle at 50% 8%, rgba(39,255,153,.18), transparent 24%),
-    linear-gradient(180deg, rgba(8,39,84,.98), rgba(3,18,49,.98))!important;
-
-  border:1px solid rgba(34,255,154,.82)!important;
-  box-shadow:
-    inset 0 0 15px rgba(54,174,255,.20),
-    0 0 8px rgba(33,255,151,.70),
-    0 0 15px rgba(43,167,255,.38)!important;
-
-  color:#fff!important;
-  text-decoration:none!important;
-}
-
-/* Çift numara yok */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::before{
-  display:none!important;
-  content:none!important;
-}
-
-/* Bağ çizgisi kısa */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item::after{
-  bottom:-8px!important;
-  height:10px!important;
-}
-
-/* İkon: <b> */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item b{
-  order:2!important;
-  width:25px!important;
-  height:25px!important;
-  min-width:25px!important;
-  min-height:25px!important;
-  border-radius:999px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  font-size:16px!important;
-  font-weight:400!important;
-  line-height:1!important;
-  font-style:normal!important;
-  margin:3px 0 1px!important;
-  background:rgba(34,81,156,.72)!important;
-  box-shadow:0 0 8px rgba(50,171,255,.34)!important;
-}
-
-/* Numara: <em> */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item em{
-  order:1!important;
-  width:23px!important;
-  height:23px!important;
-  min-width:23px!important;
-  min-height:23px!important;
-  border-radius:999px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  font-style:normal!important;
-  font-size:9px!important;
-  font-weight:900!important;
-  line-height:1!important;
-  color:#2cff92!important;
-  border:1px solid rgba(46,255,146,.78)!important;
-  background:rgba(2,30,44,.90)!important;
-  box-shadow:0 0 8px rgba(46,255,146,.44)!important;
-  margin:0!important;
-  padding:0!important;
-}
-
-/* Metin */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item span{
-  order:3!important;
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:center!important;
-  justify-content:flex-start!important;
-  width:100%!important;
-  min-width:0!important;
-  margin:0!important;
-  padding:0!important;
-}
-
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
-  display:block!important;
-  width:100%!important;
-  text-align:center!important;
-  font-size:8px!important;
-  font-weight:900!important;
-  line-height:1!important;
-  color:#ffffff!important;
-  margin:0!important;
-}
-
-body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
-  display:block!important;
-  width:100%!important;
-  text-align:center!important;
-  font-size:5.6px!important;
-  font-weight:700!important;
-  line-height:1!important;
-  color:rgba(222,239,255,.84)!important;
-  margin:1px 0 0!important;
-}
-
-/* Final dar çap koordinatları */
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-84px) rotate(0deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(42px,-73px) rotate(30deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(73px,-42px) rotate(60deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(84px,0px) rotate(90deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(73px,42px) rotate(120deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(42px,73px) rotate(150deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,84px) rotate(180deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-42px,73px) rotate(210deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-73px,42px) rotate(240deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-84px,0px) rotate(270deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-73px,-42px) rotate(300deg)!important}
-body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-42px,-73px) rotate(330deg)!important}
-
-/* Çok küçük ekran */
-@media(max-width:390px){
-  body.eg-fan12p-v10-open .eg-user-fan3-panel,
-  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-    top:74%!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item{
-    width:50px!important;
-    min-width:50px!important;
-    max-width:50px!important;
-    height:100px!important;
-    min-height:100px!important;
-    max-height:100px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item strong{
-    font-size:7.4px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .eg-user-fan3-item small{
-    font-size:5.2px!important;
-  }
-
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i12{transform:translate(-50%,-50%) translate(0px,-78px) rotate(0deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i1{transform:translate(-50%,-50%) translate(39px,-68px) rotate(30deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i2{transform:translate(-50%,-50%) translate(68px,-39px) rotate(60deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i3{transform:translate(-50%,-50%) translate(78px,0px) rotate(90deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i4{transform:translate(-50%,-50%) translate(68px,39px) rotate(120deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i5{transform:translate(-50%,-50%) translate(39px,68px) rotate(150deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i6{transform:translate(-50%,-50%) translate(0px,78px) rotate(180deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i7{transform:translate(-50%,-50%) translate(-39px,68px) rotate(210deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i8{transform:translate(-50%,-50%) translate(-68px,39px) rotate(240deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i9{transform:translate(-50%,-50%) translate(-78px,0px) rotate(270deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i10{transform:translate(-50%,-50%) translate(-68px,-39px) rotate(300deg)!important}
-  body.eg-fan12p-v10-open .eg-user-fan3-panel .i11{transform:translate(-50%,-50%) translate(-39px,-68px) rotate(330deg)!important}
-}
-</style>
-
-<script id="eg-fan12p-v13-final-lock-js">
-/* ERATGUARD FAN-12P V13 FINAL LOCK MENU */
-(function(){
-  if(window.__EG_FAN12P_V13_FINAL_LOCK_READY__) return;
-  window.__EG_FAN12P_V13_FINAL_LOCK_READY__ = true;
-
-  function mark(){
-    var panel = document.querySelector(".eg-user-fan3-panel");
-    if(panel) panel.setAttribute("data-fan12p-v13", "true");
-    var btn = document.getElementById("eg-fan12p-real-menu-btn");
-    if(btn) btn.setAttribute("data-fan12p-v13", "true");
-  }
-
-  document.addEventListener("DOMContentLoaded", mark);
-  document.addEventListener("click", mark, true);
-  setInterval(mark, 900);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v13_inner_e:
-            print("ERATGUARD FAN-12P V13 FINAL LOCK INNER ERROR:", _eg_f12p_v13_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v13_final_lock_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v13_final_lock_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v13_final_lock_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V13 FINAL LOCK MENU ACTIVE")
-
-except Exception as _eg_f12p_v13_e:
-    print("ERATGUARD FAN-12P V13 FINAL LOCK MENU ERROR:", _eg_f12p_v13_e)
-# ===== ERATGUARD FAN-12P V13 FINAL LOCK MENU END =====
-
-# ===== ERATGUARD FAN-12P V14 SAFE ACCORDION MENU START =====
-# V14: Başarısız papatya panel kapatılır. MENÜ butonu soldan sağa açılan stabil akordion menüye bağlanır.
-
-try:
-    from flask import request as _eg_f12p_v14_request
-
-    def _eg_fan12p_v14_safe_accordion_response(response):
-        try:
-            path = (_eg_f12p_v14_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V14 SAFE ACCORDION MENU" not in html:
-                inject = """
-<style id="eg-fan12p-v14-safe-accordion-css">
-/* ERATGUARD FAN-12P V14 SAFE ACCORDION MENU */
-
-/* Eski papatya/yaprak panel tamamen kapalı */
-.eg-user-fan3,
-.eg-user-fan3-panel,
-.eg-user-fan3-item{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-
-/* Gerçek MENÜ butonu tekrar sade sağda */
-#eg-fan12p-real-menu-btn{
-  position:fixed!important;
-  right:18px!important;
-  top:50%!important;
-  left:auto!important;
-  transform:translateY(-50%)!important;
-  width:84px!important;
-  height:84px!important;
-  border-radius:999px!important;
-  border:1px solid rgba(118,220,255,.95)!important;
-  background:
-    radial-gradient(circle at 35% 22%, rgba(165,232,255,.98), rgba(25,121,210,.96) 38%, rgba(3,21,64,.99) 78%)!important;
-  box-shadow:
-    0 0 0 2px rgba(36,255,142,.22),
-    0 0 16px rgba(64,178,255,.75),
-    0 0 26px rgba(33,255,148,.34)!important;
-  z-index:2147483600!important;
-  pointer-events:auto!important;
-  cursor:pointer!important;
-}
-
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  right:18px!important;
-  top:50%!important;
-  left:auto!important;
-  transform:translateY(-50%)!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-e{
-  width:44px!important;
-  height:44px!important;
-  font-size:26px!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-label{
-  font-size:10px!important;
-}
-
-/* Arka karartma */
-#eg-fan12p-accordion-backdrop{
-  position:fixed!important;
-  inset:0!important;
-  background:rgba(0,0,0,.46)!important;
-  backdrop-filter:blur(3px)!important;
-  -webkit-backdrop-filter:blur(3px)!important;
-  z-index:2147482500!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-  transition:opacity .22s ease, visibility .22s ease!important;
-}
-
-body.eg-fan12p-v10-open #eg-fan12p-accordion-backdrop{
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-}
-
-/* Soldan sağa açılan akordion panel */
-#eg-fan12p-accordion-drawer{
-  position:fixed!important;
-  left:0!important;
-  top:0!important;
-  bottom:0!important;
-  width:min(86vw, 370px)!important;
-  background:
-    radial-gradient(circle at 20% 0%, rgba(32,255,143,.18), transparent 30%),
-    linear-gradient(180deg, rgba(2,22,22,.98), rgba(0,8,13,.98))!important;
-  border-right:1px solid rgba(37,255,145,.62)!important;
-  box-shadow:
-    18px 0 44px rgba(0,0,0,.58),
-    0 0 24px rgba(31,255,145,.22)!important;
-  z-index:2147483000!important;
-  transform:translateX(-105%)!important;
-  transition:transform .28s cubic-bezier(.2,.9,.2,1)!important;
-  pointer-events:auto!important;
-  overflow-y:auto!important;
-  -webkit-overflow-scrolling:touch!important;
-  padding:20px 16px 24px!important;
-  box-sizing:border-box!important;
-}
-
-body.eg-fan12p-v10-open #eg-fan12p-accordion-drawer{
-  transform:translateX(0)!important;
-}
-
-.eg-fan12p-acc-head{
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:12px!important;
-  margin-bottom:16px!important;
-}
-
-.eg-fan12p-acc-title{
-  display:flex!important;
-  flex-direction:column!important;
-  gap:3px!important;
-}
-
-.eg-fan12p-acc-title strong{
-  color:#2cff92!important;
-  font-size:18px!important;
-  font-weight:900!important;
-  letter-spacing:.04em!important;
-}
-
-.eg-fan12p-acc-title small{
-  color:#44dfff!important;
-  font-size:11px!important;
-  font-weight:800!important;
-  letter-spacing:.22em!important;
-}
-
-#eg-fan12p-accordion-close{
-  width:42px!important;
-  height:42px!important;
-  border-radius:999px!important;
-  border:1px solid rgba(45,255,150,.55)!important;
-  background:rgba(7,35,32,.86)!important;
-  color:#fff!important;
-  font-size:26px!important;
-  line-height:1!important;
-  cursor:pointer!important;
-}
-
-.eg-fan12p-acc-list{
-  display:flex!important;
-  flex-direction:column!important;
-  gap:9px!important;
-}
-
-.eg-fan12p-acc-item{
-  display:grid!important;
-  grid-template-columns:34px 1fr 32px!important;
-  align-items:center!important;
-  gap:10px!important;
-  min-height:58px!important;
-  padding:9px 10px!important;
-  box-sizing:border-box!important;
-  border-radius:18px!important;
-  text-decoration:none!important;
-  color:#fff!important;
-  background:
-    linear-gradient(135deg, rgba(9,65,47,.92), rgba(5,22,45,.96))!important;
-  border:1px solid rgba(37,255,145,.38)!important;
-  box-shadow:
-    inset 0 0 16px rgba(57,170,255,.10),
-    0 0 10px rgba(30,255,144,.12)!important;
-}
-
-.eg-fan12p-acc-item:active{
-  transform:scale(.985)!important;
-}
-
-.eg-fan12p-acc-icon{
-  width:34px!important;
-  height:34px!important;
-  border-radius:12px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  background:rgba(35,92,165,.70)!important;
-  box-shadow:0 0 10px rgba(43,173,255,.24)!important;
-  font-size:20px!important;
-}
-
-.eg-fan12p-acc-text{
-  display:flex!important;
-  flex-direction:column!important;
-  gap:2px!important;
-  min-width:0!important;
-}
-
-.eg-fan12p-acc-text strong{
-  color:#fff!important;
-  font-size:13.5px!important;
-  font-weight:900!important;
-  line-height:1.05!important;
-}
-
-.eg-fan12p-acc-text small{
-  color:rgba(221,238,255,.76)!important;
-  font-size:10.5px!important;
-  font-weight:700!important;
-  line-height:1.05!important;
-}
-
-.eg-fan12p-acc-no{
-  width:30px!important;
-  height:30px!important;
-  border-radius:999px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  color:#2cff92!important;
-  border:1px solid rgba(46,255,146,.72)!important;
-  background:rgba(2,30,44,.85)!important;
-  font-size:10px!important;
-  font-weight:900!important;
-}
-
-.eg-fan12p-acc-foot{
-  margin-top:16px!important;
-  padding:12px 13px!important;
-  border-radius:18px!important;
-  border:1px solid rgba(37,255,145,.36)!important;
-  color:#2cff92!important;
-  display:flex!important;
-  justify-content:space-between!important;
-  align-items:center!important;
-  font-size:11px!important;
-  font-weight:900!important;
-  letter-spacing:.16em!important;
-}
-
-.eg-fan12p-acc-foot span:last-child{
-  color:#44dfff!important;
-}
-
-@media(max-width:390px){
-  #eg-fan12p-accordion-drawer{
-    width:88vw!important;
-    padding:18px 13px 22px!important;
-  }
-
-  .eg-fan12p-acc-item{
-    min-height:54px!important;
-    grid-template-columns:32px 1fr 30px!important;
-  }
-
-  .eg-fan12p-acc-text strong{
-    font-size:12.6px!important;
-  }
-
-  .eg-fan12p-acc-text small{
-    font-size:9.8px!important;
-  }
-}
-</style>
-
-<script id="eg-fan12p-v14-safe-accordion-js">
-/* ERATGUARD FAN-12P V14 SAFE ACCORDION MENU */
-(function(){
-  if(window.__EG_FAN12P_V14_ACCORDION_READY__) return;
-  window.__EG_FAN12P_V14_ACCORDION_READY__ = true;
-
-  var items = [
-    ["01","🏠","Ana Sayfa","Kontrol merkezi","/dashboard"],
-    ["02","🛡️","Koruma","SMS güvenlik motoru","/u/protection"],
-    ["03","🧠","AI Analiz","Risk taraması","/u/ai-analysis"],
-    ["04","📈","Raporlar","Güvenlik özetleri","/u/reports"],
-    ["05","🔔","Bildirimler","Güvenlik akışı","/u/notifications"],
-    ["06","🔑","Lisans","Hesap durumu","/u/license"],
-    ["07","👥","Topluluk","Geri bildirim","/u/community"],
-    ["08","⚙️","Ayarlar","Tercihler","/u/settings"],
-    ["09","📩","SMS Özet","Koruma özeti","/u/sms-summary"],
-    ["10","🚫","Blok SMS","Engellenen merkez","/u/blocked-sms"],
-    ["11","🕘","Geçmiş","Koruma geçmişi","/u/history"],
-    ["12","⭐","PRO","Final özellikleri","/u/pro"]
-  ];
-
-  function closeMenu(){
-    document.body.classList.remove("eg-fan12p-v10-open");
-  }
-
-  function ensureButton(){
-    var btn = document.getElementById("eg-fan12p-real-menu-btn");
-    if(!btn){
-      btn = document.createElement("button");
-      btn.id = "eg-fan12p-real-menu-btn";
-      btn.type = "button";
-      btn.setAttribute("aria-label", "FAN-12P Menü");
-      btn.innerHTML = '<span class="eg-v10-e">E</span><span class="eg-v10-label">MENÜ</span>';
-      document.body.appendChild(btn);
-    }
-
-    if(!btn.__EG_FAN12P_V14_BOUND__){
-      btn.__EG_FAN12P_V14_BOUND__ = true;
-      function toggle(ev){
-        if(ev){
-          ev.preventDefault();
-          ev.stopPropagation();
-          if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
-        }
-        document.body.classList.toggle("eg-fan12p-v10-open");
-      }
-      btn.addEventListener("click", toggle, true);
-      btn.addEventListener("touchstart", toggle, {capture:true, passive:false});
-    }
-  }
-
-  function ensureDrawer(){
-    if(!document.getElementById("eg-fan12p-accordion-backdrop")){
-      var back = document.createElement("div");
-      back.id = "eg-fan12p-accordion-backdrop";
-      document.body.appendChild(back);
-      back.addEventListener("click", closeMenu, true);
-      back.addEventListener("touchstart", function(ev){ ev.preventDefault(); closeMenu(); }, {capture:true, passive:false});
-    }
-
-    if(!document.getElementById("eg-fan12p-accordion-drawer")){
-      var drawer = document.createElement("aside");
-      drawer.id = "eg-fan12p-accordion-drawer";
-      drawer.setAttribute("aria-label", "FAN-12P Akordion Menü");
-
-      var list = items.map(function(it){
-        return '<a class="eg-fan12p-acc-item" href="'+it[4]+'">' +
-          '<span class="eg-fan12p-acc-icon">'+it[1]+'</span>' +
-          '<span class="eg-fan12p-acc-text"><strong>'+it[2]+'</strong><small>'+it[3]+'</small></span>' +
-          '<span class="eg-fan12p-acc-no">'+it[0]+'</span>' +
-        '</a>';
-      }).join("");
-
-      drawer.innerHTML =
-        '<div class="eg-fan12p-acc-head">' +
-          '<div class="eg-fan12p-acc-title"><strong>FAN-12P MENÜ</strong><small>COMMAND CENTER</small></div>' +
-          '<button id="eg-fan12p-accordion-close" type="button" aria-label="Menüyü kapat">×</button>' +
-        '</div>' +
-        '<nav class="eg-fan12p-acc-list">' + list + '</nav>' +
-        '<div class="eg-fan12p-acc-foot"><span>● KORUMA AKTİF</span><span>FAN-12P</span></div>';
-
-      document.body.appendChild(drawer);
-
-      var close = document.getElementById("eg-fan12p-accordion-close");
-      if(close){
-        close.addEventListener("click", function(ev){ ev.preventDefault(); closeMenu(); }, true);
-        close.addEventListener("touchstart", function(ev){ ev.preventDefault(); closeMenu(); }, {capture:true, passive:false});
-      }
-    }
-  }
-
-  function boot(){
-    ensureButton();
-    ensureDrawer();
-  }
-
-  document.addEventListener("DOMContentLoaded", boot);
-  setInterval(boot, 800);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v14_inner_e:
-            print("ERATGUARD FAN-12P V14 ACCORDION INNER ERROR:", _eg_f12p_v14_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v14_safe_accordion_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v14_safe_accordion_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v14_safe_accordion_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V14 SAFE ACCORDION MENU ACTIVE")
-
-except Exception as _eg_f12p_v14_e:
-    print("ERATGUARD FAN-12P V14 SAFE ACCORDION MENU ERROR:", _eg_f12p_v14_e)
-# ===== ERATGUARD FAN-12P V14 SAFE ACCORDION MENU END =====
-
-# ===== ERATGUARD FAN-12P V15 ACCORDION BUTTON HIDE POLISH START =====
-# V15: Akordion panel açıkken sağdaki E MENÜ butonu gizlenir; X kapatma butonu tek kontrol olur.
-
-try:
-    from flask import request as _eg_f12p_v15_request
-
-    def _eg_fan12p_v15_accordion_polish_response(response):
-        try:
-            path = (_eg_f12p_v15_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V15 ACCORDION BUTTON HIDE POLISH" not in html:
-                inject = """
-<style id="eg-fan12p-v15-accordion-polish-css">
-/* ERATGUARD FAN-12P V15 ACCORDION BUTTON HIDE POLISH */
-
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-  transform:translateY(-50%) scale(.72)!important;
-}
-
-/* Panel açıkken sağdaki bulanık alan biraz daha kararlı */
-body.eg-fan12p-v10-open #eg-fan12p-accordion-backdrop{
-  background:rgba(0,0,0,.54)!important;
-}
-
-/* Alt bar panel içinde daha net kalsın */
-.eg-fan12p-acc-foot{
-  margin-bottom:18px!important;
-}
-</style>
-
-<script id="eg-fan12p-v15-accordion-polish-js">
-/* ERATGUARD FAN-12P V15 ACCORDION BUTTON HIDE POLISH */
-(function(){
-  if(window.__EG_FAN12P_V15_ACCORDION_POLISH_READY__) return;
-  window.__EG_FAN12P_V15_ACCORDION_POLISH_READY__ = true;
-
-  function mark(){
-    var drawer = document.getElementById("eg-fan12p-accordion-drawer");
-    if(drawer) drawer.setAttribute("data-fan12p-v15", "true");
-  }
-
-  document.addEventListener("DOMContentLoaded", mark);
-  document.addEventListener("click", mark, true);
-  setInterval(mark, 900);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v15_inner_e:
-            print("ERATGUARD FAN-12P V15 ACCORDION POLISH INNER ERROR:", _eg_f12p_v15_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v15_accordion_polish_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v15_accordion_polish_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v15_accordion_polish_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V15 ACCORDION BUTTON HIDE POLISH ACTIVE")
-
-except Exception as _eg_f12p_v15_e:
-    print("ERATGUARD FAN-12P V15 ACCORDION BUTTON HIDE POLISH ERROR:", _eg_f12p_v15_e)
-# ===== ERATGUARD FAN-12P V15 ACCORDION BUTTON HIDE POLISH END =====
-
-# ===== ERATGUARD FAN-12P V16 COMPACT ACCORDION FIX START =====
-# V16: Akordion menü fazla büyük geldi. Panel daraltılır, satırlar küçültülür, E butonu açıkken gizlenir.
-
-try:
-    from flask import request as _eg_f12p_v16_request
-
-    def _eg_fan12p_v16_compact_accordion_response(response):
-        try:
-            path = (_eg_f12p_v16_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V16 COMPACT ACCORDION FIX" not in html:
-                inject = """
-<style id="eg-fan12p-v16-compact-accordion-css">
-/* ERATGUARD FAN-12P V16 COMPACT ACCORDION FIX */
-
-/* Açıkken sağdaki E MENÜ gizlensin; X kapatma yeterli */
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-  transform:translateY(-50%) scale(.65)!important;
-}
-
-/* Arka plan daha hafif */
-body.eg-fan12p-v10-open #eg-fan12p-accordion-backdrop{
-  background:rgba(0,0,0,.36)!important;
-  backdrop-filter:blur(2px)!important;
-  -webkit-backdrop-filter:blur(2px)!important;
-}
-
-/* Panel çok büyük olmasın */
-#eg-fan12p-accordion-drawer{
-  width:min(74vw, 310px)!important;
-  max-width:310px!important;
-  padding:16px 12px 18px!important;
-  border-right:1px solid rgba(37,255,145,.46)!important;
-}
-
-/* Başlık kompakt */
-.eg-fan12p-acc-head{
-  margin-bottom:12px!important;
-  gap:8px!important;
-}
-
-.eg-fan12p-acc-title strong{
-  font-size:15.5px!important;
-}
-
-.eg-fan12p-acc-title small{
-  font-size:9.5px!important;
-  letter-spacing:.18em!important;
-}
-
-#eg-fan12p-accordion-close{
-  width:36px!important;
-  height:36px!important;
-  font-size:23px!important;
-}
-
-/* Liste daha sıkı */
-.eg-fan12p-acc-list{
-  gap:7px!important;
-}
-
-.eg-fan12p-acc-item{
-  grid-template-columns:29px 1fr 27px!important;
-  gap:8px!important;
-  min-height:48px!important;
-  padding:7px 8px!important;
-  border-radius:15px!important;
-}
-
-.eg-fan12p-acc-icon{
-  width:29px!important;
-  height:29px!important;
-  border-radius:10px!important;
-  font-size:17px!important;
-}
-
-.eg-fan12p-acc-text strong{
-  font-size:11.8px!important;
-  line-height:1.02!important;
-}
-
-.eg-fan12p-acc-text small{
-  font-size:9px!important;
-  line-height:1.02!important;
-}
-
-.eg-fan12p-acc-no{
-  width:26px!important;
-  height:26px!important;
-  font-size:9px!important;
-}
-
-.eg-fan12p-acc-foot{
-  margin-top:12px!important;
-  margin-bottom:10px!important;
-  padding:10px 11px!important;
-  border-radius:15px!important;
-  font-size:9.5px!important;
-  letter-spacing:.12em!important;
-}
-
-/* Küçük ekran ekstra kompakt */
-@media(max-width:390px){
-  #eg-fan12p-accordion-drawer{
-    width:76vw!important;
-    max-width:300px!important;
-    padding:14px 10px 16px!important;
-  }
-
-  .eg-fan12p-acc-item{
-    min-height:46px!important;
-    grid-template-columns:28px 1fr 25px!important;
-    padding:6px 7px!important;
-  }
-
-  .eg-fan12p-acc-icon{
-    width:28px!important;
-    height:28px!important;
-    font-size:16px!important;
-  }
-
-  .eg-fan12p-acc-text strong{
-    font-size:11.2px!important;
-  }
-
-  .eg-fan12p-acc-text small{
-    font-size:8.5px!important;
-  }
-
-  .eg-fan12p-acc-no{
-    width:24px!important;
-    height:24px!important;
-    font-size:8.5px!important;
-  }
-}
-</style>
-
-<script id="eg-fan12p-v16-compact-accordion-js">
-/* ERATGUARD FAN-12P V16 COMPACT ACCORDION FIX */
-(function(){
-  if(window.__EG_FAN12P_V16_COMPACT_ACCORDION_READY__) return;
-  window.__EG_FAN12P_V16_COMPACT_ACCORDION_READY__ = true;
-
-  function mark(){
-    var drawer = document.getElementById("eg-fan12p-accordion-drawer");
-    if(drawer) drawer.setAttribute("data-fan12p-v16", "compact");
-  }
-
-  document.addEventListener("DOMContentLoaded", mark);
-  document.addEventListener("click", mark, true);
-  setInterval(mark, 900);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v16_inner_e:
-            print("ERATGUARD FAN-12P V16 COMPACT ACCORDION INNER ERROR:", _eg_f12p_v16_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v16_compact_accordion_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v16_compact_accordion_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v16_compact_accordion_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V16 COMPACT ACCORDION FIX ACTIVE")
-
-except Exception as _eg_f12p_v16_e:
-    print("ERATGUARD FAN-12P V16 COMPACT ACCORDION FIX ERROR:", _eg_f12p_v16_e)
-# ===== ERATGUARD FAN-12P V16 COMPACT ACCORDION FIX END =====
-
-# ===== ERATGUARD FAN-12P V17 BOTTOM COMMAND SHEET START =====
-# V17: Papatya ve sol akordion kapatılır. MENÜ alttan çıkan 3x4 komut merkezi bottom sheet'e bağlanır.
-
-try:
-    from flask import request as _eg_f12p_v17_request
-
-    def _eg_fan12p_v17_bottom_sheet_response(response):
-        try:
-            path = (_eg_f12p_v17_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V17 BOTTOM COMMAND SHEET" not in html:
-                inject = """
-<style id="eg-fan12p-v17-bottom-sheet-css">
-/* ERATGUARD FAN-12P V17 BOTTOM COMMAND SHEET */
-
-/* Eski papatya ve eski sol akordion tamamen devre dışı */
-.eg-user-fan3,
-.eg-user-fan3-panel,
-.eg-user-fan3-item,
-#eg-fan12p-accordion-drawer,
-#eg-fan12p-accordion-backdrop{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-
-/* Arka karartma */
-#eg-fan12p-sheet-backdrop{
-  position:fixed!important;
-  inset:0!important;
-  background:rgba(0,0,0,.44)!important;
-  backdrop-filter:blur(2.5px)!important;
-  -webkit-backdrop-filter:blur(2.5px)!important;
-  z-index:2147482500!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-  transition:opacity .24s ease, visibility .24s ease!important;
-}
-
-body.eg-fan12p-v10-open #eg-fan12p-sheet-backdrop{
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-}
-
-/* Bottom sheet ana panel */
-#eg-fan12p-command-sheet{
-  position:fixed!important;
-  left:0!important;
-  right:0!important;
-  bottom:0!important;
-  height:68vh!important;
-  max-height:660px!important;
-  min-height:500px!important;
-  border-radius:30px 30px 0 0!important;
-  padding:48px 22px 18px!important;
-  box-sizing:border-box!important;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(42,255,155,.20), transparent 28%),
-    radial-gradient(circle at 95% 18%, rgba(57,190,255,.12), transparent 35%),
-    linear-gradient(180deg, rgba(3,48,44,.97), rgba(1,10,18,.99))!important;
-  border:1px solid rgba(45,255,150,.72)!important;
-  border-bottom:0!important;
-  box-shadow:
-    0 -18px 52px rgba(0,0,0,.62),
-    0 0 30px rgba(36,255,145,.28),
-    inset 0 0 24px rgba(66,190,255,.12)!important;
-  z-index:2147483000!important;
-  transform:translateY(108%)!important;
-  transition:transform .30s cubic-bezier(.2,.9,.2,1)!important;
-  overflow:hidden!important;
-  pointer-events:auto!important;
-}
-
-body.eg-fan12p-v10-open #eg-fan12p-command-sheet{
-  transform:translateY(0)!important;
-}
-
-/* Drag handle */
-#eg-fan12p-command-sheet::before{
-  content:""!important;
-  position:absolute!important;
-  left:50%!important;
-  top:12px!important;
-  width:64px!important;
-  height:5px!important;
-  border-radius:999px!important;
-  transform:translateX(-50%)!important;
-  background:rgba(235,255,255,.80)!important;
-  box-shadow:0 0 12px rgba(70,255,190,.42)!important;
-}
-
-/* Gerçek MENÜ butonu */
-#eg-fan12p-real-menu-btn{
-  position:fixed!important;
-  right:18px!important;
-  top:50%!important;
-  left:auto!important;
-  bottom:auto!important;
-  transform:translateY(-50%)!important;
-  width:84px!important;
-  height:84px!important;
-  border-radius:999px!important;
-  border:1px solid rgba(118,220,255,.95)!important;
-  background:
-    radial-gradient(circle at 35% 22%, rgba(165,232,255,.98), rgba(25,121,210,.96) 38%, rgba(3,21,64,.99) 78%)!important;
-  box-shadow:
-    0 0 0 2px rgba(36,255,142,.22),
-    0 0 16px rgba(64,178,255,.75),
-    0 0 26px rgba(33,255,148,.34)!important;
-  z-index:2147483600!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  cursor:pointer!important;
-}
-
-/* Açıkken buton sheet'in üst merkezinde dursun */
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  left:50%!important;
-  right:auto!important;
-  top:auto!important;
-  bottom:calc(68vh - 42px)!important;
-  transform:translateX(-50%)!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  z-index:2147483700!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-e{
-  width:44px!important;
-  height:44px!important;
-  font-size:26px!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-label{
-  font-size:10px!important;
-}
-
-/* Header */
-.eg-fan12p-sheet-head{
-  display:flex!important;
-  align-items:flex-start!important;
-  justify-content:space-between!important;
-  gap:14px!important;
-  margin-bottom:16px!important;
-}
-
-.eg-fan12p-sheet-title{
-  display:flex!important;
-  flex-direction:column!important;
-  gap:3px!important;
-}
-
-.eg-fan12p-sheet-title strong{
-  color:#2cff92!important;
-  font-size:19px!important;
-  font-weight:950!important;
-  letter-spacing:.02em!important;
-  line-height:1.05!important;
-}
-
-.eg-fan12p-sheet-title small{
-  color:#44dfff!important;
-  font-size:11px!important;
-  font-weight:900!important;
-  letter-spacing:.24em!important;
-}
-
-#eg-fan12p-sheet-close{
-  width:42px!important;
-  height:42px!important;
-  border-radius:999px!important;
-  border:1px solid rgba(45,255,150,.62)!important;
-  background:rgba(4,33,32,.72)!important;
-  color:#fff!important;
-  font-size:27px!important;
-  line-height:1!important;
-  cursor:pointer!important;
-}
-
-/* Grid */
-.eg-fan12p-sheet-grid{
-  display:grid!important;
-  grid-template-columns:repeat(3, minmax(0, 1fr))!important;
-  gap:10px!important;
-  overflow-y:auto!important;
-  max-height:calc(68vh - 154px)!important;
-  padding:2px 0 8px!important;
-  -webkit-overflow-scrolling:touch!important;
-}
-
-.eg-fan12p-sheet-card{
-  position:relative!important;
-  min-height:94px!important;
-  padding:12px 10px 10px!important;
-  border-radius:16px!important;
-  box-sizing:border-box!important;
-  text-decoration:none!important;
-  color:#fff!important;
-  background:
-    radial-gradient(circle at 20% 0%, rgba(36,255,146,.12), transparent 34%),
-    linear-gradient(135deg, rgba(8,65,50,.92), rgba(5,25,50,.97))!important;
-  border:1px solid rgba(38,255,145,.45)!important;
-  box-shadow:
-    inset 0 0 14px rgba(58,172,255,.10),
-    0 0 11px rgba(31,255,144,.13)!important;
-  display:flex!important;
-  flex-direction:column!important;
-  justify-content:flex-start!important;
-  gap:4px!important;
-}
-
-.eg-fan12p-sheet-card:active{
-  transform:scale(.985)!important;
-}
-
-.eg-fan12p-sheet-icon{
-  width:32px!important;
-  height:32px!important;
-  border-radius:12px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  background:rgba(35,92,165,.72)!important;
-  box-shadow:0 0 10px rgba(43,173,255,.24)!important;
-  font-size:20px!important;
-  margin-bottom:5px!important;
-}
-
-.eg-fan12p-sheet-card strong{
-  display:block!important;
-  color:#fff!important;
-  font-size:14px!important;
-  font-weight:950!important;
-  line-height:1.02!important;
-  margin:0!important;
-}
-
-.eg-fan12p-sheet-card small{
-  display:block!important;
-  color:rgba(221,238,255,.78)!important;
-  font-size:10px!important;
-  font-weight:700!important;
-  line-height:1.05!important;
-  margin:0!important;
-}
-
-.eg-fan12p-sheet-no{
-  position:absolute!important;
-  right:9px!important;
-  top:9px!important;
-  min-width:29px!important;
-  height:24px!important;
-  padding:0 7px!important;
-  box-sizing:border-box!important;
-  border-radius:999px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  color:#2cff92!important;
-  border:1px solid rgba(46,255,146,.72)!important;
-  background:rgba(2,30,44,.85)!important;
-  font-size:10px!important;
-  font-weight:950!important;
-}
-
-/* Status strip */
-.eg-fan12p-sheet-foot{
-  height:36px!important;
-  margin-top:10px!important;
-  padding:0 14px!important;
-  border-radius:999px!important;
-  border:1px solid rgba(37,255,145,.42)!important;
-  background:rgba(1,18,24,.62)!important;
-  color:#2cff92!important;
-  display:flex!important;
-  justify-content:space-between!important;
-  align-items:center!important;
-  font-size:11px!important;
-  font-weight:950!important;
-  letter-spacing:.12em!important;
-}
-
-.eg-fan12p-sheet-foot span:last-child{
-  color:#44dfff!important;
-}
-
-/* Küçük ekran ayarı */
-@media(max-width:390px){
-  #eg-fan12p-command-sheet{
-    height:70vh!important;
-    min-height:500px!important;
-    padding:46px 16px 16px!important;
-  }
-
-  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-    bottom:calc(70vh - 40px)!important;
-    width:80px!important;
-    height:80px!important;
-  }
-
-  .eg-fan12p-sheet-title strong{
-    font-size:17px!important;
-  }
-
-  .eg-fan12p-sheet-title small{
-    font-size:10px!important;
-  }
-
-  .eg-fan12p-sheet-grid{
-    gap:8px!important;
-    max-height:calc(70vh - 148px)!important;
-  }
-
-  .eg-fan12p-sheet-card{
-    min-height:84px!important;
-    padding:10px 8px 8px!important;
-    border-radius:14px!important;
-  }
-
-  .eg-fan12p-sheet-icon{
-    width:29px!important;
-    height:29px!important;
-    font-size:18px!important;
-    margin-bottom:4px!important;
-  }
-
-  .eg-fan12p-sheet-card strong{
-    font-size:12.4px!important;
-  }
-
-  .eg-fan12p-sheet-card small{
-    font-size:8.7px!important;
-  }
-
-  .eg-fan12p-sheet-no{
-    min-width:26px!important;
-    height:22px!important;
-    right:7px!important;
-    top:7px!important;
-    font-size:9px!important;
-  }
-
-  .eg-fan12p-sheet-foot{
-    height:32px!important;
-    font-size:9.2px!important;
-    margin-top:8px!important;
-  }
-}
-</style>
-
-<script id="eg-fan12p-v17-bottom-sheet-js">
-/* ERATGUARD FAN-12P V17 BOTTOM COMMAND SHEET */
-(function(){
-  if(window.__EG_FAN12P_V17_BOTTOM_SHEET_READY__) return;
-  window.__EG_FAN12P_V17_BOTTOM_SHEET_READY__ = true;
-
-  var items = [
-    ["01","🏠","Ana Sayfa","Kontrol merkezi","/dashboard"],
-    ["02","🛡️","Koruma","SMS güvenlik motoru","/u/protection"],
-    ["03","🧠","AI Analiz","Risk taraması","/u/ai-analysis"],
-    ["04","📈","Raporlar","Güvenlik özetleri","/u/reports"],
-    ["05","🔔","Bildirimler","Güvenlik akışı","/u/notifications"],
-    ["06","🔑","Lisans","Hesap durumu","/u/license"],
-    ["07","👥","Topluluk","Geri bildirim","/u/community"],
-    ["08","⚙️","Ayarlar","Tercihler","/u/settings"],
-    ["09","📩","SMS Özet","Koruma özeti","/u/sms-summary"],
-    ["10","🚫","Blok SMS","Engellenen merkez","/u/blocked-sms"],
-    ["11","🕘","Geçmiş","Koruma geçmişi","/u/history"],
-    ["12","⭐","PRO","Final özellikleri","/u/pro"]
-  ];
-
-  function closeMenu(){
-    document.body.classList.remove("eg-fan12p-v10-open");
-  }
-
-  function ensureButton(){
-    var btn = document.getElementById("eg-fan12p-real-menu-btn");
-    if(!btn){
-      btn = document.createElement("button");
-      btn.id = "eg-fan12p-real-menu-btn";
-      btn.type = "button";
-      btn.setAttribute("aria-label", "FAN-12P Menü");
-      btn.innerHTML = '<span class="eg-v10-e">E</span><span class="eg-v10-label">MENÜ</span>';
-      document.body.appendChild(btn);
-    }
-
-    if(!btn.__EG_FAN12P_V14_BOUND__ && !btn.__EG_FAN12P_V17_BOUND__){
-      btn.__EG_FAN12P_V17_BOUND__ = true;
-      function toggle(ev){
-        if(ev){
-          ev.preventDefault();
-          ev.stopPropagation();
-          if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
-        }
-        document.body.classList.toggle("eg-fan12p-v10-open");
-      }
-      btn.addEventListener("click", toggle, true);
-      btn.addEventListener("touchstart", toggle, {capture:true, passive:false});
-    }
-  }
-
-  function ensureSheet(){
-    if(!document.getElementById("eg-fan12p-sheet-backdrop")){
-      var back = document.createElement("div");
-      back.id = "eg-fan12p-sheet-backdrop";
-      document.body.appendChild(back);
-      back.addEventListener("click", closeMenu, true);
-      back.addEventListener("touchstart", function(ev){ ev.preventDefault(); closeMenu(); }, {capture:true, passive:false});
-    }
-
-    if(!document.getElementById("eg-fan12p-command-sheet")){
-      var sheet = document.createElement("section");
-      sheet.id = "eg-fan12p-command-sheet";
-      sheet.setAttribute("aria-label", "FAN-12P Komut Merkezi");
-
-      var grid = items.map(function(it){
-        return '<a class="eg-fan12p-sheet-card" href="'+it[4]+'">' +
-          '<span class="eg-fan12p-sheet-no">'+it[0]+'</span>' +
-          '<span class="eg-fan12p-sheet-icon">'+it[1]+'</span>' +
-          '<strong>'+it[2]+'</strong>' +
-          '<small>'+it[3]+'</small>' +
-        '</a>';
-      }).join("");
-
-      sheet.innerHTML =
-        '<div class="eg-fan12p-sheet-head">' +
-          '<div class="eg-fan12p-sheet-title"><strong>FAN-12P KOMUT MERKEZİ</strong><small>COMMAND CENTER</small></div>' +
-          '<button id="eg-fan12p-sheet-close" type="button" aria-label="Menüyü kapat">×</button>' +
-        '</div>' +
-        '<nav class="eg-fan12p-sheet-grid">' + grid + '</nav>' +
-        '<div class="eg-fan12p-sheet-foot"><span>● KORUMA AKTİF</span><span>FAN-12P HAZIR</span></div>';
-
-      document.body.appendChild(sheet);
-
-      var close = document.getElementById("eg-fan12p-sheet-close");
-      if(close){
-        close.addEventListener("click", function(ev){ ev.preventDefault(); closeMenu(); }, true);
-        close.addEventListener("touchstart", function(ev){ ev.preventDefault(); closeMenu(); }, {capture:true, passive:false});
-      }
-    }
-  }
-
-  function boot(){
-    ensureButton();
-    ensureSheet();
-  }
-
-  document.addEventListener("DOMContentLoaded", boot);
-  setInterval(boot, 800);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v17_inner_e:
-            print("ERATGUARD FAN-12P V17 BOTTOM SHEET INNER ERROR:", _eg_f12p_v17_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v17_bottom_sheet_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v17_bottom_sheet_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v17_bottom_sheet_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V17 BOTTOM COMMAND SHEET ACTIVE")
-
-except Exception as _eg_f12p_v17_e:
-    print("ERATGUARD FAN-12P V17 BOTTOM COMMAND SHEET ERROR:", _eg_f12p_v17_e)
-# ===== ERATGUARD FAN-12P V17 BOTTOM COMMAND SHEET END =====
-
-# ===== ERATGUARD FAN-12P V18 BOTTOM SHEET FIT FIX START =====
-# V18: Bottom sheet grid kesilmesini düzeltir. 12 kart + alt status tek ekrana daha dengeli sığar.
-
-try:
-    from flask import request as _eg_f12p_v18_request
-
-    def _eg_fan12p_v18_bottom_sheet_fit_response(response):
-        try:
-            path = (_eg_f12p_v18_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V18 BOTTOM SHEET FIT FIX" not in html:
-                inject = """
-<style id="eg-fan12p-v18-bottom-sheet-fit-css">
-/* ERATGUARD FAN-12P V18 BOTTOM SHEET FIT FIX */
-
-/* Sheet daha iyi sığsın */
-#eg-fan12p-command-sheet{
-  height:72vh!important;
-  max-height:none!important;
-  min-height:0!important;
-  padding:42px 18px 14px!important;
-  display:flex!important;
-  flex-direction:column!important;
-  overflow:hidden!important;
-}
-
-/* Açıkken E buton yüksekliği sheet ile uyumlu */
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  bottom:calc(72vh - 39px)!important;
-  width:78px!important;
-  height:78px!important;
-}
-
-/* Header daha kompakt */
-.eg-fan12p-sheet-head{
-  flex:0 0 auto!important;
-  margin-bottom:10px!important;
-  align-items:center!important;
-}
-
-.eg-fan12p-sheet-title strong{
-  font-size:16.5px!important;
-  line-height:1!important;
-}
-
-.eg-fan12p-sheet-title small{
-  font-size:9.5px!important;
-  letter-spacing:.20em!important;
-}
-
-#eg-fan12p-sheet-close{
-  width:36px!important;
-  height:36px!important;
-  font-size:24px!important;
-}
-
-/* Grid artık footer üstüne binmesin */
-.eg-fan12p-sheet-grid{
-  flex:1 1 auto!important;
-  display:grid!important;
-  grid-template-columns:repeat(3, minmax(0, 1fr))!important;
-  grid-auto-rows:76px!important;
-  gap:8px!important;
-  max-height:none!important;
-  overflow-y:auto!important;
-  padding:0 0 6px!important;
-  min-height:0!important;
-}
-
-/* Kartlar daha kompakt */
-.eg-fan12p-sheet-card{
-  min-height:76px!important;
-  height:76px!important;
-  padding:8px 7px 7px!important;
-  border-radius:14px!important;
-  gap:2px!important;
-}
-
-.eg-fan12p-sheet-icon{
-  width:27px!important;
-  height:27px!important;
-  border-radius:10px!important;
-  font-size:17px!important;
-  margin-bottom:2px!important;
-}
-
-.eg-fan12p-sheet-card strong{
-  font-size:11.5px!important;
-  line-height:1!important;
-}
-
-.eg-fan12p-sheet-card small{
-  font-size:8px!important;
-  line-height:1.02!important;
-}
-
-.eg-fan12p-sheet-no{
-  right:7px!important;
-  top:7px!important;
-  min-width:24px!important;
-  height:20px!important;
-  padding:0 5px!important;
-  font-size:8.5px!important;
-}
-
-/* Footer grid'in üstüne binmesin, kendi yerinde dursun */
-.eg-fan12p-sheet-foot{
-  flex:0 0 auto!important;
-  height:31px!important;
-  margin-top:7px!important;
-  padding:0 12px!important;
-  font-size:9px!important;
-  letter-spacing:.10em!important;
-}
-
-/* Küçük ekran net sığdırma */
-@media(max-width:390px){
-  #eg-fan12p-command-sheet{
-    height:74vh!important;
-    padding:40px 14px 12px!important;
-  }
-
-  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-    bottom:calc(74vh - 38px)!important;
-    width:76px!important;
-    height:76px!important;
-  }
-
-  .eg-fan12p-sheet-grid{
-    grid-auto-rows:72px!important;
-    gap:7px!important;
-  }
-
-  .eg-fan12p-sheet-card{
-    min-height:72px!important;
-    height:72px!important;
-    padding:7px 6px 6px!important;
-  }
-
-  .eg-fan12p-sheet-icon{
-    width:25px!important;
-    height:25px!important;
-    font-size:16px!important;
-  }
-
-  .eg-fan12p-sheet-card strong{
-    font-size:10.6px!important;
-  }
-
-  .eg-fan12p-sheet-card small{
-    font-size:7.3px!important;
-  }
-
-  .eg-fan12p-sheet-foot{
-    height:29px!important;
-    font-size:8.4px!important;
-  }
-}
-</style>
-
-<script id="eg-fan12p-v18-bottom-sheet-fit-js">
-/* ERATGUARD FAN-12P V18 BOTTOM SHEET FIT FIX */
-(function(){
-  if(window.__EG_FAN12P_V18_BOTTOM_SHEET_FIT_READY__) return;
-  window.__EG_FAN12P_V18_BOTTOM_SHEET_FIT_READY__ = true;
-
-  function mark(){
-    var sheet = document.getElementById("eg-fan12p-command-sheet");
-    if(sheet) sheet.setAttribute("data-fan12p-v18", "fit");
-  }
-
-  document.addEventListener("DOMContentLoaded", mark);
-  document.addEventListener("click", mark, true);
-  setInterval(mark, 900);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v18_inner_e:
-            print("ERATGUARD FAN-12P V18 BOTTOM SHEET FIT INNER ERROR:", _eg_f12p_v18_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v18_bottom_sheet_fit_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v18_bottom_sheet_fit_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v18_bottom_sheet_fit_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V18 BOTTOM SHEET FIT FIX ACTIVE")
-
-except Exception as _eg_f12p_v18_e:
-    print("ERATGUARD FAN-12P V18 BOTTOM SHEET FIT FIX ERROR:", _eg_f12p_v18_e)
-# ===== ERATGUARD FAN-12P V18 BOTTOM SHEET FIT FIX END =====
-
-# ===== ERATGUARD FAN-12P V19 HARD KILL OLD PETAL MENU START =====
-# V19: Eski papatya/fan DOM parçaları fiziksel olarak kaldırılır. Sadece V17/V18 bottom sheet kalır.
-
-try:
-    from flask import request as _eg_f12p_v19_request
-
-    def _eg_fan12p_v19_hard_kill_petal_response(response):
-        try:
-            path = (_eg_f12p_v19_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V19 HARD KILL OLD PETAL MENU" not in html:
-                inject = """
-<style id="eg-fan12p-v19-hard-kill-petal-css">
-/* ERATGUARD FAN-12P V19 HARD KILL OLD PETAL MENU */
-
-/* Eski papatya/fan menü kesin kapalı */
-.eg-user-fan3,
-.eg-user-fan3 *,
-.eg-user-fan3-panel,
-.eg-user-fan3-item,
-[class*="papatya"],
-[id*="papatya"]{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-  transform:scale(0)!important;
-  width:0!important;
-  height:0!important;
-  max-width:0!important;
-  max-height:0!important;
-  overflow:hidden!important;
-}
-
-/* Sheet dışında eski açıklama yazısı görünmesin */
-body.eg-fan12p-v10-open .eg-user-fan3,
-body.eg-fan12p-v10-open .eg-user-fan3-panel,
-body.eg-fan12p-v10-open .eg-user-fan3-item{
-  display:none!important;
-}
-
-/* Bottom sheet daha ürün gibi dursun: boşluk azalt */
-#eg-fan12p-command-sheet{
-  height:70vh!important;
-  padding-bottom:12px!important;
-}
-
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  bottom:calc(70vh - 39px)!important;
-}
-
-.eg-fan12p-sheet-grid{
-  grid-auto-rows:74px!important;
-  gap:8px!important;
-}
-
-.eg-fan12p-sheet-card{
-  height:74px!important;
-  min-height:74px!important;
-}
-
-@media(max-width:390px){
-  #eg-fan12p-command-sheet{
-    height:72vh!important;
-  }
-
-  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-    bottom:calc(72vh - 38px)!important;
-  }
-
-  .eg-fan12p-sheet-grid{
-    grid-auto-rows:70px!important;
-  }
-
-  .eg-fan12p-sheet-card{
-    height:70px!important;
-    min-height:70px!important;
-  }
-}
-</style>
-
-<script id="eg-fan12p-v19-hard-kill-petal-js">
-/* ERATGUARD FAN-12P V19 HARD KILL OLD PETAL MENU */
-(function(){
-  if(window.__EG_FAN12P_V19_HARD_KILL_READY__) return;
-  window.__EG_FAN12P_V19_HARD_KILL_READY__ = true;
-
-  function killOldPetal(){
-    var oldRoots = document.querySelectorAll(".eg-user-fan3, .eg-user-fan3-panel");
-    oldRoots.forEach(function(el){
-      try{
-        el.remove();
-      }catch(e){
-        el.style.setProperty("display","none","important");
-        el.style.setProperty("opacity","0","important");
-        el.style.setProperty("visibility","hidden","important");
-        el.style.setProperty("pointer-events","none","important");
-      }
-    });
-
-    var oldItems = document.querySelectorAll(".eg-user-fan3-item");
-    oldItems.forEach(function(el){
-      try{ el.remove(); }catch(e){}
-    });
-
-    var sheet = document.getElementById("eg-fan12p-command-sheet");
-    if(sheet) sheet.setAttribute("data-fan12p-v19", "old-petal-killed");
-  }
-
-  document.addEventListener("DOMContentLoaded", killOldPetal);
-  document.addEventListener("click", killOldPetal, true);
-  document.addEventListener("touchstart", killOldPetal, true);
-  setInterval(killOldPetal, 500);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v19_inner_e:
-            print("ERATGUARD FAN-12P V19 HARD KILL INNER ERROR:", _eg_f12p_v19_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v19_hard_kill_petal_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v19_hard_kill_petal_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v19_hard_kill_petal_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V19 HARD KILL OLD PETAL MENU ACTIVE")
-
-except Exception as _eg_f12p_v19_e:
-    print("ERATGUARD FAN-12P V19 HARD KILL OLD PETAL MENU ERROR:", _eg_f12p_v19_e)
-# ===== ERATGUARD FAN-12P V19 HARD KILL OLD PETAL MENU END =====
-
-# ===== ERATGUARD FAN-12P V20 BOTTOM SHEET PERFORMANCE LOCK START =====
-# V20: Açılış kasmasını azaltır. Eski menü scriptleri baştan kilitlenir, blur/gölge hafifler, tek bottom sheet çalışır.
-
-try:
-    from flask import request as _eg_f12p_v20_request
-
-    def _eg_fan12p_v20_performance_response(response):
-        try:
-            path = (_eg_f12p_v20_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V20 BOTTOM SHEET PERFORMANCE LOCK" not in html:
-                early = """
-<script id="eg-fan12p-v20-early-lock-js">
-/* ERATGUARD FAN-12P V20 BOTTOM SHEET PERFORMANCE LOCK */
-/* Eski ağır menü scriptlerini sayfa başında kilitle */
-window.__EG_FAN12P_V14_ACCORDION_READY__ = true;
-window.__EG_FAN12P_V15_ACCORDION_POLISH_READY__ = true;
-window.__EG_FAN12P_V16_COMPACT_ACCORDION_READY__ = true;
-window.__EG_FAN12P_V17_BOTTOM_SHEET_READY__ = true;
-window.__EG_FAN12P_V18_BOTTOM_SHEET_FIT_READY__ = true;
-window.__EG_FAN12P_V19_HARD_KILL_READY__ = true;
-</script>
-"""
-                if "</head>" in html:
-                    html = html.replace("</head>", early + "\n</head>", 1)
-                else:
-                    html = html.replace("</body>", early + "\n</body>", 1)
-
-                inject = """
-<style id="eg-fan12p-v20-performance-css">
-/* ERATGUARD FAN-12P V20 BOTTOM SHEET PERFORMANCE LOCK */
-
-/* Eski sistemler görünmesin */
-.eg-user-fan3,
-.eg-user-fan3 *,
-.eg-user-fan3-panel,
-.eg-user-fan3-item,
-#eg-fan12p-accordion-drawer,
-#eg-fan12p-accordion-backdrop{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-
-/* Ağır blur kaldırıldı */
-#eg-fan12p-sheet-backdrop{
-  position:fixed!important;
-  inset:0!important;
-  background:rgba(0,0,0,.38)!important;
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-  z-index:2147482500!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-  transition:opacity .16s linear!important;
-  will-change:opacity!important;
-}
-
-body.eg-fan12p-v10-open #eg-fan12p-sheet-backdrop{
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-}
-
-/* Performanslı bottom sheet */
-#eg-fan12p-command-sheet{
-  position:fixed!important;
-  left:0!important;
-  right:0!important;
-  bottom:0!important;
-  height:70vh!important;
-  min-height:0!important;
-  max-height:none!important;
-  border-radius:28px 28px 0 0!important;
-  padding:42px 18px 12px!important;
-  box-sizing:border-box!important;
-  background:
-    linear-gradient(180deg, rgba(3,55,47,.98), rgba(1,10,18,.99))!important;
-  border:1px solid rgba(45,255,150,.66)!important;
-  border-bottom:0!important;
-  box-shadow:0 -14px 34px rgba(0,0,0,.52)!important;
-  z-index:2147483000!important;
-  transform:translate3d(0,108%,0)!important;
-  transition:transform .20s cubic-bezier(.2,.85,.25,1)!important;
-  will-change:transform!important;
-  contain:layout paint style!important;
-  display:flex!important;
-  flex-direction:column!important;
-  overflow:hidden!important;
-  pointer-events:auto!important;
-}
-
-body.eg-fan12p-v10-open #eg-fan12p-command-sheet{
-  transform:translate3d(0,0,0)!important;
-}
-
-#eg-fan12p-command-sheet::before{
-  content:""!important;
-  position:absolute!important;
-  left:50%!important;
-  top:12px!important;
-  width:64px!important;
-  height:5px!important;
-  border-radius:999px!important;
-  transform:translateX(-50%)!important;
-  background:rgba(235,255,255,.80)!important;
-}
-
-/* Menü butonu */
-#eg-fan12p-real-menu-btn{
-  position:fixed!important;
-  right:18px!important;
-  top:50%!important;
-  left:auto!important;
-  bottom:auto!important;
-  transform:translate3d(0,-50%,0)!important;
-  width:82px!important;
-  height:82px!important;
-  border-radius:999px!important;
-  border:1px solid rgba(118,220,255,.95)!important;
-  background:radial-gradient(circle at 35% 22%, rgba(165,232,255,.98), rgba(25,121,210,.96) 38%, rgba(3,21,64,.99) 78%)!important;
-  box-shadow:0 0 18px rgba(64,178,255,.70)!important;
-  z-index:2147483600!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-  cursor:pointer!important;
-  will-change:transform!important;
-}
-
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  left:50%!important;
-  right:auto!important;
-  top:auto!important;
-  bottom:calc(70vh - 38px)!important;
-  transform:translate3d(-50%,0,0)!important;
-  z-index:2147483700!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-e{
-  width:43px!important;
-  height:43px!important;
-  font-size:25px!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-label{
-  font-size:10px!important;
-}
-
-/* Header */
-.eg-fan12p-sheet-head{
-  flex:0 0 auto!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:space-between!important;
-  gap:12px!important;
-  margin-bottom:10px!important;
-}
-
-.eg-fan12p-sheet-title{
-  display:flex!important;
-  flex-direction:column!important;
-  gap:3px!important;
-}
-
-.eg-fan12p-sheet-title strong{
-  color:#2cff92!important;
-  font-size:16.5px!important;
-  font-weight:950!important;
-  line-height:1!important;
-}
-
-.eg-fan12p-sheet-title small{
-  color:#44dfff!important;
-  font-size:9.5px!important;
-  font-weight:900!important;
-  letter-spacing:.20em!important;
-}
-
-#eg-fan12p-sheet-close{
-  width:36px!important;
-  height:36px!important;
-  border-radius:999px!important;
-  border:1px solid rgba(45,255,150,.62)!important;
-  background:rgba(4,33,32,.72)!important;
-  color:#fff!important;
-  font-size:24px!important;
-  line-height:1!important;
-  cursor:pointer!important;
-}
-
-/* Grid */
-.eg-fan12p-sheet-grid{
-  flex:1 1 auto!important;
-  display:grid!important;
-  grid-template-columns:repeat(3, minmax(0, 1fr))!important;
-  grid-auto-rows:74px!important;
-  gap:8px!important;
-  min-height:0!important;
-  overflow-y:auto!important;
-  padding:0 0 6px!important;
-  -webkit-overflow-scrolling:touch!important;
-}
-
-.eg-fan12p-sheet-card{
-  position:relative!important;
-  height:74px!important;
-  min-height:74px!important;
-  padding:7px 7px 6px!important;
-  border-radius:14px!important;
-  box-sizing:border-box!important;
-  text-decoration:none!important;
-  color:#fff!important;
-  background:linear-gradient(135deg, rgba(8,65,50,.92), rgba(5,25,50,.97))!important;
-  border:1px solid rgba(38,255,145,.42)!important;
-  box-shadow:none!important;
-  display:flex!important;
-  flex-direction:column!important;
-  gap:2px!important;
-}
-
-.eg-fan12p-sheet-card:active{
-  transform:scale(.985)!important;
-}
-
-.eg-fan12p-sheet-icon{
-  width:25px!important;
-  height:25px!important;
-  border-radius:10px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  background:rgba(35,92,165,.72)!important;
-  font-size:16px!important;
-  margin-bottom:2px!important;
-}
-
-.eg-fan12p-sheet-card strong{
-  color:#fff!important;
-  font-size:10.8px!important;
-  font-weight:950!important;
-  line-height:1!important;
-  margin:0!important;
-}
-
-.eg-fan12p-sheet-card small{
-  color:rgba(221,238,255,.78)!important;
-  font-size:7.5px!important;
-  font-weight:700!important;
-  line-height:1.02!important;
-  margin:0!important;
-}
-
-.eg-fan12p-sheet-no{
-  position:absolute!important;
-  right:7px!important;
-  top:7px!important;
-  min-width:24px!important;
-  height:20px!important;
-  padding:0 5px!important;
-  border-radius:999px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  color:#2cff92!important;
-  border:1px solid rgba(46,255,146,.72)!important;
-  background:rgba(2,30,44,.85)!important;
-  font-size:8.5px!important;
-  font-weight:950!important;
-}
-
-.eg-fan12p-sheet-foot{
-  flex:0 0 auto!important;
-  height:31px!important;
-  margin-top:7px!important;
-  padding:0 12px!important;
-  border-radius:999px!important;
-  border:1px solid rgba(37,255,145,.42)!important;
-  background:rgba(1,18,24,.62)!important;
-  color:#2cff92!important;
-  display:flex!important;
-  justify-content:space-between!important;
-  align-items:center!important;
-  font-size:9px!important;
-  font-weight:950!important;
-  letter-spacing:.10em!important;
-}
-
-.eg-fan12p-sheet-foot span:last-child{
-  color:#44dfff!important;
-}
-</style>
-
-<script id="eg-fan12p-v20-performance-js">
-/* ERATGUARD FAN-12P V20 BOTTOM SHEET PERFORMANCE LOCK */
-(function(){
-  if(window.__EG_FAN12P_V20_PERFORMANCE_READY__) return;
-  window.__EG_FAN12P_V20_PERFORMANCE_READY__ = true;
-
-  var items = [
-    ["01","🏠","Ana Sayfa","Kontrol merkezi","/dashboard"],
-    ["02","🛡️","Koruma","SMS güvenlik motoru","/u/protection"],
-    ["03","🧠","AI Analiz","Risk taraması","/u/ai-analysis"],
-    ["04","📈","Raporlar","Güvenlik özetleri","/u/reports"],
-    ["05","🔔","Bildirimler","Güvenlik akışı","/u/notifications"],
-    ["06","🔑","Lisans","Hesap durumu","/u/license"],
-    ["07","👥","Topluluk","Geri bildirim","/u/community"],
-    ["08","⚙️","Ayarlar","Tercihler","/u/settings"],
-    ["09","📩","SMS Özet","Koruma özeti","/u/sms-summary"],
-    ["10","🚫","Blok SMS","Engellenen merkez","/u/blocked-sms"],
-    ["11","🕘","Geçmiş","Koruma geçmişi","/u/history"],
-    ["12","⭐","PRO","Final özellikleri","/u/pro"]
-  ];
-
-  function closeMenu(){
-    document.body.classList.remove("eg-fan12p-v10-open");
-  }
-
-  function toggleMenu(ev){
-    if(ev){
-      ev.preventDefault();
-      ev.stopPropagation();
-      if(ev.stopImmediatePropagation) ev.stopImmediatePropagation();
-    }
-    document.body.classList.toggle("eg-fan12p-v10-open");
-  }
-
-  function boot(){
-    document.querySelectorAll(".eg-user-fan3,.eg-user-fan3-panel,.eg-user-fan3-item,#eg-fan12p-accordion-drawer,#eg-fan12p-accordion-backdrop").forEach(function(el){
-      try{ el.remove(); }catch(e){}
-    });
-
-    var btn = document.getElementById("eg-fan12p-real-menu-btn");
-    if(!btn){
-      btn = document.createElement("button");
-      btn.id = "eg-fan12p-real-menu-btn";
-      btn.type = "button";
-      btn.setAttribute("aria-label", "FAN-12P Menü");
-      btn.innerHTML = '<span class="eg-v10-e">E</span><span class="eg-v10-label">MENÜ</span>';
-      document.body.appendChild(btn);
-    }
-
-    btn.onclick = toggleMenu;
-    btn.ontouchstart = toggleMenu;
-
-    var back = document.getElementById("eg-fan12p-sheet-backdrop");
-    if(!back){
-      back = document.createElement("div");
-      back.id = "eg-fan12p-sheet-backdrop";
-      document.body.appendChild(back);
-    }
-    back.onclick = closeMenu;
-
-    var sheet = document.getElementById("eg-fan12p-command-sheet");
-    if(!sheet){
-      sheet = document.createElement("section");
-      sheet.id = "eg-fan12p-command-sheet";
-      sheet.setAttribute("aria-label", "FAN-12P Komut Merkezi");
-
-      var grid = items.map(function(it){
-        return '<a class="eg-fan12p-sheet-card" href="'+it[4]+'">' +
-          '<span class="eg-fan12p-sheet-no">'+it[0]+'</span>' +
-          '<span class="eg-fan12p-sheet-icon">'+it[1]+'</span>' +
-          '<strong>'+it[2]+'</strong>' +
-          '<small>'+it[3]+'</small>' +
-        '</a>';
-      }).join("");
-
-      sheet.innerHTML =
-        '<div class="eg-fan12p-sheet-head">' +
-          '<div class="eg-fan12p-sheet-title"><strong>FAN-12P KOMUT MERKEZİ</strong><small>COMMAND CENTER</small></div>' +
-          '<button id="eg-fan12p-sheet-close" type="button" aria-label="Menüyü kapat">×</button>' +
-        '</div>' +
-        '<nav class="eg-fan12p-sheet-grid">' + grid + '</nav>' +
-        '<div class="eg-fan12p-sheet-foot"><span>● KORUMA AKTİF</span><span>FAN-12P HAZIR</span></div>';
-
-      document.body.appendChild(sheet);
-    }
-
-    var close = document.getElementById("eg-fan12p-sheet-close");
-    if(close){
-      close.onclick = function(ev){ ev.preventDefault(); closeMenu(); };
-      close.ontouchstart = function(ev){ ev.preventDefault(); closeMenu(); };
-    }
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", boot, {once:true});
-  }else{
-    boot();
-  }
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v20_inner_e:
-            print("ERATGUARD FAN-12P V20 PERFORMANCE INNER ERROR:", _eg_f12p_v20_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v20_performance_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v20_performance_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v20_performance_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V20 BOTTOM SHEET PERFORMANCE LOCK ACTIVE")
-
-except Exception as _eg_f12p_v20_e:
-    print("ERATGUARD FAN-12P V20 BOTTOM SHEET PERFORMANCE LOCK ERROR:", _eg_f12p_v20_e)
-# ===== ERATGUARD FAN-12P V20 BOTTOM SHEET PERFORMANCE LOCK END =====
-
-# ===== ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX START =====
-# V21: Kapalı menü butonu kart içinden çıkarılır. Logo/header sıkışması azaltılır.
-
-try:
-    from flask import request as _eg_f12p_v21_request
-
-    def _eg_fan12p_v21_position_fix_response(response):
-        try:
-            path = (_eg_f12p_v21_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX" not in html:
-                inject = """
-<style id="eg-fan12p-v21-position-fix-css">
-/* ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX */
-
-/* Üst logo alanını başlık çubuğundan biraz uzaklaştır */
-.eg-shell,
-.eg-page,
-.eg-user-page,
-.eg-dashboard,
-.eg-user-dashboard,
-.eg-fan12p-page,
-body{
-  scroll-behavior:auto!important;
-}
-
-/* Logonun olduğu üst bölüm sıkışmasın */
-.eg-brand,
-.eg-logo-block,
-.eg-hero-brand,
-.eg-user-brand,
-.eg-fan12p-brand,
-.header-brand,
-.brand-block{
-  margin-top:18px!important;
-}
-
-/* Üstteki EratGuard logo/title bloğu için genel güvenli alan */
-body:not(.eg-fan12p-v10-open) .eg-logo,
-body:not(.eg-fan12p-v10-open) .logo,
-body:not(.eg-fan12p-v10-open) .app-logo{
-  margin-top:8px!important;
-}
-
-/* Kapalıyken E MENÜ kartın üstünden çıkarılıp boş sağ-alt alana alınır */
-body:not(.eg-fan12p-v10-open) #eg-fan12p-real-menu-btn{
-  position:fixed!important;
-  right:28px!important;
-  top:auto!important;
-  bottom:185px!important;
-  left:auto!important;
-  transform:translate3d(0,0,0)!important;
-  width:76px!important;
-  height:76px!important;
-  z-index:2147483600!important;
-}
-
-/* Açıkken yine bottom sheet üst merkezine otursun */
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  left:50%!important;
-  right:auto!important;
-  top:auto!important;
-  bottom:calc(70vh - 38px)!important;
-  transform:translate3d(-50%,0,0)!important;
-  width:78px!important;
-  height:78px!important;
-  z-index:2147483700!important;
-}
-
-/* Buton içi biraz kompakt */
-#eg-fan12p-real-menu-btn .eg-v10-e{
-  width:40px!important;
-  height:40px!important;
-  font-size:24px!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-label{
-  font-size:9.5px!important;
-  letter-spacing:.08em!important;
-}
-
-/* Küçük ekranlarda daha yukarıda dursun, alt status bar'a binmesin */
-@media(max-width:390px){
-  body:not(.eg-fan12p-v10-open) #eg-fan12p-real-menu-btn{
-    right:24px!important;
-    bottom:170px!important;
-    width:72px!important;
-    height:72px!important;
-  }
-
-  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-    bottom:calc(72vh - 37px)!important;
-    width:74px!important;
-    height:74px!important;
-  }
-}
-</style>
-
-<script id="eg-fan12p-v21-position-fix-js">
-/* ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX */
-(function(){
-  if(window.__EG_FAN12P_V21_POSITION_FIX_READY__) return;
-  window.__EG_FAN12P_V21_POSITION_FIX_READY__ = true;
-
-  function mark(){
-    var btn = document.getElementById("eg-fan12p-real-menu-btn");
-    if(btn) btn.setAttribute("data-fan12p-v21", "position-fixed");
-
-    var sheet = document.getElementById("eg-fan12p-command-sheet");
-    if(sheet) sheet.setAttribute("data-fan12p-v21", "position-fixed");
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", mark, {once:true});
-  }else{
-    mark();
-  }
-
-  document.addEventListener("click", mark, true);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v21_inner_e:
-            print("ERATGUARD FAN-12P V21 POSITION FIX INNER ERROR:", _eg_f12p_v21_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v21_position_fix_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v21_position_fix_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v21_position_fix_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX ACTIVE")
-
-except Exception as _eg_f12p_v21_e:
-    print("ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX ERROR:", _eg_f12p_v21_e)
-# ===== ERATGUARD FAN-12P V21 BUTTON AND HEADER POSITION FIX END =====
-
-# ===== ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL START =====
-# V22: Kapalı durumdaki E MENÜ butonu SMS Merkezi butonundan tamamen ayrılır.
-# Sadece kapalı pozisyon düzeltilir; bottom sheet açık hali korunur.
-
-try:
-    from flask import request as _eg_f12p_v22_request
-
-    def _eg_fan12p_v22_button_position_response(response):
-        try:
-            path = (_eg_f12p_v22_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            if "text/html" not in ctype:
-                return response
-
-            html = response.get_data(as_text=True)
-            if "FAN-12P" not in html:
-                return response
-
-            if "ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL" not in html:
-                inject = """
-<style id="eg-fan12p-v22-button-position-css">
-/* ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL */
-
-/* Kapalı durumda E MENÜ karttan ayrılır, sağ-alt boş alana iner */
-body:not(.eg-fan12p-v10-open) #eg-fan12p-real-menu-btn{
-  position:fixed!important;
-  right:24px!important;
-  top:auto!important;
-  bottom:245px!important;
-  left:auto!important;
-  transform:translate3d(0,0,0)!important;
-  width:72px!important;
-  height:72px!important;
-  z-index:2147483600!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-}
-
-/* Açık durumda V20/V21 bottom sheet üst merkez davranışı aynen korunur */
-body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-  left:50%!important;
-  right:auto!important;
-  top:auto!important;
-  bottom:calc(70vh - 38px)!important;
-  transform:translate3d(-50%,0,0)!important;
-  width:78px!important;
-  height:78px!important;
-  z-index:2147483700!important;
-}
-
-/* İç yazı kompakt */
-#eg-fan12p-real-menu-btn .eg-v10-e{
-  width:39px!important;
-  height:39px!important;
-  font-size:23px!important;
-}
-
-#eg-fan12p-real-menu-btn .eg-v10-label{
-  font-size:9px!important;
-  letter-spacing:.08em!important;
-}
-
-/* Küçük ekran */
-@media(max-width:390px){
-  body:not(.eg-fan12p-v10-open) #eg-fan12p-real-menu-btn{
-    right:22px!important;
-    bottom:230px!important;
-    width:70px!important;
-    height:70px!important;
-  }
-
-  body.eg-fan12p-v10-open #eg-fan12p-real-menu-btn{
-    bottom:calc(72vh - 37px)!important;
-    width:74px!important;
-    height:74px!important;
-  }
-}
-</style>
-
-<script id="eg-fan12p-v22-button-position-js">
-/* ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL */
-(function(){
-  if(window.__EG_FAN12P_V22_BUTTON_POSITION_READY__) return;
-  window.__EG_FAN12P_V22_BUTTON_POSITION_READY__ = true;
-
-  function mark(){
-    var btn = document.getElementById("eg-fan12p-real-menu-btn");
-    if(btn) btn.setAttribute("data-fan12p-v22", "closed-position-final");
-  }
-
-  if(document.readyState === "loading"){
-    document.addEventListener("DOMContentLoaded", mark, {once:true});
-  }else{
-    mark();
-  }
-
-  document.addEventListener("click", mark, true);
-})();
-</script>
-"""
-                html = html.replace("</body>", inject + "\n</body>", 1)
-
-            response.set_data(html)
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            return response
-
-        except Exception as _eg_f12p_v22_inner_e:
-            print("ERATGUARD FAN-12P V22 BUTTON POSITION INNER ERROR:", _eg_f12p_v22_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v22_button_position_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v22_button_position_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v22_button_position_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL ACTIVE")
-
-except Exception as _eg_f12p_v22_e:
-    print("ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL ERROR:", _eg_f12p_v22_e)
-# ===== ERATGUARD FAN-12P V22 CLOSED MENU BUTTON POSITION FINAL END =====
-
-# ===== ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL START =====
-# V23: Eski V6-V22 yamalı DOM tamamen bypass edilir.
-# Dashboard + bottom command sheet tek temiz HTML olarak döndürülür.
-
-try:
-    from flask import request as _eg_f12p_v23_request
-
-    def _eg_fan12p_v23_clean_html():
-        return r'''<!doctype html>
-<html lang="tr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>EratGuard PRO - FAN-12P Command Center</title>
-<style>
-/* ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL */
-:root{
-  --bg:#020b08;
-  --panel:#041b17;
-  --panel2:#05233a;
-  --green:#25ff8f;
-  --cyan:#46dfff;
-  --text:#f4fff9;
-  --muted:rgba(230,244,255,.66);
-  --line:rgba(37,255,143,.42);
-  --blue:#1778e8;
-}
-
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:#000;color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-body{
-  overflow-x:hidden;
-  background:
-    radial-gradient(circle at 82% 38%, rgba(21,255,122,.16), transparent 34%),
-    radial-gradient(circle at 20% 12%, rgba(45,220,255,.08), transparent 28%),
-    linear-gradient(180deg,#00110c 0%,#000906 55%,#000704 100%);
-}
-
-.eg-app{
-  position:relative;
-  min-height:100dvh;
-  padding:90px 30px 34px;
-  overflow:hidden;
-}
-
-.eg-top-pill{
-  position:absolute;
-  left:0;
-  right:0;
-  top:24px;
-  height:78px;
-  border-radius:34px;
-  background:linear-gradient(90deg,#19f884,#28ff95);
-  color:#061008;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:950;
-  font-size:26px;
-  letter-spacing:.01em;
-  box-shadow:0 0 32px rgba(37,255,143,.24);
-}
-
-.eg-brand{
-  position:relative;
-  z-index:1;
-  margin-top:28px;
-  margin-bottom:92px;
-}
-
-.eg-logo{
-  width:112px;
-  height:112px;
-  border-radius:30px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:66px;
-  line-height:1;
-  font-weight:950;
-  color:#020b08;
-  background:linear-gradient(135deg,#1ff587 0%,#39dfff 52%,#336dff 100%);
-  box-shadow:0 0 28px rgba(49,218,255,.32);
-  margin-bottom:24px;
-}
-
-.eg-brand h1{
-  margin:0;
-  font-size:41px;
-  line-height:1;
-  font-weight:950;
-  letter-spacing:-.05em;
-}
-.eg-brand h1 span{color:var(--green)}
-.eg-brand small{
-  display:block;
-  margin-top:22px;
-  color:var(--cyan);
-  font-size:15px;
-  font-weight:950;
-  letter-spacing:.34em;
-  line-height:1.55;
-}
-
-.eg-card{
-  position:relative;
-  z-index:1;
-  border:1px solid rgba(37,255,143,.35);
-  border-radius:28px;
-  padding:28px 28px 26px;
-  background:
-    radial-gradient(circle at 88% 8%, rgba(31,255,133,.12), transparent 38%),
-    linear-gradient(180deg,rgba(4,46,32,.74),rgba(3,20,17,.78));
-  box-shadow:0 0 30px rgba(37,255,143,.08), inset 0 0 24px rgba(22,255,126,.04);
-}
-
-.eg-card-kicker{
-  color:var(--green);
-  font-size:20px;
-  font-weight:950;
-  letter-spacing:.08em;
-  margin-bottom:12px;
-}
-.eg-card h2{
-  margin:0 0 12px;
-  font-size:36px;
-  line-height:1.05;
-  font-weight:950;
-}
-.eg-card p{
-  margin:0 0 26px;
-  color:rgba(230,244,255,.68);
-  font-size:25px;
-  line-height:1.25;
-}
-
-.eg-stats{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:18px;
-  margin-bottom:24px;
-}
-.eg-stat{
-  min-height:94px;
-  border-radius:22px;
-  background:rgba(13,54,37,.62);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-}
-.eg-stat strong{
-  color:var(--green);
-  font-size:38px;
-  font-weight:950;
-  line-height:1;
-}
-.eg-stat span{
-  margin-top:10px;
-  color:rgba(230,244,255,.75);
-  font-size:18px;
-  font-weight:850;
-}
-
-.eg-actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-}
-.eg-actions a{
-  min-height:78px;
-  border-radius:22px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-decoration:none;
-  font-size:25px;
-  font-weight:950;
-}
-.eg-actions a:first-child{
-  background:linear-gradient(90deg,#25ff8f,#25ff94);
-  color:#061008;
-}
-.eg-actions a:last-child{
-  border:1px solid rgba(37,255,143,.42);
-  color:var(--green);
-  background:rgba(6,42,28,.45);
-}
-
-.eg-menu-slot{
-  position:relative;
-  z-index:3;
-  display:flex;
-  justify-content:flex-end;
-  padding-right:18px;
-  margin-top:22px;
-  margin-bottom:170px;
-}
-
-#eg-fan12p-real-menu-btn{
-  appearance:none;
-  border:1px solid rgba(128,224,255,.92);
-  width:78px;
-  height:78px;
-  border-radius:999px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:4px;
-  color:#fff;
-  cursor:pointer;
-  background:radial-gradient(circle at 35% 22%,rgba(174,237,255,.98),rgba(30,124,224,.96) 39%,rgba(2,20,64,.98) 78%);
-  box-shadow:0 0 0 2px rgba(37,255,143,.20),0 0 24px rgba(65,188,255,.74),0 0 34px rgba(37,255,143,.22);
-  z-index:20;
-  padding:0;
-}
-#eg-fan12p-real-menu-btn .e{
-  width:42px;
-  height:42px;
-  border-radius:999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:2px solid rgba(235,255,255,.45);
-  font-size:27px;
-  font-weight:950;
-}
-#eg-fan12p-real-menu-btn .label{
-  font-size:10px;
-  font-weight:950;
-  letter-spacing:.08em;
-}
-
-.eg-status{
-  position:relative;
-  z-index:1;
-  width:min(396px,100%);
-  margin-left:10px;
-  border:1px solid rgba(37,255,143,.28);
-  border-radius:999px;
-  min-height:72px;
-  padding:0 22px;
-  display:flex;
-  align-items:center;
-  gap:14px;
-  color:#fff;
-  background:rgba(2,24,18,.48);
-  box-shadow:0 0 18px rgba(37,255,143,.05);
-}
-.eg-status .dot{
-  width:17px;
-  height:17px;
-  border-radius:50%;
-  background:var(--green);
-  box-shadow:0 0 15px rgba(37,255,143,.64);
-}
-.eg-status strong{
-  font-size:16px;
-  letter-spacing:.22em;
-  font-weight:950;
-}
-.eg-status span{
-  color:var(--cyan);
-  font-size:14px;
-  letter-spacing:.13em;
-  font-weight:950;
-}
-
-/* Bottom sheet */
-.eg-backdrop{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.38);
-  opacity:0;
-  visibility:hidden;
-  pointer-events:none;
-  transition:opacity .14s linear;
-  z-index:1000;
-}
-
-.eg-sheet{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
-  height:70dvh;
-  border-radius:30px 30px 0 0;
-  padding:42px 30px 14px;
-  background:
-    radial-gradient(circle at 50% 0%,rgba(37,255,143,.20),transparent 27%),
-    linear-gradient(180deg,rgba(4,61,53,.98),rgba(1,11,18,.99));
-  border:1px solid rgba(37,255,143,.66);
-  border-bottom:0;
-  box-shadow:0 -16px 38px rgba(0,0,0,.55);
-  transform:translate3d(0,110%,0);
-  transition:transform .18s cubic-bezier(.2,.85,.25,1);
-  will-change:transform;
-  z-index:1100;
-  display:flex;
-  flex-direction:column;
-  contain:layout paint style;
-}
-.eg-sheet::before{
-  content:"";
-  position:absolute;
-  top:13px;
-  left:50%;
-  width:78px;
-  height:6px;
-  transform:translateX(-50%);
-  border-radius:999px;
-  background:rgba(235,255,255,.84);
-}
-
-body.eg-open .eg-backdrop{
-  opacity:1;
-  visibility:visible;
-  pointer-events:auto;
-}
-body.eg-open .eg-sheet{
-  transform:translate3d(0,0,0);
-}
-body.eg-open #eg-fan12p-real-menu-btn{
-  position:fixed;
-  left:50%;
-  right:auto;
-  bottom:calc(70dvh - 39px);
-  transform:translateX(-50%);
-  z-index:1200;
-}
-
-.eg-sheet-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin-bottom:12px;
-  flex:0 0 auto;
-}
-.eg-sheet-head strong{
-  display:block;
-  color:var(--green);
-  font-size:19px;
-  line-height:1.05;
-  font-weight:950;
-}
-.eg-sheet-head small{
-  display:block;
-  color:var(--cyan);
-  font-size:11px;
-  margin-top:6px;
-  letter-spacing:.26em;
-  font-weight:950;
-}
-.eg-close{
-  appearance:none;
-  width:42px;
-  height:42px;
-  border-radius:999px;
-  border:1px solid rgba(37,255,143,.58);
-  color:#fff;
-  background:rgba(4,35,32,.78);
-  font-size:31px;
-  line-height:1;
-  cursor:pointer;
-}
-
-.eg-grid{
-  flex:1 1 auto;
-  min-height:0;
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  grid-auto-rows:74px;
-  gap:9px;
-  overflow-y:auto;
-  padding-bottom:8px;
-  -webkit-overflow-scrolling:touch;
-}
-.eg-tile{
-  position:relative;
-  border:1px solid rgba(37,255,143,.42);
-  border-radius:15px;
-  background:linear-gradient(135deg,rgba(8,65,50,.92),rgba(5,25,50,.97));
-  color:#fff;
-  text-decoration:none;
-  padding:8px 8px 6px;
-  display:flex;
-  flex-direction:column;
-  gap:2px;
-}
-.eg-icon{
-  width:27px;
-  height:27px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:10px;
-  background:rgba(35,92,165,.72);
-  font-size:17px;
-  margin-bottom:2px;
-}
-.eg-tile strong{
-  font-size:11px;
-  line-height:1;
-  font-weight:950;
-}
-.eg-tile small{
-  color:rgba(221,238,255,.78);
-  font-size:7.6px;
-  line-height:1.05;
-  font-weight:750;
-}
-.eg-no{
-  position:absolute;
-  right:7px;
-  top:7px;
-  min-width:25px;
-  height:21px;
-  border-radius:999px;
-  border:1px solid rgba(37,255,143,.70);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--green);
-  background:rgba(2,30,44,.85);
-  font-size:8.6px;
-  font-weight:950;
-}
-
-.eg-sheet-foot{
-  flex:0 0 auto;
-  height:32px;
-  border:1px solid rgba(37,255,143,.42);
-  border-radius:999px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 13px;
-  color:var(--green);
-  font-size:9.3px;
-  font-weight:950;
-  letter-spacing:.10em;
-}
-.eg-sheet-foot span:last-child{color:var(--cyan)}
-
-@media(max-width:420px){
-  .eg-app{padding-left:29px;padding-right:29px}
-  .eg-top-pill{height:78px;font-size:24px}
-  .eg-card{padding:28px 28px 26px}
-  .eg-card h2{font-size:35px}
-  .eg-card p{font-size:24px}
-}
-@media(max-width:390px){
-  .eg-app{padding-left:24px;padding-right:24px}
-  .eg-brand{margin-bottom:72px}
-  .eg-logo{width:104px;height:104px;font-size:60px}
-  .eg-brand h1{font-size:38px}
-  .eg-card h2{font-size:31px}
-  .eg-card p{font-size:21px}
-  .eg-actions a{font-size:22px}
-  .eg-menu-slot{margin-bottom:145px}
-  #eg-fan12p-real-menu-btn{width:72px;height:72px}
-  .eg-status{min-height:64px}
-  .eg-sheet{height:72dvh;padding:40px 24px 12px}
-  body.eg-open #eg-fan12p-real-menu-btn{bottom:calc(72dvh - 37px)}
-  .eg-grid{grid-auto-rows:70px;gap:8px}
-  .eg-tile{padding:7px 7px 6px}
-  .eg-icon{width:25px;height:25px;font-size:16px}
-  .eg-tile strong{font-size:10.2px}
-  .eg-tile small{font-size:7.1px}
-}
-</style>
-</head>
-<body>
-<div class="eg-app">
-  <div class="eg-top-pill">FAN-12P Command Center</div>
-
-  <section class="eg-brand">
-    <div class="eg-logo">E</div>
-    <h1>Erat<span>Guard</span></h1>
-    <small>FAN-12P<br>COMMAND CENTER</small>
-  </section>
-
-  <section class="eg-card">
-    <div class="eg-card-kicker">ERATGUARD FAN-12P</div>
-    <h2>SMS Koruma Özeti</h2>
-    <p>SMS risk motoru hazır, yeni analizleri bekliyor.</p>
-
-    <div class="eg-stats">
-      <div class="eg-stat"><strong>HAZIR</strong><span>Durum</span></div>
-      <div class="eg-stat"><strong>0</strong><span>Toplam Aksiyon</span></div>
-      <div class="eg-stat"><strong>0</strong><span>Engellenen</span></div>
-      <div class="eg-stat"><strong>0</strong><span>Şikayet</span></div>
-    </div>
-
-    <div class="eg-actions">
-      <a href="/u/ai-analysis">AI Analiz Aç</a>
-      <a href="/u/sms-summary">SMS Merkezi</a>
-    </div>
-  </section>
-
-  <div class="eg-menu-slot">
-    <button id="eg-fan12p-real-menu-btn" type="button" aria-label="FAN-12P Menü">
-      <span class="e">E</span>
-      <span class="label">MENÜ</span>
-    </button>
-  </div>
-
-  <section class="eg-status">
-    <span class="dot"></span>
-    <strong>KORUMA AKTİF</strong>
-    <span>FAN-12P HAZIR</span>
-  </section>
-</div>
-
-<div class="eg-backdrop" id="eg-fan12p-sheet-backdrop"></div>
-
-<section class="eg-sheet" id="eg-fan12p-command-sheet" aria-label="FAN-12P Komut Merkezi">
-  <div class="eg-sheet-head">
-    <div>
-      <strong>FAN-12P KOMUT MERKEZİ</strong>
-      <small>COMMAND CENTER</small>
-    </div>
-    <button class="eg-close" id="eg-fan12p-sheet-close" type="button">×</button>
-  </div>
-
-  <nav class="eg-grid">
-    <a class="eg-tile" href="/u/eg-panel"><span class="eg-no">01</span><span class="eg-icon">🏠</span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></a>
-    <a class="eg-tile" href="/u/protection"><span class="eg-no">02</span><span class="eg-icon">🛡️</span><strong>Koruma</strong><small>SMS güvenlik motoru</small></a>
-    <a class="eg-tile" href="/u/ai-analysis"><span class="eg-no">03</span><span class="eg-icon">🧠</span><strong>AI Analiz</strong><small>Risk taraması</small></a>
-    <a class="eg-tile" href="/u/reports"><span class="eg-no">04</span><span class="eg-icon">📈</span><strong>Raporlar</strong><small>Güvenlik özetleri</small></a>
-    <a class="eg-tile" href="/u/notifications"><span class="eg-no">05</span><span class="eg-icon">🔔</span><strong>Bildirimler</strong><small>Güvenlik akışı</small></a>
-    <a class="eg-tile" href="/u/license"><span class="eg-no">06</span><span class="eg-icon">🔑</span><strong>Lisans</strong><small>Hesap durumu</small></a>
-    <a class="eg-tile" href="/u/community"><span class="eg-no">07</span><span class="eg-icon">👥</span><strong>Topluluk</strong><small>Geri bildirim</small></a>
-    <a class="eg-tile" href="/u/settings"><span class="eg-no">08</span><span class="eg-icon">⚙️</span><strong>Ayarlar</strong><small>Tercihler</small></a>
-    <a class="eg-tile" href="/u/sms-summary"><span class="eg-no">09</span><span class="eg-icon">📩</span><strong>SMS Özet</strong><small>Koruma özeti</small></a>
-    <a class="eg-tile" href="/u/blocked-sms"><span class="eg-no">10</span><span class="eg-icon">🚫</span><strong>Blok SMS</strong><small>Engellenen merkez</small></a>
-    <a class="eg-tile" href="/u/history"><span class="eg-no">11</span><span class="eg-icon">🕘</span><strong>Geçmiş</strong><small>Koruma geçmişi</small></a>
-    <a class="eg-tile" href="/u/pro"><span class="eg-no">12</span><span class="eg-icon">⭐</span><strong>PRO</strong><small>Final özellikleri</small></a>
-  </nav>
-
-  <div class="eg-sheet-foot">
-    <span>● KORUMA AKTİF</span>
-    <span>FAN-12P HAZIR</span>
-  </div>
-</section>
-
-<script>
-/* ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL */
-(function(){
-  var body = document.body;
-  var btn = document.getElementById("eg-fan12p-real-menu-btn");
-  var close = document.getElementById("eg-fan12p-sheet-close");
-  var back = document.getElementById("eg-fan12p-sheet-backdrop");
-
-  function openMenu(ev){
-    if(ev){ev.preventDefault();ev.stopPropagation();}
-    body.classList.toggle("eg-open");
-  }
-  function closeMenu(ev){
-    if(ev){ev.preventDefault();ev.stopPropagation();}
-    body.classList.remove("eg-open");
-  }
-
-  if(btn){btn.addEventListener("click",openMenu,{passive:false});}
-  if(close){close.addEventListener("click",closeMenu,{passive:false});}
-  if(back){back.addEventListener("click",closeMenu,{passive:false});}
-})();
-</script>
-</body>
-</html>'''
-
-    def _eg_fan12p_v23_clean_shell_response(response):
-        try:
-            path = (_eg_f12p_v23_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            html = _eg_fan12p_v23_clean_html()
-            response.set_data(html)
-            response.headers["Content-Type"] = "text/html; charset=utf-8"
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-            response.headers["Pragma"] = "no-cache"
-            response.headers["Expires"] = "0"
-            return response
-
-        except Exception as _eg_f12p_v23_inner_e:
-            print("ERATGUARD FAN-12P V23 CLEAN SHELL INNER ERROR:", _eg_f12p_v23_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v23_clean_shell_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v23_clean_shell_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v23_clean_shell_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL ACTIVE")
-
-except Exception as _eg_f12p_v23_e:
-    print("ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL ERROR:", _eg_f12p_v23_e)
-# ===== ERATGUARD FAN-12P V23 CLEAN COMMAND SHELL END =====
-
-# ===== ERATGUARD FAN-12P V24 CLEAN RADIAL SIGNATURE PANEL START =====
-# V24: Kullanıcının istediği imza paneli: temiz FAN-12P radial/papatya komut merkezi.
-# Eski V6-V22 yamalı panel değil; V23 temiz shell üstüne sıfırdan clean radial layout.
-
-try:
-    from flask import request as _eg_f12p_v24_request
-
-    def _eg_fan12p_v24_radial_html():
-        return r'''<!doctype html>
-<html lang="tr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>EratGuard PRO - FAN-12P Radial Command Center</title>
-<style>
-/* ERATGUARD FAN-12P V24 CLEAN RADIAL SIGNATURE PANEL */
-:root{
-  --green:#25ff8f;
-  --cyan:#42dcff;
-  --bg:#020b08;
-  --text:#f4fff9;
-  --muted:rgba(230,244,255,.70);
-  --line:rgba(37,255,143,.44);
-  --blue:#1979e9;
-}
-*{box-sizing:border-box}
-html,body{
-  margin:0;
-  min-height:100%;
-  background:#000;
-  color:var(--text);
-  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-}
-body{
-  overflow-x:hidden;
-  background:
-    radial-gradient(circle at 78% 32%,rgba(37,255,143,.14),transparent 34%),
-    radial-gradient(circle at 18% 12%,rgba(66,220,255,.08),transparent 28%),
-    linear-gradient(180deg,#000b08 0%,#000806 52%,#000503 100%);
-}
-.eg-app{
-  width:100%;
-  min-height:100dvh;
-  padding:88px 36px 34px;
-  position:relative;
-}
-.eg-top-pill{
-  position:absolute;
-  left:35px;
-  right:35px;
-  top:34px;
-  height:50px;
-  border-radius:999px;
-  background:linear-gradient(90deg,#19f884,#28ff95);
-  color:#061008;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:950;
-  font-size:22px;
-  box-shadow:0 0 28px rgba(37,255,143,.24);
-}
-.eg-brand{
-  margin-top:18px;
-  margin-left:18px;
-  margin-bottom:18px;
-}
-.eg-logo{
-  width:84px;
-  height:84px;
-  border-radius:23px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:54px;
-  font-weight:950;
-  color:#020b08;
-  background:linear-gradient(135deg,#1ff587 0%,#39dfff 52%,#336dff 100%);
-  box-shadow:0 0 28px rgba(49,218,255,.32);
-  margin-bottom:10px;
-}
-.eg-brand h1{
-  margin:0;
-  font-size:32px;
-  line-height:1;
-  font-weight:950;
-  letter-spacing:-.06em;
-}
-.eg-brand h1 span{color:var(--green)}
-.eg-brand small{
-  display:block;
-  margin-top:10px;
-  color:var(--cyan);
-  font-size:13px;
-  font-weight:950;
-  letter-spacing:.28em;
-  line-height:1.35;
-}
-.eg-card{
-  border:1px solid rgba(37,255,143,.34);
-  border-radius:26px;
-  padding:20px 20px 18px;
-  background:
-    radial-gradient(circle at 88% 8%,rgba(31,255,133,.11),transparent 38%),
-    linear-gradient(180deg,rgba(4,46,32,.72),rgba(3,20,17,.77));
-  box-shadow:0 0 30px rgba(37,255,143,.07), inset 0 0 24px rgba(22,255,126,.04);
-}
-.eg-kicker{
-  color:var(--green);
-  font-size:16px;
-  font-weight:950;
-  letter-spacing:.12em;
-  margin-bottom:10px;
-}
-.eg-card h2{
-  margin:0 0 8px;
-  font-size:29px;
-  line-height:1.05;
-  font-weight:950;
-}
-.eg-card p{
-  margin:0 0 14px;
-  color:rgba(230,244,255,.70);
-  font-size:16px;
-  line-height:1.25;
-}
-.eg-stats{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px 14px;
-  margin-bottom:14px;
-}
-.eg-stat{
-  min-height:68px;
-  border-radius:18px;
-  border:1px solid rgba(37,255,143,.16);
-  background:rgba(13,54,37,.62);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-}
-.eg-stat strong{
-  color:var(--green);
-  font-size:28px;
-  font-weight:950;
-  line-height:1;
-}
-.eg-stat span{
-  margin-top:7px;
-  color:rgba(230,244,255,.75);
-  font-size:14px;
-  font-weight:850;
-}
-.eg-actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-}
-.eg-actions a{
-  height:54px;
-  border-radius:18px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-decoration:none;
-  font-size:20px;
-  font-weight:950;
-}
-.eg-actions a:first-child{
-  background:linear-gradient(90deg,#25ff8f,#25ff94);
-  color:#061008;
-}
-.eg-actions a:last-child{
-  border:1px solid rgba(37,255,143,.42);
-  color:var(--green);
-  background:rgba(6,42,28,.45);
-}
-
-/* RADIAL SIGNATURE PANEL */
-.eg-radial-wrap{
-  position:relative;
-  width:min(620px,100%);
-  height:520px;
-  margin:8px auto 10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.eg-radial{
-  position:relative;
-  width:430px;
-  height:430px;
-}
-.eg-center{
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:116px;
-  height:116px;
-  transform:translate(-50%,-50%);
-  border-radius:999px;
-  border:3px solid rgba(37,255,143,.92);
-  background:radial-gradient(circle at 35% 22%,rgba(174,237,255,.98),rgba(30,124,224,.96) 40%,rgba(2,20,64,.98) 78%);
-  box-shadow:
-    0 0 0 2px rgba(66,220,255,.30),
-    0 0 25px rgba(66,220,255,.78),
-    0 0 40px rgba(37,255,143,.36);
-  color:#fff;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  z-index:10;
-  text-decoration:none;
-}
-.eg-center b{
-  width:58px;
-  height:58px;
-  border-radius:999px;
-  border:2px solid rgba(235,255,255,.46);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:38px;
-  line-height:1;
-}
-.eg-center span{
-  margin-top:6px;
-  font-size:14px;
-  font-weight:950;
-  letter-spacing:.06em;
-}
-
-.eg-petal{
-  --a:0deg;
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:94px;
-  height:176px;
-  margin-left:-47px;
-  margin-top:-88px;
-  transform:rotate(var(--a)) translateY(-165px);
-  transform-origin:center center;
-  border-radius:48px;
-  border:1px solid rgba(37,255,143,.58);
-  background:
-    radial-gradient(circle at 50% 16%,rgba(37,255,143,.20),transparent 28%),
-    linear-gradient(180deg,rgba(8,44,83,.98),rgba(2,12,38,.97));
-  box-shadow:
-    inset 0 0 20px rgba(40,120,255,.22),
-    0 0 16px rgba(37,255,143,.30);
-  color:#fff;
-  text-decoration:none;
-  z-index:4;
-  overflow:hidden;
-}
-.eg-petal::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  bottom:-12px;
-  width:2px;
-  height:70px;
-  transform:translateX(-50%);
-  background:linear-gradient(180deg,rgba(37,255,143,.9),rgba(60,145,255,.12));
-  opacity:.75;
-}
-.eg-petal-in{
-  width:100%;
-  height:100%;
-  transform:rotate(calc(-1 * var(--a)));
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:12px 8px 14px;
-  position:relative;
-  z-index:2;
-}
-.eg-no{
-  position:absolute;
-  top:9px;
-  left:9px;
-  width:28px;
-  height:28px;
-  border-radius:999px;
-  border:1px solid rgba(37,255,143,.85);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--green);
-  background:rgba(2,30,44,.85);
-  font-size:11px;
-  font-weight:950;
-}
-.eg-ico{
-  font-size:30px;
-  line-height:1;
-  margin-top:20px;
-  margin-bottom:8px;
-  filter:drop-shadow(0 0 6px rgba(66,220,255,.35));
-}
-.eg-petal strong{
-  display:block;
-  font-size:12px;
-  line-height:1.05;
-  font-weight:950;
-}
-.eg-petal small{
-  display:block;
-  margin-top:6px;
-  color:rgba(230,244,255,.78);
-  font-size:9px;
-  line-height:1.15;
-  font-weight:750;
-}
-
-.eg-status{
-  width:min(360px,100%);
-  margin:0 auto;
-  border:1px solid rgba(37,255,143,.28);
-  border-radius:999px;
-  min-height:56px;
-  padding:0 20px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:13px;
-  background:rgba(2,24,18,.48);
-}
-.eg-dot{
-  width:15px;
-  height:15px;
-  border-radius:50%;
-  background:var(--green);
-  box-shadow:0 0 15px rgba(37,255,143,.64);
-}
-.eg-status strong{
-  font-size:14px;
-  letter-spacing:.20em;
-  font-weight:950;
-}
-.eg-status span{
-  color:var(--cyan);
-  font-size:13px;
-  letter-spacing:.11em;
-  font-weight:950;
-}
-
-@media(max-width:430px){
-  .eg-app{padding:88px 28px 32px}
-  .eg-top-pill{left:36px;right:36px;height:50px;font-size:20px}
-  .eg-brand{margin-left:18px}
-  .eg-logo{width:82px;height:82px;font-size:52px}
-  .eg-brand h1{font-size:31px}
-  .eg-card{padding:18px 20px}
-  .eg-card h2{font-size:28px}
-  .eg-card p{font-size:16px}
-  .eg-radial-wrap{height:510px;margin-top:4px}
-  .eg-radial{width:396px;height:396px;transform:scale(.92)}
-}
-@media(max-width:390px){
-  .eg-app{padding-left:22px;padding-right:22px}
-  .eg-top-pill{left:28px;right:28px;font-size:18px}
-  .eg-card h2{font-size:25px}
-  .eg-actions a{font-size:18px}
-  .eg-radial-wrap{height:480px;margin-top:0}
-  .eg-radial{transform:scale(.84)}
-  .eg-status{min-height:52px}
-  .eg-status strong{font-size:12px}
-  .eg-status span{font-size:11px}
-}
-</style>
-</head>
-<body>
-<div class="eg-app">
-  <div class="eg-top-pill">FAN-12P Command Center</div>
-
-  <section class="eg-brand">
-    <div class="eg-logo">E</div>
-    <h1>Erat<span>Guard</span></h1>
-    <small>FAN-12P<br>COMMAND CENTER</small>
-  </section>
-
-  <section class="eg-card">
-    <div class="eg-kicker">ERATGUARD FAN-12P</div>
-    <h2>SMS Koruma Özeti</h2>
-    <p>SMS risk motoru hazır, yeni analizleri bekliyor.</p>
-
-    <div class="eg-stats">
-      <div class="eg-stat"><strong>HAZIR</strong><span>Durum</span></div>
-      <div class="eg-stat"><strong>0</strong><span>Toplam Aksiyon</span></div>
-      <div class="eg-stat"><strong>0</strong><span>Engellenen</span></div>
-      <div class="eg-stat"><strong>0</strong><span>Şikayet</span></div>
-    </div>
-
-    <div class="eg-actions">
-      <a href="/u/ai-analysis">AI Analiz Aç</a>
-      <a href="/u/sms-summary">SMS Merkezi</a>
-    </div>
-  </section>
-
-  <section class="eg-radial-wrap" aria-label="FAN-12P Radial Menü">
-    <div class="eg-radial">
-      <a class="eg-center" href="/u/eg-panel"><b>E</b><span>MENÜ</span></a>
-
-      <a class="eg-petal" style="--a:0deg" href="/u/pro"><span class="eg-petal-in"><span class="eg-no">12</span><span class="eg-ico">⭐</span><strong>PRO</strong><small>Final özellikleri</small></span></a>
-      <a class="eg-petal" style="--a:30deg" href="/u/eg-panel"><span class="eg-petal-in"><span class="eg-no">01</span><span class="eg-ico">🏠</span><strong>Ana Sayfa</strong><small>Kontrol merkezi</small></span></a>
-      <a class="eg-petal" style="--a:60deg" href="/u/protection"><span class="eg-petal-in"><span class="eg-no">02</span><span class="eg-ico">🛡️</span><strong>Koruma</strong><small>SMS güvenlik motoru</small></span></a>
-      <a class="eg-petal" style="--a:90deg" href="/u/ai-analysis"><span class="eg-petal-in"><span class="eg-no">03</span><span class="eg-ico">🧠</span><strong>AI Analiz</strong><small>Risk taraması</small></span></a>
-      <a class="eg-petal" style="--a:120deg" href="/u/reports"><span class="eg-petal-in"><span class="eg-no">04</span><span class="eg-ico">📈</span><strong>Raporlar</strong><small>Güvenlik özetleri</small></span></a>
-      <a class="eg-petal" style="--a:150deg" href="/u/notifications"><span class="eg-petal-in"><span class="eg-no">05</span><span class="eg-ico">🔔</span><strong>Bildirimler</strong><small>Güvenlik akışı</small></span></a>
-      <a class="eg-petal" style="--a:180deg" href="/u/license"><span class="eg-petal-in"><span class="eg-no">06</span><span class="eg-ico">🔑</span><strong>Lisans</strong><small>Hesap durumu</small></span></a>
-      <a class="eg-petal" style="--a:210deg" href="/u/community"><span class="eg-petal-in"><span class="eg-no">07</span><span class="eg-ico">👥</span><strong>Topluluk</strong><small>Geri bildirim</small></span></a>
-      <a class="eg-petal" style="--a:240deg" href="/u/settings"><span class="eg-petal-in"><span class="eg-no">08</span><span class="eg-ico">⚙️</span><strong>Ayarlar</strong><small>Tercihler</small></span></a>
-      <a class="eg-petal" style="--a:270deg" href="/u/sms-summary"><span class="eg-petal-in"><span class="eg-no">09</span><span class="eg-ico">✉️</span><strong>SMS Özet</strong><small>Koruma özeti</small></span></a>
-      <a class="eg-petal" style="--a:300deg" href="/u/blocked-sms"><span class="eg-petal-in"><span class="eg-no">10</span><span class="eg-ico">🚫</span><strong>Blok SMS</strong><small>Engellenen merkez</small></span></a>
-      <a class="eg-petal" style="--a:330deg" href="/u/history"><span class="eg-petal-in"><span class="eg-no">11</span><span class="eg-ico">🕘</span><strong>Geçmiş</strong><small>Koruma geçmişi</small></span></a>
-    </div>
-  </section>
-
-  <section class="eg-status">
-    <span class="eg-dot"></span>
-    <strong>KORUMA AKTİF</strong>
-    <span>FAN-12P HAZIR</span>
-  </section>
-</div>
-</body>
-</html>'''
-
-    def _eg_fan12p_v24_radial_signature_response(response):
-        try:
-            path = (_eg_f12p_v24_request.path or "").strip()
-            if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
-                return response
-
-            html = _eg_fan12p_v24_radial_html()
-            response.set_data(html)
-            response.headers["Content-Type"] = "text/html; charset=utf-8"
-            response.headers["Content-Length"] = str(len(html.encode("utf-8")))
-            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-            response.headers["Pragma"] = "no-cache"
-            response.headers["Expires"] = "0"
-            return response
-
-        except Exception as _eg_f12p_v24_inner_e:
-            print("ERATGUARD FAN-12P V24 RADIAL SIGNATURE INNER ERROR:", _eg_f12p_v24_inner_e)
-            return response
-
-    app.after_request(_eg_fan12p_v24_radial_signature_response)
-
-    try:
-        _eg_after_list = app.after_request_funcs.get(None, [])
-        _eg_after_list = [f for f in _eg_after_list if getattr(f, "__name__", "") != "_eg_fan12p_v24_radial_signature_response"]
-        _eg_after_list.insert(0, _eg_fan12p_v24_radial_signature_response)
-        app.after_request_funcs[None] = _eg_after_list
-    except Exception:
-        pass
-
-    print("ERATGUARD FAN-12P V24 CLEAN RADIAL SIGNATURE PANEL ACTIVE")
-
-except Exception as _eg_f12p_v24_e:
-    print("ERATGUARD FAN-12P V24 CLEAN RADIAL SIGNATURE PANEL ERROR:", _eg_f12p_v24_e)
-# ===== ERATGUARD FAN-12P V24 CLEAN RADIAL SIGNATURE PANEL END =====
-
 # ===== ERATGUARD FAN-12P V25 RADIAL FIT FINAL START =====
 # V25: V24 imza radial panel korunur; sadece ekrana sığma, ölçek ve boşluk profesyonel ayarlanır.
 
@@ -33377,6 +24557,10 @@ try:
 
     def _eg_fan12p_v25_radial_fit_response(response):
         try:
+            # ERATGUARD NON-200 RESPONSE GUARD
+            if getattr(response, "status_code", 200) != 200:
+                return response
+
             path = (_eg_f12p_v25_request.path or "").strip()
             if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
                 return response
@@ -33600,6 +24784,10 @@ try:
 
     def _eg_fan12p_v26_radial_polish_response(response):
         try:
+            # ERATGUARD NON-200 RESPONSE GUARD
+            if getattr(response, "status_code", 200) != 200:
+                return response
+
             path = (_eg_f12p_v26_request.path or "").strip()
             if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
                 return response
@@ -33843,6 +25031,10 @@ try:
 
     def _eg_fan12p_v28_radial_final_lock_response(response):
         try:
+            # ERATGUARD NON-200 RESPONSE GUARD
+            if getattr(response, "status_code", 200) != 200:
+                return response
+
             path = (_eg_f12p_v28_request.path or "").strip()
             if path not in {"/dashboard", "/u/dashboard", "/app-start", "/radial", "/radial-menu", "/radial-demo"}:
                 return response
@@ -34205,213 +25397,10 @@ def eratguard_signature_radial_svg_demo():
 # ===== ERATGUARD SIGNATURE SVG RADIAL DEMO ROUTE END =====
 
 
-# ===== ERATGUARD SIGNATURE GALAXY FINAL HOME OVERRIDE START =====
-# Eski FAN-12P route lock blokları /dashboard ve /u/dashboard'u tekrar ele geçiriyordu.
-# Bu final blok en sonda çalışır ve kullanıcı ana girişlerini Signature Galaxy panele zorlar.
-try:
-    from flask import redirect as _eg_sig_final_redirect
-    from flask import request as _eg_sig_final_request
-
-    def _eg_signature_galaxy_home_final():
-        return _eg_sig_final_redirect("/signature-radial")
-
-    def _eg_signature_galaxy_home_before_request():
-        try:
-            path = str(getattr(_eg_sig_final_request, "path", "") or "")
-            if path in ("/dashboard", "/u/dashboard", "/app-start"):
-                return _eg_sig_final_redirect("/signature-radial")
-        except Exception:
-            return None
-        return None
-
-    # Route endpointlerini de son kez override et.
-    try:
-        for _eg_rule in list(app.url_map.iter_rules()):
-            if str(_eg_rule.rule) in ("/dashboard", "/u/dashboard", "/app-start"):
-                app.view_functions[_eg_rule.endpoint] = _eg_signature_galaxy_home_final
-                print("ERATGUARD SIGNATURE HOME OVERRIDE:", _eg_rule.rule, "->", _eg_rule.endpoint, flush=True)
-    except Exception as _eg_sig_route_e:
-        print("ERATGUARD SIGNATURE HOME ROUTE OVERRIDE WARN:", repr(_eg_sig_route_e), flush=True)
-
-    # before_request listesinin en başına koy; eski FAN-12P before_request cevap döndürmeden yakalasın.
-    try:
-        _eg_sig_funcs = app.before_request_funcs.setdefault(None, [])
-        _eg_sig_funcs = [
-            f for f in _eg_sig_funcs
-            if getattr(f, "__name__", "") != "_eg_signature_galaxy_home_before_request"
-        ]
-        _eg_sig_funcs.insert(0, _eg_signature_galaxy_home_before_request)
-        app.before_request_funcs[None] = _eg_sig_funcs
-        print("ERATGUARD SIGNATURE GALAXY FINAL HOME OVERRIDE ACTIVE", flush=True)
-    except Exception as _eg_sig_before_e:
-        print("ERATGUARD SIGNATURE HOME BEFORE OVERRIDE WARN:", repr(_eg_sig_before_e), flush=True)
-
-except Exception as _eg_sig_final_e:
-    print("ERATGUARD SIGNATURE GALAXY FINAL HOME OVERRIDE ERROR:", repr(_eg_sig_final_e), flush=True)
-# ===== ERATGUARD SIGNATURE GALAXY FINAL HOME OVERRIDE END =====
+# ERATGUARD CLEANUP: SIGNATURE GALAXY FINAL HOME OVERRIDE REMOVED BY BATCH-1
 
 
-# ERATGUARD_FINAL_PRIORITY_ROUTE_GUARD_START
-# En son yayın kilidi:
-# /radial asla admin/dashboard'a gitmeyecek.
-# Kullanıcı eski panelleri tek ana panel olan /radial'e dönecek.
-# Bu guard Flask before_request listesinde en başa taşınır.
-def eratguard_final_priority_route_guard():
-    try:
-        from flask import request, redirect, render_template
 
-        raw_path = request.path or "/"
-        path = raw_path.rstrip("/") or "/"
-
-        # Statik ve API tarafına dokunma.
-        if (
-            path == "/static" or path.startswith("/static/") or
-            path == "/assets" or path.startswith("/assets/") or
-            path == "/api" or path.startswith("/api/") or
-            path == "/favicon.ico" or
-            path == "/robots.txt"
-        ):
-            return None
-
-        # Kullanıcı ana radial ekranı artık yeni eg-panel'e yönlendirilir.
-        if path in {
-            "/radial",
-            "/signature-radial"
-        }:
-            return redirect("/u/eg-panel")
-
-        # Eski kullanıcı girişleri tek ana panele yönlenir.
-        if path in {
-            "/",
-            "/home",
-            "/dashboard",
-            "/user",
-            "/panel",
-            "/console",
-            "/living",
-            "/live",
-            "/app-start",
-            "/radial-menu",
-            "/radial-demo",
-            "/fan",
-            "/fan12p",
-            "/fan-12p",
-            "/fan_12p",
-            "/radial_live",
-            "/radial-live",
-            "/user/dashboard",
-            "/user/home",
-            "/user/panel",
-            "/u/dashboard",
-            "/u/home",
-            "/u/panel",
-            "/u/console",
-            "/u/fan",
-            "/u/fan12p",
-            "/u/radial_live"
-        }:
-            return redirect("/radial", code=302)
-
-        # Admin tarafına burada dokunma.
-        # Admin kendi mevcut kilitleriyle devam eder.
-        return None
-
-    except Exception:
-        return None
-
-
-try:
-    # Flask hook sırasını zorla:
-    # Bu guard listenin en başında çalışsın.
-    app.before_request(eratguard_final_priority_route_guard)
-
-    _lst = app.before_request_funcs.get(None, [])
-    if eratguard_final_priority_route_guard in _lst:
-        _lst.remove(eratguard_final_priority_route_guard)
-        _lst.insert(0, eratguard_final_priority_route_guard)
-
-    print("ERATGUARD FINAL PRIORITY ROUTE GUARD ACTIVE")
-except Exception as _eg_final_guard_error:
-    print("ERATGUARD FINAL PRIORITY ROUTE GUARD ERROR:", _eg_final_guard_error)
-# ERATGUARD_FINAL_PRIORITY_ROUTE_GUARD_END
-
-# ERATGUARD_FINAL_ADMIN_SEPARATION_BRIDGE_START
-# Yayın kilidi:
-# Kullanıcı ana paneli = /radial
-# Admin ana paneli = /admin/dashboard
-# Admin yolları asla kullanıcı /dashboard veya /radial akışına düşmeyecek.
-def eratguard_final_admin_separation_bridge():
-    try:
-        from flask import request, redirect, render_template
-
-        raw_path = request.path or "/"
-        path = raw_path.rstrip("/") or "/"
-
-        # Sadece admin girişlerini ele al.
-        if path == "/admin":
-            return redirect("/admin/dashboard", code=302)
-
-        if path == "/admin/dashboard":
-            # SECURITY FIX:
-            # Bu bridge auth guard'lardan önce çalıştığı için burada
-            # admin yetkisi doğrulanmadan template render edilmemeli.
-            #
-            # Yetkilendirmeyi aşağıdaki gerçek admin guard zincirine bırak.
-            return None
-
-            # Mevcut admin template varsa doğrudan bas.
-            # Yoksa minimal güvenli admin shell döndür.
-            try:
-                return render_template("admin_dashboard.html")
-            except Exception:
-                try:
-                    return render_template("admin_panel.html")
-                except Exception:
-                    return """
-                    <!doctype html>
-                    <html lang="tr">
-                    <head>
-                      <meta charset="utf-8">
-                      <meta name="viewport" content="width=device-width,initial-scale=1">
-                      <title>EratGuard Admin</title>
-                      <style>
-                        body{margin:0;background:#020806;color:#dfffea;font-family:Arial,sans-serif}
-                        .wrap{padding:24px}
-                        .card{border:1px solid rgba(0,255,140,.35);border-radius:18px;padding:20px;background:#06140f}
-                        h1{color:#7cffb2}
-                        a{color:#7cffb2}
-                      </style>
-                    </head>
-                    <body>
-                      <div class="wrap">
-                        <div class="card">
-                          <h1>EratGuard Admin Dashboard</h1>
-                          <p>Admin paneli kullanıcı radial panelinden ayrıldı.</p>
-                          <p><a href="/u/eg-panel">Kullanıcı Radial Paneli</a></p>
-                        </div>
-                      </div>
-                    </body>
-                    </html>
-                    """
-
-        return None
-
-    except Exception:
-        return None
-
-
-try:
-    app.before_request(eratguard_final_admin_separation_bridge)
-
-    _lst = app.before_request_funcs.get(None, [])
-    if eratguard_final_admin_separation_bridge in _lst:
-        _lst.remove(eratguard_final_admin_separation_bridge)
-        _lst.insert(0, eratguard_final_admin_separation_bridge)
-
-    print("ERATGUARD FINAL ADMIN SEPARATION BRIDGE ACTIVE")
-except Exception as _eg_admin_sep_error:
-    print("ERATGUARD FINAL ADMIN SEPARATION BRIDGE ERROR:", _eg_admin_sep_error)
-# ERATGUARD_FINAL_ADMIN_SEPARATION_BRIDGE_END
 
 # ERATGUARD_SMS_DEFAULT_FALLBACK_ROUTE_START
 # Web radial içinden SMS Varsayılanılan dilimine basılırsa kullanıcıyı net hedefe götüren güvenli fallback.
@@ -34522,82 +25511,18 @@ except Exception as _eg_sms_priority_error:
     print("ERATGUARD SMS DEFAULT PRIORITY BRIDGE ERROR:", _eg_sms_priority_error)
 # ERATGUARD_SMS_DEFAULT_PRIORITY_BRIDGE_END
 
-# ERATGUARD_RADIAL_SMS_LABEL_FINAL_POLISH_START
-# /radial ve /signature-radial final 12P template döndürür; SMS etiketi tam görünür.
-def eratguard_radial_sms_label_final_polish_guard():
-    try:
-        from flask import request, render_template
+# ERATGUARD CLEANUP: RADIAL SMS LABEL FINAL POLISH REMOVED BY BATCH-1
 
-        path = (request.path or "/").rstrip("/") or "/"
-
-        if path in {"/radial", "/signature-radial"}:
-            return render_template("radial_menu.html")
-
-        return None
-    except Exception:
-        return None
-
-
-try:
-    app.before_request(eratguard_radial_sms_label_final_polish_guard)
-
-    _lst = app.before_request_funcs.get(None, [])
-    if eratguard_radial_sms_label_final_polish_guard in _lst:
-        _lst.remove(eratguard_radial_sms_label_final_polish_guard)
-        _lst.insert(0, eratguard_radial_sms_label_final_polish_guard)
-
-    print("ERATGUARD RADIAL SMS LABEL FINAL POLISH ACTIVE")
-except Exception as _eg_radial_sms_label_error:
-    print("ERATGUARD RADIAL SMS LABEL FINAL POLISH ERROR:", _eg_radial_sms_label_error)
-# ERATGUARD_RADIAL_SMS_LABEL_FINAL_POLISH_END
-
-# ERATGUARD_RADIAL_HARD_FINAL_HTML_OVERRIDE_START
-# /radial ve /signature-radial artık doğrudan final radial_menu.html dosyasını döndürür.
-# Böylece eski FAN/papatya/dashboard hook'ları içerik değiştiremez.
-def eratguard_radial_hard_final_html_response():
-    try:
-        from flask import redirect
-        return redirect("/u/eg-panel")
-    except Exception:
-        return "EratGuard Signature Radial 12P · SMS VARSAYILAN", 200
-
-
-def eratguard_radial_hard_final_html_guard():
-    try:
-        from flask import request
-
-        path = (request.path or "/").rstrip("/") or "/"
-
-        if path in {"/radial", "/signature-radial"}:
-            return eratguard_radial_hard_final_html_response()
-
-        return None
-    except Exception:
-        return None
-
-
-try:
-    app.before_request(eratguard_radial_hard_final_html_guard)
-
-    _lst = app.before_request_funcs.get(None, [])
-    if eratguard_radial_hard_final_html_guard in _lst:
-        _lst.remove(eratguard_radial_hard_final_html_guard)
-        _lst.insert(0, eratguard_radial_hard_final_html_guard)
-
-    # Route endpoint override: before_request kaçarsa bile /radial ve /signature-radial final HTML döndürsün.
-    for _rule in list(app.url_map.iter_rules()):
-        if str(_rule.rule) in {"/radial", "/signature-radial"}:
-            app.view_functions[_rule.endpoint] = eratguard_radial_hard_final_html_response
-
-    print("ERATGUARD RADIAL HARD FINAL HTML OVERRIDE ACTIVE")
-except Exception as _eg_radial_hard_final_error:
-    print("ERATGUARD RADIAL HARD FINAL HTML OVERRIDE ERROR:", _eg_radial_hard_final_error)
-# ERATGUARD_RADIAL_HARD_FINAL_HTML_OVERRIDE_END
+# ERATGUARD CLEANUP: RADIAL HARD FINAL HTML OVERRIDE REMOVED BY BATCH-1
 
 # ERATGUARD_RADIAL_FINAL_RESPONSE_LABEL_LOCK_START
 # /radial cevabı başka eski hook'lar tarafından değişse bile en son SMS VARSAYILAN etiketi garanti edilir.
 def eratguard_radial_final_response_label_lock(response):
     try:
+        # ERATGUARD NON-200 RESPONSE GUARD
+        if getattr(response, "status_code", 200) != 200:
+            return response
+
         from flask import request
 
         path = (request.path or "/").rstrip("/") or "/"
@@ -34947,6 +25872,10 @@ def eratguard_signature_radial_hard_clean_guard():
 
 def eratguard_signature_radial_final_sanitizer(response):
     try:
+        # ERATGUARD NON-200 RESPONSE GUARD
+        if getattr(response, "status_code", 200) != 200:
+            return response
+
         from flask import request
         path = (request.path or "/").rstrip("/") or "/"
 
@@ -35196,26 +26125,44 @@ def eg_user_panel_v2():
 
     return render_template("eg_panel_v2.html", metrics=metrics, license_info=license_info)
 
-# ===== ERATGUARD TRUE FINAL RADIAL -> EG-PANEL LOCK (dosyanin en sonu, kesin kazanir) =====
-def eratguard_true_final_radial_lock():
-    try:
-        from flask import request, redirect
-        path = (request.path or "/").rstrip("/") or "/"
-        if path in {"/radial", "/signature-radial"}:
-            return redirect("/u/eg-panel")
-    except Exception:
-        return None
+# ERATGUARD CLEANUP: TRUE FINAL RADIAL -> EG-PANEL LOCK REMOVED BY BATCH-1
 
-try:
-    app.before_request(eratguard_true_final_radial_lock)
-    _true_final = app.before_request_funcs.get(None, [])
-    _true_final = [f for f in _true_final if getattr(f, "__name__", "") != "eratguard_true_final_radial_lock"]
-    _true_final.insert(0, eratguard_true_final_radial_lock)
-    app.before_request_funcs[None] = _true_final
-    print("ERATGUARD TRUE FINAL RADIAL LOCK ACTIVE")
-except Exception as _eg_true_final_err:
-    print("ERATGUARD TRUE FINAL RADIAL LOCK ERROR:", _eg_true_final_err)
-# ===== ERATGUARD TRUE FINAL RADIAL -> EG-PANEL LOCK END =====
+# ===== EVA USER ASSISTANT (kullaniciya ozel, kisitli erisim) =====
+@app.route("/u/eva-chat", methods=["POST"])
+def eva_chat_user():
+    if not login_required():
+        return jsonify({"ok": False, "error": "Oturum gerekli."}), 401
+
+    from admin.services.eva import ask_eva_user
+
+    try:
+        payload = request.get_json(silent=True) or {}
+        message = str(payload.get("message", "")).strip()
+        history = payload.get("history", [])
+
+        if not message:
+            return jsonify({"ok": False, "error": "Mesaj bos olamaz."}), 400
+
+        if not isinstance(history, list):
+            history = []
+
+        username = session.get("username", "")
+        metrics = _eg_panel_metrics()
+        users = load_users()
+        udata = users.get(username, {})
+        license_info = {
+            "plan": udata.get("license_key") or "Ucretsiz",
+            "expires_at": udata.get("expires_at") or "-",
+        }
+
+        ok, answer = ask_eva_user(username, metrics, license_info, message, history)
+
+        return jsonify({"ok": ok, "answer": answer})
+
+    except Exception as e:
+        return jsonify({"ok": False, "error": "Sunucu hatasi."}), 500
+# ===== EVA USER ASSISTANT END =====
+
 
 
 # ===== ERATGUARD NEW ADMIN RUNTIME QUARANTINE V1 START =====
@@ -35771,4 +26718,2006 @@ except Exception as _eg_fab_boot_err:
 
 # =============================================================================
 # ERATGUARD FINAL ADMIN AUTH BOUNDARY V1 END
+# =============================================================================
+
+
+# =============================================================================
+# ERATGUARD CANONICAL ADMIN LOGIN V1
+# =============================================================================
+# Canonical EratGuard admin entry:
+#     /admin/login
+#
+# Existing authentication engine remains authoritative:
+#     _eg_al3_force_admin_access()
+#
+# Legacy:
+#     /ss-admin-access
+# remains temporarily available for compatibility.
+# =============================================================================
+
+try:
+    from flask import request as _eg_cal_request
+    from flask import redirect as _eg_cal_redirect
+
+    # -------------------------------------------------------------------------
+    # 1. Register the canonical route.
+    # -------------------------------------------------------------------------
+    if not any(
+        str(rule).rstrip("/") == "/admin/login"
+        for rule in app.url_map.iter_rules()
+    ):
+        app.add_url_rule(
+            "/admin/login",
+            endpoint="eg_canonical_admin_login",
+            view_func=_eg_al3_force_admin_access,
+            methods=["GET", "POST"]
+        )
+
+    # -------------------------------------------------------------------------
+    # 2. Replace FINAL boundary with canonical-login aware version.
+    #    Keep the same real-admin decision.
+    # -------------------------------------------------------------------------
+    def _eg_final_admin_auth_boundary_v2():
+        try:
+            raw_path = str(
+                getattr(_eg_cal_request, "path", "") or ""
+            )
+            path = raw_path.rstrip("/") or "/"
+
+            is_admin_page = (
+                path == "/admin"
+                or path.startswith("/admin/")
+            )
+
+            is_admin_api = (
+                path == "/api/admin"
+                or path.startswith("/api/admin/")
+            )
+
+            if not is_admin_page and not is_admin_api:
+                return None
+
+            # Canonical login and admin static files are public.
+            if path == "/admin/login":
+                return None
+
+            if path.startswith("/admin/static/"):
+                return None
+
+            # Preserve authoritative real-admin evaluator.
+            real_admin_fn = globals().get("_eg_al1_is_real_admin")
+
+            try:
+                is_real_admin = bool(
+                    callable(real_admin_fn)
+                    and real_admin_fn()
+                )
+            except Exception:
+                is_real_admin = False
+
+            if is_real_admin:
+                return None
+
+            # APIs never redirect.
+            if is_admin_api:
+                from flask import abort
+                return abort(403)
+
+            # Admin HTML pages always go to canonical EratGuard login.
+            next_path = (
+                raw_path
+                if raw_path.startswith("/")
+                else "/admin/dashboard"
+            )
+
+            return _eg_cal_redirect(
+                "/admin/login?next=" + next_path,
+                code=302
+            )
+
+        except Exception:
+            try:
+                path = str(
+                    getattr(_eg_cal_request, "path", "") or ""
+                ).rstrip("/") or "/"
+
+                if path == "/api/admin" or path.startswith("/api/admin/"):
+                    from flask import abort
+                    return abort(403)
+
+                if path == "/admin" or path.startswith("/admin/"):
+                    if path != "/admin/login":
+                        return _eg_cal_redirect("/admin/login", code=302)
+
+            except Exception:
+                pass
+
+            return None
+
+    # -------------------------------------------------------------------------
+    # 3. Remove V1/V2 duplicates and force V2 to index 0.
+    # -------------------------------------------------------------------------
+    _eg_cal_funcs = app.before_request_funcs.setdefault(None, [])
+
+    _eg_cal_funcs[:] = [
+        fn for fn in _eg_cal_funcs
+        if getattr(fn, "__name__", "") not in (
+            "_eg_final_admin_auth_boundary_v1",
+            "_eg_final_admin_auth_boundary_v2",
+        )
+    ]
+
+    _eg_cal_funcs.insert(0, _eg_final_admin_auth_boundary_v2)
+
+    print(
+        "ERATGUARD CANONICAL ADMIN LOGIN V1 ACTIVE:",
+        "/admin/login -> _eg_al3_force_admin_access",
+        flush=True
+    )
+
+    print(
+        "ERATGUARD FINAL ADMIN AUTH BOUNDARY V2 ACTIVE:",
+        "login=/admin/login index=0",
+        flush=True
+    )
+
+except Exception as _eg_cal_boot_err:
+    print(
+        "ERATGUARD CANONICAL ADMIN LOGIN V1 BOOT ERROR:",
+        repr(_eg_cal_boot_err),
+        flush=True
+    )
+
+# =============================================================================
+# ERATGUARD CANONICAL ADMIN LOGIN V1 END
+# =============================================================================
+
+
+# =============================================================================
+# ERATGUARD CANONICAL ADMIN LOGIN V2 — LEGACY RUNTIME RETIREMENT
+# =============================================================================
+# Canonical admin authentication entry:
+#
+#     /admin/login
+#
+# Rules:
+#   1. /admin/login remains the authoritative EratGuard admin login.
+#   2. /ss-admin-access becomes compatibility redirect only.
+#   3. Old internal admin redirects are normalized at response level.
+#   4. POST /admin/login gets independent login rate limiting.
+#   5. Admin API behavior remains 403, never login redirect.
+#
+# Existing password/authentication engine remains:
+#
+#     _eg_al3_force_admin_access()
+#
+# =============================================================================
+
+try:
+    from flask import request as _eg_cal2_request
+    from flask import redirect as _eg_cal2_redirect
+    from flask import abort as _eg_cal2_abort
+
+    # -------------------------------------------------------------------------
+    # 1. Legacy admin entry becomes redirect-only.
+    # -------------------------------------------------------------------------
+
+    def _eg_cal2_legacy_admin_login_redirect():
+        try:
+            next_path = str(
+                _eg_cal2_request.args.get("next") or ""
+            ).strip()
+
+            target = "/admin/login"
+
+            # Only preserve safe local admin paths.
+            if (
+                next_path.startswith("/admin")
+                and not next_path.startswith("//")
+            ):
+                from urllib.parse import quote
+                target += "?next=" + quote(next_path, safe="/?=&")
+
+            return _eg_cal2_redirect(target, code=302)
+
+        except Exception:
+            return _eg_cal2_redirect("/admin/login", code=302)
+
+
+    # Rebind only the legacy endpoint.
+    for _eg_cal2_rule in list(app.url_map.iter_rules()):
+        try:
+            if str(_eg_cal2_rule).rstrip("/") == "/ss-admin-access":
+                app.view_functions[
+                    _eg_cal2_rule.endpoint
+                ] = _eg_cal2_legacy_admin_login_redirect
+        except Exception:
+            pass
+
+
+    # -------------------------------------------------------------------------
+    # 2. Canonical admin-login rate limiter.
+    #
+    # Existing project limiter is reused when available.
+    # We do NOT create a second storage mechanism.
+    # -------------------------------------------------------------------------
+
+    def _eg_cal2_admin_login_rate_limit():
+        try:
+            path = str(
+                getattr(_eg_cal2_request, "path", "") or ""
+            ).rstrip("/") or "/"
+
+            if path != "/admin/login":
+                return None
+
+            if str(_eg_cal2_request.method).upper() != "POST":
+                return None
+
+            limiter = globals().get("_eg_rate_limit_check")
+
+            if not callable(limiter):
+                return None
+
+            # Same policy as legacy admin login:
+            # 8 attempts / 15 minutes.
+            ok, retry_after = limiter(
+                "admin-login",
+                8,
+                15 * 60
+            )
+
+            if ok:
+                return None
+
+            try:
+                retry_after = max(1, int(retry_after))
+            except Exception:
+                retry_after = 60
+
+            response = app.make_response(
+                (
+                    "Çok fazla admin giriş denemesi. "
+                    "Lütfen daha sonra tekrar deneyin.",
+                    429
+                )
+            )
+
+            response.headers["Retry-After"] = str(retry_after)
+            response.headers["Cache-Control"] = "no-store"
+
+            return response
+
+        except Exception:
+            # Do not destroy login availability if the optional
+            # rate-limit subsystem itself fails.
+            return None
+
+
+    # -------------------------------------------------------------------------
+    # 3. Normalize stale legacy redirects produced by old internal code.
+    #
+    # This allows us to retire old references gradually instead of doing
+    # a dangerous global text replacement.
+    # -------------------------------------------------------------------------
+
+
+
+    # -------------------------------------------------------------------------
+    # 4. Force canonical login limiter to early priority, directly after
+    #    FINAL ADMIN AUTH BOUNDARY V2.
+    # -------------------------------------------------------------------------
+
+    _eg_cal2_funcs = app.before_request_funcs.setdefault(None, [])
+
+    _eg_cal2_funcs[:] = [
+        fn for fn in _eg_cal2_funcs
+        if getattr(fn, "__name__", "") !=
+        "_eg_cal2_admin_login_rate_limit"
+    ]
+
+    # Boundary V2 must stay index 0.
+    # Rate limiter becomes index 1.
+    insert_at = 1 if _eg_cal2_funcs else 0
+
+    _eg_cal2_funcs.insert(
+        insert_at,
+        _eg_cal2_admin_login_rate_limit
+    )
+
+
+    print(
+        "ERATGUARD CANONICAL ADMIN LOGIN V2 ACTIVE:",
+        "legacy=/ss-admin-access -> /admin/login",
+        flush=True
+    )
+
+    print(
+        "ERATGUARD ADMIN LOGIN RATE LIMIT V2 ACTIVE:",
+        "8 attempts / 15 minutes",
+        flush=True
+    )
+
+
+
+except Exception as _eg_cal2_boot_err:
+    print(
+        "ERATGUARD CANONICAL ADMIN LOGIN V2 BOOT ERROR:",
+        repr(_eg_cal2_boot_err),
+        flush=True
+    )
+
+# =============================================================================
+# ERATGUARD CANONICAL ADMIN LOGIN V2 END
+# =============================================================================
+
+
+# ================================================================
+# ERATGUARD NEW ADMIN RUNTIME QUARANTINE V4
+# Disable obsolete admin-only after_request UI injectors.
+# New admin blueprint owns its own UI.
+# ================================================================
+
+def _eg_admin_legacy_after_request_v4():
+    try:
+        _targets = {
+            "_eg6k_force_slim_admin_ui",
+            "_eg6k15_ultra_slim_fit_inject",
+        }
+
+        _after = app.after_request_funcs.get(None, [])
+        _removed = []
+
+        for _fn in list(_after):
+            _name = getattr(_fn, "__name__", "")
+            if _name in _targets:
+                try:
+                    _after.remove(_fn)
+                    _removed.append(_name)
+                except ValueError:
+                    pass
+
+        print(
+            "ERATGUARD NEW ADMIN RUNTIME QUARANTINE V4 ACTIVE:",
+            ", ".join(_removed) if _removed else "nothing-to-remove"
+        )
+
+    except Exception as _eg_v4_err:
+        print(
+            "ERATGUARD NEW ADMIN RUNTIME QUARANTINE V4 ERROR:",
+            _eg_v4_err
+        )
+
+
+_eg_admin_legacy_after_request_v4()
+
+
+# ===== ERATGUARD CANONICAL USER HOME BOUNDARY V1 START =====
+#
+# Canonical authenticated user home:
+#
+#     /dashboard
+#
+# Actual UI implementation remains eg_user_panel_v2().
+#
+# Compatibility aliases:
+#     /radial
+#     /signature-radial
+#     /u/eg-panel
+#     /
+#
+# Admin routes are intentionally excluded.
+#
+try:
+    from flask import request as _eg_ch1_request
+    from flask import session as _eg_ch1_session
+    from flask import redirect as _eg_ch1_redirect
+
+    def _eg_canonical_user_home_boundary_v1():
+        try:
+            path = (_eg_ch1_request.path or "/").rstrip("/") or "/"
+
+            # -------------------------------------------------
+            # Never interfere with canonical admin namespace.
+            # -------------------------------------------------
+            if path == "/admin" or path.startswith("/admin/"):
+                return None
+
+            logged_in = bool(
+                _eg_ch1_session.get("logged_in")
+                and _eg_ch1_session.get("username")
+            )
+
+            # -------------------------------------------------
+            # Root:
+            # anonymous     -> /login
+            # authenticated -> /dashboard
+            # -------------------------------------------------
+            if path == "/":
+                if not logged_in:
+                    return _eg_ch1_redirect("/login", code=302)
+                return _eg_ch1_redirect("/dashboard", code=302)
+
+            # -------------------------------------------------
+            # Canonical home.
+            #
+            # Render the already-existing real user panel
+            # directly, avoiding old radial/signature chains.
+            # -------------------------------------------------
+            if path == "/dashboard":
+                if not logged_in:
+                    return _eg_ch1_redirect(
+                        "/login?auth_required=1",
+                        code=302
+                    )
+
+                return eg_user_panel_v2()
+
+            # -------------------------------------------------
+            # Historical home aliases.
+            # Keep URLs alive but canonicalize them.
+            # -------------------------------------------------
+            if path in {
+                "/radial",
+                "/radial-menu",
+                "/radial-demo",
+                "/signature-radial",
+                "/u/eg-panel",
+                "/u/dashboard",
+                "/app-start",
+            }:
+                if not logged_in:
+                    return _eg_ch1_redirect(
+                        "/login?auth_required=1",
+                        code=302
+                    )
+
+                return _eg_ch1_redirect("/dashboard", code=302)
+
+            return None
+
+        except Exception as _eg_ch1_error:
+            try:
+                print(
+                    "ERATGUARD CANONICAL USER HOME BOUNDARY V1 WARN:",
+                    repr(_eg_ch1_error),
+                    flush=True
+                )
+            except Exception:
+                pass
+
+            return None
+
+
+    # Register, then force to absolute first position.
+    app.before_request(_eg_canonical_user_home_boundary_v1)
+
+    _eg_ch1_funcs = app.before_request_funcs.setdefault(None, [])
+
+    _eg_ch1_funcs = [
+        f for f in _eg_ch1_funcs
+        if getattr(f, "__name__", "") !=
+           "_eg_canonical_user_home_boundary_v1"
+    ]
+
+    _eg_ch1_funcs.insert(
+        0,
+        _eg_canonical_user_home_boundary_v1
+    )
+
+    app.before_request_funcs[None] = _eg_ch1_funcs
+
+    print(
+        "ERATGUARD CANONICAL USER HOME BOUNDARY V1 ACTIVE: "
+        "/dashboard -> eg_user_panel_v2",
+        flush=True
+    )
+
+except Exception as _eg_ch1_boot_error:
+    print(
+        "ERATGUARD CANONICAL USER HOME BOUNDARY V1 BOOT ERROR:",
+        repr(_eg_ch1_boot_error),
+        flush=True
+    )
+
+# ===== ERATGUARD CANONICAL USER HOME BOUNDARY V1 END =====
+
+
+
+# ============================================================================
+# ERATGUARD PHASE 6A
+# CANONICAL ADMIN CONTROL PLANE V1
+#
+# Purpose:
+#   One authoritative GET control plane for the main /admin namespace.
+#
+# Security:
+#   Authentication remains owned by _eg_final_admin_auth_boundary_v2 and
+#   _eg_al1_is_real_admin. This layer does NOT weaken or duplicate admin auth.
+#
+# Commercial:
+#   Existing POST/action routes are intentionally untouched.
+# ============================================================================
+
+def _eg_phase6a_admin_notifications_v1():
+    try:
+        events = _eg_recent_audit_logs(100)
+    except Exception:
+        events = []
+
+    if not isinstance(events, list):
+        events = []
+
+    return _eg_real_render(
+        "admin_notifications.html",
+        notifications=events,
+        events=events,
+        items=events,
+    )
+
+
+def _eg_phase6a_admin_control_plane_v1():
+    try:
+        raw_path = str(getattr(request, "path", "") or "")
+        path = raw_path.rstrip("/") or "/"
+
+        # Authentication is deliberately not implemented here.
+        # _eg_final_admin_auth_boundary_v2 runs earlier and owns the boundary.
+
+        if path == "/admin":
+            return redirect("/admin/dashboard", code=302)
+
+        if path == "/admin/dashboard":
+            return _eg_real_admin_dashboard()
+
+        if path == "/admin/users":
+            # Prefer the mature production admin users implementation
+            # when available. Fall back to the registered endpoint.
+            real_users = globals().get("_eg_real_admin_panel")
+
+            if callable(real_users):
+                return real_users()
+
+            fn = app.view_functions.get("admin.users")
+            if callable(fn):
+                return fn()
+
+            return "Admin users center unavailable.", 503
+
+        if path == "/admin/licenses":
+            return _eg_real_admin_licenses()
+
+        if path == "/admin/payment-requests":
+            return _eg_real_admin_payments()
+
+        if path == "/admin/security":
+            return _eg_real_admin_security()
+
+        if path == "/admin/notifications":
+            return _eg_phase6a_admin_notifications_v1()
+
+        if path == "/admin/system":
+            return _eg_real_admin_system()
+
+        return None
+
+    except Exception as _eg_phase6a_error:
+        try:
+            print(
+                "ERATGUARD PHASE6A ADMIN CONTROL PLANE ERROR:",
+                repr(_eg_phase6a_error),
+                flush=True,
+            )
+        except Exception:
+            pass
+
+        return None
+
+
+# Register immediately AFTER the authoritative admin auth boundary.
+#
+# Current expected order:
+#   0 canonical user home boundary
+#   1 final admin auth boundary
+#   2 admin login rate limit
+#
+# We insert after auth/rate-limit so this renderer can never bypass them.
+
+try:
+    _eg_phase6a_hooks = app.before_request_funcs.setdefault(None, [])
+
+    if _eg_phase6a_admin_control_plane_v1 in _eg_phase6a_hooks:
+        _eg_phase6a_hooks.remove(_eg_phase6a_admin_control_plane_v1)
+
+    _eg_phase6a_auth = globals().get("_eg_final_admin_auth_boundary_v2")
+    _eg_phase6a_rate = globals().get("_eg_cal2_admin_login_rate_limit")
+
+    _eg_phase6a_insert = 0
+
+    if _eg_phase6a_auth in _eg_phase6a_hooks:
+        _eg_phase6a_insert = (
+            _eg_phase6a_hooks.index(_eg_phase6a_auth) + 1
+        )
+
+    if _eg_phase6a_rate in _eg_phase6a_hooks:
+        _eg_phase6a_insert = max(
+            _eg_phase6a_insert,
+            _eg_phase6a_hooks.index(_eg_phase6a_rate) + 1,
+        )
+
+    _eg_phase6a_hooks.insert(
+        _eg_phase6a_insert,
+        _eg_phase6a_admin_control_plane_v1,
+    )
+
+    print(
+        "ERATGUARD PHASE 6A CANONICAL ADMIN CONTROL PLANE V1 ACTIVE:",
+        "index=" + str(_eg_phase6a_insert),
+        flush=True,
+    )
+
+except Exception as _eg_phase6a_register_error:
+    print(
+        "ERATGUARD PHASE 6A REGISTER ERROR:",
+        repr(_eg_phase6a_register_error),
+        flush=True,
+    )
+
+
+# =====================================================================
+# ERATGUARD PHASE 6C - CANONICAL ADMIN RUNTIME FIX V1
+#
+# Goals:
+#   1) /api/admin/* uses authoritative real-admin evaluator.
+#   2) canonical notifications receives complete template context.
+#   3) canonical dashboard uses numeric-safe admin stats.
+#   4) canonical system route survives legacy health_level bug.
+#
+# Compatibility layer only.
+# =====================================================================
+
+try:
+    from flask import (
+        request as _eg_p6c_request,
+        jsonify as _eg_p6c_jsonify,
+        redirect as _eg_p6c_redirect,
+        render_template as _eg_p6c_render_template,
+    )
+
+    def _eg_phase6c_real_admin_v1():
+        """
+        Single authoritative admin decision for Phase 6C.
+        Fail closed on every exception.
+        """
+        try:
+            fn = globals().get("_eg_al1_is_real_admin")
+            return bool(callable(fn) and fn())
+        except Exception:
+            return False
+
+
+    def _eg_phase6c_admin_api_boundary_v1():
+        """
+        Security boundary for every /api/admin and /api/admin/* request.
+
+        This hook must execute before the legacy Stage5C router because
+        Stage5C historically trusts session flags directly.
+        """
+        try:
+            raw_path = str(
+                getattr(_eg_p6c_request, "path", "") or ""
+            )
+            path = raw_path.rstrip("/") or "/"
+
+            if not (
+                path == "/api/admin"
+                or path.startswith("/api/admin/")
+            ):
+                return None
+
+            if _eg_phase6c_real_admin_v1():
+                return None
+
+            return _eg_p6c_jsonify({
+                "ok": False,
+                "error": "admin_forbidden",
+            }), 403
+
+        except Exception:
+            return _eg_p6c_jsonify({
+                "ok": False,
+                "error": "admin_forbidden",
+            }), 403
+
+
+    def _eg_phase6c_notification_stats_v1(items):
+        try:
+            from datetime import datetime as _eg_p6c_datetime
+
+            if not isinstance(items, list):
+                items = []
+
+            today = _eg_p6c_datetime.now().strftime("%Y-%m-%d")
+
+            total = len(items)
+            today_count = 0
+            critical_count = 0
+
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+
+                try:
+                    created = str(
+                        item.get("created_at", "") or ""
+                    )
+                    if created.startswith(today):
+                        today_count += 1
+                except Exception:
+                    pass
+
+                try:
+                    priority = str(
+                        item.get("priority", "") or ""
+                    ).strip().lower()
+
+                    level = str(
+                        item.get("level", "") or ""
+                    ).strip().lower()
+
+                    if (
+                        priority == "critical"
+                        or level in ("critical", "error")
+                    ):
+                        critical_count += 1
+                except Exception:
+                    pass
+
+            return {
+                "total": total,
+                "today": today_count,
+                "critical": critical_count,
+            }
+
+        except Exception:
+            return {
+                "total": 0,
+                "today": 0,
+                "critical": 0,
+            }
+
+
+    def _eg_phase6c_admin_notifications_v1():
+        try:
+            events = _eg_recent_audit_logs(100)
+        except Exception:
+            events = []
+
+        if not isinstance(events, list):
+            events = []
+
+        display_items = list(reversed(events[-80:]))
+
+        return _eg_real_render(
+            "admin_notifications.html",
+            notifications=display_items,
+            events=display_items,
+            items=display_items,
+            notification_stats=_eg_phase6c_notification_stats_v1(
+                events
+            ),
+            success="",
+            error="",
+            brand="EratGuard PRO",
+        )
+
+
+    def _eg_phase6c_admin_dashboard_v1():
+        """
+        admin_dashboard.html is given numeric-safe canonical statistics.
+
+        The older _eg_real_admin_dashboard_stats() intentionally returns
+        presentation strings such as '3 kullanıcı'.  Later admin response
+        layers may perform numeric comparisons, so those presentation
+        strings must not be the canonical dashboard data contract.
+        """
+        stats = {}
+
+        try:
+            fn = globals().get("_eg_default_admin_stats")
+            if callable(fn):
+                candidate = fn()
+                if isinstance(candidate, dict):
+                    stats.update(candidate)
+        except Exception:
+            pass
+
+        numeric_defaults = {
+            "users": 0,
+            "licenses": 0,
+            "payments": 0,
+            "spam_logs": 0,
+            "safe_list": 0,
+            "system_score": 0,
+            "health_score": 0,
+            "ops_score": 0,
+            "release_score": 0,
+        }
+
+        for key, default in numeric_defaults.items():
+            try:
+                value = stats.get(key, default)
+
+                if isinstance(value, bool):
+                    value = int(value)
+
+                elif isinstance(value, (int, float)):
+                    pass
+
+                else:
+                    value = int(str(value).strip())
+
+                stats[key] = value
+
+            except Exception:
+                stats[key] = default
+
+        return _eg_real_render(
+            "admin_dashboard.html",
+            admin_stats=stats,
+        )
+
+
+    def _eg_phase6c_admin_system_v1():
+        """
+        Prefer the mature system implementation.
+
+        Legacy implementation contains one known branch where
+        health_label='SAĞLIKLI' is assigned without health_level.
+        If that branch raises UnboundLocalError, return the production
+        system template with a complete safe context rather than leaking
+        control into unrelated legacy before_request layers.
+        """
+        try:
+            fn = globals().get("_eg_real_admin_system")
+
+            if callable(fn):
+                return fn()
+
+        except UnboundLocalError as exc:
+            try:
+                print(
+                    "ERATGUARD PHASE6C SYSTEM LEGACY FALLBACK:",
+                    repr(exc),
+                    flush=True,
+                )
+            except Exception:
+                pass
+
+        except Exception as exc:
+            try:
+                print(
+                    "ERATGUARD PHASE6C SYSTEM FALLBACK:",
+                    repr(exc),
+                    flush=True,
+                )
+            except Exception:
+                pass
+
+        def _state(path):
+            try:
+                from pathlib import Path
+                return "OK" if Path(path).exists() else "YOK"
+            except Exception:
+                return "YOK"
+
+        try:
+            import sys
+            python_version = sys.version.split()[0]
+        except Exception:
+            python_version = "-"
+
+        try:
+            stats_fn = globals().get("_eg_default_admin_stats")
+            admin_stats = (
+                stats_fn()
+                if callable(stats_fn)
+                else {}
+            )
+        except Exception:
+            admin_stats = {}
+
+        return _eg_real_render(
+            "admin_system.html",
+
+            mode="PRODUCTION",
+            debug_state="KAPALI",
+
+            users_state=_state("data/users.json"),
+            licenses_state=_state("data/licenses.json"),
+            settings_state=_state("data/settings.json"),
+
+            python_version=python_version,
+            admin_stats=admin_stats,
+
+            health_items=[],
+            health_score=100,
+            health_label="SAĞLIKLI",
+            health_level="good",
+
+            ops_events=[],
+            ops_score=100,
+            ops_label="OPERASYON SAĞLIKLI",
+            ops_level="good",
+            ops_good=0,
+            ops_watch=0,
+            ops_danger=0,
+
+            release_items=[],
+            release_score=100,
+            release_label="RELEASE READY",
+            release_level="good",
+            release_good=0,
+            release_watch=0,
+            release_danger=0,
+
+            command_score=100,
+            command_label="SYSTEM READY",
+            command_level="good",
+            command_desc=(
+                "Canonical admin system fallback active."
+            ),
+            command_cards=[],
+
+            danger_count=0,
+            watch_count=0,
+            ok_count=0,
+        )
+
+
+    def _eg_phase6c_admin_control_plane_v1():
+        """
+        Canonical Phase 6C HTML control plane.
+
+        Authentication remains owned by
+        _eg_final_admin_auth_boundary_v2, which executes earlier.
+        """
+        try:
+            raw_path = str(
+                getattr(_eg_p6c_request, "path", "") or ""
+            )
+            path = raw_path.rstrip("/") or "/"
+
+            if path == "/admin":
+                return _eg_p6c_redirect(
+                    "/admin/dashboard",
+                    code=302,
+                )
+
+            if path == "/admin/dashboard":
+                return _eg_phase6c_admin_dashboard_v1()
+
+            if path == "/admin/users":
+                real_users = globals().get(
+                    "_eg_real_admin_panel"
+                )
+
+                if callable(real_users):
+                    return real_users()
+
+                fn = app.view_functions.get("admin.users")
+                if callable(fn):
+                    return fn()
+
+                return "Admin users center unavailable.", 503
+
+            if path == "/admin/licenses":
+                return _eg_real_admin_licenses()
+
+            if path == "/admin/payment-requests":
+                return _eg_real_admin_payments()
+
+            if path == "/admin/security":
+                return _eg_real_admin_security()
+
+            if path == "/admin/notifications":
+                return _eg_phase6c_admin_notifications_v1()
+
+            if path == "/admin/system":
+                return _eg_phase6c_admin_system_v1()
+
+            return None
+
+        except Exception as exc:
+            try:
+                print(
+                    "ERATGUARD PHASE6C ADMIN CONTROL PLANE ERROR:",
+                    repr(exc),
+                    flush=True,
+                )
+            except Exception:
+                pass
+
+            return None
+
+
+    # -------------------------------------------------------------
+    # Hook installation
+    # -------------------------------------------------------------
+
+    _eg_p6c_hooks = app.before_request_funcs.setdefault(None, [])
+
+    # Phase 6A plane is superseded by Phase 6C.
+    _eg_p6a_old = globals().get(
+        "_eg_phase6a_admin_control_plane_v1"
+    )
+
+    if _eg_p6a_old in _eg_p6c_hooks:
+        _eg_p6c_hooks.remove(_eg_p6a_old)
+
+    # Avoid duplicate registration on reload.
+    for _fn in (
+        _eg_phase6c_admin_api_boundary_v1,
+        _eg_phase6c_admin_control_plane_v1,
+    ):
+        while _fn in _eg_p6c_hooks:
+            _eg_p6c_hooks.remove(_fn)
+
+    _eg_auth = globals().get(
+        "_eg_final_admin_auth_boundary_v2"
+    )
+
+    _eg_rate = globals().get(
+        "_eg_cal2_admin_login_rate_limit"
+    )
+
+    # HTML control plane:
+    # auth -> rate limiter -> Phase6C plane
+    _eg_plane_index = 0
+
+    if _eg_auth in _eg_p6c_hooks:
+        _eg_plane_index = max(
+            _eg_plane_index,
+            _eg_p6c_hooks.index(_eg_auth) + 1,
+        )
+
+    if _eg_rate in _eg_p6c_hooks:
+        _eg_plane_index = max(
+            _eg_plane_index,
+            _eg_p6c_hooks.index(_eg_rate) + 1,
+        )
+
+    _eg_p6c_hooks.insert(
+        _eg_plane_index,
+        _eg_phase6c_admin_control_plane_v1,
+    )
+
+    # API boundary must be before any legacy API router.
+    # Put it directly after authoritative HTML auth boundary.
+    _eg_api_index = 0
+
+    if _eg_auth in _eg_p6c_hooks:
+        _eg_api_index = (
+            _eg_p6c_hooks.index(_eg_auth) + 1
+        )
+
+    _eg_p6c_hooks.insert(
+        _eg_api_index,
+        _eg_phase6c_admin_api_boundary_v1,
+    )
+
+    print(
+        "ERATGUARD PHASE 6C CANONICAL ADMIN RUNTIME FIX V1 ACTIVE:",
+        "api_index=" + str(
+            _eg_p6c_hooks.index(
+                _eg_phase6c_admin_api_boundary_v1
+            )
+        ),
+        "plane_index=" + str(
+            _eg_p6c_hooks.index(
+                _eg_phase6c_admin_control_plane_v1
+            )
+        ),
+        flush=True,
+    )
+
+except Exception as _eg_phase6c_install_error:
+    try:
+        print(
+            "ERATGUARD PHASE 6C INSTALL ERROR:",
+            repr(_eg_phase6c_install_error),
+            flush=True,
+        )
+    except Exception:
+        pass
+    raise
+
+
+# =====================================================================
+# ERATGUARD PHASE 7A
+# FINAL ADMIN COMMAND CENTER DATA CORE V1
+# =====================================================================
+
+def _eg_phase7a_load_json(default, *paths):
+    import json
+    from pathlib import Path
+
+    for raw_path in paths:
+        try:
+            fp = Path(raw_path)
+
+            if not fp.exists():
+                continue
+
+            data = json.loads(
+                fp.read_text(
+                    encoding="utf-8",
+                    errors="replace",
+                )
+            )
+
+            return data
+
+        except Exception:
+            continue
+
+    return default
+
+
+def _eg_phase7a_as_list(value):
+    if isinstance(value, list):
+        return value
+
+    if isinstance(value, dict):
+        # Wrapped JSON structures.
+        for key in (
+            "items",
+            "data",
+            "logs",
+            "requests",
+            "licenses",
+            "notifications",
+        ):
+            nested = value.get(key)
+
+            if isinstance(nested, list):
+                return nested
+
+        return list(value.values())
+
+    return []
+
+
+def _eg_phase7a_users():
+    try:
+        loader = globals().get("load_users")
+
+        if callable(loader):
+            data = loader()
+
+            if isinstance(data, dict):
+                return data
+    except Exception:
+        pass
+
+    data = _eg_phase7a_load_json(
+        {},
+        "data/users.json",
+        "users.json",
+    )
+
+    return data if isinstance(data, dict) else {}
+
+
+def _eg_phase7a_licenses():
+    data = _eg_phase7a_load_json(
+        {},
+        "data/generated_licenses.json",
+        "data/licenses.json",
+        "generated_licenses.json",
+        "licenses.json",
+    )
+
+    return _eg_phase7a_as_list(data)
+
+
+def _eg_phase7a_payments():
+    data = _eg_phase7a_load_json(
+        [],
+        "data/payment_requests.json",
+        "payment_requests.json",
+    )
+
+    return _eg_phase7a_as_list(data)
+
+
+def _eg_phase7a_audit():
+    try:
+        fn = globals().get("_eg_recent_audit_logs")
+
+        if callable(fn):
+            events = fn(100)
+
+            if isinstance(events, list):
+                return events
+    except Exception:
+        pass
+
+    data = _eg_phase7a_load_json(
+        [],
+        "data/audit_logs.json",
+        "audit_logs.json",
+    )
+
+    return _eg_phase7a_as_list(data)
+
+
+def _eg_phase7a_stats():
+    users = _eg_phase7a_users()
+    licenses = _eg_phase7a_licenses()
+    payments = _eg_phase7a_payments()
+    audit = _eg_phase7a_audit()
+
+    total_users = len(users)
+
+    active_users = 0
+    admin_users = 0
+    banned_users = 0
+
+    for username, user in users.items():
+        if not isinstance(user, dict):
+            continue
+
+        role = str(
+            user.get("role") or ""
+        ).strip().lower()
+
+        if (
+            role == "admin"
+            or user.get("is_admin") is True
+            or str(username).lower() == "admin"
+        ):
+            admin_users += 1
+
+        if user.get("is_banned") is True:
+            banned_users += 1
+        elif user.get("active", True):
+            active_users += 1
+
+    used_licenses = 0
+    expired_licenses = 0
+
+    for item in licenses:
+        if not isinstance(item, dict):
+            continue
+
+        status = str(
+            item.get("status") or ""
+        ).strip().lower()
+
+        if (
+            item.get("used") is True
+            or status in (
+                "used",
+                "active",
+                "activated",
+            )
+        ):
+            used_licenses += 1
+
+        if status in (
+            "expired",
+            "disabled",
+            "revoked",
+        ):
+            expired_licenses += 1
+
+    pending_payments = 0
+
+    for item in payments:
+        if not isinstance(item, dict):
+            continue
+
+        status = str(
+            item.get("status") or ""
+        ).strip().lower()
+
+        if status not in (
+            "approved",
+            "rejected",
+            "cancelled",
+            "canceled",
+        ):
+            pending_payments += 1
+
+    security_warnings = 0
+    critical_events = 0
+
+    for event in audit:
+        if not isinstance(event, dict):
+            continue
+
+        level = str(
+            event.get("level") or
+            event.get("severity") or
+            "info"
+        ).strip().lower()
+
+        if level in (
+            "warning",
+            "warn",
+            "error",
+            "critical",
+        ):
+            security_warnings += 1
+
+        if level in (
+            "error",
+            "critical",
+        ):
+            critical_events += 1
+
+    # Keep these values numeric.
+    # The final dashboard template may format them visually.
+    return {
+        "users": total_users,
+        "total_users": total_users,
+        "active_users": active_users,
+        "admin_users": admin_users,
+        "banned_users": banned_users,
+
+        "licenses": len(licenses),
+        "total_licenses": len(licenses),
+        "used_licenses": used_licenses,
+        "expired_licenses": expired_licenses,
+
+        "payments": pending_payments,
+        "payment_requests": len(payments),
+        "pending_payments": pending_payments,
+
+        "security": security_warnings,
+        "security_warnings": security_warnings,
+        "critical_events": critical_events,
+
+        "audit_events": len(audit),
+
+        # Compatibility with older template/data names.
+        "spam_logs": len(audit),
+        "blocked": 0,
+        "safe_list": 0,
+        "notifications": 0,
+        "unread_notifications": 0,
+
+        "system_score": 100,
+        "health_score": 100,
+        "ops_score": (
+            100 if critical_events == 0 else 80
+        ),
+        "release_score": 100,
+
+        "system": "ONLINE",
+        "health": "HEALTHY",
+    }
+
+
+def _eg_phase7a_dashboard():
+    stats = _eg_phase7a_stats()
+
+    renderer = globals().get("_eg_real_render")
+
+    if callable(renderer):
+        return renderer(
+            "admin_dashboard.html",
+            admin_stats=stats,
+        )
+
+    return render_template(
+        "admin_dashboard.html",
+        admin_stats=stats,
+    )
+
+
+# Replace only the dashboard branch of the already-authoritative
+# Phase 6C HTML control plane.
+#
+# Authentication remains owned by:
+# _eg_final_admin_auth_boundary_v2
+#
+# API fail-closed remains owned by:
+# _eg_phase6c_admin_api_boundary_v1
+
+_eg_phase7a_old_plane = globals().get(
+    "_eg_phase6c_admin_control_plane_v1"
+)
+
+
+def _eg_phase7a_admin_control_plane():
+    try:
+        path = str(
+            getattr(request, "path", "") or ""
+        ).rstrip("/") or "/"
+
+        if path == "/admin":
+            return redirect(
+                "/admin/dashboard",
+                code=302,
+            )
+
+        if path == "/admin/dashboard":
+            return _eg_phase7a_dashboard()
+
+        old_plane = globals().get(
+            "_eg_phase7a_old_plane"
+        )
+
+        if callable(old_plane):
+            return old_plane()
+
+        return None
+
+    except Exception as exc:
+        try:
+            print(
+                "ERATGUARD PHASE7A COMMAND CENTER ERROR:",
+                repr(exc),
+                flush=True,
+            )
+        except Exception:
+            pass
+
+        return None
+
+
+try:
+    _eg_phase7a_hooks = (
+        app.before_request_funcs.setdefault(
+            None,
+            [],
+        )
+    )
+
+    _eg_phase7a_old = globals().get(
+        "_eg_phase6c_admin_control_plane_v1"
+    )
+
+    if _eg_phase7a_old in _eg_phase7a_hooks:
+        _eg_phase7a_index = (
+            _eg_phase7a_hooks.index(
+                _eg_phase7a_old
+            )
+        )
+
+        _eg_phase7a_hooks.remove(
+            _eg_phase7a_old
+        )
+
+        _eg_phase7a_hooks.insert(
+            _eg_phase7a_index,
+            _eg_phase7a_admin_control_plane,
+        )
+
+    elif (
+        _eg_phase7a_admin_control_plane
+        not in _eg_phase7a_hooks
+    ):
+        # Must remain after canonical auth/API boundary.
+        _eg_phase7a_insert = 4
+
+        if len(_eg_phase7a_hooks) < 4:
+            _eg_phase7a_insert = len(
+                _eg_phase7a_hooks
+            )
+
+        _eg_phase7a_hooks.insert(
+            _eg_phase7a_insert,
+            _eg_phase7a_admin_control_plane,
+        )
+
+    print(
+        "ERATGUARD PHASE 7A FINAL COMMAND CENTER DATA CORE ACTIVE",
+        flush=True,
+    )
+
+except Exception as _eg_phase7a_install_error:
+    print(
+        "ERATGUARD PHASE7A INSTALL ERROR:",
+        repr(_eg_phase7a_install_error),
+        flush=True,
+    )
+
+
+
+# ================================================================
+# ERATGUARD PHASE 7B - COMMAND CENTER UI FINALIZATION
+# Phase 7A canonical data -> Mission Control UI
+# ================================================================
+EG_PHASE7B_COMMAND_CENTER_UI = True
+
+
+# ===== ERATGUARD PHASE 7C.1 CANONICAL ADMIN OWNERSHIP LOCK START =====
+#
+# Final admin HTML ownership contract:
+#
+#   /admin/dashboard
+#       -> admin.dashboard
+#       -> admin.routes.dashboard
+#       -> admin/dashboard.html
+#
+# Authentication remains owned by FINAL ADMIN AUTH BOUNDARY V2.
+# API routing remains owned by PHASE 6C ADMIN API BOUNDARY.
+#
+# This layer does NOT render legacy root admin templates.
+# It only prevents obsolete dashboard control planes from owning
+# canonical blueprint-owned HTML routes.
+# =====================================================================
+
+try:
+    from flask import request as _eg7c1_request
+
+    def _eg_phase7c1_canonical_admin_ownership_lock():
+        path = str(getattr(_eg7c1_request, "path", "") or "")
+        method = str(getattr(_eg7c1_request, "method", "GET") or "GET").upper()
+
+        # Only canonical blueprint HTML routes are handled here.
+        if method != "GET":
+            return None
+
+        canonical_blueprint_paths = {
+            "/admin",
+            "/admin/",
+            "/admin/dashboard",
+            "/admin/users",
+            "/admin/security",
+            "/admin/spam-logs",
+        }
+
+        if path not in canonical_blueprint_paths:
+            return None
+
+        # Authentication is deliberately NOT duplicated here.
+        # FINAL ADMIN AUTH BOUNDARY V2 runs earlier and owns auth.
+        #
+        # Returning None allows Flask URL dispatch to reach
+        # admin.routes directly.
+        return None
+
+
+    _eg7c1_before = app.before_request_funcs.setdefault(None, [])
+
+    # Remove duplicate installation on reload.
+    _eg7c1_before[:] = [
+        fn for fn in _eg7c1_before
+        if getattr(fn, "__name__", "") !=
+        "_eg_phase7c1_canonical_admin_ownership_lock"
+    ]
+
+    # Position:
+    # auth boundary
+    # api boundary
+    # rate limit
+    # ownership lock
+    # old Phase7A plane
+    #
+    # Therefore the ownership contract is visible immediately before
+    # the old HTML control plane.
+    _eg7c1_insert_at = min(4, len(_eg7c1_before))
+    _eg7c1_before.insert(
+        _eg7c1_insert_at,
+        _eg_phase7c1_canonical_admin_ownership_lock
+    )
+
+    # -----------------------------------------------------------------
+    # Quarantine obsolete HTML ownership from Phase 7A control plane.
+    #
+    # Phase 7A still remains available for any non-canonical paths it
+    # may legitimately own, but canonical blueprint routes must fall
+    # through to Flask's admin blueprint.
+    # -----------------------------------------------------------------
+
+    _eg7c1_old_phase7a_plane = globals().get(
+        "_eg_phase7a_admin_control_plane"
+    )
+
+    if callable(_eg7c1_old_phase7a_plane):
+
+        def _eg_phase7c1_phase7a_compat_plane():
+            path = str(
+                getattr(_eg7c1_request, "path", "") or ""
+            ).rstrip("/") or "/"
+
+            canonical = {
+                "/admin",
+                "/admin/dashboard",
+                "/admin/users",
+                "/admin/security",
+                "/admin/spam-logs",
+            }
+
+            if path in canonical:
+                return None
+
+            return _eg7c1_old_phase7a_plane()
+
+        _eg7c1_before[:] = [
+            fn for fn in _eg7c1_before
+            if getattr(fn, "__name__", "") !=
+            "_eg_phase7a_admin_control_plane"
+        ]
+
+        _eg7c1_before.append(
+            _eg_phase7c1_phase7a_compat_plane
+        )
+
+    print(
+        "ERATGUARD PHASE 7C.1 CANONICAL ADMIN OWNERSHIP LOCK ACTIVE"
+    )
+
+except Exception as _eg7c1_error:
+    print(
+        "ERATGUARD PHASE 7C.1 CANONICAL ADMIN OWNERSHIP LOCK ERROR:",
+        _eg7c1_error
+    )
+
+# ===== ERATGUARD PHASE 7C.1 CANONICAL ADMIN OWNERSHIP LOCK END =====
+
+
+
+# ==================================================================
+# ERATGUARD PHASE 7D.10A
+# CANONICAL ADMIN SYSTEM CENTER RUNTIME RESPONSE LOCK
+# ==================================================================
+#
+# /admin/system ownership already belongs to:
+#
+#     admin.system_center
+#     admin.routes.system_center
+#
+# Legacy dashboard_web before_request layers may still intercept the
+# HTTP request and replace the canonical response.  This lock executes
+# after authentication and before legacy admin runtime fallbacks.
+#
+# It does NOT modify production data.
+# ==================================================================
+
+try:
+    from flask import request as _eg7d10a_request
+
+    def _eg7d10a_canonical_system_response_lock():
+        path = str(
+            getattr(_eg7d10a_request, "path", "") or ""
+        )
+
+        if path != "/admin/system":
+            return None
+
+        # Authentication remains owned by the existing final admin
+        # boundary.  Never bypass it here.
+        try:
+            if not _eg_admin_request_ok():
+                return None
+        except Exception:
+            return None
+
+        try:
+            canonical_view = app.view_functions.get(
+                "admin.system_center"
+            )
+
+            if not callable(canonical_view):
+                return None
+
+            return canonical_view()
+
+        except Exception as exc:
+            print(
+                "ERATGUARD PHASE7D10A CANONICAL SYSTEM LOCK WARN:",
+                repr(exc),
+                flush=True,
+            )
+
+            return None
+
+
+    # --------------------------------------------------------------
+    # Registration ordering
+    #
+    # Final admin auth boundary must stay ahead of this lock.
+    # We therefore insert immediately AFTER the known final admin
+    # authentication boundary when it can be located.
+    # --------------------------------------------------------------
+
+    _eg7d10a_chain = app.before_request_funcs.setdefault(
+        None,
+        []
+    )
+
+    if _eg7d10a_canonical_system_response_lock not in _eg7d10a_chain:
+
+        _eg7d10a_insert_at = 1
+
+        for _eg7d10a_i, _eg7d10a_fn in enumerate(
+            _eg7d10a_chain
+        ):
+            _eg7d10a_name = getattr(
+                _eg7d10a_fn,
+                "__name__",
+                ""
+            )
+
+            if _eg7d10a_name in (
+                "_eg_final_admin_auth_boundary_v2",
+                "_eg_final_admin_auth_boundary_v1",
+            ):
+                _eg7d10a_insert_at = _eg7d10a_i + 1
+                break
+
+        _eg7d10a_chain.insert(
+            _eg7d10a_insert_at,
+            _eg7d10a_canonical_system_response_lock
+        )
+
+    print(
+        "ERATGUARD PHASE 7D.10A CANONICAL SYSTEM RESPONSE LOCK ACTIVE",
+        flush=True
+    )
+
+except Exception as _eg7d10a_error:
+    print(
+        "ERATGUARD PHASE 7D.10A INSTALL WARN:",
+        repr(_eg7d10a_error),
+        flush=True
+    )
+
+# ==================================================================
+# ERATGUARD PHASE 7D.10A END
+# ==================================================================
+
+
+# ===== ERATGUARD PHASE 7D.15A CANONICAL NOTIFICATIONS RESPONSE LOCK START =====
+#
+# Purpose:
+# - Preserve the canonical admin.notifications_center route.
+# - Prevent legacy notification UI before_request bridges from owning
+#   the effective /admin/notifications HTTP response.
+# - Keep the existing final admin authentication boundary authoritative.
+#
+try:
+    from flask import request as _eg7d15a_request
+    from flask import session as _eg7d15a_session
+    from flask import redirect as _eg7d15a_redirect
+    from flask import url_for as _eg7d15a_url_for
+
+    def _eg7d15a_is_admin():
+        try:
+            _role = str(
+                _eg7d15a_session.get("role", "")
+                or ""
+            ).strip().lower()
+
+            _username = str(
+                _eg7d15a_session.get("username", "")
+                or ""
+            ).strip().lower()
+
+            return bool(
+                _eg7d15a_session.get("is_admin") is True
+                or _eg7d15a_session.get("admin") is True
+                or _eg7d15a_session.get("admin_ok") is True
+                or _eg7d15a_session.get("admin_logged_in") is True
+                or (
+                    _eg7d15a_session.get("logged_in") is True
+                    and _role == "admin"
+                )
+                or (
+                    _eg7d15a_session.get("logged_in") is True
+                    and _username == "admin"
+                )
+            )
+        except Exception:
+            return False
+
+
+    def _eg7d15a_canonical_notifications_response_lock():
+        try:
+            _path = str(
+                getattr(
+                    _eg7d15a_request,
+                    "path",
+                    "",
+                )
+                or ""
+            ).rstrip("/")
+
+            if _path != "/admin/notifications":
+                return None
+
+            # Canonical Notifications Center is currently READ ONLY.
+            # Only GET/HEAD is response-locked here.
+            _method = str(
+                getattr(
+                    _eg7d15a_request,
+                    "method",
+                    "GET",
+                )
+                or "GET"
+            ).upper()
+
+            if _method not in {"GET", "HEAD"}:
+                return None
+
+            # Preserve admin boundary even if ordering changes later.
+            if not _eg7d15a_is_admin():
+                try:
+                    return _eg7d15a_redirect(
+                        _eg7d15a_url_for(
+                            "admin_login",
+                            next=_eg7d15a_request.path,
+                        )
+                    )
+                except Exception:
+                    try:
+                        return _eg7d15a_redirect(
+                            "/admin/login?next=/admin/notifications"
+                        )
+                    except Exception:
+                        return None
+
+            _view = app.view_functions.get(
+                "admin.notifications_center"
+            )
+
+            if _view is None:
+                return None
+
+            return _view()
+
+        except Exception as _eg7d15a_err:
+            print(
+                "ERATGUARD PHASE7D15A "
+                "NOTIFICATIONS RESPONSE LOCK ERROR:",
+                repr(_eg7d15a_err),
+            )
+            return None
+
+
+    try:
+        _eg7d15a_funcs = app.before_request_funcs.setdefault(
+            None,
+            []
+        )
+
+        _eg7d15a_funcs[:] = [
+            _func
+            for _func in _eg7d15a_funcs
+            if getattr(
+                _func,
+                "__name__",
+                "",
+            )
+            != "_eg7d15a_canonical_notifications_response_lock"
+        ]
+
+        # Final admin auth boundary must remain ahead of this lock.
+        _insert_index = 0
+
+        for _idx, _func in enumerate(_eg7d15a_funcs):
+            _name = getattr(
+                _func,
+                "__name__",
+                "",
+            )
+
+            if _name in {
+                "_eg_final_admin_auth_boundary_v2",
+                "_eg_final_admin_auth_boundary_v1",
+                "_eg_final_admin_auth_boundary",
+            }:
+                _insert_index = _idx + 1
+                break
+
+        _eg7d15a_funcs.insert(
+            _insert_index,
+            _eg7d15a_canonical_notifications_response_lock,
+        )
+
+        print(
+            "ERATGUARD PHASE 7D.15A "
+            "CANONICAL NOTIFICATIONS RESPONSE LOCK ACTIVE"
+        )
+
+    except Exception as _eg7d15a_insert_err:
+        print(
+            "ERATGUARD PHASE7D15A "
+            "NOTIFICATIONS RESPONSE LOCK INSERT ERROR:",
+            repr(_eg7d15a_insert_err),
+        )
+
+except Exception as _eg7d15a_boot_err:
+    print(
+        "ERATGUARD PHASE7D15A "
+        "NOTIFICATIONS RESPONSE LOCK BOOT ERROR:",
+        repr(_eg7d15a_boot_err),
+    )
+
+# ===== ERATGUARD PHASE 7D.15A CANONICAL NOTIFICATIONS RESPONSE LOCK END =====
+
+# =============================================================================
+# ERATGUARD PHASE 7D.18A - TRUE FINAL APPLICATION BOOT
+# =============================================================================
+# IMPORTANT:
+# All routes, quarantine layers, authentication boundaries and canonical
+# runtime control planes must be registered BEFORE the Flask server starts.
+# =============================================================================
+
+
+# ===== ERATGUARD RESTORE: _eg_al1_is_real_admin (ADMIN-LOCK-1 den kurtarildi) =====
+# _eg_final_admin_auth_boundary_v2 bu fonksiyona bagimli; ADMIN-LOCK-1 guard i
+# karantinaya alinirken bu yardimci fonksiyon yanlislikla birlikte silinmisti.
+try:
+    import json as _eg_al1r_json
+    from pathlib import Path as _eg_al1r_Path
+    from flask import request as _eg_al1r_request
+    from flask import session as _eg_al1r_session
+
+    def _eg_al1_read_users():
+        for raw in ("data/users.json", "users.json"):
+            try:
+                path = _eg_al1r_Path(raw)
+                if path.exists():
+                    txt = path.read_text(encoding="utf-8").strip()
+                    if not txt:
+                        return {}
+                    data = _eg_al1r_json.loads(txt)
+                    return data if isinstance(data, dict) else {}
+            except Exception:
+                pass
+        return {}
+
+    def _eg_al1_is_real_admin():
+        try:
+            username = str(_eg_al1r_session.get("username") or "").strip()
+            role = str(_eg_al1r_session.get("role") or "").strip().lower()
+            session_is_admin = _eg_al1r_session.get("is_admin") is True
+
+            users = _eg_al1_read_users()
+            user = users.get(username) if username else None
+
+            user_is_admin = False
+            if isinstance(user, dict):
+                user_role = str(user.get("role") or "").strip().lower()
+                user_is_admin = (
+                    user_role == "admin"
+                    or user.get("is_admin") is True
+                    or username.lower() == "admin"
+                )
+
+            if username and isinstance(user, dict):
+                return bool(user_is_admin)
+
+            if username.lower() == "admin" and (role == "admin" or session_is_admin):
+                return True
+
+            if username == "eg_admin_mobile" and role == "admin" and session_is_admin:
+                try:
+                    cookie_ok_fn = globals().get("_ss_admin_cookie_ok_final")
+                    if callable(cookie_ok_fn) and cookie_ok_fn():
+                        return True
+                except Exception:
+                    pass
+
+            return False
+        except Exception:
+            return False
+
+    print("ERATGUARD RESTORE: _eg_al1_is_real_admin ACTIVE", flush=True)
+except Exception as _eg_al1r_err:
+    print("ERATGUARD RESTORE: _eg_al1_is_real_admin ERROR:", repr(_eg_al1r_err), flush=True)
+# ===== ERATGUARD RESTORE END =====
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
+
+# =============================================================================
+# ERATGUARD PHASE 7D.18A END
 # =============================================================================

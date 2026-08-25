@@ -93,8 +93,9 @@ def invalidate_existing_tokens(username: str):
         save_reset_tokens(tokens)
 
 
-def create_reset_token(username: str) -> str:
-    invalidate_existing_tokens(username)
+def create_reset_token(username: str, invalidate: bool = True) -> str:
+    if invalidate:
+        invalidate_existing_tokens(username)
 
     raw_token = secrets.token_hex(32)
     hashed = _token_hash(raw_token)
@@ -113,8 +114,9 @@ def create_reset_token(username: str) -> str:
     return raw_token
 
 
-def create_reset_code(username: str) -> str:
-    invalidate_existing_tokens(username)
+def create_reset_code(username: str, invalidate: bool = True) -> str:
+    if invalidate:
+        invalidate_existing_tokens(username)
 
     code = str(secrets.randbelow(900000) + 100000)
     hashed = _token_hash(code)
@@ -214,8 +216,10 @@ def reset_user_password(username: str, new_password: str) -> bool:
     if username not in users:
         return False
 
-    users[username]["password_hash"] = generate_password_hash(new_password)
-    users[username].pop("password", None)
+    # Canonical EratGuard user-login contract:
+    # /login reads the Werkzeug hash from the "password" field.
+    users[username]["password"] = generate_password_hash(new_password)
+    users[username].pop("password_hash", None)
 
     save_users(users)
     return True
