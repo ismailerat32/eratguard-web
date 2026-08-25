@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>EratGuard Admin — Kullanıcılar</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('admin.static', filename='css/dashboard.css') }}"
+    >
+    <link
+        rel="stylesheet"
+        href="{{ url_for('admin.static', filename='css/panels.css') }}"
+    >
+    <link
+        rel="stylesheet"
+        href="{{ url_for('admin.static', filename='css/responsive.css') }}"
+    >
+
+    <style>
+        .users-shell {
+            width: min(1180px, calc(100% - 32px));
+            margin: 32px auto;
+        }
+
+        .users-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .users-header h1 {
+            margin: 0;
+        }
+
+        .back-link {
+            text-decoration: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card,
+        .user-card {
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 16px;
+            padding: 18px;
+            background: rgba(255,255,255,.04);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            opacity: .7;
+            margin-top: 5px;
+        }
+
+        .users-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .user-card {
+            display: grid;
+            grid-template-columns:
+                minmax(150px, 1.2fr)
+                minmax(180px, 1.5fr)
+                repeat(3, minmax(100px, .7fr));
+            gap: 14px;
+            align-items: center;
+        }
+
+        .username {
+            font-weight: 700;
+        }
+
+        .muted {
+            opacity: .7;
+        }
+
+        .badge {
+            display: inline-block;
+            width: fit-content;
+            padding: 5px 9px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.15);
+            font-size: 12px;
+        }
+
+        @media (max-width: 800px) {
+            .stats-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+            .user-card {
+                grid-template-columns: 1fr;
+            }
+
+            .users-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="users-shell">
+
+    <header class="users-header">
+        <div>
+            <h1>Kullanıcı Merkezi</h1>
+            <div class="muted">
+                EratGuard Admin
+            </div>
+        </div>
+
+        <a
+            class="back-link"
+            href="{{ url_for('admin.dashboard') }}"
+        >
+            ← Admin Dashboard
+        </a>
+    </header>
+
+
+    <section class="stats-grid">
+
+        <article class="stat-card">
+            <div class="stat-value">
+                {{ total_users }}
+            </div>
+            <div class="stat-label">
+                Toplam kullanıcı
+            </div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-value">
+                {{ active_users }}
+            </div>
+            <div class="stat-label">
+                Aktif
+            </div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-value">
+                {{ admin_users }}
+            </div>
+            <div class="stat-label">
+                Admin
+            </div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-value">
+                {{ banned_users }}
+            </div>
+            <div class="stat-label">
+                Pasif
+            </div>
+        </article>
+
+    </section>
+
+
+    <section class="users-list">
+
+        {% for uname, udata in users.items() %}
+
+        <article class="user-card">
+
+            <div>
+                <div class="username">
+                    {{ udata.username }}
+                </div>
+
+                {% if udata.probe_account %}
+                <div class="muted">
+                    Probe hesabı
+                </div>
+                {% endif %}
+            </div>
+
+            <div>
+                {{ udata.email or 'E-posta yok' }}
+            </div>
+
+            <div>
+                <span class="badge">
+                    {{ udata.role }}
+                </span>
+            </div>
+
+            <div>
+                <span class="badge">
+                    {{ udata.license_label }}
+                </span>
+            </div>
+
+            <div>
+                <span class="badge">
+                    {{ 'AKTİF' if udata.active else 'PASİF' }}
+                </span>
+            </div>
+
+        </article>
+
+        {% else %}
+
+        <article class="user-card">
+            Kullanıcı bulunamadı.
+        </article>
+
+        {% endfor %}
+
+    </section>
+
+</main>
+
+</body>
+</html>

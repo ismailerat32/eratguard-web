@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>EratGuard Command Center</title>
+
+<link rel="stylesheet" href="{{ url_for('admin.static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('admin.static', filename='css/panels.css') }}">
+<link rel="stylesheet" href="{{ url_for('admin.static', filename='css/eva.css') }}">
+<link rel="stylesheet" href="{{ url_for('admin.static', filename='css/animations.css') }}">
+<link rel="stylesheet" href="{{ url_for('admin.static', filename='css/responsive.css') }}">
+
+</head>
+
+<body>
+
+{% include "components/topbar.html" %}
+
+<div class="workspace">
+
+    <aside class="left">
+        {% include "components/left_panel.html" %}
+    </aside>
+
+    <main class="center">
+        {% include "components/eva_core.html" %}
+    </main>
+
+    <aside class="right">
+        {% include "components/right_panel.html" %}
+    </aside>
+
+</div>
+
+<footer>
+{% include "components/bottom_panel.html" %}
+</footer>
+
+<script src="{{ url_for('admin.static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('admin.static', filename='js/eva.js') }}"></script>
+<script src="{{ url_for('admin.static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('admin.static', filename='js/websocket.js') }}"></script>
+
+</body>
+</html>

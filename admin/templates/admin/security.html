@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>EratGuard Admin — Güvenlik Merkezi</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('admin.static', filename='css/dashboard.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('admin.static', filename='css/panels.css') }}"
+    >
+
+    <style>
+        .security-page{
+            padding:18px;
+        }
+
+        .security-head{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:16px;
+            margin-bottom:18px;
+        }
+
+        .security-head h1{
+            margin:0 0 6px;
+        }
+
+        .security-sub{
+            opacity:.72;
+        }
+
+        .state{
+            padding:9px 13px;
+            border-radius:999px;
+            font-weight:800;
+            white-space:nowrap;
+        }
+
+        .state.healthy{
+            background:rgba(34,197,94,.14);
+            color:#86efac;
+            border:1px solid rgba(34,197,94,.35);
+        }
+
+        .state.warning{
+            background:rgba(245,158,11,.14);
+            color:#fcd34d;
+            border:1px solid rgba(245,158,11,.35);
+        }
+
+        .state.critical{
+            background:rgba(239,68,68,.14);
+            color:#fca5a5;
+            border:1px solid rgba(239,68,68,.35);
+        }
+
+        .metric-grid{
+            display:grid;
+            grid-template-columns:
+                repeat(4,minmax(0,1fr));
+            gap:12px;
+            margin-bottom:18px;
+        }
+
+        .metric{
+            border:1px solid rgba(148,163,184,.18);
+            border-radius:16px;
+            padding:16px;
+            background:rgba(15,23,42,.72);
+        }
+
+        .metric-label{
+            font-size:13px;
+            opacity:.68;
+            margin-bottom:7px;
+        }
+
+        .metric-value{
+            font-size:28px;
+            font-weight:900;
+        }
+
+        .metric-note{
+            margin-top:5px;
+            font-size:12px;
+            opacity:.62;
+        }
+
+        .panel{
+            border:1px solid rgba(148,163,184,.18);
+            border-radius:18px;
+            background:rgba(15,23,42,.72);
+            overflow:hidden;
+        }
+
+        .panel-head{
+            display:flex;
+            justify-content:space-between;
+            gap:12px;
+            align-items:center;
+            padding:15px 16px;
+            border-bottom:1px solid rgba(148,163,184,.15);
+        }
+
+        .panel-head h2{
+            margin:0;
+            font-size:17px;
+        }
+
+        .event-list{
+            display:flex;
+            flex-direction:column;
+        }
+
+        .event{
+            display:grid;
+            grid-template-columns:
+                150px 90px minmax(150px,1fr)
+                minmax(130px,.7fr) minmax(180px,1.3fr);
+            gap:12px;
+            padding:13px 16px;
+            border-bottom:1px solid rgba(148,163,184,.10);
+            align-items:center;
+        }
+
+        .event:last-child{
+            border-bottom:0;
+        }
+
+        .level{
+            display:inline-flex;
+            justify-content:center;
+            align-items:center;
+            padding:5px 8px;
+            border-radius:999px;
+            font-size:11px;
+            font-weight:900;
+            text-transform:uppercase;
+        }
+
+        .level.info{
+            background:rgba(59,130,246,.13);
+            color:#93c5fd;
+        }
+
+        .level.warning{
+            background:rgba(245,158,11,.14);
+            color:#fcd34d;
+        }
+
+        .level.critical{
+            background:rgba(239,68,68,.14);
+            color:#fca5a5;
+        }
+
+        .event-main{
+            font-weight:750;
+            overflow-wrap:anywhere;
+        }
+
+        .muted{
+            opacity:.65;
+            font-size:12px;
+            overflow-wrap:anywhere;
+        }
+
+        .empty{
+            padding:32px 16px;
+            text-align:center;
+            opacity:.7;
+        }
+
+        @media(max-width:1000px){
+            .metric-grid{
+                grid-template-columns:
+                    repeat(2,minmax(0,1fr));
+            }
+
+            .event{
+                grid-template-columns:
+                    120px 85px 1fr;
+            }
+
+            .event-user,
+            .event-detail{
+                grid-column:3;
+            }
+        }
+
+        @media(max-width:650px){
+            .security-page{
+                padding:12px;
+            }
+
+            .security-head{
+                flex-direction:column;
+            }
+
+            .metric-grid{
+                grid-template-columns:1fr 1fr;
+            }
+
+            .metric-value{
+                font-size:23px;
+            }
+
+            .event{
+                display:flex;
+                flex-direction:column;
+                align-items:flex-start;
+                gap:6px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="security-page">
+
+    <div class="security-head">
+        <div>
+            <h1>Güvenlik Merkezi</h1>
+
+            <div class="security-sub">
+                EratGuard güvenlik olayları ve koruma özeti
+            </div>
+        </div>
+
+        <div class="state {{ security_state }}">
+            {{ security_state_label }}
+        </div>
+    </div>
+
+
+    <div class="metric-grid">
+
+        <div class="metric">
+            <div class="metric-label">
+                Toplam güvenlik olayı
+            </div>
+
+            <div class="metric-value">
+                {{ total_events }}
+            </div>
+
+            <div class="metric-note">
+                Audit kayıtları
+            </div>
+        </div>
+
+
+        <div class="metric">
+            <div class="metric-label">
+                Kritik olay
+            </div>
+
+            <div class="metric-value">
+                {{ critical_events }}
+            </div>
+
+            <div class="metric-note">
+                Yüksek öncelikli kayıt
+            </div>
+        </div>
+
+
+        <div class="metric">
+            <div class="metric-label">
+                Uyarı
+            </div>
+
+            <div class="metric-value">
+                {{ warning_events }}
+            </div>
+
+            <div class="metric-note">
+                İncelenmesi gereken olay
+            </div>
+        </div>
+
+
+        <div class="metric">
+            <div class="metric-label">
+                Son 24 saat
+            </div>
+
+            <div class="metric-value">
+                {{ recent_window }}
+            </div>
+
+            <div class="metric-note">
+                Yeni güvenlik olayı
+            </div>
+        </div>
+
+
+        <div class="metric">
+            <div class="metric-label">
+                SMS analiz kaydı
+            </div>
+
+            <div class="metric-value">
+                {{ spam_total }}
+            </div>
+
+            <div class="metric-note">
+                Yüksek risk: {{ spam_high_risk }}
+            </div>
+        </div>
+
+
+        <div class="metric">
+            <div class="metric-label">
+                Karantina
+            </div>
+
+            <div class="metric-value">
+                {{ quarantine_active }}
+            </div>
+
+            <div class="metric-note">
+                Toplam kayıt: {{ quarantine_total }}
+            </div>
+        </div>
+
+
+        <div class="metric">
+            <div class="metric-label">
+                Engellenen mesaj
+            </div>
+
+            <div class="metric-value">
+                {{ blocked_total }}
+            </div>
+
+            <div class="metric-note">
+                Koruma veri kaynağı
+            </div>
+        </div>
+
+
+        <div class="metric">
+            <div class="metric-label">
+                Durum
+            </div>
+
+            <div class="metric-value"
+                 style="font-size:18px">
+                {{ security_state_label }}
+            </div>
+
+            <div class="metric-note">
+                Canlı veri özeti
+            </div>
+        </div>
+
+    </div>
+
+
+    <section class="panel">
+
+        <div class="panel-head">
+            <h2>Son Güvenlik Olayları</h2>
+
+            <div class="muted">
+                Son {{ events|length }} kayıt
+            </div>
+        </div>
+
+
+        {% if events %}
+
+        <div class="event-list">
+
+            {% for ev in events %}
+
+            <div class="event">
+
+                <div class="muted">
+                    {{ ev.get("time","-") }}
+                </div>
+
+                <div>
+                    <span class="level {{ ev.get('level','info') }}">
+                        {{ ev.get("level","info") }}
+                    </span>
+                </div>
+
+                <div>
+                    <div class="event-main">
+                        {{ ev.get("event","security_event") }}
+                    </div>
+
+                    <div class="muted">
+                        {{ ev.get("path","-") }}
+                    </div>
+                </div>
+
+                <div class="event-user">
+                    <div>
+                        {{ ev.get("username","-") }}
+                    </div>
+
+                    <div class="muted">
+                        {{ ev.get("ip","-") }}
+                    </div>
+                </div>
+
+                <div class="event-detail muted">
+                    {{ ev.get("detail","-") }}
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% else %}
+
+        <div class="empty">
+            Güvenlik olayı bulunamadı.
+        </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+</body>
+</html>

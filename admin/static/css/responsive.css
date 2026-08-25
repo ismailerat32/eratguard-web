@@ -1,0 +1,56 @@
+
+@media(max-width:420px){
+
+    .eg-shell{
+        padding-left:10px;
+        padding-right:10px;
+    }
+
+    .eg-brand-mark{
+        width:38px;
+        height:38px;
+    }
+
+    .eg-brand-name{
+        font-size:13px;
+    }
+
+    .eg-live{
+        font-size:9px;
+    }
+
+    .eg-logout{
+        padding:8px 10px;
+        font-size:9px;
+    }
+
+    .eg-command-head h1{
+        font-size:29px;
+    }
+
+    .eg-command-head p{
+        font-size:11px;
+    }
+
+    .eg-metrics{
+        gap:8px;
+    }
+
+    .eg-metric{
+        border-radius:12px;
+        padding:13px;
+    }
+
+    .eg-metric-top{
+        font-size:8px;
+    }
+
+    .eg-metric > small{
+        line-height:1.4;
+    }
+
+    .eg-module-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+}

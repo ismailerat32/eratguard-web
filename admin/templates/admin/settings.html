@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    >
+    <title>EratGuard • Ayarlar Merkezi</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('admin.static', filename='css/dashboard.css') }}"
+    >
+    <link
+        rel="stylesheet"
+        href="{{ url_for('admin.static', filename='css/panels.css') }}"
+    >
+    <link
+        rel="stylesheet"
+        href="{{ url_for('admin.static', filename='css/responsive.css') }}"
+    >
+
+    <style>
+        .settings-shell {
+            max-width: 1450px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .settings-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .settings-head h1 {
+            margin: 0 0 8px;
+            font-size: clamp(25px, 4vw, 42px);
+        }
+
+        .settings-head p {
+            margin: 0;
+            opacity: .72;
+        }
+
+        .status-pill {
+            border: 1px solid rgba(124,255,178,.35);
+            border-radius: 999px;
+            padding: 9px 14px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .12em;
+            white-space: nowrap;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(3, minmax(0,1fr));
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .setting-card {
+            border: 1px solid rgba(255,255,255,.09);
+            border-radius: 18px;
+            padding: 18px;
+            background: rgba(255,255,255,.025);
+        }
+
+        .setting-card .label {
+            font-size: 12px;
+            opacity: .62;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+        }
+
+        .setting-card .value {
+            margin-top: 9px;
+            font-size: 25px;
+            font-weight: 800;
+            word-break: break-word;
+        }
+
+        .section {
+            margin-top: 18px;
+            border: 1px solid rgba(255,255,255,.09);
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(255,255,255,.02);
+        }
+
+        .section-head {
+            padding: 17px 19px;
+            border-bottom:
+                1px solid rgba(255,255,255,.08);
+        }
+
+        .section-head h2 {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .rows {
+            padding: 5px 18px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 15px;
+            padding: 13px 0;
+            border-bottom:
+                1px solid rgba(255,255,255,.06);
+        }
+
+        .row:last-child {
+            border-bottom: 0;
+        }
+
+        .row-key {
+            opacity: .62;
+        }
+
+        .row-value {
+            font-weight: 650;
+            overflow-wrap: anywhere;
+        }
+
+        .ok {
+            font-weight: 800;
+        }
+
+        .file-list {
+            padding: 7px 18px;
+        }
+
+        .file {
+            display: grid;
+            grid-template-columns:
+                minmax(160px,1.4fr)
+                100px
+                110px
+                minmax(180px,1fr);
+            gap: 12px;
+            padding: 13px 0;
+            border-bottom:
+                1px solid rgba(255,255,255,.06);
+        }
+
+        .file:last-child {
+            border-bottom: 0;
+        }
+
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .toolbar a {
+            text-decoration: none;
+            border: 1px solid rgba(124,255,178,.28);
+            border-radius: 12px;
+            padding: 11px 15px;
+            color: inherit;
+        }
+
+        .readonly {
+            margin-top: 18px;
+            padding: 15px 17px;
+            border-radius: 15px;
+            border: 1px solid rgba(124,255,178,.2);
+            background: rgba(124,255,178,.035);
+            line-height: 1.55;
+        }
+
+        @media (max-width: 900px) {
+            .settings-grid {
+                grid-template-columns:
+                    repeat(2,minmax(0,1fr));
+            }
+
+            .file {
+                grid-template-columns: 1fr 90px;
+            }
+
+            .file .modified {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .settings-shell {
+                padding: 15px;
+            }
+
+            .settings-head {
+                display: block;
+            }
+
+            .status-pill {
+                display: inline-block;
+                margin-top: 14px;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="settings-shell">
+
+    <div class="settings-head">
+        <div>
+            <h1>Ayarlar Merkezi</h1>
+            <p>
+                EratGuard yönetim ortamı, veri kaynakları
+                ve çalışma yapılandırması.
+            </p>
+        </div>
+
+        <div class="status-pill">
+            {{ status }}
+        </div>
+    </div>
+
+    <div class="settings-grid">
+        <div class="setting-card">
+            <div class="label">Kullanıcılar</div>
+            <div class="value">
+                {{ counters.users }}
+            </div>
+        </div>
+
+        <div class="setting-card">
+            <div class="label">Aktif Kullanıcı</div>
+            <div class="value">
+                {{ counters.active_users }}
+            </div>
+        </div>
+
+        <div class="setting-card">
+            <div class="label">Admin</div>
+            <div class="value">
+                {{ counters.admins }}
+            </div>
+        </div>
+
+        <div class="setting-card">
+            <div class="label">Lisanslar</div>
+            <div class="value">
+                {{ counters.licenses }}
+            </div>
+        </div>
+
+        <div class="setting-card">
+            <div class="label">Üretilen Lisans</div>
+            <div class="value">
+                {{ counters.generated_licenses }}
+            </div>
+        </div>
+
+        <div class="setting-card">
+            <div class="label">Ödeme Talepleri</div>
+            <div class="value">
+                {{ counters.payment_requests }}
+            </div>
+        </div>
+    </div>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>Runtime Yapılandırması</h2>
+        </div>
+
+        <div class="rows">
+            <div class="row">
+                <div class="row-key">Platform</div>
+                <div class="row-value">
+                    {{ environment.platform }}
+                    {{ environment.release }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="row-key">Python</div>
+                <div class="row-value">
+                    {{ environment.python_version }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="row-key">Proje Dizini</div>
+                <div class="row-value">
+                    {{ environment.working_directory }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="row-key">Debug</div>
+                <div class="row-value">
+                    {{ "AÇIK" if environment.debug else "KAPALI" }}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>Production Veri Kaynakları</h2>
+        </div>
+
+        <div class="file-list">
+            {% for item in data_files %}
+            <div class="file">
+                <strong>{{ item.name }}</strong>
+
+                <span>
+                    {{ "ONLINE" if item.exists else "MISSING" }}
+                </span>
+
+                <span>
+                    {{ item.size }} B
+                </span>
+
+                <span class="modified">
+                    {{ item.modified or "—" }}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-head">
+            <h2>Güvenlik Kilitleri</h2>
+        </div>
+
+        <div class="rows">
+            <div class="row">
+                <div class="row-key">
+                    Canonical Admin
+                </div>
+                <div class="row-value ok">
+                    {{ "AKTİF" if safeguards.canonical_admin else "PASİF" }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="row-key">
+                    Admin Auth Boundary
+                </div>
+                <div class="row-value ok">
+                    {{ "AKTİF" if safeguards.auth_boundary else "PASİF" }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="row-key">
+                    Settings Modu
+                </div>
+                <div class="row-value ok">
+                    READ ONLY
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="row-key">
+                    Production Write
+                </div>
+                <div class="row-value">
+                    DEVRE DIŞI
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="readonly">
+        <strong>Canonical Settings Center</strong><br>
+        Bu aşamada ayarlar merkezi gözlem ve doğrulama
+        modundadır. Production yapılandırmasını veya JSON
+        verilerini değiştirmez.
+    </div>
+
+    <div class="toolbar">
+        <a href="/admin/dashboard">
+            ← Command Center
+        </a>
+
+        <a href="/admin/system">
+            Sistem Merkezi
+        </a>
+
+        <a href="/admin/security">
+            Güvenlik Merkezi
+        </a>
+
+        <a href="/admin/users">
+            Kullanıcılar
+        </a>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+>
+
+<title>EratGuard System Center</title>
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('admin.static', filename='css/dashboard.css') }}"
+>
+<link
+    rel="stylesheet"
+    href="{{ url_for('admin.static', filename='css/panels.css') }}"
+>
+<link
+    rel="stylesheet"
+    href="{{ url_for('admin.static', filename='css/responsive.css') }}"
+>
+
+<style>
+.system-shell {
+    min-height: 100vh;
+    padding: 26px;
+}
+
+.system-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.system-title {
+    margin: 0;
+    font-size: clamp(24px, 4vw, 40px);
+}
+
+.system-subtitle {
+    margin-top: 8px;
+    opacity: .72;
+}
+
+.system-back {
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.system-status-row {
+    display: grid;
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.system-card,
+.system-panel {
+    border: 1px solid
+        rgba(120, 255, 180, .18);
+    border-radius: 18px;
+    background:
+        rgba(5, 16, 20, .78);
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, .18);
+}
+
+.system-card {
+    padding: 18px;
+}
+
+.system-label {
+    font-size: 12px;
+    opacity: .62;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.system-value {
+    margin-top: 8px;
+    font-size: 25px;
+    font-weight: 800;
+}
+
+.system-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.system-panel {
+    padding: 20px;
+}
+
+.system-panel h2 {
+    margin: 0 0 18px;
+    font-size: 18px;
+}
+
+.metric {
+    margin-bottom: 18px;
+}
+
+.metric:last-child {
+    margin-bottom: 0;
+}
+
+.metric-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.metric-track {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background:
+        rgba(255, 255, 255, .08);
+}
+
+.metric-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: currentColor;
+}
+
+.system-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.system-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid
+        rgba(255, 255, 255, .07);
+    vertical-align: top;
+}
+
+.system-table td:first-child {
+    opacity: .62;
+    width: 42%;
+}
+
+.system-warning {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid
+        rgba(255, 190, 80, .28);
+    background:
+        rgba(255, 190, 80, .06);
+}
+
+.system-ok {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid
+        rgba(100, 255, 170, .22);
+    background:
+        rgba(100, 255, 170, .05);
+}
+
+.system-footer {
+    margin-top: 18px;
+    opacity: .52;
+    font-size: 12px;
+    word-break: break-word;
+}
+
+@media (max-width: 900px) {
+    .system-status-row {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+    .system-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .system-shell {
+        padding: 16px;
+    }
+
+    .system-head {
+        display: block;
+    }
+
+    .system-back {
+        display: inline-block;
+        margin-top: 14px;
+    }
+
+    .system-status-row {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="system-shell">
+
+    <header class="system-head">
+
+        <div>
+            <div class="system-label">
+                ERATGUARD ADMIN
+            </div>
+
+            <h1 class="system-title">
+                Sistem Merkezi
+            </h1>
+
+            <div class="system-subtitle">
+                Canlı çalışma ortamı ve kaynak durumu
+            </div>
+        </div>
+
+        <a
+            class="system-back"
+            href="{{ url_for('admin.dashboard') }}"
+        >
+            ← Command Center
+        </a>
+
+    </header>
+
+    <section class="system-status-row">
+
+        <div class="system-card">
+            <div class="system-label">
+                Sistem
+            </div>
+            <div class="system-value">
+                {{ status }}
+            </div>
+        </div>
+
+        <div class="system-card">
+            <div class="system-label">
+                Sağlık
+            </div>
+            <div class="system-value">
+                {{ health }}
+            </div>
+        </div>
+
+        <div class="system-card">
+            <div class="system-label">
+                CPU
+            </div>
+            <div class="system-value">
+                {% if cpu_percent is not none %}
+                    {{ cpu_percent }}%
+                {% else %}
+                    N/A
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="system-card">
+            <div class="system-label">
+                RAM
+            </div>
+            <div class="system-value">
+                {% if memory_percent is not none %}
+                    {{ memory_percent }}%
+                {% else %}
+                    N/A
+                {% endif %}
+            </div>
+        </div>
+
+    </section>
+
+    <section class="system-grid">
+
+        <article class="system-panel">
+
+            <h2>Kaynak Kullanımı</h2>
+
+            <div class="metric">
+
+                <div class="metric-top">
+                    <span>CPU</span>
+                    <strong>
+                        {% if cpu_percent is not none %}
+                            {{ cpu_percent }}%
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div class="metric-track">
+                    <div
+                        class="metric-fill"
+                        style="width: {{ cpu_percent or 0 }}%"
+                    ></div>
+                </div>
+
+            </div>
+
+            <div class="metric">
+
+                <div class="metric-top">
+                    <span>Bellek</span>
+                    <strong>
+                        {% if memory_percent is not none %}
+                            {{ memory_percent }}%
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div class="metric-track">
+                    <div
+                        class="metric-fill"
+                        style="width: {{ memory_percent or 0 }}%"
+                    ></div>
+                </div>
+
+                <div class="system-footer">
+                    {{ memory_used_label }}
+                    /
+                    {{ memory_total_label }}
+                </div>
+
+            </div>
+
+            <div class="metric">
+
+                <div class="metric-top">
+                    <span>Disk</span>
+                    <strong>
+                        {% if disk_percent is not none %}
+                            {{ disk_percent }}%
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div class="metric-track">
+                    <div
+                        class="metric-fill"
+                        style="width: {{ disk_percent or 0 }}%"
+                    ></div>
+                </div>
+
+                <div class="system-footer">
+                    {{ disk_used_label }}
+                    /
+                    {{ disk_total_label }}
+                </div>
+
+            </div>
+
+        </article>
+
+        <article class="system-panel">
+
+            <h2>Runtime</h2>
+
+            <table class="system-table">
+                <tr>
+                    <td>Platform</td>
+                    <td>{{ platform }}</td>
+                </tr>
+
+                <tr>
+                    <td>Release</td>
+                    <td>{{ release }}</td>
+                </tr>
+
+                <tr>
+                    <td>Mimari</td>
+                    <td>{{ machine }}</td>
+                </tr>
+
+                <tr>
+                    <td>Python</td>
+                    <td>{{ python_version }}</td>
+                </tr>
+
+                <tr>
+                    <td>CPU çekirdeği</td>
+                    <td>{{ cpu_count }}</td>
+                </tr>
+
+                <tr>
+                    <td>PID</td>
+                    <td>{{ process_pid }}</td>
+                </tr>
+
+                <tr>
+                    <td>Thread</td>
+                    <td>
+                        {{ process_threads
+                           if process_threads is not none
+                           else "N/A" }}
+                    </td>
+                </tr>
+            </table>
+
+        </article>
+
+        <article class="system-panel">
+
+            <h2>Depolama</h2>
+
+            <table class="system-table">
+                <tr>
+                    <td>Toplam</td>
+                    <td>{{ disk_total_label }}</td>
+                </tr>
+
+                <tr>
+                    <td>Kullanılan</td>
+                    <td>{{ disk_used_label }}</td>
+                </tr>
+
+                <tr>
+                    <td>Boş</td>
+                    <td>{{ disk_free_label }}</td>
+                </tr>
+
+                <tr>
+                    <td>Bellek toplam</td>
+                    <td>{{ memory_total_label }}</td>
+                </tr>
+
+                <tr>
+                    <td>Bellek kullanılabilir</td>
+                    <td>{{ memory_available_label }}</td>
+                </tr>
+            </table>
+
+        </article>
+
+        <article class="system-panel">
+
+            <h2>Sistem Uyarıları</h2>
+
+            {% if warnings %}
+
+                {% for warning in warnings %}
+                    <div class="system-warning">
+                        {{ warning }}
+                    </div>
+                {% endfor %}
+
+            {% else %}
+
+                <div class="system-ok">
+                    Kritik kaynak uyarısı bulunmuyor.
+                </div>
+
+            {% endif %}
+
+            <div class="system-footer">
+                Son ölçüm:
+                {{ generated_at }}
+            </div>
+
+        </article>
+
+    </section>
+
+    <div class="system-footer">
+        Project root: {{ project_root }}
+        <br>
+        Python: {{ python_executable }}
+    </div>
+
+</div>
+
+</body>
+</html>

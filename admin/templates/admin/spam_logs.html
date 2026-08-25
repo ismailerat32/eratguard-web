@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Spam / SMS Logları — EratGuard Admin</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    background:#07100c;
+    color:#e9fff4;
+    font-family:Arial,Helvetica,sans-serif;
+}
+.wrap{
+    width:min(1180px,94%);
+    margin:0 auto;
+    padding:22px 0 40px;
+}
+.top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:18px;
+}
+.brand{
+    font-size:13px;
+    color:#7cffb2;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+}
+h1{
+    margin:5px 0 0;
+    font-size:28px;
+}
+.back{
+    color:#7cffb2;
+    text-decoration:none;
+    border:1px solid #1d4a35;
+    padding:9px 12px;
+    border-radius:10px;
+}
+.grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+}
+.card{
+    background:#0c1812;
+    border:1px solid #173526;
+    border-radius:14px;
+    padding:15px;
+}
+.card .k{
+    color:#93aa9d;
+    font-size:12px;
+}
+.card .v{
+    margin-top:7px;
+    font-size:27px;
+    font-weight:700;
+}
+.green{color:#7cffb2}
+.red{color:#ff8d8d}
+.yellow{color:#ffd66b}
+
+.panel{
+    margin-top:18px;
+    background:#0c1812;
+    border:1px solid #173526;
+    border-radius:14px;
+    overflow:hidden;
+}
+.panel-title{
+    padding:15px 16px;
+    border-bottom:1px solid #173526;
+    font-weight:700;
+}
+.table-wrap{
+    overflow-x:auto;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:900px;
+}
+th,td{
+    padding:12px 13px;
+    border-bottom:1px solid #142a20;
+    text-align:left;
+    vertical-align:top;
+    font-size:13px;
+}
+th{
+    color:#91a99c;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+}
+.msg{
+    max-width:390px;
+    line-height:1.45;
+    word-break:break-word;
+}
+.badge{
+    display:inline-block;
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+}
+.badge-spam{
+    background:#3b1717;
+    color:#ff9a9a;
+}
+.badge-safe{
+    background:#123423;
+    color:#7cffb2;
+}
+.badge-unknown{
+    background:#34301a;
+    color:#ffe08a;
+}
+.risk-high{color:#ff8d8d;font-weight:700}
+.risk-medium{color:#ffd66b;font-weight:700}
+.risk-low{color:#7cffb2;font-weight:700}
+.muted{color:#82968b}
+.empty{
+    padding:28px 16px;
+    text-align:center;
+    color:#82968b;
+}
+
+@media(max-width:850px){
+    .grid{grid-template-columns:repeat(2,1fr)}
+    h1{font-size:23px}
+}
+@media(max-width:520px){
+    .grid{grid-template-columns:1fr}
+    .top{align-items:flex-start}
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+    <div class="top">
+        <div>
+            <div class="brand">EratGuard Admin</div>
+            <h1>Spam / SMS Log Merkezi</h1>
+        </div>
+
+        <a class="back" href="/admin/dashboard">
+            Admin Paneli
+        </a>
+    </div>
+
+    <div class="grid">
+
+        <div class="card">
+            <div class="k">Toplam SMS analiz kaydı</div>
+            <div class="v">{{ data.total_logs }}</div>
+        </div>
+
+        <div class="card">
+            <div class="k">SPAM</div>
+            <div class="v red">{{ data.spam_total }}</div>
+        </div>
+
+        <div class="card">
+            <div class="k">Güvenli</div>
+            <div class="v green">{{ data.safe_total }}</div>
+        </div>
+
+        <div class="card">
+            <div class="k">Yüksek risk skoru</div>
+            <div class="v red">{{ data.high_risk }}</div>
+        </div>
+
+        <div class="card">
+            <div class="k">Orta risk skoru</div>
+            <div class="v yellow">{{ data.medium_risk }}</div>
+        </div>
+
+        <div class="card">
+            <div class="k">Engellenen mesaj</div>
+            <div class="v">{{ data.blocked_total }}</div>
+        </div>
+
+        <div class="card">
+            <div class="k">Karantina</div>
+            <div class="v">{{ data.quarantine_total }}</div>
+        </div>
+
+        <div class="card">
+            <div class="k">AI analiz geçmişi</div>
+            <div class="v">{{ data.analysis_history_total }}</div>
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <div class="panel-title">
+            Son Spam / SMS Analiz Kayıtları
+        </div>
+
+        {% if data.logs %}
+
+        <div class="table-wrap">
+        <table>
+
+            <thead>
+            <tr>
+                <th>Zaman</th>
+                <th>Gönderen</th>
+                <th>Mesaj</th>
+                <th>Durum</th>
+                <th>Skor</th>
+                <th>Risk</th>
+                <th>Neden</th>
+                <th>Kaynak</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            {% for log in data.logs %}
+            <tr>
+
+                <td class="muted">
+                    {{ log.time }}
+                </td>
+
+                <td>
+                    {{ log.sender }}
+                </td>
+
+                <td class="msg">
+                    {{ log.message[:240] }}
+                </td>
+
+                <td>
+                    <span class="badge badge-{{ log.state }}">
+                        {{ log.state_label }}
+                    </span>
+                </td>
+
+                <td>
+                    {{ log.score }}
+                </td>
+
+                <td class="risk-{{ log.risk_level }}">
+                    {{ log.risk_label }}
+                </td>
+
+                <td class="msg muted">
+                    {{ log.reason[:220] }}
+                </td>
+
+                <td class="muted">
+                    {{ log.source }}
+                </td>
+
+            </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+        </div>
+
+        {% else %}
+
+        <div class="empty">
+            Henüz Spam / SMS analiz kaydı bulunmuyor.
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+</body>
+</html>
