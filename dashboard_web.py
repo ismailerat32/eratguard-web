@@ -3390,8 +3390,6 @@ def ss_live_admin_access():
 
         env_admin_passwords = [
             os.environ.get("ERATGUARD_ADMIN_PASSWORD", ""),
-            os.environ.get("ADMIN_PASSWORD", ""),
-            os.environ.get("SPAMSHIELD_ADMIN_PASSWORD", ""),
         ]
         env_admin_passwords = [x for x in env_admin_passwords if x]
 
@@ -3403,13 +3401,10 @@ def ss_live_admin_access():
         env_admin_usernames = [str(x).strip().lower() for x in env_admin_usernames if str(x).strip()]
 
         is_admin_name = username.lower() in env_admin_usernames or str(user.get("role", "")).lower() == "admin" or user.get("is_admin") is True
-        fallback_admin_sha256 = "11b2d8d98c0a8ed79080d388420deb3b3168e5631667cad074d09ee0e26c86fb"
+        fallback_admin_sha256 = ""
         ok_env = username.lower() in env_admin_usernames and password in env_admin_passwords
-        ok_fallback = username.lower() == "admin" and hashlib.sha256(password.encode()).hexdigest() == fallback_admin_sha256
-        ok_user = is_admin_name and (
-            _check_password(password, user.get("password") or "")
-            or _check_password(password, user.get("password_hash") or "")
-        )
+        ok_fallback = False
+        ok_user = False
 
         if ok_env or ok_fallback or ok_user:
             session["logged_in"] = True
@@ -4690,8 +4685,6 @@ def _ss_admin_access_cookie_override():
 
         env_admin_passwords = [
             os.environ.get("ERATGUARD_ADMIN_PASSWORD", ""),
-            os.environ.get("ADMIN_PASSWORD", ""),
-            os.environ.get("SPAMSHIELD_ADMIN_PASSWORD", ""),
         ]
         env_admin_passwords = [x for x in env_admin_passwords if x]
 
@@ -4701,7 +4694,7 @@ def _ss_admin_access_cookie_override():
             "admin",
         ]
         env_admin_usernames = [str(x).strip().lower() for x in env_admin_usernames if str(x).strip()]
-        fallback_admin_sha256 = "11b2d8d98c0a8ed79080d388420deb3b3168e5631667cad074d09ee0e26c86fb"
+        fallback_admin_sha256 = ""
 
         is_admin_name = (
             username.lower() == "admin"
@@ -4710,11 +4703,8 @@ def _ss_admin_access_cookie_override():
         )
 
         ok_env = username.lower() in env_admin_usernames and password in env_admin_passwords
-        ok_fallback = username.lower() == "admin" and hashlib.sha256(password.encode()).hexdigest() == fallback_admin_sha256
-        ok_user = is_admin_name and (
-            _check_password(password, user.get("password") or "")
-            or _check_password(password, user.get("password_hash") or "")
-        )
+        ok_fallback = False
+        ok_user = False
 
         if ok_env or ok_fallback or ok_user:
             session["logged_in"] = True
