@@ -11124,12 +11124,12 @@ try:
             if not _eg_al3_is_admin_user(username, user):
                 return _eg_al3_render_template("admin_login.html", error="Admin girişi başarısız.")
 
-            pw_ok = False
-            if isinstance(user, dict):
-                pw_ok = (
-                    _eg_al3_check_password(password, user.get("password") or "")
-                    or _eg_al3_check_password(password, user.get("password_hash") or "")
-                )
+            # Canonical admin password source: Render environment only.
+            env_admin_password = str(
+                os.environ.get("ERATGUARD_ADMIN_PASSWORD", "")
+            )
+
+            pw_ok = bool(env_admin_password) and password == env_admin_password
 
             if not pw_ok:
                 return _eg_al3_render_template("admin_login.html", error="Admin girişi başarısız.")
