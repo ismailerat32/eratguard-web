@@ -3339,105 +3339,6 @@ def user_pay():
     return redirect(url_for("user_checkout", plan=plan))
 
 # ===== ERATGUARD LIVE ADMIN APK ROUTES START =====
-@app.route("/ss-admin-access", methods=["GET", "POST"])
-def ss_live_admin_access():
-    from pathlib import Path
-    import json
-    import os
-    import hashlib
-
-    def _read_users():
-        p = Path("data/users.json")
-        try:
-            if p.exists():
-                data = json.loads(p.read_text(encoding="utf-8"))
-                return data if isinstance(data, dict) else {}
-        except Exception:
-            pass
-        return {}
-
-    def _check_password(raw, stored):
-        raw = str(raw or "")
-        stored = str(stored or "")
-
-        if not stored:
-            return False
-
-        if raw == stored:
-            return True
-
-        try:
-            from werkzeug.security import check_password_hash
-            if stored.startswith(("pbkdf2:", "scrypt:", "sha256:")):
-                return check_password_hash(stored, raw)
-        except Exception:
-            pass
-
-        try:
-            if hashlib.sha256(raw.encode()).hexdigest() == stored:
-                return True
-        except Exception:
-            pass
-
-        return False
-
-    if request.method == "POST":
-        username = (request.form.get("username") or request.form.get("email") or "").strip()
-        password = request.form.get("password") or ""
-
-        users = _read_users()
-        user = users.get(username) or users.get(username.lower()) or {}
-
-        env_admin_passwords = [
-            os.environ.get("ERATGUARD_ADMIN_PASSWORD", ""),
-        ]
-        env_admin_passwords = [x for x in env_admin_passwords if x]
-
-        env_admin_usernames = [
-            os.environ.get("ERATGUARD_ADMIN_USERNAME", ""),
-            os.environ.get("ADMIN_USERNAME", ""),
-            "admin",
-        ]
-        env_admin_usernames = [str(x).strip().lower() for x in env_admin_usernames if str(x).strip()]
-
-        is_admin_name = username.lower() in env_admin_usernames or str(user.get("role", "")).lower() == "admin" or user.get("is_admin") is True
-        fallback_admin_sha256 = ""
-        ok_env = username.lower() in env_admin_usernames and password in env_admin_passwords
-        ok_fallback = False
-        ok_user = False
-
-        if ok_env or ok_fallback or ok_user:
-            session["logged_in"] = True
-            session["username"] = username or "admin"
-            session["role"] = "admin"
-            session["is_admin"] = True
-            return redirect("/admin/dashboard")
-
-        try:
-            return render_template("admin_login.html", error="Admin girişi başarısız.")
-        except Exception:
-            return "<h2>EratGuard Admin</h2><p>Admin girişi başarısız.</p>", 401
-
-    try:
-        return render_template("admin_login.html", error="")
-    except Exception:
-        return """
-        <html><head><meta charset="UTF-8"><title>EratGuard Admin</title></head>
-        <body style="background:#020806;color:white;font-family:Arial;padding:24px;">
-          <h2>EratGuard ADMIN</h2>
-          <form method="post">
-            <input name="username" placeholder="admin" style="display:block;margin:10px 0;padding:12px;">
-            <input name="password" type="password" placeholder="şifre" style="display:block;margin:10px 0;padding:12px;">
-            <button style="padding:12px 18px;">Giriş</button>
-          
-              <div style="margin-top:14px;text-align:center;">
-                <a href="/admin/forgot-mail-diagnostic" style="color:#8cff5a;text-decoration:none;font-weight:800;">Admin şifremi unuttum</a>
-                <span style="opacity:.45;margin:0 8px;">|</span>
-                <a href="/forgot-password" style="color:#8cff5a;text-decoration:none;">Kullanıcı şifremi unuttum</a>
-              </div>
-            </form>
-        </body></html>
-        """
 
 
 
@@ -4635,123 +4536,7 @@ def _ss_admin_logged_in_final():
     return _ss_admin_ok()
 
 # Admin login endpointini imzalı cookie basacak şekilde override et
-def _ss_admin_access_cookie_override():
-    from pathlib import Path
-    import json
-    import os
-    import hashlib
 
-    def _read_users():
-        p = Path("data/users.json")
-        try:
-            if p.exists():
-                data = json.loads(p.read_text(encoding="utf-8"))
-                return data if isinstance(data, dict) else {}
-        except Exception:
-            pass
-        return {}
-
-    def _check_password(raw, stored):
-        raw = str(raw or "")
-        stored = str(stored or "")
-
-        if not stored:
-            return False
-
-        if raw == stored:
-            return True
-
-        try:
-            from werkzeug.security import check_password_hash
-            if stored.startswith(("pbkdf2:", "scrypt:", "sha256:")):
-                return check_password_hash(stored, raw)
-        except Exception:
-            pass
-
-        try:
-            if hashlib.sha256(raw.encode()).hexdigest() == stored:
-                return True
-        except Exception:
-            pass
-
-        return False
-
-    if request.method == "POST":
-        username = (request.form.get("username") or request.form.get("email") or "").strip()
-        password = request.form.get("password") or ""
-
-        users = _read_users()
-        user = users.get(username) or users.get(username.lower()) or {}
-
-        env_admin_passwords = [
-            os.environ.get("ERATGUARD_ADMIN_PASSWORD", ""),
-        ]
-        env_admin_passwords = [x for x in env_admin_passwords if x]
-
-        env_admin_usernames = [
-            os.environ.get("ERATGUARD_ADMIN_USERNAME", ""),
-            os.environ.get("ADMIN_USERNAME", ""),
-            "admin",
-        ]
-        env_admin_usernames = [str(x).strip().lower() for x in env_admin_usernames if str(x).strip()]
-        fallback_admin_sha256 = ""
-
-        is_admin_name = (
-            username.lower() == "admin"
-            or str(user.get("role", "")).lower() == "admin"
-            or user.get("is_admin") is True
-        )
-
-        ok_env = username.lower() in env_admin_usernames and password in env_admin_passwords
-        ok_fallback = False
-        ok_user = False
-
-        if ok_env or ok_fallback or ok_user:
-            session["logged_in"] = True
-            session["username"] = username or "admin"
-            session["role"] = "admin"
-            session["is_admin"] = True
-
-            resp = redirect("/admin/dashboard")
-            resp.set_cookie(
-                "ss_admin_mobile",
-                _ss_admin_cookie_token_final(),
-                max_age=60 * 60 * 24 * 30,
-                httponly=True,
-                secure=True,
-                samesite="Lax",
-                path="/"
-            )
-            return resp
-
-        try:
-            return render_template("admin_login.html", error="Admin girişi başarısız.")
-        except Exception:
-            return "<h2>EratGuard Admin</h2><p>Admin girişi başarısız.</p>", 401
-
-    try:
-        return render_template("admin_login.html", error="")
-    except Exception:
-        return """
-        <html><head><meta charset="UTF-8"><title>EratGuard Admin</title></head>
-        <body style="background:#020806;color:white;font-family:Arial;padding:24px;">
-          <h2>EratGuard ADMIN</h2>
-          <form method="post">
-            <input name="username" placeholder="admin" style="display:block;margin:10px 0;padding:12px;">
-            <input name="password" type="password" placeholder="şifre" style="display:block;margin:10px 0;padding:12px;">
-            <button style="padding:12px 18px;">Giriş</button>
-          
-              <div style="margin-top:14px;text-align:center;">
-                <a href="/admin/forgot-mail-diagnostic" style="color:#8cff5a;text-decoration:none;font-weight:800;">Admin şifremi unuttum</a>
-                <span style="opacity:.45;margin:0 8px;">|</span>
-                <a href="/forgot-password" style="color:#8cff5a;text-decoration:none;">Kullanıcı şifremi unuttum</a>
-              </div>
-</form>
-        </body></html>
-        """
-
-if "ss_live_admin_access" in app.view_functions:
-    app.view_functions["ss_live_admin_access"] = _ss_admin_access_cookie_override
 # ===== ERATGUARD ADMIN SIGNED COOKIE FALLBACK END =====
 
 # ===== ERATGUARD USER FINAL ROUTE ALIAS + HOME LOCK START =====
@@ -23416,38 +23201,7 @@ print(
 # ===== ERATGUARD APP RUN MOVED TO TRUE EOF BY PHASE 7D.18A =====
 
 
-# ===== ERATGUARD STAGE6J SAFE ADMIN AUTH DEBUG START =====
-# Geçici güvenli debug: secret değerleri göstermez, sadece env anahtarları var mı yok mu gösterir.
-try:
-    from flask import jsonify as _eg6j_jsonify
-    import os as _eg6j_os
 
-    @app.route("/__eg_admin_auth_debug_6j")
-    def _eg6j_admin_auth_debug():
-        def _present(name):
-            return bool(str(_eg6j_os.environ.get(name, "")).strip())
-
-        env_usernames = [
-            _eg6j_os.environ.get("ERATGUARD_ADMIN_USERNAME", ""),
-            _eg6j_os.environ.get("ADMIN_USERNAME", ""),
-            "admin",
-        ]
-        env_usernames_clean = [str(x).strip().lower() for x in env_usernames if str(x).strip()]
-
-        return _eg6j_jsonify({
-            "auth_fix_active": True,
-            "entrypoint": "dashboard_web.py",
-            "expected_custom_username": "eg_admin_tgwaxziy08",
-            "custom_username_in_env_list": "eg_admin_tgwaxziy08" in env_usernames_clean,
-            "has_ERATGUARD_ADMIN_USERNAME": _present("ERATGUARD_ADMIN_USERNAME"),
-            "has_ADMIN_USERNAME": _present("ADMIN_USERNAME"),
-            "has_ERATGUARD_ADMIN_PASSWORD": _present("ERATGUARD_ADMIN_PASSWORD"),
-            "has_ADMIN_PASSWORD": _present("ADMIN_PASSWORD"),
-            "username_count": len(env_usernames_clean),
-        })
-except Exception as _eg6j_debug_err:
-    print("ERATGUARD STAGE6J SAFE DEBUG BOOT ERROR:", _eg6j_debug_err)
-# ===== ERATGUARD STAGE6J SAFE ADMIN AUTH DEBUG END =====
 
 
 # ERATGUARD CLEANUP: duplicate STAGE6J debug block removed
@@ -23455,20 +23209,9 @@ except Exception as _eg6j_debug_err:
 
 
 
-# ===== ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE START =====
-# SECURITY RETIRED:
-# Eski hotfix yalnız cookie uzunluğuna bakarak admin session üretiyordu.
-# Admin cookie doğrulaması STAGE6K8 doğrulamalı token mekanizmasına bırakıldı.
-# ===== ERATGUARD STAGE6K FORCE ACCEPT ADMIN COOKIE END =====
 
-# ===== ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE START =====
-# SECURITY RETIRED:
-# Bu eski bridge yalnız cookie varlığı/uzunluğu ile admin session
-# üretebildiği için privilege-escalation riski oluşturuyordu.
-#
-# Doğrulanmış mobil admin cookie -> session dönüşümü yalnızca
-# STAGE6K8 doğrulamalı token mekanizmasına bırakılmıştır.
-# ===== ERATGUARD STAGE6K DIRECT ADMIN DASHBOARD BRIDGE END =====
+
+
 
 
 
@@ -26913,6 +26656,19 @@ try:
         except Exception:
             return _eg_cal2_redirect("/admin/login", code=302)
 
+
+    # Register lightweight compatibility route when the historical
+    # /ss-admin-access rule has already been physically removed.
+    if not any(
+        str(_rule).rstrip("/") == "/ss-admin-access"
+        for _rule in app.url_map.iter_rules()
+    ):
+        app.add_url_rule(
+            "/ss-admin-access",
+            endpoint="eg_legacy_admin_login_redirect",
+            view_func=_eg_cal2_legacy_admin_login_redirect,
+            methods=["GET", "POST"]
+        )
 
     # Rebind only the legacy endpoint.
     for _eg_cal2_rule in list(app.url_map.iter_rules()):
