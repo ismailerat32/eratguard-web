@@ -2889,7 +2889,7 @@ def user_protection_toggle():
     data[username] = user_settings
     save_user_settings_data(data)
 
-    return redirect(url_for("user_protection"))
+    return redirect(url_for("eg_vites2c_protection_center"))
 
 
 USER_BLOCK_LIST_FILE = "data/user_block_list.json"
@@ -20521,6 +20521,10 @@ def eratguard_fixed_menu_restore_final(response):
 
         path = request.path or ""
         if not (path == "/dashboard" or path == "/u/dashboard" or path.startswith("/u/")):
+            return response
+
+        # UI injector must never modify JSON/API/non-HTML responses.
+        if response.mimetype != "text/html":
             return response
 
         html = response.get_data(as_text=True)
