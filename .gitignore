@@ -183,3 +183,15 @@ ERATGUARD_SECRETS/
 .env.*
 # ===== ERATGUARD LOCAL BACKUP / BUILD / SECRET SAFETY END =====
 data/ai_memory.json
+
+# === ERATGUARD RUNTIME DATA 2026-09-03 ===
+data/user_notifications.json
+data/admin_notifications.json
+data/blocked_messages.json
+data/community_reports.json
+data/eratguard_sms_actions_v5c.json
+data/messages.json
+data/notifications.json
+data/reported_numbers.json
+data/spam_reports.json
+# === /ERATGUARD RUNTIME DATA ===

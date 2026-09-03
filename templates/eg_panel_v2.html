@@ -752,10 +752,10 @@ async function loadStats(){
 try{
 const res=await fetch("/api/stats");
 const data=await res.json();
-document.querySelectorAll(".b-num")[0].textContent=data.spam??0;
+document.querySelectorAll(".b-num")[0].textContent=data.blocked_count??0;
 document.querySelectorAll(".b-num")[1].textContent=data.total??0;
-document.querySelectorAll(".b-num")[2].textContent=data.temiz??0;
-document.querySelectorAll(".b-num")[3].textContent=0;
+document.querySelectorAll(".b-num")[2].textContent=data.safe_count??0;
+document.querySelectorAll(".b-num")[3].textContent=data.reported_count??0;
 if(data.protection_status)document.querySelector(".threat-tag").textContent=data.protection_status.toUpperCase();
 if(data.security_percent)document.querySelector(".ring-pct").textContent=data.security_percent+"%";
 }catch(e){console.log(e);}

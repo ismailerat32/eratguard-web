@@ -8863,14 +8863,7 @@ def _eg_admin_payment_requests_page():
     )
 
 
-@app.route("/admin/payment-requests")
-def eg_admin_payment_requests_redirect_final():
-    return _eg_admin_payment_requests_page()
-
-
-@app.route("/admin/payments")
 @app.route("/admin/payment-requests-live")
-@app.route("/admin/license-requests")
 def eg_admin_license_requests_live():
     return redirect("/admin/payment-requests")
 
@@ -14256,6 +14249,11 @@ body{padding:12px 11px 18px}
 .event small{display:block;color:rgba(245,255,248,.42);font-size:10px;font-weight:800;margin-top:5px}
 .event strong{color:var(--yellow);font-size:12px;white-space:nowrap;text-align:right}
 .empty{padding:14px;color:var(--muted);font-weight:850;text-align:center;font-size:13px}
+.account-danger{margin-top:10px;border:1px solid rgba(255,82,82,.28);background:linear-gradient(145deg,rgba(52,14,14,.72),rgba(18,7,7,.82));border-radius:20px;padding:14px}
+.account-danger h3{margin:0 0 6px;color:#ff8d8d;font-size:16px;font-weight:950}
+.account-danger p{margin:0;color:rgba(255,235,235,.68);font-size:12px;font-weight:800;line-height:1.45}
+.delete-account-btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:46px;margin-top:13px;border-radius:14px;border:1px solid rgba(255,82,82,.38);background:rgba(210,45,45,.18);color:#ff9a9a;text-decoration:none;font-size:14px;font-weight:950}
+.delete-account-btn:active{background:rgba(210,45,45,.30)}
 .foot{text-align:center;margin:16px 0 0;color:rgba(245,255,248,.42);font-weight:800;font-size:12px}
 </style>
 </head>
@@ -15383,6 +15381,21 @@ body{padding:12px 11px 18px}
     <a class="btn secondary" href="/u/eg-panel">Panel</a>
   </div>
 </form>
+
+<div class="section-title">HESAP VE VERİLER</div>
+
+<section class="account-danger">
+  <h3>⚠️ Hesabımı Sil</h3>
+  <p>
+    EratGuard PRO hesabınızı ve hesabınıza bağlı kullanıcı
+    verilerini kalıcı olarak silebilirsiniz. İşlem öncesinde
+    şifrenizi tekrar doğrulamanız gerekir.
+  </p>
+
+  <a class="delete-account-btn" href="/account/delete">
+    Hesabımı Sil
+  </a>
+</section>
 
 <div class="foot">EratGuard PRO - __USERNAME__ - © 2026</div>
 </body>
@@ -17062,9 +17075,8 @@ try:
 """
 
     def _eg_user_fan3_should_inject():
-        # SIGNATURE GALAXY FINAL:
-        # Eski sağdan-sola FAN/papatya overlay artık kullanıcı sayfalarına bindirilmez.
-        # /signature-radial image-map ana panel olarak kalır.
+        # FAN-3 kalici olarak devre disi.
+        # Mobil arayuz sade navigasyona geciyor.
         return False
 
     def _eg_user_fan3_inject_html(html):
@@ -17668,6 +17680,42 @@ textarea::placeholder{color:rgba(242,255,246,.38)}
   animation:eg-energy-rise-ai linear infinite}}
 @keyframes eg-energy-rise-ai{{0%{{opacity:0;bottom:-6%}}12%{{opacity:.9}}88%{{opacity:.35}}100%{{opacity:0;bottom:106%}}}}
 .eg-wrap{{position:relative;z-index:1}}
+
+.eg-delete-account{{
+  margin-top:18px;
+  padding:18px;
+  border-radius:24px;
+  border:1px solid rgba(255,82,82,.32);
+  background:linear-gradient(145deg,rgba(55,12,12,.72),rgba(20,5,5,.82));
+  box-shadow:0 12px 36px rgba(0,0,0,.28);
+}}
+.eg-delete-account h3{{
+  margin:0 0 8px;
+  color:#ff8d8d;
+  font-size:18px;
+}}
+.eg-delete-account p{{
+  margin:0;
+  color:rgba(255,235,235,.68);
+  font-size:13px;
+  line-height:1.55;
+}}
+.eg-delete-account a{{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:48px;
+  margin-top:14px;
+  border-radius:16px;
+  border:1px solid rgba(255,82,82,.42);
+  background:rgba(210,45,45,.18);
+  color:#ff9a9a;
+  text-decoration:none;
+  font-weight:900;
+}}
+.eg-delete-account a:active{{
+  background:rgba(210,45,45,.32);
+}}
 </style>
 </head>
 <body>
@@ -19207,6 +19255,45 @@ html,body{{
 }}
 .eg-note{{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.55}}
 
+.eg-delete-account{{
+  margin-top:18px;
+  padding:18px;
+  border-radius:24px;
+  border:1px solid rgba(255,82,82,.34);
+  background:linear-gradient(145deg,rgba(55,12,12,.78),rgba(20,5,5,.88));
+  box-shadow:0 12px 36px rgba(0,0,0,.28);
+}}
+.eg-delete-account h3{{
+  margin:0 0 8px;
+  color:#ff8d8d;
+  font-size:18px;
+  font-weight:900;
+}}
+.eg-delete-account p{{
+  margin:0;
+  color:rgba(255,235,235,.72);
+  font-size:13px;
+  line-height:1.55;
+}}
+.eg-delete-account a{{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:48px;
+  margin-top:14px;
+  border-radius:16px;
+  border:1px solid rgba(255,82,82,.44);
+  background:rgba(210,45,45,.20);
+  color:#ff9a9a;
+  text-decoration:none;
+  font-size:14px;
+  font-weight:900;
+}}
+.eg-delete-account a:active{{
+  background:rgba(210,45,45,.34);
+}}
+
 /* ===== ERATGUARD VITES-2I INLINE APK VISUAL START ===== */
 .eg-list .eg-row:first-child{{
   padding-right:130px !important;
@@ -19302,6 +19389,16 @@ html,body{{
   </div>
 
   <a class="eg-back" href="/u/eg-panel">← Ana Ekrana Dön</a>
+
+  <section class="eg-delete-account">
+    <h3>⚠️ Hesap ve Veriler</h3>
+    <p>
+      EratGuard PRO hesabınızı ve hesabınıza bağlı kullanıcı
+      verilerini kalıcı olarak silebilirsiniz. İşlem öncesinde
+      mevcut şifrenizi tekrar doğrulamanız gerekir.
+    </p>
+    <a href="/account/delete">Hesabımı Sil</a>
+  </section>
 
   <div class="eg-note">EratGuard Ayarlar Merkezi, kullanıcı hesabı ve güvenlik tercihlerini premium yapıda gösterir.</div>
 </div>
@@ -20425,14 +20522,47 @@ def eratguard_vites5g_dashboard_sms_summary_final_order(response):
         if "ERATGUARD VITES-5G DASHBOARD FINAL CARD START" in html:
             return response
 
-        db = eratguard_v5c_load_actions()
-        blocked = len(db.get("blocked", []))
-        safe = len(db.get("safe", []))
-        reported = len(db.get("reported", []))
-        total = blocked + safe + reported
+        # Gercek SMS kayitlarindan aksiyon ozeti
+        sms_logs = []
+        sms_path = "data/spam_logs.json"
 
-        status = "AKTİF İZLEME" if total > 0 else "HAZIR"
-        desc = "SMS risk motoru aktif, analiz ve aksiyon kayıtları takip ediliyor." if total > 0 else "SMS risk motoru hazır, yeni analizleri bekliyor."
+        if os.path.exists(sms_path):
+            try:
+                with open(sms_path, "r", encoding="utf-8") as f:
+                    sms_logs = json.load(f)
+            except Exception:
+                sms_logs = []
+
+        if not isinstance(sms_logs, list):
+            sms_logs = []
+
+        blocked_ids = set()
+        reported_ids = set()
+
+        for i, item in enumerate(sms_logs):
+            if not isinstance(item, dict):
+                continue
+
+            key = str(item.get("id") or f"row-{i}")
+            item_status = str(item.get("status", "")).strip().upper()
+
+            if item_status == "BLOCKED" or bool(item.get("blocked")):
+                blocked_ids.add(key)
+
+            if item.get("reported_by"):
+                reported_ids.add(key)
+
+        blocked = len(blocked_ids)
+        reported = len(reported_ids)
+        total = len(blocked_ids | reported_ids)
+
+        status = "AKTİF İZLEME" if sms_logs else "HAZIR"
+        desc = (
+            "SMS risk motoru aktif, analiz ve aksiyon kayıtları takip ediliyor."
+            if sms_logs
+            else
+            "SMS risk motoru hazır, yeni analizleri bekliyor."
+        )
 
         card = f"""
 <div style="margin:170px auto 0;max-width:520px;background:rgba(35,255,137,.08);border:1px solid rgba(35,255,137,.32);border-radius:24px;padding:16px;box-shadow:0 0 26px rgba(35,255,137,.12);">
@@ -28463,6 +28593,1017 @@ try:
 except Exception as _eg_al1r_err:
     print("ERATGUARD RESTORE: _eg_al1_is_real_admin ERROR:", repr(_eg_al1r_err), flush=True)
 # ===== ERATGUARD RESTORE END =====
+
+# === ERATGUARD MOBILE LOGIN API V1 ===
+
+@app.route("/api/mobile/login", methods=["POST"])
+def eratguard_mobile_login():
+    try:
+        data = request.get_json(silent=True) or {}
+
+        username = str(data.get("username", "")).strip()
+        password = str(data.get("password", ""))
+
+        if not username or not password:
+            return jsonify({
+                "ok": False,
+                "error": "missing_credentials",
+                "message": "Kullanıcı adı ve şifre gerekli."
+            }), 400
+
+        users = _eg_ensure_demo_user_live()
+        user = users.get(username)
+
+        locked, remaining = _eg_login_lock_status(username)
+
+        if locked:
+            return jsonify({
+                "ok": False,
+                "error": "login_locked",
+                "remaining_seconds": remaining,
+                "message": "Çok fazla hatalı giriş denemesi."
+            }), 429
+
+        if not user:
+            _eg_login_record_failure(username)
+            return jsonify({
+                "ok": False,
+                "error": "invalid_credentials",
+                "message": "Kullanıcı adı veya şifre yanlış."
+            }), 401
+
+        if not user.get("active", True):
+            return jsonify({
+                "ok": False,
+                "error": "inactive_user",
+                "message": "Bu kullanıcı pasif durumda."
+            }), 403
+
+        expires_at = user.get(
+            "expires_at",
+            user.get("license_expiry", "2099-12-31")
+        )
+
+        if is_date_expired(expires_at):
+            return jsonify({
+                "ok": False,
+                "error": "license_expired",
+                "message": "Kullanıcı lisans süresi dolmuş."
+            }), 403
+
+        stored_password = str(
+            user.get("password")
+            or user.get("password_hash")
+            or ""
+        )
+
+        if not stored_password or not check_password_hash(
+            stored_password,
+            password
+        ):
+            count = _eg_login_record_failure(username)
+
+            return jsonify({
+                "ok": False,
+                "error": "invalid_credentials",
+                "attempt_count": count,
+                "message": "Kullanıcı adı veya şifre yanlış."
+            }), 401
+
+        _eg_login_clear_failures(username)
+
+        try:
+            from datetime import datetime
+
+            now = datetime.now().isoformat(timespec="seconds")
+            users[username]["last_login"] = now
+            users[username]["last_seen"] = now
+            save_users(users)
+
+            _eg_touch_user_session(username, "mobile_login")
+            _eg_audit_log(
+                "mobile_login_success",
+                username,
+                {"role": user.get("role", "user")},
+                "info"
+            )
+        except Exception:
+            pass
+
+        return jsonify({
+            "ok": True,
+            "message": "Giriş başarılı.",
+            "user": {
+                "username": username,
+                "email": user.get("email", ""),
+                "role": user.get("role", "user"),
+                "premium": bool(
+                    user.get("premium")
+                    or user.get("is_premium")
+                ),
+                "plan": user.get(
+                    "plan",
+                    user.get("license_type", "")
+                ),
+                "license_status": user.get(
+                    "license_status",
+                    user.get("license_mode", "")
+                ),
+                "license_expiry": expires_at,
+                "license_label": user.get("license_label", "")
+            }
+        }), 200
+
+    except Exception as e:
+        print("MOBILE_LOGIN_API_ERROR:", repr(e), flush=True)
+
+        return jsonify({
+            "ok": False,
+            "error": "server_error",
+            "message": "Sunucu hatası."
+        }), 500
+
+
+# === /ERATGUARD MOBILE LOGIN API V1 ===
+
+
+
+# === ERATGUARD USER ACCOUNT DELETION V1 ===
+
+def _eg_account_delete_load_json(path, default):
+    try:
+        from pathlib import Path as _Path
+        import json as _json
+
+        p = _Path(path)
+        if not p.exists():
+            return default
+
+        return _json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return default
+
+
+def _eg_account_delete_save_json(path, data):
+    from pathlib import Path as _Path
+    import json as _json
+
+    p = _Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+
+    tmp = p.with_suffix(p.suffix + ".tmp")
+    tmp.write_text(
+        _json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+    )
+    tmp.replace(p)
+
+
+def _eg_delete_username_dict_record(path, username):
+    data = _eg_account_delete_load_json(path, {})
+
+    if not isinstance(data, dict):
+        return 0
+
+    if username not in data:
+        return 0
+
+    del data[username]
+    _eg_account_delete_save_json(path, data)
+    return 1
+
+
+def _eg_delete_username_list_records(path, username):
+    data = _eg_account_delete_load_json(path, [])
+
+    if not isinstance(data, list):
+        return 0
+
+    before = len(data)
+
+    cleaned = [
+        item for item in data
+        if not (
+            isinstance(item, dict)
+            and str(item.get("username", "")).strip() == username
+        )
+    ]
+
+    removed = before - len(cleaned)
+
+    if removed:
+        _eg_account_delete_save_json(path, cleaned)
+
+    return removed
+
+
+def _eg_detach_user_licenses(username):
+    changed = 0
+
+    # data/licenses.json -> dict, anahtar lisans kodu
+    licenses_path = "data/licenses.json"
+    licenses = _eg_account_delete_load_json(licenses_path, {})
+
+    if isinstance(licenses, dict):
+        for _, item in licenses.items():
+            if not isinstance(item, dict):
+                continue
+
+            if str(item.get("username", "")).strip() == username:
+                item["username"] = ""
+                item["status"] = "revoked_account_deleted"
+                item["revoked_reason"] = "account_deleted"
+                changed += 1
+
+        if changed:
+            _eg_account_delete_save_json(licenses_path, licenses)
+
+    # data/generated_licenses.json -> list
+    generated_path = "data/generated_licenses.json"
+    generated = _eg_account_delete_load_json(generated_path, [])
+
+    generated_changed = 0
+
+    if isinstance(generated, list):
+        for item in generated:
+            if not isinstance(item, dict):
+                continue
+
+            owner = str(item.get("username", "")).strip()
+            activated_by = str(item.get("activated_by", "")).strip()
+
+            if owner == username or activated_by == username:
+                if "username" in item:
+                    item["username"] = ""
+
+                if "activated_by" in item:
+                    item["activated_by"] = ""
+
+                item["status"] = "revoked_account_deleted"
+                item["revoked_reason"] = "account_deleted"
+                generated_changed += 1
+
+        if generated_changed:
+            _eg_account_delete_save_json(generated_path, generated)
+
+    return changed + generated_changed
+
+
+def _eg_delete_user_application_data(username):
+    removed = {}
+
+    # username doğrudan JSON anahtarı olan dosyalar
+    dict_files = [
+        "data/user_settings.json",
+        "data/user_block_list.json",
+        "data/user_notification_settings.json",
+        "data/user_notifications.json",
+    ]
+
+    for path in dict_files:
+        removed[path] = _eg_delete_username_dict_record(path, username)
+
+    # username kayıtların içindeki alan olan liste dosyaları
+    list_files = [
+        "data/user_analysis_history.json",
+        "data/user_quarantine.json",
+        "data/user_titanium_events.json",
+        "data/user_community_feedback.json",
+        "data/community_reports.json",
+        "data/spam_reports.json",
+    ]
+
+    for path in list_files:
+        removed[path] = _eg_delete_username_list_records(path, username)
+
+    # Oturumlar mümkünse mevcut yardımcı fonksiyon üzerinden temizlenir.
+    try:
+        loader = globals().get("_eg_load_user_sessions")
+        saver = globals().get("_eg_save_user_sessions")
+
+        if callable(loader) and callable(saver):
+            sessions = loader()
+
+            if isinstance(sessions, dict) and username in sessions:
+                del sessions[username]
+                saver(sessions)
+                removed["data/user_sessions.json"] = 1
+            else:
+                removed["data/user_sessions.json"] = 0
+        else:
+            removed["data/user_sessions.json"] = \
+                _eg_delete_username_dict_record(
+                    "data/user_sessions.json",
+                    username
+                )
+    except Exception:
+        removed["data/user_sessions.json"] = \
+            _eg_delete_username_dict_record(
+                "data/user_sessions.json",
+                username
+            )
+
+    removed["licenses"] = _eg_detach_user_licenses(username)
+
+    return removed
+
+
+@app.route("/account-deletion", methods=["GET"])
+def account_deletion_info():
+    deleted = request.args.get("deleted") == "1"
+
+    message = ""
+    if deleted:
+        message = """
+        <div class="success">
+            Hesabınız ve EratGuard PRO kullanıcı verileriniz silindi.
+        </div>
+        """
+
+    return f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EratGuard PRO - Hesap ve Veri Silme</title>
+
+<style>
+body {{
+    margin:0;
+    padding:24px;
+    background:#06110c;
+    color:#eef7f1;
+    font-family:system-ui,-apple-system,Arial,sans-serif;
+}}
+
+.card {{
+    max-width:720px;
+    margin:40px auto;
+    padding:28px;
+    border-radius:22px;
+    background:#0b1c13;
+    border:1px solid #244532;
+}}
+
+h1 {{
+    margin-top:0;
+    color:#5cff9b;
+}}
+
+h2 {{
+    margin-top:28px;
+    color:#c8ffda;
+}}
+
+p, li {{
+    line-height:1.65;
+}}
+
+a.button {{
+    display:inline-block;
+    margin-top:15px;
+    padding:14px 20px;
+    border-radius:14px;
+    background:#18d878;
+    color:#031108;
+    font-weight:800;
+    text-decoration:none;
+}}
+
+.notice {{
+    margin-top:20px;
+    padding:16px;
+    border-radius:14px;
+    background:#16241b;
+}}
+
+.success {{
+    margin-bottom:20px;
+    padding:16px;
+    border-radius:14px;
+    background:#123c25;
+    color:#8effb5;
+    font-weight:700;
+}}
+</style>
+</head>
+
+<body>
+<div class="card">
+
+{message}
+
+<h1>EratGuard PRO Hesap ve Veri Silme</h1>
+
+<p>
+EratGuard PRO kullanıcıları hesaplarını ve hesaplarıyla ilişkili
+kişisel uygulama verilerini silebilir.
+</p>
+
+<h2>Hesabınızı nasıl silebilirsiniz?</h2>
+
+<p>
+EratGuard PRO hesabınıza giriş yapın ve
+<strong>Hesabımı Sil</strong> sayfasını açın.
+Kimliğinizi doğrulamak için mevcut şifrenizi tekrar girmeniz gerekir.
+</p>
+
+<a class="button" href="/account/delete">
+Hesabımı Sil
+</a>
+
+<h2>Silinen veriler</h2>
+
+<ul>
+<li>Kullanıcı hesabı ve giriş bilgileri</li>
+<li>Kullanıcı tercihleri ve ayarları</li>
+<li>Bildirim tercihleri ve kullanıcı bildirimleri</li>
+<li>Kullanıcı oturum kayıtları</li>
+<li>Kullanıcı engelleme listesi</li>
+<li>Kullanıcı analiz geçmişi</li>
+<li>Kullanıcı karantina kayıtları</li>
+<li>Kullanıcıya bağlı Titanium olay kayıtları</li>
+<li>Kullanıcı topluluk geri bildirimleri</li>
+<li>Hesaba bağlı aktif lisans bağlantısı</li>
+</ul>
+
+<div class="notice">
+<strong>Ödeme ve işlem kayıtları:</strong>
+Hesap silindiğinde ödeme, sipariş veya zorunlu işlem kayıtları
+otomatik olarak silinmez. Dolandırıcılığın önlenmesi,
+muhasebe, uyuşmazlık çözümü veya geçerli yasal yükümlülükler
+gerektirdiği ölçüde bu kayıtlar ayrı olarak saklanabilir.
+</div>
+
+<p>
+Silme işlemi tamamlandığında kullanıcı oturumu da kapatılır
+ve silinen hesapla yeniden giriş yapılamaz.
+</p>
+
+<p>
+EratGuard PRO
+</p>
+
+</div>
+</body>
+</html>
+"""
+
+
+@app.route("/account/delete", methods=["GET", "POST"])
+def account_delete_self():
+    if not login_required():
+        return redirect(url_for("login"))
+
+    username = str(session.get("username", "")).strip()
+
+    if not username:
+        session.clear()
+        return redirect(url_for("login"))
+
+    # Sistem hesaplarının yanlışlıkla silinmesini engelle.
+    if username in {"admin", "demo"}:
+        return """
+        <h2>Bu sistem hesabı bu ekrandan silinemez.</h2>
+        <p><a href="/">Ana sayfaya dön</a></p>
+        """, 403
+
+    error = None
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        confirmation = request.form.get("confirmation", "").strip()
+
+        users = load_users()
+        user = users.get(username)
+
+        if not user:
+            session.clear()
+            return redirect(url_for("login"))
+
+        if confirmation != "HESABIMI SIL":
+            error = 'Onay alanına tam olarak "HESABIMI SIL" yazın.'
+
+        elif not check_password_hash(
+            str(user.get("password", "")),
+            password
+        ):
+            error = "Şifreniz yanlış."
+
+        else:
+            try:
+                # Önce kullanıcıya bağlı uygulama verilerini temizle.
+                removed = _eg_delete_user_application_data(username)
+
+                # Ana kullanıcı hesabını en son kaldır.
+                users = load_users()
+
+                if username in users:
+                    del users[username]
+                    save_users(users)
+
+                # Güvenlik/audit kaydında içerik yerine yalnızca olay tutulur.
+                try:
+                    _eg_audit_log(
+                        "account_deleted",
+                        username,
+                        {
+                            "self_service": True,
+                            "removed_categories": [
+                                key for key, value in removed.items()
+                                if value
+                            ],
+                        },
+                        "info"
+                    )
+                except Exception:
+                    pass
+
+                session.clear()
+
+                return redirect("/account-deletion?deleted=1")
+
+            except Exception as exc:
+                print(
+                    "ACCOUNT_DELETE_ERROR:",
+                    repr(exc),
+                    flush=True
+                )
+                error = (
+                    "Hesap şu anda silinemedi. "
+                    "Lütfen daha sonra tekrar deneyin."
+                )
+
+    error_html = ""
+
+    if error:
+        error_html = f"""
+        <div class="error">{error}</div>
+        """
+
+    return f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>EratGuard PRO - Hesabımı Sil</title>
+
+<style>
+body {{
+    margin:0;
+    padding:24px;
+    background:#080d0a;
+    color:#f2f5f3;
+    font-family:system-ui,-apple-system,Arial,sans-serif;
+}}
+
+.card {{
+    max-width:620px;
+    margin:40px auto;
+    padding:28px;
+    border-radius:22px;
+    background:#151b17;
+    border:1px solid #463030;
+}}
+
+h1 {{
+    color:#ff7070;
+}}
+
+input {{
+    width:100%;
+    box-sizing:border-box;
+    margin-top:8px;
+    margin-bottom:18px;
+    padding:14px;
+    border-radius:12px;
+    border:1px solid #555;
+    background:#090c0a;
+    color:white;
+    font-size:16px;
+}}
+
+button {{
+    width:100%;
+    padding:15px;
+    border:0;
+    border-radius:14px;
+    background:#d83f3f;
+    color:white;
+    font-size:16px;
+    font-weight:800;
+}}
+
+.error {{
+    margin-bottom:18px;
+    padding:14px;
+    border-radius:12px;
+    background:#471d1d;
+    color:#ffd2d2;
+}}
+
+.warning {{
+    padding:15px;
+    margin-bottom:22px;
+    border-radius:12px;
+    background:#2a2016;
+}}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h1>Hesabımı Sil</h1>
+
+<p>
+<strong>{username}</strong> hesabını kalıcı olarak silmek üzeresiniz.
+</p>
+
+<div class="warning">
+Bu işlem kullanıcı hesabınızı ve EratGuard PRO içindeki
+hesabınıza bağlı kullanıcı verilerini silecektir.
+Bu işlem geri alınamaz.
+</div>
+
+{error_html}
+
+<form method="post">
+
+<label>Mevcut şifreniz</label>
+<input
+    type="password"
+    name="password"
+    autocomplete="current-password"
+    required
+>
+
+<label>Onaylamak için <strong>HESABIMI SIL</strong> yazın</label>
+<input
+    type="text"
+    name="confirmation"
+    autocomplete="off"
+    required
+>
+
+<button type="submit">
+HESABIMI KALICI OLARAK SİL
+</button>
+
+</form>
+
+<p style="margin-top:22px">
+<a href="/" style="color:#8effb5">
+Vazgeç ve geri dön
+</a>
+</p>
+
+</div>
+
+</body>
+</html>
+"""
+
+# === /ERATGUARD USER ACCOUNT DELETION V1 ===
+
+
+
+# =============================================================================
+# ERATGUARD LIVE PANEL API V1
+# =============================================================================
+
+@app.route("/api/logs")
+def eg_live_api_logs():
+    if not session.get("username") and not session.get("user"):
+        return jsonify({"status": "error", "message": "unauthorized"}), 401
+
+    try:
+        path = "data/spam_logs.json"
+
+        if not os.path.exists(path):
+            logs = []
+        else:
+            with open(path, "r", encoding="utf-8") as f:
+                logs = json.load(f)
+
+        if not isinstance(logs, list):
+            logs = []
+
+        logs = list(reversed(logs))[:100]
+
+        return jsonify({
+            "status": "success",
+            "total": len(logs),
+            "logs": logs
+        })
+
+    except Exception as e:
+        print("ERATGUARD LIVE API ERROR:", repr(e), flush=True)
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
+@app.route("/api/stats")
+def eg_live_api_stats():
+    if not session.get("username") and not session.get("user"):
+        return jsonify({"status": "error", "message": "unauthorized"}), 401
+
+    try:
+        path = "data/spam_logs.json"
+
+        if not os.path.exists(path):
+            logs = []
+        else:
+            with open(path, "r", encoding="utf-8") as f:
+                logs = json.load(f)
+
+        if not isinstance(logs, list):
+            logs = []
+
+        spam = 0
+        temiz = 0
+        blocked = 0
+        reported = 0
+
+        for item in logs:
+            if not isinstance(item, dict):
+                continue
+
+            status = str(item.get("status", "")).strip().upper()
+
+            if status == "SPAM":
+                spam += 1
+            elif status == "OK":
+                temiz += 1
+            elif status == "BLOCKED":
+                blocked += 1
+            elif bool(item.get("blocked")):
+                blocked += 1
+
+            if item.get("reported_by"):
+                reported += 1
+
+        total = len(logs)
+
+        return jsonify({
+            "status": "success",
+            "total": total,
+            "spam": spam,
+            "temiz": temiz,
+            "blocked_count": blocked,
+            "safe_count": temiz,
+            "reported_count": reported,
+            "security_percent": (
+                0 if total == 0
+                else round((temiz / total) * 100)
+            ),
+            "protection_status": (
+                "Yüksek" if spam > 10
+                else "Orta" if spam > 3
+                else "Düşük"
+            )
+        })
+
+    except Exception as e:
+        print("ERATGUARD LIVE API ERROR:", repr(e), flush=True)
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+# =============================================================================
+# /ERATGUARD LIVE PANEL API V1
+# =============================================================================
+
+
+
+# =============================================================================
+# ERATGUARD MOBILE NAV V1
+# =============================================================================
+
+def eratguard_mobile_nav_v1(response):
+    try:
+        from flask import request, session
+
+        if response.status_code != 200:
+            return response
+
+        if "text/html" not in response.headers.get("Content-Type", ""):
+            return response
+
+        path = request.path
+
+        if not session.get("username") and not session.get("user"):
+            return response
+
+        if not (
+            path in ("/dashboard", "/u/dashboard")
+            or path.startswith("/u/")
+        ):
+            return response
+
+        if path.startswith("/admin") or path.startswith("/api/"):
+            return response
+
+        html = response.get_data(as_text=True)
+
+        if "ERATGUARD MOBILE NAV V1 START" in html:
+            return response
+
+        nav = r"""
+<!-- ERATGUARD MOBILE NAV V1 START -->
+
+<style>
+body {
+    padding-bottom: 94px !important;
+}
+
+#eg-mobile-nav {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    height: 66px;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+
+    border: 1px solid rgba(35,255,137,.28);
+    border-radius: 20px;
+
+    background: rgba(5,16,14,.94);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    box-shadow:
+        0 0 24px rgba(35,255,137,.10),
+        0 8px 28px rgba(0,0,0,.45);
+}
+
+#eg-mobile-nav a {
+    flex: 1;
+    min-width: 0;
+    height: 58px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+
+    color: #91a5a0;
+    text-decoration: none;
+    font-family: system-ui,-apple-system,Arial,sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+#eg-mobile-nav .eg-nav-icon {
+    font-size: 20px;
+    line-height: 22px;
+}
+
+#eg-mobile-nav a.eg-active {
+    color: #23ff89;
+}
+
+#eg-mobile-nav a.eg-active .eg-nav-icon {
+    filter: drop-shadow(0 0 7px rgba(35,255,137,.65));
+}
+
+@media (min-width:800px) {
+    #eg-mobile-nav {
+        max-width: 620px;
+        left: 50%;
+        right: auto;
+        width: calc(100% - 40px);
+        transform: translateX(-50%);
+    }
+}
+</style>
+
+<nav id="eg-mobile-nav" aria-label="EratGuard hızlı menü">
+
+<a href="/dashboard" data-eg-path="home">
+    <span class="eg-nav-icon">⌂</span>
+    <span>Ana Sayfa</span>
+</a>
+
+<a href="/u/protection" data-eg-path="protection">
+    <span class="eg-nav-icon">🛡</span>
+    <span>Koruma</span>
+</a>
+
+<a href="/u/sms-actions-center" data-eg-path="sms">
+    <span class="eg-nav-icon">💬</span>
+    <span>SMS</span>
+</a>
+
+<a href="/u/notifications" data-eg-path="notifications">
+    <span class="eg-nav-icon">🔔</span>
+    <span>Bildirim</span>
+</a>
+
+<a href="/u/settings" data-eg-path="settings">
+    <span class="eg-nav-icon">⚙</span>
+    <span>Ayarlar</span>
+</a>
+
+</nav>
+
+<script>
+(function() {
+    const p = window.location.pathname;
+    const nav = document.getElementById("eg-mobile-nav");
+
+    if (!nav) return;
+
+    let key = "";
+
+    if (
+        p === "/dashboard" ||
+        p === "/u/dashboard" ||
+        p === "/u/eg-panel"
+    ) {
+        key = "home";
+    } else if (p.startsWith("/u/protection")) {
+        key = "protection";
+    } else if (p.startsWith("/u/sms")) {
+        key = "sms";
+    } else if (p.startsWith("/u/notifications")) {
+        key = "notifications";
+    } else if (p.startsWith("/u/settings")) {
+        key = "settings";
+    }
+
+    if (key) {
+        const el = nav.querySelector(
+            '[data-eg-path="' + key + '"]'
+        );
+
+        if (el) {
+            el.classList.add("eg-active");
+        }
+    }
+})();
+</script>
+
+<!-- ERATGUARD MOBILE NAV V1 END -->
+"""
+
+        if "</body>" in html:
+            html = html.replace(
+                "</body>",
+                nav + "\n</body>",
+                1
+            )
+        else:
+            html += nav
+
+        response.set_data(html)
+        response.headers["Content-Length"] = str(
+            len(response.get_data())
+        )
+
+    except Exception as e:
+        print(
+            "ERATGUARD MOBILE NAV ERROR:",
+            repr(e),
+            flush=True
+        )
+
+    return response
+
+
+try:
+    funcs = app.after_request_funcs.setdefault(None, [])
+
+    funcs = [
+        f for f in funcs
+        if getattr(f, "__name__", "")
+        != "eratguard_mobile_nav_v1"
+    ]
+
+    funcs.insert(0, eratguard_mobile_nav_v1)
+    app.after_request_funcs[None] = funcs
+
+except Exception as e:
+    print(
+        "ERATGUARD MOBILE NAV REGISTER ERROR:",
+        repr(e),
+        flush=True
+    )
+
+# =============================================================================
+# /ERATGUARD MOBILE NAV V1
+# =============================================================================
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
