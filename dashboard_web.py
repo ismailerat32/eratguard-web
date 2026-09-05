@@ -91,24 +91,25 @@ app.register_blueprint(admin_bp)
 
 
 
-# ===== ERATGUARD STABLE SESSION SECRET START =====
-import os as _ss_os
-from pathlib import Path as _ss_Path
+# ===== ERATGUARD SECURE SESSION SECRET START =====
+import os as _eg_secret_os
 
-_ss_secret_file = _ss_Path("data/.eratguard_secret_key")
-try:
-    _ss_secret_file.parent.mkdir(parents=True, exist_ok=True)
-    if not _ss_secret_file.exists():
-        _ss_secret_file.write_text("eratguard-stable-render-session-secret-2026-admin-mobile", encoding="utf-8")
-    app.secret_key = (
-        _ss_os.environ.get("FLASK_SECRET_KEY")
-        or _ss_os.environ.get("SECRET_KEY")
-        or _ss_os.environ.get("ERATGUARD_SECRET_KEY") or os.environ.get("ERATGUARD_SECRET_KEY")
-        or _ss_secret_file.read_text(encoding="utf-8").strip()
+app.secret_key = (
+    _eg_secret_os.environ.get("ERATGUARD_SECRET_KEY")
+    or _eg_secret_os.environ.get("FLASK_SECRET_KEY")
+    or _eg_secret_os.environ.get("SECRET_KEY")
+)
+
+if not app.secret_key:
+    raise RuntimeError(
+        "Session secret tanimli degil. "
+        "ERATGUARD_SECRET_KEY environment variable ayarlanmalidir."
     )
-except Exception:
-    app.secret_key = "eratguard-stable-render-session-secret-2026-admin-mobile"
-# ===== ERATGUARD STABLE SESSION SECRET END =====
+
+app.config["SECRET_KEY"] = app.secret_key
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+# ===== ERATGUARD SECURE SESSION SECRET END =====
 
 # app.secret_key already configured above with stable EratGuard/Render secret.
 
@@ -220,18 +221,8 @@ def _eg_kv_set_json(key, value):
 def ensure_default_user():
     os.makedirs("data", exist_ok=True)
     if not os.path.exists(USERS_FILE):
-        users = {
-            "admin": {
-                "password": generate_password_hash("admin123"),
-                "role": "admin",
-                "active": True,
-                "license_key": "ADMIN-SYSTEM",
-                "expires_at": "2099-12-31",
-                "email": ""
-            }
-        }
         with open(USERS_FILE, "w", encoding="utf-8") as f:
-            json.dump(users, f, ensure_ascii=False, indent=2)
+            json.dump({}, f, ensure_ascii=False, indent=2)
 
 
 def ensure_default_settings():
@@ -945,87 +936,7 @@ EratGuard
 
 
 
-# ===== ERATGUARD DEMO USER LIVE ENSURE START =====
-def _eg_ensure_demo_user_live():
-    """
-    Canlı ortam KV/users verisi data/users.json'u ezebildiği için
-    demo kullanıcıyı login öncesi aktif kullanıcı deposuna garanti ekler.
-    """
-    try:
-        from datetime import datetime
-        username = "demo"
-        plain_password = "Demo12345!"
-        license_key = "ERATGUARD-DEMO-PRO-2026"
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        users = load_users()
-        if not isinstance(users, dict):
-            users = {}
-
-        demo = users.get(username)
-        needs_write = False
-
-        if not isinstance(demo, dict):
-            demo = {}
-            needs_write = True
-
-        # Şifre yoksa veya bozuksa yeniden hashle.
-        try:
-            pw_ok = check_password_hash(str(demo.get("password", "")), plain_password)
-        except Exception:
-            pw_ok = False
-
-        if not pw_ok:
-            ph = generate_password_hash(plain_password)
-            demo["password"] = ph
-            demo["password_hash"] = ph
-            needs_write = True
-
-        required = {
-            "username": username,
-            "email": "demo@eratguard.com",
-            "role": "user",
-            "active": True,
-            "is_admin": False,
-            "is_active": True,
-            "license_key": license_key,
-            "license_type": "pro",
-            "license_mode": "active",
-            "license_expiry": "2099-12-31",
-            "expires_at": "2099-12-31",
-            "plan": "pro",
-            "license_name": "EratGuard PRO",
-            "license_label": "PRO",
-            "premium": True,
-            "is_premium": True,
-            "license_status": "active",
-            "demo_account": True,
-            "note": "Internal demo user for EratGuard PRO testing",
-        }
-
-        for k, v in required.items():
-            if demo.get(k) != v:
-                demo[k] = v
-                needs_write = True
-
-        if not demo.get("created_at"):
-            demo["created_at"] = now
-            needs_write = True
-
-        demo["updated_at"] = now
-        users[username] = demo
-
-        if needs_write:
-            save_users(users)
-
-        return users
-    except Exception as e:
-        try:
-            print("DEMO_USER_LIVE_ENSURE_WARN:", repr(e), flush=True)
-        except Exception:
-            pass
-        return load_users()
-# ===== ERATGUARD DEMO USER LIVE ENSURE END =====
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -1038,7 +949,7 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
-        users = _eg_ensure_demo_user_live()
+        users = load_users()
         user = users.get(username)
 
         locked, remaining = _eg_login_lock_status(username)
@@ -4464,48 +4375,15 @@ except Exception as _eg_real_admin_restore_error:
 # ===== ERATGUARD REAL ADMIN TEMPLATE RESTORE END =====
 
 
-# ===== ERATGUARD FINAL SESSION SECRET LOCK START =====
-try:
-    import os as _ss_final_os
-    from pathlib import Path as _ss_final_Path
-
-    _ss_final_secret_file = _ss_final_Path("data/.eratguard_secret_key")
-    _ss_final_secret_file.parent.mkdir(parents=True, exist_ok=True)
-
-    if not _ss_final_secret_file.exists():
-        _ss_final_secret_file.write_text(
-            "eratguard-final-stable-session-secret-2026-admin-mobile",
-            encoding="utf-8"
-        )
-
-    app.secret_key = (
-        _ss_final_os.environ.get("FLASK_SECRET_KEY")
-        or _ss_final_os.environ.get("SECRET_KEY")
-        or _ss_final_os.environ.get("ERATGUARD_SECRET_KEY") or os.environ.get("ERATGUARD_SECRET_KEY")
-        or _ss_final_secret_file.read_text(encoding="utf-8").strip()
-        or "eratguard-final-stable-session-secret-2026-admin-mobile"
-    )
-    app.config["SECRET_KEY"] = app.secret_key
-    app.config["SESSION_COOKIE_HTTPONLY"] = True
-    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-except Exception:
-    app.secret_key = "eratguard-final-stable-session-secret-2026-admin-mobile"
-    app.config["SECRET_KEY"] = app.secret_key
-# ===== ERATGUARD FINAL SESSION SECRET LOCK END =====
+# Session secret yukarida tek merkezden yapilandiriliyor.
 
 
 # ===== ERATGUARD ADMIN SIGNED COOKIE FALLBACK START =====
 def _ss_admin_cookie_secret_final():
-    try:
-        import os
-        return (
-            os.environ.get("FLASK_SECRET_KEY")
-            or os.environ.get("SECRET_KEY")
-            or os.environ.get("ERATGUARD_SECRET_KEY") or os.environ.get("ERATGUARD_SECRET_KEY")
-            or "eratguard-final-stable-session-secret-2026-admin-mobile"
-        )
-    except Exception:
-        return "eratguard-final-stable-session-secret-2026-admin-mobile"
+    secret = app.secret_key
+    if not secret:
+        raise RuntimeError("Session secret tanimli degil.")
+    return str(secret)
 
 def _ss_admin_cookie_token_final():
     import hmac
@@ -28603,6 +28481,7 @@ def eratguard_mobile_login():
 
         username = str(data.get("username", "")).strip()
         password = str(data.get("password", ""))
+        installation_id = str(data.get("installation_id", "")).strip()
 
         if not username or not password:
             return jsonify({
@@ -28611,7 +28490,7 @@ def eratguard_mobile_login():
                 "message": "Kullanıcı adı ve şifre gerekli."
             }), 400
 
-        users = _eg_ensure_demo_user_live()
+        users = load_users()
         user = users.get(username)
 
         locked, remaining = _eg_login_lock_status(username)
@@ -28671,6 +28550,73 @@ def eratguard_mobile_login():
             }), 401
 
         _eg_login_clear_failures(username)
+
+        # === ERATGUARD MOBILE DEVICE LIMIT V1 ===
+        # Admin hesapları cihaz sınırından muaftır.
+        is_admin_user = (
+            str(user.get("role", "")).lower() == "admin"
+            or bool(user.get("is_admin"))
+        )
+
+        if not is_admin_user:
+            if not installation_id:
+                return jsonify({
+                    "ok": False,
+                    "error": "installation_id_required",
+                    "message": "Bu uygulama sürümü için cihaz kimliği gerekli."
+                }), 400
+
+            import hashlib
+
+            installation_hash = hashlib.sha256(
+                installation_id.encode("utf-8")
+            ).hexdigest()
+
+            try:
+                device_limit = int(user.get("device_limit", 1))
+            except (TypeError, ValueError):
+                device_limit = 1
+
+            device_limit = max(1, device_limit)
+
+            devices = user.get("devices", [])
+            if not isinstance(devices, list):
+                devices = []
+
+            now_device = __import__("datetime").datetime.now().isoformat(
+                timespec="seconds"
+            )
+
+            matched_device = None
+            for device in devices:
+                if (
+                    isinstance(device, dict)
+                    and device.get("installation_hash") == installation_hash
+                ):
+                    matched_device = device
+                    break
+
+            if matched_device is not None:
+                matched_device["last_seen"] = now_device
+            else:
+                if len(devices) >= device_limit:
+                    return jsonify({
+                        "ok": False,
+                        "error": "device_limit_reached",
+                        "device_limit": device_limit,
+                        "message": "Bu lisans için izin verilen cihaz sınırına ulaşıldı."
+                    }), 403
+
+                devices.append({
+                    "installation_hash": installation_hash,
+                    "first_seen": now_device,
+                    "last_seen": now_device
+                })
+
+            users[username]["device_limit"] = device_limit
+            users[username]["devices"] = devices
+            user = users[username]
+        # === /ERATGUARD MOBILE DEVICE LIMIT V1 ===
 
         try:
             from datetime import datetime
