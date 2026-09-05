@@ -22,7 +22,7 @@ object MobileAuthApi {
      * Android cihaz fiziksel olarak Termux sunucusuna bağlanacaksa
      * 127.0.0.1 değil, telefonun erişebildiği sunucu adresi kullanılmalı.
      */
-    private const val BASE_URL = "http://127.0.0.1:5000"
+    private const val BASE_URL = "https://app.eratguard.com"
 
     fun login(
         username: String,
