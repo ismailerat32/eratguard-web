@@ -931,6 +931,13 @@
                       <span>Son IP</span>
                       <b>{{ user.last_ip or '-' }}</b>
                     </div>
+
+                    {% if user.role != 'admin' %}
+                    <div class="info">
+                      <span>Bağlı cihaz</span>
+                      <b>{{ user.devices|default([])|length }} / {{ user.device_limit|default(1) }}</b>
+                    </div>
+                    {% endif %}
                   </div>
     <details class="license-details">
 
@@ -970,6 +977,17 @@
                     <form class="inline-form" method="POST" action="/admin/approve-upgrade/{{ user.username }}">
                       <button class="btn warn" type="submit">💎 Premium</button>
                     </form>
+
+                    {% if user.role != 'admin' %}
+                    <form
+                      class="inline-form"
+                      method="POST"
+                      action="/admin/reset-devices/{{ user.username }}"
+                      onsubmit="return confirm('{{ user.username }} kullanıcısının bağlı cihazları sıfırlansın mı?');"
+                    >
+                      <button class="btn warn" type="submit">📱 Cihazları Sıfırla</button>
+                    </form>
+                    {% endif %}
 
                     <form class="inline-form" method="POST" action="/admin/toggle-ban/{{ user.username }}">
                       {% if user.is_banned %}

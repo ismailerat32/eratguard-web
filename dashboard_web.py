@@ -9232,6 +9232,54 @@ def eg_premium_admin_add_user_action():
         return _eg_admin_users_redirect("user_create_error")
 
 
+
+@app.route("/admin/reset-devices/<target_username>", methods=["POST"])
+def eg_premium_admin_reset_devices_action(target_username):
+    if not _eg_admin_users_action_ok():
+        return redirect("/admin/login")
+
+    try:
+        users = load_users()
+
+        if not isinstance(users, dict) or target_username not in users:
+            return _eg_admin_users_redirect("user_not_found")
+
+        user = users.get(target_username, {})
+        if not isinstance(user, dict):
+            return _eg_admin_users_redirect("user_invalid")
+
+        # Cihaz limitini koru; yalnızca bağlı cihazları kaldır.
+        old_devices = user.get("devices", [])
+        old_device_count = len(old_devices) if isinstance(old_devices, list) else 0
+
+        user["devices"] = []
+
+        users[target_username] = user
+        save_users(users)
+
+        try:
+            _eg_audit_log(
+                "admin_devices_reset",
+                target_username,
+                {
+                    "removed_device_count": old_device_count,
+                    "device_limit": user.get("device_limit", 1),
+                },
+                "info",
+            )
+        except Exception as e:
+            print("ADMIN_DEVICE_RESET_AUDIT_WARN:", repr(e), flush=True)
+
+        return _eg_admin_users_redirect(
+            "devices_reset",
+            "username=" + target_username
+        )
+
+    except Exception as e:
+        print("ADMIN_DEVICE_RESET_ERROR:", repr(e), flush=True)
+        return _eg_admin_users_redirect("device_reset_error")
+
+
 @app.route("/admin/update-license/<target_username>", methods=["POST"])
 def eg_premium_admin_update_license_action(target_username):
     if not _eg_admin_users_action_ok():
