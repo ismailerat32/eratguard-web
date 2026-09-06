@@ -1779,7 +1779,7 @@ function renderUsers(){
       '</div>'+
       '<div class="urow-detail">'+
         '<div class="urow-detail-grid">'+
-          [["E-posta",u.email||"—"],["Rol",u.role||"user"],["Lisans",u.license_type||"trial"],["Bitiş",u.expires_at||"—"],["Tehdit",(u.threats||0).toLocaleString()],["Son Görülme",u.last_seen||"—"]].map(function(kv){
+          [["E-posta",u.email||"—"],["Rol",u.role||"user"],["Lisans",u.license_type||"trial"],["Bitiş",u.expires_at||"—"]].concat(u.role==="admin"?[]:[["Bağlı cihaz",(u.device_count||0)+" / "+(u.device_limit||1)]]).concat([["Tehdit",(u.threats||0).toLocaleString()],["Son Görülme",u.last_seen||"—"]]).map(function(kv){
             return '<div class="urow-kv"><div class="k">'+esc(kv[0])+'</div><div class="v">'+esc(kv[1])+'</div></div>';
           }).join("")+
         '</div>'+
@@ -1787,7 +1787,8 @@ function renderUsers(){
           '<button class="act-btn act-ac" onclick="event.stopPropagation();actUser(\'upgrade\',\''+esc(u.username)+'\')">◈ PRO Onayla</button>'+
           '<button class="act-btn act-gr" onclick="event.stopPropagation();actUser(\'license\',\''+esc(u.username)+'\')">◇ Lisans Oluştur</button>'+
           '<button class="act-btn '+(ban?"act-ac":"act-rd")+'" onclick="event.stopPropagation();actUser(\'ban\',\''+esc(u.username)+'\')">'+(ban?"◎ Ban Kaldır":"⊘ Ban At")+'</button>'+
-          '<a href="/admin/user/'+esc(u.username)+'" target="_blank" class="act-btn act-or" onclick="event.stopPropagation()">↗ Tam Profil</a>'+
+          (u.role==="admin"?"":'<button class="act-btn act-or" onclick="event.stopPropagation();resetUserDevices(\''+esc(u.username)+'\')">📱 Cihazları Sıfırla</button>')+
+        '<a href="/admin/user/'+esc(u.username)+'" target="_blank" class="act-btn act-or" onclick="event.stopPropagation()">↗ Tam Profil</a>'+
         '</div>'+
       '</div>'+
     '</div>';
@@ -1850,6 +1851,22 @@ function actUser(action,username){
   fetch(paths[action]+username,{method:"POST",credentials:"include"})
     .then(function(){toast(username+": "+labels[action],"ok");loadUsers();})
     .catch(function(){toast("İşlem başarısız","error");});
+}
+function resetUserDevices(username){
+  if(!confirm(username+" kullanıcısının bağlı cihazları sıfırlansın mı?"))return;
+
+  fetch("/admin/reset-devices/"+encodeURIComponent(username),{
+    method:"POST",
+    credentials:"include"
+  })
+    .then(function(r){
+      if(!r.ok)throw new Error("device_reset_failed");
+      toast(username+": bağlı cihazlar sıfırlandı","ok");
+      return loadUsers();
+    })
+    .catch(function(){
+      toast("Cihaz sıfırlama başarısız","error");
+    });
 }
 function openModal(un){
   var u=USERS.find(function(x){return x.username===un});if(!u)return;

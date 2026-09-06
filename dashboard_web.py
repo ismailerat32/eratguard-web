@@ -10458,7 +10458,16 @@ try:
             return ""
 
     def _eg5c_user_items():
-        users = _eg5c_as_dict(_eg5c_load_json({}, "data/users.json", "users.json"))
+        # Canonical user source: production DB/Supabase when enabled,
+        # with load_users() handling the local JSON fallback/sync.
+        try:
+            loader = globals().get("load_users")
+            users = loader() if callable(loader) else {}
+        except Exception as _err:
+            print("ERATGUARD STAGE5C LOAD USERS ERROR:", _err)
+            users = {}
+
+        users = _eg5c_as_dict(users)
         items = []
 
         for username, u in users.items():
@@ -10481,6 +10490,8 @@ try:
                 "active": active,
                 "status": "active" if active else "passive",
                 "last_login": last_login,
+                "device_count": len(u.get("devices", [])) if isinstance(u.get("devices", []), list) else 0,
+                "device_limit": max(1, int(u.get("device_limit", 1))) if str(u.get("device_limit", 1)).isdigit() else 1,
                 "threats": 0,
             })
 
