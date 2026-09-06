@@ -1,8 +1,58 @@
 from pathlib import Path
 import json
+import os
+import urllib.parse
+import urllib.request
 
 
 USERS_PATH = Path("data/users.json")
+
+def _db_enabled():
+    flag = str(os.getenv("ERATGUARD_DB_ENABLED", "")).strip().lower()
+    return (
+        bool(os.getenv("SUPABASE_URL"))
+        and bool(os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
+        and flag in {"1", "true", "yes", "on"}
+    )
+
+
+def _load_db_users():
+    if not _db_enabled():
+        return None
+
+    try:
+        base_url = os.getenv("SUPABASE_URL", "").strip().rstrip("/")
+        key = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "").strip()
+        encoded_key = urllib.parse.quote("users", safe="")
+
+        url = (
+            f"{base_url}/rest/v1/eratguard_kv"
+            f"?key=eq.{encoded_key}&select=value"
+        )
+
+        req = urllib.request.Request(
+            url,
+            headers={
+                "apikey": key,
+                "Authorization": "Bearer " + key,
+                "Accept": "application/json",
+            },
+            method="GET",
+        )
+
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            rows = json.loads(resp.read().decode("utf-8") or "[]")
+
+        if not isinstance(rows, list) or not rows:
+            return None
+
+        users = rows[0].get("value")
+        return users if isinstance(users, dict) and users else None
+
+    except Exception as exc:
+        print("ADMIN_USERS_DB_READ_WARN:", repr(exc), flush=True)
+        return None
+
 
 
 # Bu alanlar hiçbir zaman admin template'ine gönderilmez.
@@ -17,6 +67,27 @@ SENSITIVE_FIELDS = {
 
 
 def _load_raw_users():
+    # Production'da Supabase/KV canonical kaynak.
+    db_users = _load_db_users()
+
+    if isinstance(db_users, dict) and db_users:
+        # Local dosyayi fallback/cache olarak senkron tut.
+        try:
+            USERS_PATH.parent.mkdir(parents=True, exist_ok=True)
+            USERS_PATH.write_text(
+                json.dumps(
+                    db_users,
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+        except Exception:
+            pass
+
+        return db_users
+
+    # DB kapali, erisilemez veya bos ise local fallback.
     if not USERS_PATH.exists():
         return {}
 
@@ -30,11 +101,7 @@ def _load_raw_users():
     except Exception:
         return {}
 
-    if not isinstance(data, dict):
-        return {}
-
-    return data
-
+    return data if isinstance(data, dict) else {}
 
 def _normalize_user(username, raw):
     if not isinstance(raw, dict):
@@ -102,6 +169,18 @@ def _normalize_user(username, raw):
         "probe_account": bool(
             raw.get("probe_account")
             or raw.get("live_probe")
+        ),
+        # Yalnizca guvenli cihaz ozeti admin UI'ye gonderilir.
+        # Installation ID/hash degerleri browser'a cikmaz.
+        "device_count": (
+            len(raw.get("devices", []))
+            if isinstance(raw.get("devices"), list)
+            else 0
+        ),
+        "device_limit": (
+            max(1, int(raw.get("device_limit", 1)))
+            if str(raw.get("device_limit", 1)).isdigit()
+            else 1
         ),
     }
 

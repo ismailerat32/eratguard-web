@@ -80,7 +80,8 @@
             grid-template-columns:
                 minmax(150px, 1.2fr)
                 minmax(180px, 1.5fr)
-                repeat(3, minmax(100px, .7fr));
+                repeat(3, minmax(100px, .7fr))
+                minmax(150px, 1fr);
             gap: 14px;
             align-items: center;
         }
@@ -91,6 +92,26 @@
 
         .muted {
             opacity: .7;
+        }
+
+        .device-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .device-reset {
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 10px;
+            padding: 7px 10px;
+            background: rgba(255,255,255,.06);
+            color: inherit;
+            cursor: pointer;
+        }
+
+        .device-reset:hover {
+            background: rgba(255,255,255,.11);
         }
 
         .badge {
@@ -220,6 +241,29 @@
                 <span class="badge">
                     {{ 'AKTİF' if udata.active else 'PASİF' }}
                 </span>
+            </div>
+
+            <div class="device-box">
+                {% if not udata.is_admin %}
+                <span class="badge">
+                    Bağlı cihaz:
+                    {{ udata.device_count }} / {{ udata.device_limit }}
+                </span>
+
+                <form
+                    method="post"
+                    action="{{ url_for('eg_premium_admin_reset_devices_action', target_username=udata.username) }}"
+                    onsubmit="return confirm('{{ udata.username }} kullanıcısının bağlı cihazları sıfırlansın mı?');"
+                >
+                    <button class="device-reset" type="submit">
+                        📱 Cihazları Sıfırla
+                    </button>
+                </form>
+                {% else %}
+                <span class="muted">
+                    Cihaz sınırı yok
+                </span>
+                {% endif %}
             </div>
 
         </article>
