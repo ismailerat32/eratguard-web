@@ -430,6 +430,34 @@
     font-size:8px;
 }
 
+.eg-identity-action{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    min-height:43px;
+    margin-top:14px;
+    padding:0 13px;
+    border:1px solid rgba(141,255,106,.18);
+    border-radius:10px;
+    background:rgba(141,255,106,.045);
+    color:var(--green);
+    text-decoration:none;
+    font-size:8px;
+    letter-spacing:.12em;
+    font-weight:950;
+    transition:.18s ease;
+}
+
+.eg-identity-action:hover{
+    border-color:rgba(141,255,106,.34);
+    background:rgba(141,255,106,.075);
+}
+
+.eg-identity-action span:last-child{
+    font-size:13px;
+}
+
 .eg-device-actions{
     margin-top:12px;
 }
@@ -706,6 +734,14 @@
                     {% endif %}
                 </div>
 
+                <a
+                    class="eg-identity-action"
+                    href="{{ url_for('eg_premium_admin_user_detail_page', target_username=udata.username) }}"
+                >
+                    <span>IDENTITY CONTROL</span>
+                    <span>→</span>
+                </a>
+
                 <div class="eg-device-actions">
 
                     <form
@@ -714,7 +750,7 @@
                         onsubmit="return confirm('{{ udata.username }} kullanıcısının bağlı cihazları sıfırlansın mı?');"
                     >
                         <button class="eg-reset" type="submit">
-                            ⟳ RESET TRUSTED DEVICES
+                            ⟳ RESET DEVICE BINDING
                         </button>
                     </form>
 
@@ -727,6 +763,14 @@
             <div class="eg-admin-device">
                 ◇ ADMIN AUTHORITY · DEVICE LIMIT EXEMPT
             </div>
+
+            <a
+                class="eg-identity-action"
+                href="{{ url_for('eg_premium_admin_user_detail_page', target_username=udata.username) }}"
+            >
+                <span>IDENTITY CONTROL</span>
+                <span>→</span>
+            </a>
 
             {% endif %}
 

@@ -1,0 +1,922 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#03070b">
+
+<title>EratGuard · Identity Control</title>
+
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/dashboard.css') }}">
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/panels.css') }}">
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/animations.css') }}">
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/responsive.css') }}">
+
+<style>
+.eg-id{
+    width:min(1320px,100%);
+    margin:0 auto;
+    padding:24px;
+}
+
+.eg-id-top{
+    min-height:70px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    border-bottom:1px solid var(--line);
+}
+
+.eg-id-brand{
+    display:flex;
+    align-items:center;
+    gap:13px;
+}
+
+.eg-id-logo{
+    width:44px;
+    height:44px;
+    display:grid;
+    place-items:center;
+    border-radius:13px;
+    background:linear-gradient(135deg,var(--green),var(--green2));
+    color:#041009;
+    font-size:13px;
+    font-weight:950;
+    box-shadow:0 0 28px rgba(82,255,153,.16);
+}
+
+.eg-id-brand b{
+    display:block;
+    font-size:14px;
+    letter-spacing:.15em;
+}
+
+.eg-id-brand small{
+    display:block;
+    margin-top:4px;
+    color:var(--muted);
+    font-size:8px;
+    letter-spacing:.18em;
+}
+
+.eg-id-back{
+    padding:10px 14px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:#a9bbc2;
+    text-decoration:none;
+    font-size:8px;
+    letter-spacing:.12em;
+    font-weight:900;
+}
+
+.eg-id-head{
+    padding:34px 2px 24px;
+}
+
+.eg-id-kicker{
+    color:var(--green);
+    font-size:9px;
+    letter-spacing:.24em;
+    font-weight:950;
+}
+
+.eg-id-head h1{
+    margin:8px 0 6px;
+    font-size:clamp(30px,5vw,48px);
+    letter-spacing:-.045em;
+    line-height:1;
+}
+
+.eg-id-head p{
+    margin:0;
+    color:var(--muted);
+    font-size:12px;
+}
+
+.eg-id-panel{
+    position:relative;
+    overflow:hidden;
+    border:1px solid rgba(85,168,255,.14);
+    border-radius:18px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(10,25,37,.96),
+            rgba(5,13,20,.98)
+        );
+}
+
+.eg-id-panel::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    height:1px;
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(141,255,106,.32),
+            transparent
+        );
+}
+
+.eg-not-found{
+    padding:55px 25px;
+    text-align:center;
+}
+
+.eg-not-found strong{
+    display:block;
+    color:var(--danger);
+    font-size:11px;
+    letter-spacing:.16em;
+}
+
+.eg-not-found h2{
+    margin:12px 0 8px;
+    font-size:30px;
+}
+
+.eg-not-found p{
+    color:var(--muted);
+}
+
+.eg-profile{
+    display:grid;
+    grid-template-columns:.78fr 1.22fr;
+    gap:12px;
+}
+
+.eg-identity{
+    padding:22px;
+}
+
+.eg-profile-main{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.eg-id-avatar{
+    flex:0 0 auto;
+    width:72px;
+    height:72px;
+    display:grid;
+    place-items:center;
+    border-radius:20px;
+    border:1px solid rgba(141,255,106,.25);
+    background:
+        radial-gradient(
+            circle,
+            rgba(141,255,106,.13),
+            rgba(7,24,18,.72)
+        );
+    color:var(--green);
+    font-size:23px;
+    font-weight:950;
+    box-shadow:0 0 30px rgba(141,255,106,.08);
+}
+
+.eg-profile-name{
+    min-width:0;
+}
+
+.eg-profile-name h2{
+    margin:0;
+    font-size:26px;
+    letter-spacing:-.035em;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.eg-profile-name p{
+    margin:6px 0 0;
+    color:var(--muted);
+    font-size:10px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.eg-health{
+    margin-top:20px;
+    padding:15px;
+    border:1px solid rgba(141,255,106,.14);
+    border-radius:13px;
+    background:rgba(141,255,106,.035);
+}
+
+.eg-health-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+}
+
+.eg-health-label{
+    color:#718a95;
+    font-size:7px;
+    letter-spacing:.17em;
+    font-weight:950;
+}
+
+.eg-health-state{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    color:var(--green);
+    font-size:9px;
+    letter-spacing:.12em;
+    font-weight:950;
+}
+
+.eg-health-state::before{
+    content:"";
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:currentColor;
+    box-shadow:0 0 10px currentColor;
+}
+
+.health-danger .eg-health-state{
+    color:var(--danger);
+}
+
+.health-warning .eg-health-state{
+    color:#ffc450;
+}
+
+.eg-health-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:7px;
+    margin-top:13px;
+}
+
+.eg-health-grid div{
+    padding:10px;
+    border:1px solid rgba(88,170,255,.10);
+    border-radius:10px;
+    background:rgba(4,14,21,.55);
+}
+
+.eg-health-grid span{
+    display:block;
+    color:#607985;
+    font-size:7px;
+    letter-spacing:.12em;
+}
+
+.eg-health-grid b{
+    display:block;
+    margin-top:5px;
+    font-size:10px;
+}
+
+.eg-telemetry{
+    padding:20px;
+}
+
+.eg-section-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:15px;
+    margin-bottom:15px;
+}
+
+.eg-section-head span{
+    color:var(--green);
+    font-size:8px;
+    letter-spacing:.18em;
+    font-weight:950;
+}
+
+.eg-section-head h3{
+    margin:5px 0 0;
+    font-size:18px;
+}
+
+.eg-live{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:var(--green);
+    font-size:7px;
+    letter-spacing:.12em;
+    font-weight:950;
+}
+
+.eg-live i{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 10px var(--green);
+}
+
+.eg-data-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+}
+
+.eg-data{
+    min-height:76px;
+    padding:12px;
+    border:1px solid rgba(88,170,255,.10);
+    border-radius:11px;
+    background:rgba(4,14,21,.58);
+}
+
+.eg-data span{
+    display:block;
+    color:#607985;
+    font-size:7px;
+    letter-spacing:.13em;
+    font-weight:900;
+}
+
+.eg-data b{
+    display:block;
+    margin-top:8px;
+    color:#dceae6;
+    font-size:10px;
+    line-height:1.45;
+    word-break:break-word;
+}
+
+.eg-lower{
+    margin-top:12px;
+    display:grid;
+    grid-template-columns:.82fr 1.18fr;
+    gap:12px;
+}
+
+.eg-license,
+.eg-events{
+    padding:20px;
+}
+
+.eg-license-status{
+    padding:15px;
+    border:1px solid rgba(86,244,255,.13);
+    border-radius:12px;
+    background:rgba(86,244,255,.025);
+}
+
+.eg-license-status small{
+    display:block;
+    color:#607985;
+    font-size:7px;
+    letter-spacing:.14em;
+}
+
+.eg-license-status strong{
+    display:block;
+    margin-top:7px;
+    color:var(--cyan);
+    font-size:19px;
+}
+
+.eg-license-key{
+    margin-top:12px;
+    padding:12px;
+    border:1px solid rgba(88,170,255,.10);
+    border-radius:10px;
+    background:#040d13;
+}
+
+.eg-license-key span{
+    color:#607985;
+    font-size:7px;
+    letter-spacing:.13em;
+}
+
+.eg-license-key code{
+    display:block;
+    margin-top:7px;
+    color:#b7cbd2;
+    font-family:monospace;
+    font-size:10px;
+    word-break:break-all;
+}
+
+.eg-device{
+    margin-top:12px;
+    padding:14px;
+    border:1px solid rgba(141,255,106,.13);
+    border-radius:12px;
+    background:rgba(141,255,106,.025);
+}
+
+.eg-device-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+}
+
+.eg-device-top span{
+    color:#718a95;
+    font-size:7px;
+    letter-spacing:.14em;
+    font-weight:900;
+}
+
+.eg-device-top b{
+    font-size:11px;
+}
+
+.eg-device-track{
+    height:4px;
+    margin-top:10px;
+    overflow:hidden;
+    border-radius:99px;
+    background:rgba(255,255,255,.055);
+}
+
+.eg-device-fill{
+    height:100%;
+    border-radius:99px;
+    background:linear-gradient(90deg,var(--green2),var(--green));
+    box-shadow:0 0 10px rgba(141,255,106,.25);
+}
+
+.eg-device-state{
+    margin-top:8px;
+    color:#607985;
+    font-size:8px;
+}
+
+.eg-reset{
+    width:100%;
+    min-height:39px;
+    margin-top:12px;
+    border:1px solid rgba(255,102,127,.18);
+    border-radius:9px;
+    background:rgba(255,102,127,.035);
+    color:#ff8799;
+    font:inherit;
+    font-size:8px;
+    letter-spacing:.11em;
+    font-weight:950;
+    cursor:pointer;
+}
+
+.eg-reset:hover{
+    background:rgba(255,102,127,.07);
+}
+
+.eg-admin-exempt{
+    margin-top:12px;
+    padding:13px;
+    border:1px solid rgba(141,255,106,.13);
+    border-radius:10px;
+    color:#78928a;
+    font-size:8px;
+    letter-spacing:.1em;
+}
+
+.eg-timeline{
+    display:flex;
+    flex-direction:column;
+}
+
+.eg-event{
+    display:grid;
+    grid-template-columns:8px minmax(0,1fr) auto;
+    gap:10px;
+    align-items:start;
+    padding:12px 0;
+    border-bottom:1px solid rgba(100,170,210,.08);
+}
+
+.eg-event:last-child{
+    border-bottom:0;
+}
+
+.eg-event-dot{
+    width:6px;
+    height:6px;
+    margin-top:4px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 8px rgba(141,255,106,.45);
+}
+
+.eg-event.level-warning .eg-event-dot{
+    background:#ffc450;
+}
+
+.eg-event.level-error .eg-event-dot,
+.eg-event.level-critical .eg-event-dot{
+    background:var(--danger);
+}
+
+.eg-event-body{
+    min-width:0;
+}
+
+.eg-event-body b{
+    display:block;
+    font-size:10px;
+}
+
+.eg-event-body span,
+.eg-event-body small{
+    display:block;
+    margin-top:4px;
+    color:#607985;
+    font-size:8px;
+    line-height:1.45;
+    word-break:break-word;
+}
+
+.eg-event time{
+    color:#536a74;
+    font-size:7px;
+    white-space:nowrap;
+}
+
+.eg-empty{
+    padding:35px 10px;
+    text-align:center;
+    color:#607985;
+    font-size:9px;
+}
+
+@media(max-width:800px){
+    .eg-id{
+        padding:14px;
+    }
+
+    .eg-profile,
+    .eg-lower{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:430px){
+    .eg-id{
+        padding:10px;
+    }
+
+    .eg-id-brand small{
+        display:none;
+    }
+
+    .eg-id-back{
+        padding:9px 10px;
+        font-size:7px;
+    }
+
+    .eg-id-head{
+        padding:27px 2px 20px;
+    }
+
+    .eg-id-head h1{
+        font-size:32px;
+    }
+
+    .eg-identity,
+    .eg-telemetry,
+    .eg-license,
+    .eg-events{
+        padding:14px;
+    }
+
+    .eg-id-avatar{
+        width:60px;
+        height:60px;
+        border-radius:17px;
+        font-size:19px;
+    }
+
+    .eg-profile-name h2{
+        font-size:22px;
+    }
+
+    .eg-data-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .eg-event{
+        grid-template-columns:7px minmax(0,1fr);
+    }
+
+    .eg-event time{
+        grid-column:2;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<main class="eg-id">
+
+<header class="eg-id-top">
+    <div class="eg-id-brand">
+        <div class="eg-id-logo">EG</div>
+        <div>
+            <b>ERATGUARD</b>
+            <small>IDENTITY SECURITY CONTROL</small>
+        </div>
+    </div>
+
+    <a class="eg-id-back"
+       href="{{ url_for('admin.users') }}">
+        ← USER COMMAND
+    </a>
+</header>
+
+
+{% if not found %}
+
+<section class="eg-id-head">
+    <div class="eg-id-kicker">IDENTITY LOOKUP · FAILED</div>
+    <h1>Identity Control</h1>
+</section>
+
+<section class="eg-id-panel eg-not-found">
+    <strong>IDENTITY NOT FOUND</strong>
+    <h2>{{ target_username }}</h2>
+    <p>Bu kullanıcı canlı EratGuard kullanıcı verisinde bulunamadı.</p>
+    <a class="eg-id-back"
+       href="{{ url_for('admin.users') }}">
+        Kullanıcı Merkezine Dön
+    </a>
+</section>
+
+{% else %}
+
+<section class="eg-id-head">
+    <div class="eg-id-kicker">
+        TRUST · LICENSE · DEVICE · TELEMETRY
+    </div>
+
+    <h1>Identity Control</h1>
+
+    <p>
+        {{ target_username }} hesabının güvenlik kimliği,
+        lisansı ve cihaz bağlantısı.
+    </p>
+</section>
+
+
+<section class="eg-profile">
+
+    <article class="eg-id-panel eg-identity health-{{ health }}">
+
+        <div class="eg-profile-main">
+
+            <div class="eg-id-avatar">
+                {{ target_username[:2]|upper }}
+            </div>
+
+            <div class="eg-profile-name">
+                <h2>{{ target_username }}</h2>
+                <p>{{ email }}</p>
+            </div>
+
+        </div>
+
+        <div class="eg-health">
+
+            <div class="eg-health-top">
+                <span class="eg-health-label">
+                    IDENTITY SECURITY STATE
+                </span>
+
+                <span class="eg-health-state">
+                    {{ account_status }}
+                </span>
+            </div>
+
+            <div class="eg-health-grid">
+                <div>
+                    <span>ROLE</span>
+                    <b>{{ role|upper }}</b>
+                </div>
+
+                <div>
+                    <span>RISK</span>
+                    <b>{{ risk_label }}</b>
+                </div>
+
+                <div>
+                    <span>LICENSE</span>
+                    <b>{{ license_type|upper }}</b>
+                </div>
+
+                <div>
+                    <span>NETWORK</span>
+                    <b>{{ 'ONLINE' if last_seen != '-' else 'OFFLINE' }}</b>
+                </div>
+            </div>
+
+        </div>
+
+    </article>
+
+
+    <article class="eg-id-panel eg-telemetry">
+
+        <div class="eg-section-head">
+            <div>
+                <span>LIVE ACCOUNT TELEMETRY</span>
+                <h3>Security Signals</h3>
+            </div>
+
+            <div class="eg-live">
+                <i></i>
+                LIVE
+            </div>
+        </div>
+
+        <div class="eg-data-grid">
+
+            <div class="eg-data">
+                <span>LAST LOGIN</span>
+                <b>{{ last_login }}</b>
+            </div>
+
+            <div class="eg-data">
+                <span>LAST SEEN</span>
+                <b>{{ last_seen }}</b>
+            </div>
+
+            <div class="eg-data">
+                <span>LAST IP</span>
+                <b>{{ last_ip }}</b>
+            </div>
+
+            <div class="eg-data">
+                <span>ACCOUNT ACTIVE</span>
+                <b>{{ 'EVET' if active else 'HAYIR' }}</b>
+            </div>
+
+            <div class="eg-data">
+                <span>RESTRICTION</span>
+                <b>{{ 'BANLI' if banned else 'TEMİZ' }}</b>
+            </div>
+
+            <div class="eg-data">
+                <span>CLIENT</span>
+                <b>{{ user_agent }}</b>
+            </div>
+
+        </div>
+
+    </article>
+
+</section>
+
+
+<section class="eg-lower">
+
+    <article class="eg-id-panel eg-license">
+
+        <div class="eg-section-head">
+            <div>
+                <span>LICENSE & DEVICE TRUST</span>
+                <h3>Authorization</h3>
+            </div>
+        </div>
+
+        <div class="eg-license-status">
+            <small>CURRENT LICENSE</small>
+            <strong>{{ license_type|upper }}</strong>
+        </div>
+
+        <div class="eg-license-key">
+            <span>LICENSE KEY</span>
+            <code>{{ masked_license_key }}</code>
+        </div>
+
+        <div class="eg-data" style="margin-top:8px">
+            <span>LICENSE EXPIRY</span>
+            <b>{{ expires_at }}</b>
+        </div>
+
+
+        {% if not is_admin %}
+
+        <div class="eg-device">
+
+            <div class="eg-device-top">
+                <span>TRUSTED DEVICE CAPACITY</span>
+                <b>{{ device_count }} / {{ device_limit }}</b>
+            </div>
+
+            <div class="eg-device-track">
+                <div
+                    class="eg-device-fill"
+                    style="width: {{ [100, ((device_count * 100) // device_limit)]|min }}%">
+                </div>
+            </div>
+
+            <div class="eg-device-state">
+                {% if device_count == 0 %}
+                    AWAITING BIND · Yeni cihaz bağlantısına hazır
+                {% elif device_count >= device_limit %}
+                    SECURED DEVICE · Cihaz kapasitesi kullanılıyor
+                {% else %}
+                    TRUST ACTIVE · Güvenilir cihaz bağlantısı aktif
+                {% endif %}
+            </div>
+
+            <form
+                method="post"
+                action="{{ url_for('eg_premium_admin_reset_devices_action', target_username=target_username) }}"
+                onsubmit="return confirm('{{ target_username }} kullanıcısının güvenilir cihaz bağlantıları sıfırlansın mı?');"
+            >
+                <button class="eg-reset" type="submit">
+                    RESET TRUSTED DEVICES
+                </button>
+            </form>
+
+        </div>
+
+        {% else %}
+
+        <div class="eg-admin-exempt">
+            ◇ ADMIN AUTHORITY · DEVICE LIMIT EXEMPT
+        </div>
+
+        {% endif %}
+
+    </article>
+
+
+    <article class="eg-id-panel eg-events">
+
+        <div class="eg-section-head">
+            <div>
+                <span>SECURITY EVENT STREAM</span>
+                <h3>Identity Timeline</h3>
+            </div>
+
+            <div class="eg-live">
+                <i></i>
+                AUDIT
+            </div>
+        </div>
+
+        <div class="eg-timeline">
+
+        {% for ev in user_events %}
+
+            <article class="eg-event level-{{ ev.get('level', 'info') }}">
+
+                <i class="eg-event-dot"></i>
+
+                <div class="eg-event-body">
+                    <b>{{ ev.get('event', ev.get('type', 'event')) }}</b>
+                    <span>{{ ev.get('ip', '-') }}</span>
+
+                    {% if ev.get('detail') %}
+                    <small>
+                        {% if ev.get('detail') is mapping %}
+                            {{ ev.get('detail')|tojson }}
+                        {% else %}
+                            {{ ev.get('detail') }}
+                        {% endif %}
+                    </small>
+                    {% endif %}
+                </div>
+
+                <time>{{ ev.get('time', '-') }}</time>
+
+            </article>
+
+        {% else %}
+
+            <div class="eg-empty">
+                Bu kimlik için henüz audit olayı bulunmuyor.
+            </div>
+
+        {% endfor %}
+
+        </div>
+
+    </article>
+
+</section>
+
+{% endif %}
+
+</main>
+
+</body>
+</html>
