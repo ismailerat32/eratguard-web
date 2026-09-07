@@ -3744,14 +3744,6 @@ try:
             admin_stats=_eg_real_admin_dashboard_stats()
         )
 
-    def _eg_real_admin_panel():
-        return _eg_real_render(
-            "admin_panel.html",
-            users=_eg_real_users_list(),
-            upgrade_requests=globals().get("upgrade_requests", []),
-            audit_logs=_eg_recent_audit_logs(12),
-        )
-
     def _eg_real_admin_licenses():
         import json as _eg_json
         from pathlib import Path as _eg_Path
@@ -4050,7 +4042,6 @@ try:
         _eg_ops_sources = [
             ("dashboard_web.py", "Admin backend", "core"),
             ("templates/admin_system.html", "Admin system UI", "ui"),
-            ("templates/admin_users.html", "Admin users UI", "ui"),
             ("templates/admin_user_detail.html", "Admin user detail UI", "ui"),
             ("payments.db", "Payment database", "data"),
             ("license_keys.json", "License key store", "license"),
@@ -4333,7 +4324,7 @@ try:
         if slug in ("", "dashboard"):
             return _eg_real_admin_dashboard()
         if slug in ("panel", "users", "user"):
-            return _eg_real_admin_panel()
+            return redirect("/admin/users", code=302)
         if slug in ("licenses", "license", "generated-licenses"):
             return _eg_real_admin_licenses()
         if slug in ("payment-requests", "payments", "payment", "license-requests"):
@@ -4355,7 +4346,6 @@ try:
     _real_override_map = {
         "ss_live_admin_home": _eg_real_admin_home,
         "ss_live_admin_dashboard": _eg_real_admin_dashboard,
-        "ss_live_admin_panel_alias": _eg_real_admin_panel,
         "ss_live_admin_licenses_alias": _eg_real_admin_licenses,
         "ss_live_admin_payment_requests_alias": _eg_real_admin_payments,
         "ss_live_admin_spam_logs_alias": _eg_real_admin_spam_logs,
@@ -27088,13 +27078,7 @@ def _eg_phase6a_admin_control_plane_v1():
             return _eg_real_admin_dashboard()
 
         if path == "/admin/users":
-            # Prefer the mature production admin users implementation
-            # when available. Fall back to the registered endpoint.
-            real_users = globals().get("_eg_real_admin_panel")
-
-            if callable(real_users):
-                return real_users()
-
+            # Canonical owner: admin blueprint -> admin.routes.users
             fn = app.view_functions.get("admin.users")
             if callable(fn):
                 return fn()
@@ -27515,13 +27499,7 @@ try:
                 return _eg_phase6c_admin_dashboard_v1()
 
             if path == "/admin/users":
-                real_users = globals().get(
-                    "_eg_real_admin_panel"
-                )
-
-                if callable(real_users):
-                    return real_users()
-
+                # Canonical owner: admin blueprint -> admin.routes.users
                 fn = app.view_functions.get("admin.users")
                 if callable(fn):
                     return fn()

@@ -1,282 +1,748 @@
 <!doctype html>
 <html lang="tr">
 <head>
-    <meta charset="utf-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#03070b">
 
-    <title>EratGuard Admin — Kullanıcılar</title>
+<title>EratGuard — User Command Center</title>
 
-    <link
-        rel="stylesheet"
-        href="{{ url_for('admin.static', filename='css/dashboard.css') }}"
-    >
-    <link
-        rel="stylesheet"
-        href="{{ url_for('admin.static', filename='css/panels.css') }}"
-    >
-    <link
-        rel="stylesheet"
-        href="{{ url_for('admin.static', filename='css/responsive.css') }}"
-    >
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/dashboard.css') }}">
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/panels.css') }}">
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/animations.css') }}">
+<link rel="stylesheet"
+      href="{{ url_for('admin.static', filename='css/responsive.css') }}">
 
-    <style>
-        .users-shell {
-            width: min(1180px, calc(100% - 32px));
-            margin: 32px auto;
-        }
+<style>
+.eg-users{
+    width:min(1420px,100%);
+    margin:0 auto;
+    padding:24px;
+}
 
-        .users-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
+.eg-users-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    padding:14px 0 25px;
+    border-bottom:1px solid var(--line);
+}
 
-        .users-header h1 {
-            margin: 0;
-        }
+.eg-users-brand{
+    display:flex;
+    align-items:center;
+    gap:13px;
+}
 
-        .back-link {
-            text-decoration: none;
-        }
+.eg-users-logo{
+    width:44px;
+    height:44px;
+    display:grid;
+    place-items:center;
+    border-radius:13px;
+    background:linear-gradient(135deg,var(--green),var(--green2));
+    color:#041009;
+    font-weight:950;
+    font-size:13px;
+    box-shadow:0 0 28px rgba(82,255,153,.16);
+}
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(4, minmax(0, 1fr));
-            gap: 14px;
-            margin-bottom: 24px;
-        }
+.eg-users-brand b{
+    display:block;
+    font-size:14px;
+    letter-spacing:.15em;
+}
 
-        .stat-card,
-        .user-card {
-            border: 1px solid rgba(255,255,255,.12);
-            border-radius: 16px;
-            padding: 18px;
-            background: rgba(255,255,255,.04);
-        }
+.eg-users-brand small{
+    display:block;
+    margin-top:4px;
+    color:var(--muted);
+    font-size:8px;
+    letter-spacing:.2em;
+}
 
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-        }
+.eg-back{
+    padding:10px 14px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    color:#a9bbc2;
+    text-decoration:none;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:.1em;
+}
 
-        .stat-label {
-            opacity: .7;
-            margin-top: 5px;
-        }
+.eg-users-hero{
+    position:relative;
+    overflow:hidden;
+    padding:38px 2px 28px;
+}
 
-        .users-list {
-            display: grid;
-            gap: 12px;
-        }
+.eg-users-hero::after{
+    content:"";
+    position:absolute;
+    width:360px;
+    height:360px;
+    right:-100px;
+    top:-180px;
+    border-radius:50%;
+    background:radial-gradient(
+        circle,
+        rgba(88,170,255,.12),
+        transparent 68%
+    );
+    pointer-events:none;
+}
 
-        .user-card {
-            display: grid;
-            grid-template-columns:
-                minmax(150px, 1.2fr)
-                minmax(180px, 1.5fr)
-                repeat(3, minmax(100px, .7fr))
-                minmax(150px, 1fr);
-            gap: 14px;
-            align-items: center;
-        }
+.eg-users-kicker{
+    color:var(--green);
+    font-size:9px;
+    letter-spacing:.25em;
+    font-weight:950;
+}
 
-        .username {
-            font-weight: 700;
-        }
+.eg-users-hero h1{
+    margin:8px 0 7px;
+    font-size:clamp(30px,5vw,50px);
+    line-height:.98;
+    letter-spacing:-.045em;
+}
 
-        .muted {
-            opacity: .7;
-        }
+.eg-users-hero p{
+    margin:0;
+    max-width:650px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.6;
+}
 
-        .device-box {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            align-items: flex-start;
-        }
+.eg-users-live{
+    margin-top:16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--green);
+    font-size:8px;
+    letter-spacing:.14em;
+    font-weight:900;
+}
 
-        .device-reset {
-            border: 1px solid rgba(255,255,255,.18);
-            border-radius: 10px;
-            padding: 7px 10px;
-            background: rgba(255,255,255,.06);
-            color: inherit;
-            cursor: pointer;
-        }
+.eg-users-live i{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 12px var(--green);
+}
 
-        .device-reset:hover {
-            background: rgba(255,255,255,.11);
-        }
+.eg-users-metrics{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:11px;
+    margin-bottom:14px;
+}
 
-        .badge {
-            display: inline-block;
-            width: fit-content;
-            padding: 5px 9px;
-            border-radius: 999px;
-            border: 1px solid rgba(255,255,255,.15);
-            font-size: 12px;
-        }
+.eg-users-metric{
+    position:relative;
+    overflow:hidden;
+    min-height:118px;
+    padding:17px;
+    border:1px solid var(--line2);
+    border-radius:15px;
+    background:linear-gradient(
+        145deg,
+        rgba(13,30,44,.95),
+        rgba(5,14,21,.97)
+    );
+}
 
-        @media (max-width: 800px) {
-            .stats-grid {
-                grid-template-columns:
-                    repeat(2, minmax(0, 1fr));
-            }
+.eg-users-metric::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:1px;
+    background:linear-gradient(
+        90deg,
+        transparent,
+        rgba(141,255,106,.25),
+        transparent
+    );
+}
 
-            .user-card {
-                grid-template-columns: 1fr;
-            }
+.eg-users-metric-head{
+    display:flex;
+    justify-content:space-between;
+    color:#78909b;
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:.14em;
+}
 
-            .users-header {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-        }
-    </style>
+.eg-users-metric-icon{
+    color:var(--green);
+    font-size:15px;
+}
+
+.eg-users-metric strong{
+    display:block;
+    margin-top:16px;
+    font-size:30px;
+    line-height:1;
+}
+
+.eg-users-metric small{
+    display:block;
+    margin-top:8px;
+    color:#607985;
+    font-size:8px;
+}
+
+.eg-users-panel{
+    position:relative;
+    overflow:hidden;
+    padding:19px;
+    border:1px solid rgba(85,168,255,.14);
+    border-radius:17px;
+    background:linear-gradient(
+        145deg,
+        rgba(10,25,37,.96),
+        rgba(5,13,20,.98)
+    );
+}
+
+.eg-users-panel::before{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    top:0;
+    height:1px;
+    background:linear-gradient(
+        90deg,
+        transparent,
+        rgba(141,255,106,.30),
+        transparent
+    );
+}
+
+.eg-users-panel-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    margin-bottom:15px;
+}
+
+.eg-users-panel-head span{
+    color:var(--green);
+    font-size:8px;
+    letter-spacing:.2em;
+    font-weight:950;
+}
+
+.eg-users-panel-head h2{
+    margin:5px 0 0;
+    font-size:18px;
+}
+
+.eg-users-count{
+    padding:7px 10px;
+    border:1px solid rgba(141,255,106,.18);
+    border-radius:999px;
+    color:var(--green);
+    font-size:8px;
+    letter-spacing:.1em;
+    font-weight:900;
+}
+
+.eg-user-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:11px;
+}
+
+.eg-user{
+    position:relative;
+    overflow:hidden;
+    min-width:0;
+    padding:17px;
+    border:1px solid rgba(88,170,255,.12);
+    border-radius:14px;
+    background:rgba(4,13,20,.72);
+    transition:transform .18s ease,border-color .18s ease;
+}
+
+.eg-user:hover{
+    transform:translateY(-2px);
+    border-color:rgba(141,255,106,.28);
+}
+
+.eg-user-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+}
+
+.eg-user-ident{
+    display:flex;
+    gap:11px;
+    min-width:0;
+}
+
+.eg-avatar{
+    flex:0 0 auto;
+    width:42px;
+    height:42px;
+    display:grid;
+    place-items:center;
+    border-radius:12px;
+    border:1px solid rgba(141,255,106,.18);
+    background:rgba(141,255,106,.055);
+    color:var(--green);
+    font-size:13px;
+    font-weight:950;
+}
+
+.eg-user-name{
+    min-width:0;
+}
+
+.eg-user-name strong{
+    display:block;
+    font-size:15px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.eg-user-name small{
+    display:block;
+    margin-top:5px;
+    color:#607985;
+    font-size:9px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.eg-state{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 8px;
+    border:1px solid rgba(141,255,106,.18);
+    border-radius:999px;
+    color:var(--green);
+    font-size:7px;
+    letter-spacing:.1em;
+    font-weight:950;
+}
+
+.eg-state::before{
+    content:"";
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:currentColor;
+    box-shadow:0 0 7px currentColor;
+}
+
+.eg-state.off{
+    color:var(--danger);
+    border-color:rgba(255,102,127,.20);
+}
+
+.eg-user-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:15px;
+}
+
+.eg-tag{
+    padding:6px 8px;
+    border-radius:8px;
+    border:1px solid rgba(88,170,255,.12);
+    background:rgba(88,170,255,.035);
+    color:#8ba5b0;
+    font-size:7px;
+    letter-spacing:.1em;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.eg-tag.pro{
+    color:var(--cyan);
+    border-color:rgba(86,244,255,.18);
+}
+
+.eg-device{
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px solid rgba(100,170,210,.08);
+}
+
+.eg-device-head{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+    align-items:center;
+}
+
+.eg-device-title{
+    color:#6f8994;
+    font-size:7px;
+    letter-spacing:.16em;
+    font-weight:900;
+}
+
+.eg-device-value{
+    color:var(--text);
+    font-size:10px;
+    font-weight:900;
+}
+
+.eg-device-track{
+    height:4px;
+    margin-top:9px;
+    overflow:hidden;
+    border-radius:99px;
+    background:rgba(255,255,255,.055);
+}
+
+.eg-device-fill{
+    height:100%;
+    border-radius:99px;
+    background:linear-gradient(90deg,var(--green2),var(--green));
+    box-shadow:0 0 10px rgba(141,255,106,.30);
+}
+
+.eg-device-note{
+    margin-top:7px;
+    color:#607985;
+    font-size:8px;
+}
+
+.eg-device-actions{
+    margin-top:12px;
+}
+
+.eg-reset{
+    width:100%;
+    min-height:38px;
+    border:1px solid rgba(141,255,106,.18);
+    border-radius:9px;
+    background:rgba(141,255,106,.045);
+    color:var(--green);
+    font:inherit;
+    font-size:8px;
+    letter-spacing:.12em;
+    font-weight:950;
+    cursor:pointer;
+}
+
+.eg-reset:hover{
+    background:rgba(141,255,106,.085);
+}
+
+.eg-admin-device{
+    margin-top:14px;
+    padding:12px;
+    border-top:1px solid rgba(100,170,210,.08);
+    color:#607985;
+    font-size:8px;
+    letter-spacing:.1em;
+}
+
+.eg-empty-users{
+    grid-column:1/-1;
+    padding:45px;
+    text-align:center;
+    color:var(--muted);
+}
+
+@media(max-width:760px){
+    .eg-users{
+        padding:14px;
+    }
+
+    .eg-users-top{
+        padding-top:7px;
+    }
+
+    .eg-users-metrics{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .eg-user-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:430px){
+    .eg-users{
+        padding:10px;
+    }
+
+    .eg-users-brand small{
+        display:none;
+    }
+
+    .eg-back{
+        padding:9px 10px;
+        font-size:7px;
+    }
+
+    .eg-users-hero{
+        padding:28px 2px 22px;
+    }
+
+    .eg-users-hero h1{
+        font-size:32px;
+    }
+
+    .eg-users-metrics{
+        gap:7px;
+    }
+
+    .eg-users-metric{
+        min-height:102px;
+        padding:13px;
+    }
+
+    .eg-users-metric strong{
+        font-size:26px;
+    }
+
+    .eg-users-panel{
+        padding:12px;
+    }
+
+    .eg-user{
+        padding:14px;
+    }
+}
+</style>
 </head>
 
 <body>
 
-<main class="users-shell">
+<main class="eg-users">
 
-    <header class="users-header">
+<header class="eg-users-top">
+    <div class="eg-users-brand">
+        <div class="eg-users-logo">EG</div>
         <div>
-            <h1>Kullanıcı Merkezi</h1>
-            <div class="muted">
-                EratGuard Admin
-            </div>
+            <b>ERATGUARD</b>
+            <small>SECURITY COMMAND SYSTEM</small>
+        </div>
+    </div>
+
+    <a class="eg-back"
+       href="{{ url_for('admin.dashboard') }}">
+        ← COMMAND CENTER
+    </a>
+</header>
+
+
+<section class="eg-users-hero">
+    <div class="eg-users-kicker">
+        IDENTITY · LICENSE · DEVICE CONTROL
+    </div>
+
+    <h1>User Command Center</h1>
+
+    <p>
+        EratGuard kullanıcılarını, lisans durumlarını ve
+        güvenilir cihaz bağlantılarını tek güvenlik yüzeyinden yönetin.
+    </p>
+
+    <div class="eg-users-live">
+        <i></i>
+        LIVE SECURITY CHANNEL · ONLINE
+    </div>
+</section>
+
+
+<section class="eg-users-metrics">
+
+    <div class="eg-users-metric">
+        <div class="eg-users-metric-head">
+            USERS
+            <span class="eg-users-metric-icon">♙</span>
+        </div>
+        <strong>{{ total_users }}</strong>
+        <small>Toplam kayıtlı hesap</small>
+    </div>
+
+    <div class="eg-users-metric">
+        <div class="eg-users-metric-head">
+            ACTIVE
+            <span class="eg-users-metric-icon">●</span>
+        </div>
+        <strong>{{ active_users }}</strong>
+        <small>Çevrimiçi güvenlik politikası</small>
+    </div>
+
+    <div class="eg-users-metric">
+        <div class="eg-users-metric-head">
+            ADMIN
+            <span class="eg-users-metric-icon">◇</span>
+        </div>
+        <strong>{{ admin_users }}</strong>
+        <small>Yetkili yönetici hesabı</small>
+    </div>
+
+    <div class="eg-users-metric">
+        <div class="eg-users-metric-head">
+            RESTRICTED
+            <span class="eg-users-metric-icon">!</span>
+        </div>
+        <strong>{{ banned_users }}</strong>
+        <small>Pasif / kısıtlı hesap</small>
+    </div>
+
+</section>
+
+
+<section class="eg-users-panel">
+
+    <div class="eg-users-panel-head">
+        <div>
+            <span>SECURE IDENTITY MATRIX</span>
+            <h2>Kullanıcı Ağı</h2>
         </div>
 
-        <a
-            class="back-link"
-            href="{{ url_for('admin.dashboard') }}"
-        >
-            ← Admin Dashboard
-        </a>
-    </header>
+        <div class="eg-users-count">
+            {{ total_users }} NODE
+        </div>
+    </div>
 
 
-    <section class="stats-grid">
+    <div class="eg-user-grid">
 
-        <article class="stat-card">
-            <div class="stat-value">
-                {{ total_users }}
-            </div>
-            <div class="stat-label">
-                Toplam kullanıcı
-            </div>
-        </article>
+    {% for uname, udata in users.items() %}
 
-        <article class="stat-card">
-            <div class="stat-value">
-                {{ active_users }}
-            </div>
-            <div class="stat-label">
-                Aktif
-            </div>
-        </article>
+        <article class="eg-user">
 
-        <article class="stat-card">
-            <div class="stat-value">
-                {{ admin_users }}
-            </div>
-            <div class="stat-label">
-                Admin
-            </div>
-        </article>
+            <div class="eg-user-top">
 
-        <article class="stat-card">
-            <div class="stat-value">
-                {{ banned_users }}
-            </div>
-            <div class="stat-label">
-                Pasif
-            </div>
-        </article>
+                <div class="eg-user-ident">
 
-    </section>
+                    <div class="eg-avatar">
+                        {{ (udata.username or '?')[:2]|upper }}
+                    </div>
 
+                    <div class="eg-user-name">
+                        <strong>{{ udata.username }}</strong>
+                        <small>
+                            {{ udata.email or 'E-posta tanımlı değil' }}
+                        </small>
+                    </div>
 
-    <section class="users-list">
-
-        {% for uname, udata in users.items() %}
-
-        <article class="user-card">
-
-            <div>
-                <div class="username">
-                    {{ udata.username }}
                 </div>
 
-                {% if udata.probe_account %}
-                <div class="muted">
-                    Probe hesabı
+                <div class="eg-state {{ '' if udata.active else 'off' }}">
+                    {{ 'ACTIVE' if udata.active else 'PASSIVE' }}
                 </div>
-                {% endif %}
+
             </div>
 
-            <div>
-                {{ udata.email or 'E-posta yok' }}
-            </div>
 
-            <div>
-                <span class="badge">
+            <div class="eg-user-tags">
+
+                <span class="eg-tag">
                     {{ udata.role }}
                 </span>
-            </div>
 
-            <div>
-                <span class="badge">
+                <span class="eg-tag pro">
                     {{ udata.license_label }}
                 </span>
-            </div>
 
-            <div>
-                <span class="badge">
-                    {{ 'AKTİF' if udata.active else 'PASİF' }}
-                </span>
-            </div>
-
-            <div class="device-box">
-                {% if not udata.is_admin %}
-                <span class="badge">
-                    Bağlı cihaz:
-                    {{ udata.device_count }} / {{ udata.device_limit }}
-                </span>
-
-                <form
-                    method="post"
-                    action="{{ url_for('eg_premium_admin_reset_devices_action', target_username=udata.username) }}"
-                    onsubmit="return confirm('{{ udata.username }} kullanıcısının bağlı cihazları sıfırlansın mı?');"
-                >
-                    <button class="device-reset" type="submit">
-                        📱 Cihazları Sıfırla
-                    </button>
-                </form>
-                {% else %}
-                <span class="muted">
-                    Cihaz sınırı yok
+                {% if udata.probe_account %}
+                <span class="eg-tag">
+                    PROBE
                 </span>
                 {% endif %}
+
             </div>
 
+
+            {% if not udata.is_admin %}
+
+            <div class="eg-device">
+
+                <div class="eg-device-head">
+                    <span class="eg-device-title">
+                        TRUSTED DEVICE LICENSE
+                    </span>
+
+                    <span class="eg-device-value">
+                        {{ udata.device_count }} / {{ udata.device_limit }}
+                    </span>
+                </div>
+
+                <div class="eg-device-track">
+                    <div
+                        class="eg-device-fill"
+                        style="width: {{ [100, ((udata.device_count * 100) // udata.device_limit)]|min }}%">
+                    </div>
+                </div>
+
+                <div class="eg-device-note">
+                    {% if udata.device_count >= udata.device_limit %}
+                        Cihaz kapasitesi kullanılıyor
+                    {% elif udata.device_count == 0 %}
+                        Yeni cihaz bağlantısı için hazır
+                    {% else %}
+                        Güvenilir cihaz bağlantısı aktif
+                    {% endif %}
+                </div>
+
+                <div class="eg-device-actions">
+
+                    <form
+                        method="post"
+                        action="{{ url_for('eg_premium_admin_reset_devices_action', target_username=udata.username) }}"
+                        onsubmit="return confirm('{{ udata.username }} kullanıcısının bağlı cihazları sıfırlansın mı?');"
+                    >
+                        <button class="eg-reset" type="submit">
+                            ⟳ RESET TRUSTED DEVICES
+                        </button>
+                    </form>
+
+                </div>
+
+            </div>
+
+            {% else %}
+
+            <div class="eg-admin-device">
+                ◇ ADMIN AUTHORITY · DEVICE LIMIT EXEMPT
+            </div>
+
+            {% endif %}
+
         </article>
 
-        {% else %}
+    {% else %}
 
-        <article class="user-card">
-            Kullanıcı bulunamadı.
-        </article>
+        <div class="eg-empty-users">
+            Kayıtlı kullanıcı bulunamadı.
+        </div>
 
-        {% endfor %}
+    {% endfor %}
 
-    </section>
+    </div>
+
+</section>
 
 </main>
 
