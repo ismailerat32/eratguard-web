@@ -1,6 +1,0 @@
-R_DEF: Internal format may change without notice
-local
-drawable splash_art
-mipmap ic_launcher
-mipmap ic_launcher_round
-style AppTheme

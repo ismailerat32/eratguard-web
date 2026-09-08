@@ -196,3 +196,19 @@ data/reported_numbers.json
 data/spam_reports.json
 # === /ERATGUARD RUNTIME DATA ===
 /gradle.properties
+
+# Android / Gradle generated files
+.gradle/
+**/build/
+build/
+*.apk
+*.aab
+*.dex
+*.class
+
+# IDE
+.idea/
+*.iml
+
+# Local machine
+local.properties
