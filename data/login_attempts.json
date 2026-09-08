@@ -4,5 +4,23 @@
     "last_failed": "2026-06-09T08:39:49",
     "username": "testuser",
     "ip": "127.0.0.1"
+  },
+  "erat|127.0.0.1": {
+    "count": 1,
+    "last_failed": "2026-07-29T12:41:21",
+    "username": "Erat",
+    "ip": "127.0.0.1"
+  },
+  "nida|127.0.0.1": {
+    "count": 1,
+    "last_failed": "2026-07-29T12:41:26",
+    "username": "Nida",
+    "ip": "127.0.0.1"
+  },
+  "-|127.0.0.1": {
+    "count": 1,
+    "last_failed": "2026-07-30T07:32:42",
+    "username": "",
+    "ip": "127.0.0.1"
   }
 }

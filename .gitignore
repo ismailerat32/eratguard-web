@@ -195,3 +195,4 @@ data/notifications.json
 data/reported_numbers.json
 data/spam_reports.json
 # === /ERATGUARD RUNTIME DATA ===
+/gradle.properties

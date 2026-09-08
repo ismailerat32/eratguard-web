@@ -22,5 +22,17 @@
     "language": "tr",
     "updated_at": "2026-06-22 11:47:12",
     "demo_account": true
+  },
+  "Erat@32": {
+    "security_alerts": false,
+    "license_alerts": false,
+    "admin_announcements": false,
+    "auto_quarantine": false,
+    "compact_mode": false,
+    "high_sensitivity": false,
+    "theme": "green_dark",
+    "language": "tr",
+    "updated_at": "2026-08-28 07:40:50",
+    "protection_enabled": false
   }
 }

@@ -28,9 +28,9 @@ Modern, lisans sistemine sahip spam kontrol ve kullanıcı yönetim paneli.
 ## ⚡ Kurulum
 
 ```bash
-git clone https://github.com/ismailerat32/Spamshield.git
-cd Spamshield
-python app.py
+git clone https://github.com/ismailerat32/eratguard-web.git
+cd eratguard-web
+python dashboard_web.py
 ```
 
 ---
