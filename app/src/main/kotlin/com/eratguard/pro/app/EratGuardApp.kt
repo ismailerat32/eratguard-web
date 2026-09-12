@@ -1,149 +1,367 @@
 package com.eratguard.pro.app
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
+import android.webkit.CookieManager
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.eratguard.pro.dashboard.PremiumDashboard
+import androidx.compose.ui.viewinterop.AndroidView
+import com.eratguard.pro.R
 import com.eratguard.pro.screens.SmsCenterScreen
-import com.eratguard.pro.theme.DashboardTheme
 import kotlinx.coroutines.delay
 
-private enum class EratGuardScreen {
-    SPLASH,
-    DASHBOARD,
-    SMS_CENTER
-}
+private const val ERATGUARD_PANEL =
+    "https://app.eratguard.com/dashboard"
 
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun EratGuardApp() {
 
-    var screen by remember {
-        mutableStateOf(EratGuardScreen.SPLASH)
+    var webView: WebView? by remember { mutableStateOf(null) }
+
+    var showSplash by remember { mutableStateOf(true) }
+    val splashStartedAt = remember { SystemClock.elapsedRealtime() }
+
+    // Compose splash en az 10 saniye görünür.
+    // WebView hazır değilse %99'da bekler; Render kullanıcıya gösterilmez.
+    val minimumSplashMs = 13000L
+
+    var progress by remember { mutableIntStateOf(0) }
+    var statusText by remember {
+        mutableStateOf("ERATGUARD ÇEKİRDEĞİ BAŞLATILIYOR...")
     }
 
-    DashboardTheme {
+    var webReady by remember { mutableStateOf(false) }
 
-        when (screen) {
+    var showNativeSms by remember { mutableStateOf(false) }
 
-            EratGuardScreen.SPLASH -> {
+    val handler = remember {
+        Handler(Looper.getMainLooper())
+    }
 
-                LaunchedEffect(Unit) {
-                    delay(1800)
-                    screen = EratGuardScreen.DASHBOARD
+    /*
+     * Splash progress WebView progress'inden bağımsızdır.
+     * 10 saniyede 0 -> 99 ilerler.
+     * WebView gerçekten hazır olduğunda 100 olur ve kapanır.
+     */
+    LaunchedEffect(showSplash, webReady) {
+        if (!showSplash) return@LaunchedEffect
+
+        while (showSplash) {
+            val elapsed =
+                SystemClock.elapsedRealtime() - splashStartedAt
+
+            val timedProgress =
+                ((elapsed * 99L) / minimumSplashMs)
+                    .coerceIn(0L, 99L)
+                    .toInt()
+
+            progress = timedProgress
+
+            statusText =
+                when {
+                    elapsed < 2200L ->
+                        "ERATGUARD ÇEKİRDEĞİ BAŞLATILIYOR..."
+
+                    elapsed < 4800L ->
+                        "YAPAY ZEKA MODÜLLERİ YÜKLENİYOR..."
+
+                    elapsed < 7200L ->
+                        "GÜVENLİK KATMANLARI DOĞRULANIYOR..."
+
+                    elapsed < minimumSplashMs ->
+                        "KORUMA ÇEKİRDEĞİ HAZIRLANIYOR..."
+
+                    !webReady ->
+                        "GÜVENLİ BAĞLANTI TAMAMLANIYOR..."
+
+                    else ->
+                        "ERATGUARD HAZIR"
                 }
 
-                AnimatedVisibility(
-                    visible = true,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    EratGuardSplash()
-                }
-            }
+            if (elapsed >= minimumSplashMs && webReady) {
+                progress = 100
+                statusText = "ERATGUARD HAZIR"
 
-            EratGuardScreen.DASHBOARD -> {
-
-                PremiumDashboard(
-                    onSmsCenterClick = {
-                        screen = EratGuardScreen.SMS_CENTER
-                    }
+                android.util.Log.i(
+                    "ERATGUARD_TIMING",
+                    "SPLASH_COMPLETE elapsed=${elapsed}ms"
                 )
+
+                delay(450L)
+                showSplash = false
+                break
             }
 
-            EratGuardScreen.SMS_CENTER -> {
-
-                SmsCenterScreen(
-                    onBack = {
-                        screen = EratGuardScreen.DASHBOARD
-                    }
-                )
-            }
+            delay(50L)
         }
     }
-}
 
-@Composable
-private fun EratGuardSplash() {
+    if (showNativeSms) {
+        SmsCenterScreen(
+            onBack = {
+                showNativeSms = false
+            }
+        )
+        return
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF020E07)),
-        contentAlignment = Alignment.Center
+            .background(Color(0xFF02070D))
     ) {
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
 
-            Box(
-                modifier = Modifier
-                    .size(110.dp),
-                contentAlignment = Alignment.Center
-            ) {
+            factory = { context ->
 
-                Text(
-                    text = "🛡",
-                    fontSize = 64.sp
-                )
+                WebView(context).apply {
+
+                    setBackgroundColor(
+                        android.graphics.Color.rgb(2, 7, 13)
+                    )
+
+                    settings.javaScriptEnabled = true
+                    settings.domStorageEnabled = true
+                    settings.loadsImagesAutomatically = true
+                    settings.useWideViewPort = true
+                    settings.loadWithOverviewMode = false
+                    settings.setSupportZoom(false)
+                    settings.builtInZoomControls = false
+                    settings.displayZoomControls = false
+
+                    CookieManager
+                        .getInstance()
+                        .setAcceptCookie(true)
+
+                    CookieManager
+                        .getInstance()
+                        .setAcceptThirdPartyCookies(this, true)
+
+                    webChromeClient =
+                        object : WebChromeClient() {
+                            override fun onProgressChanged(
+                                view: WebView?,
+                                newProgress: Int
+                            ) {
+                                // WebView arka planda yüklenir.
+                                // Splash progress zaman tabanlıdır.
+                            }
+                        }
+
+                    webViewClient =
+                        object : WebViewClient() {
+
+                            override fun shouldOverrideUrlLoading(
+                                view: WebView?,
+                                request: WebResourceRequest?
+                            ): Boolean {
+
+                                val path =
+                                    request?.url?.path.orEmpty()
+
+                                if (
+                                    path.equals(
+                                        "/sms",
+                                        ignoreCase = true
+                                    ) ||
+                                    path.contains(
+                                        "sms-center",
+                                        ignoreCase = true
+                                    ) ||
+                                    path.contains(
+                                        "sms-actions-center",
+                                        ignoreCase = true
+                                    )
+                                ) {
+                                    showNativeSms = true
+                                    return true
+                                }
+
+                                return false
+                            }
+
+                            override fun onPageStarted(
+                                view: WebView?,
+                                url: String?,
+                                favicon: Bitmap?
+                            ) {
+                                if (showSplash) {
+                                    statusText =
+                                        "ERATGUARD AĞINA BAĞLANILIYOR..."
+                                }
+                            }
+
+                            override fun onPageFinished(
+                                view: WebView?,
+                                url: String?
+                            ) {
+                                CookieManager
+                                    .getInstance()
+                                    .flush()
+
+                                /*
+                                 * Render'ın ara yükleme sayfasını
+                                 * kullanıcıya göstermiyoruz.
+                                 */
+                                view?.evaluateJavascript(
+                                    """
+                                    (function() {
+                                        var t =
+                                            (document.body &&
+                                             document.body.innerText)
+                                             ? document.body.innerText
+                                             : '';
+
+                                        return t.substring(0, 4000);
+                                    })();
+                                    """.trimIndent()
+                                ) { result ->
+
+                                    val text =
+                                        result
+                                            .orEmpty()
+                                            .lowercase()
+
+                                    val renderLoading =
+                                        text.contains(
+                                            "application loading"
+                                        ) ||
+                                        text.contains(
+                                            "render.com"
+                                        )
+
+                                    val eratGuardReady =
+                                        text.contains(
+                                            "eratguard"
+                                        ) &&
+                                        (
+                                            text.contains(
+                                                "ana koruma"
+                                            ) ||
+                                            text.contains(
+                                                "pro notification control"
+                                            ) ||
+                                            text.contains(
+                                                "sistem aktif"
+                                            )
+                                        )
+
+                                    if (eratGuardReady) {
+
+                                        if (!webReady) {
+                                            android.util.Log.i(
+                                                "ERATGUARD_TIMING",
+                                                "READY elapsed=" +
+                                                    (SystemClock.elapsedRealtime() - splashStartedAt) +
+                                                    "ms"
+                                            )
+                                        }
+
+                                        webReady = true
+
+                                    } else if (renderLoading) {
+
+                                        android.util.Log.i(
+                                            "ERATGUARD_TIMING",
+                                            "RENDER_LOADING elapsed=" +
+                                                (SystemClock.elapsedRealtime() - splashStartedAt) +
+                                                "ms"
+                                        )
+
+                                        handler.postDelayed({
+
+                                            if (showSplash) {
+                                                view?.loadUrl(
+                                                    ERATGUARD_PANEL
+                                                )
+                                            }
+
+                                        }, 2500)
+
+                                    }
+                                }
+                            }
+                        }
+
+                    webView = this
+
+                    loadUrl(ERATGUARD_PANEL)
+                }
             }
+        )
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "EratGuard",
-                fontSize = 38.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
+        // Yeni PNG'siz Compose/Canvas EratGuard Splash.
+        // WebView arka planda yüklenmeye devam eder.
+        if (showSplash) {
+            EratGuardSplash(
+                progress = progress,
+                statusText = statusText
             )
+        }
+    }
 
-            Spacer(modifier = Modifier.height(8.dp))
+    BackHandler(
+        enabled =
+            !showSplash &&
+            webView?.canGoBack() == true
+    ) {
+        webView?.goBack()
+    }
 
-            Text(
-                text = "AI SPAM KORUMA SİSTEMİ",
-                fontSize = 11.sp,
-                letterSpacing = 3.sp,
-                color = Color(0xFF00FF88)
-            )
+    DisposableEffect(Unit) {
 
-            Spacer(modifier = Modifier.height(32.dp))
+        onDispose {
 
-            CircularProgressIndicator(
-                modifier = Modifier.size(24.dp),
-                color = Color(0xFF00FF88),
-                strokeWidth = 2.dp
-            )
+            handler.removeCallbacksAndMessages(null)
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Text(
-                text = "Güvenlik başlatılıyor...",
-                fontSize = 12.sp,
-                color = Color.White.copy(alpha = 0.55f)
-            )
+            webView?.stopLoading()
+            webView?.destroy()
+            webView = null
         }
     }
 }
