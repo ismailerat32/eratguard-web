@@ -3,6 +3,9 @@ package com.eratguard.pro.screens
 import android.app.Activity
 import android.Manifest
 import android.content.pm.PackageManager
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
@@ -37,6 +40,7 @@ import com.eratguard.pro.contacts.ContactNameResolver
 import com.eratguard.pro.spam.feedback.SpamFeedbackService
 import com.eratguard.pro.spam.sms.SmsRoleManager
 import com.eratguard.pro.spam.store.SpamQuarantineStore
+import com.eratguard.pro.spam.store.SmsInboxReader
 import com.eratguard.pro.theme.DashboardColors
 
 @Composable
@@ -127,11 +131,31 @@ fun SmsCenterScreen(
         }
     }
 
-    val messages =
+    val quarantineMessages =
         remember(refreshKey) {
             SpamQuarantineStore.list(
                 context
             )
+        }
+
+    var showInbox by
+        remember {
+            mutableStateOf(true)
+        }
+
+    val inboxMessages =
+        remember(
+            refreshKey,
+            permissionRefreshKey
+        ) {
+            if (smsPermissionsGranted) {
+                SmsInboxReader.list(
+                    context = context,
+                    limit = 100
+                )
+            } else {
+                emptyList()
+            }
         }
 
     val isDefaultSmsApp =
@@ -288,133 +312,260 @@ fun SmsCenterScreen(
             modifier = Modifier.height(16.dp)
         )
 
-        if (messages.isEmpty()) {
-
-            Text(
-                text = "Karantinada mesaj yok."
-            )
-
-        } else {
-
-            LazyColumn(
-                verticalArrangement =
-                    Arrangement.spacedBy(12.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement =
+                Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                modifier = Modifier.weight(1f),
+                onClick = {
+                    showInbox = true
+                }
             ) {
+                Text(
+                    if (showInbox)
+                        "● Gelen Kutusu"
+                    else
+                        "Gelen Kutusu"
+                )
+            }
 
-                items(
-                    items = messages,
-                    key = { it.id }
-                ) { message ->
+            Button(
+                modifier = Modifier.weight(1f),
+                onClick = {
+                    showInbox = false
+                }
+            ) {
+                Text(
+                    if (!showInbox)
+                        "● Karantina"
+                    else
+                        "Karantina"
+                )
+            }
+        }
 
-                    Card(
-                        modifier =
-                            Modifier.fillMaxWidth(),
-                        colors =
-                            CardDefaults.cardColors(
-                                containerColor =
-                                    DashboardColors.SurfaceLight
-                            )
-                    ) {
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
 
-                        Column(
+        if (showInbox) {
+
+            if (!smsPermissionsGranted) {
+
+                Text(
+                    text =
+                        "Gelen kutusunu görmek için SMS okuma izni gerekli."
+                )
+
+            } else if (inboxMessages.isEmpty()) {
+
+                Text(
+                    text = "Gelen kutusunda mesaj yok."
+                )
+
+            } else {
+
+                LazyColumn(
+                    verticalArrangement =
+                        Arrangement.spacedBy(12.dp)
+                ) {
+                    items(
+                        items = inboxMessages,
+                        key = { "inbox_${it.id}" }
+                    ) { message ->
+
+                        Card(
                             modifier =
-                                Modifier.padding(16.dp)
+                                Modifier.fillMaxWidth(),
+                            colors =
+                                CardDefaults.cardColors(
+                                    containerColor =
+                                        DashboardColors.SurfaceLight
+                                )
                         ) {
-
-                            Text(
-                                text =
-                                    ContactNameResolver.displayName(
-                                        context = context,
-                                        phoneNumber = message.sender
-                                    )
-                            )
-
-                            Spacer(
+                            Column(
                                 modifier =
-                                    Modifier.height(8.dp)
-                            )
-
-                            Text(
-                                text = message.body
-                            )
-
-                            Spacer(
-                                modifier =
-                                    Modifier.height(8.dp)
-                            )
-
-                            Text(
-                                text =
-                                    "Risk: ${message.score} / ${message.verdict}"
-                            )
-
-                            Spacer(
-                                modifier =
-                                    Modifier.height(12.dp)
-                            )
-
-                            Button(
-                                enabled =
-                                    isDefaultSmsApp,
-                                onClick = {
-
-                                    val result =
-                                        SpamFeedbackService
-                                            .markSafe(
-                                                context =
-                                                    context,
-                                                messageId =
-                                                    message.id
-                                            )
-
-                                    statusMessage =
-                                        when (result) {
-
-                                            SpamFeedbackService
-                                                .SafeResult
-                                                .SUCCESS ->
-                                                "Mesaj güvenli olarak işaretlendi ve Inbox'a taşındı."
-
-                                            SpamFeedbackService
-                                                .SafeResult
-                                                .INVALID_ID ->
-                                                "Geçersiz mesaj kimliği."
-
-                                            SpamFeedbackService
-                                                .SafeResult
-                                                .NOT_FOUND ->
-                                                "Mesaj karantinada bulunamadı."
-
-                                            SpamFeedbackService
-                                                .SafeResult
-                                                .INBOX_INSERT_FAILED ->
-                                                "Inbox'a yazılamadı. Mesaj karantinada tutuldu."
-
-                                            SpamFeedbackService
-                                                .SafeResult
-                                                .QUARANTINE_REMOVE_FAILED ->
-                                                "Inbox yazıldı ancak karantina kaydı kaldırılamadı."
-                                        }
-
-                                    if (
-                                        result ==
-                                        SpamFeedbackService
-                                            .SafeResult
-                                            .SUCCESS
-                                    ) {
-                                        refreshKey++
-                                    }
-                                }
+                                    Modifier.padding(16.dp)
                             ) {
+                                Text(
+                                    text =
+                                        ContactNameResolver.displayName(
+                                            context = context,
+                                            phoneNumber = message.sender
+                                        )
+                                )
+
+                                Spacer(
+                                    modifier =
+                                        Modifier.height(8.dp)
+                                )
 
                                 Text(
-                                    "Güvenli - Inbox'a taşı"
+                                    text = message.body
+                                )
+
+                                Spacer(
+                                    modifier =
+                                        Modifier.height(8.dp)
+                                )
+
+                                Text(
+                                    text =
+                                        SimpleDateFormat(
+                                            "dd.MM.yyyy HH:mm",
+                                            Locale.getDefault()
+                                        ).format(
+                                            Date(message.timestamp)
+                                        )
+                                )
+
+                                Spacer(
+                                    modifier =
+                                        Modifier.height(4.dp)
+                                )
+
+                                Text(
+                                    text =
+                                        if (message.read)
+                                            "Okundu"
+                                        else
+                                            "Okunmadı"
                                 )
                             }
                         }
                     }
                 }
             }
+
+        } else {
+
+            if (quarantineMessages.isEmpty()) {
+
+                Text(
+                    text = "Karantinada mesaj yok."
+                )
+
+            } else {
+
+                LazyColumn(
+                    verticalArrangement =
+                        Arrangement.spacedBy(12.dp)
+                ) {
+                    items(
+                        items = quarantineMessages,
+                        key = { "quarantine_${it.id}" }
+                    ) { message ->
+
+                        Card(
+                            modifier =
+                                Modifier.fillMaxWidth(),
+                            colors =
+                                CardDefaults.cardColors(
+                                    containerColor =
+                                        DashboardColors.SurfaceLight
+                                )
+                        ) {
+                            Column(
+                                modifier =
+                                    Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    text =
+                                        ContactNameResolver.displayName(
+                                            context = context,
+                                            phoneNumber = message.sender
+                                        )
+                                )
+
+                                Spacer(
+                                    modifier =
+                                        Modifier.height(8.dp)
+                                )
+
+                                Text(
+                                    text = message.body
+                                )
+
+                                Spacer(
+                                    modifier =
+                                        Modifier.height(8.dp)
+                                )
+
+                                Text(
+                                    text =
+                                        "Risk: ${message.score} / ${message.verdict}"
+                                )
+
+                                Spacer(
+                                    modifier =
+                                        Modifier.height(12.dp)
+                                )
+
+                                Button(
+                                    enabled =
+                                        isDefaultSmsApp,
+                                    onClick = {
+
+                                        val result =
+                                            SpamFeedbackService
+                                                .markSafe(
+                                                    context =
+                                                        context,
+                                                    messageId =
+                                                        message.id
+                                                )
+
+                                        statusMessage =
+                                            when (result) {
+
+                                                SpamFeedbackService
+                                                    .SafeResult
+                                                    .SUCCESS ->
+                                                    "Mesaj güvenli olarak işaretlendi ve Inbox'a taşındı."
+
+                                                SpamFeedbackService
+                                                    .SafeResult
+                                                    .INVALID_ID ->
+                                                    "Geçersiz mesaj kimliği."
+
+                                                SpamFeedbackService
+                                                    .SafeResult
+                                                    .NOT_FOUND ->
+                                                    "Mesaj karantinada bulunamadı."
+
+                                                SpamFeedbackService
+                                                    .SafeResult
+                                                    .INBOX_INSERT_FAILED ->
+                                                    "Inbox'a yazılamadı. Mesaj karantinada tutuldu."
+
+                                                SpamFeedbackService
+                                                    .SafeResult
+                                                    .QUARANTINE_REMOVE_FAILED ->
+                                                    "Inbox yazıldı ancak karantina kaydı kaldırılamadı."
+                                            }
+
+                                        if (
+                                            result ==
+                                            SpamFeedbackService
+                                                .SafeResult
+                                                .SUCCESS
+                                        ) {
+                                            refreshKey++
+                                        }
+                                    }
+                                ) {
+                                    Text(
+                                        "Güvenli - Inbox'a taşı"
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
+
     }
 }
