@@ -765,12 +765,18 @@ def register():
             from datetime import datetime
             now = datetime.now().isoformat(timespec="seconds")
 
+            trial_expires_at = _eg_trial_expiry_v1()
+
             users[username] = {
                 "password": generate_password_hash(password),
                 "role": "user",
                 "active": True,
                 "license_key": "NONE",
-                "expires_at": "2099-01-01",
+                "license_type": "trial",
+                "plan": "trial",
+                "license_status": "trial",
+                "trial_started_at": now,
+                "trial_expires_at": trial_expires_at,
                 "email": email,
                 "created_at": now,
                 "last_seen": now
@@ -965,10 +971,6 @@ def login():
             _eg_login_record_failure(username)
             _eg_audit_log("login_failed", username, {"reason": "inactive_user"}, "warning")
             error = "Bu kullanıcı pasif durumda." if get_lang() == "tr" else "This user is inactive."
-        elif is_date_expired(user.get("expires_at", "2099-12-31")):
-            _eg_login_record_failure(username)
-            _eg_audit_log("login_failed", username, {"reason": "license_expired"}, "warning")
-            error = "Kullanıcı lisans süresi dolmuş." if get_lang() == "tr" else "User license has expired."
         elif check_password_hash(user["password"], password):
             _eg_login_clear_failures(username)
 
@@ -10035,9 +10037,19 @@ try:
 
     def _eg4q_current_user_is_premium():
         try:
-            username = str(_eg4q_session.get("username") or "").strip()
-            role = str(_eg4q_session.get("role") or "").lower().strip()
-            is_admin = bool(_eg4q_session.get("is_admin")) or role == "admin" or username.lower() == "admin"
+            username = str(
+                _eg4q_session.get("username") or ""
+            ).strip()
+
+            role = str(
+                _eg4q_session.get("role") or ""
+            ).lower().strip()
+
+            is_admin = (
+                bool(_eg4q_session.get("is_admin"))
+                or role == "admin"
+                or username.lower() == "admin"
+            )
 
             if is_admin:
                 return True
@@ -10045,67 +10057,35 @@ try:
             if not username:
                 return False
 
-            users = _eg4q_load_json(_EG4Q_USERS_FILE, {})
-            licenses = _eg4q_load_json(_EG4Q_LICENSES_FILE, {})
+            users = _eg4q_load_json(
+                _EG4Q_USERS_FILE,
+                {}
+            )
 
             user = {}
             if isinstance(users, dict):
-                user = users.get(username) or users.get(username.lower()) or {}
+                user = (
+                    users.get(username)
+                    or users.get(username.lower())
+                    or {}
+                )
 
             if not isinstance(user, dict):
-                user = {}
-
-            if user.get("active") is False:
                 return False
 
-            license_type = str(
-                user.get("license_type")
-                or user.get("license_mode")
-                or user.get("plan")
-                or ""
-            ).lower().strip()
+            entitlement = _eg_user_entitlement_v1(
+                user
+            )
 
-            premium_types = {"pro", "premium", "lifetime", "admin", "pro_monthly", "pro_yearly"}
-
-            if license_type in premium_types:
-                return True
-
-            license_key = str(user.get("license_key") or "").strip().upper()
-            if not license_key or license_key == "NONE":
-                return False
-
-            # Kullanıcıda geçerli tarih varsa lisanslı kabul et.
-            for date_key in ("expires_at", "license_expiry", "expiry"):
-                if _eg4q_date_active(user.get(date_key)):
-                    return True
-
-            if isinstance(licenses, dict):
-                lic = licenses.get(license_key)
-                if isinstance(lic, dict):
-                    status = str(lic.get("status") or "").lower()
-                    used = lic.get("used")
-                    lic_user = str(lic.get("username") or lic.get("used_by") or "").strip()
-
-                    lic_type = str(
-                        lic.get("license_type")
-                        or lic.get("type")
-                        or lic.get("plan")
-                        or ""
-                    ).lower().strip()
-
-                    if lic_type in premium_types:
-                        if status in ("active", "used", "approved") or used is True or lic_user == username:
-                            return True
-
-                    for date_key in ("license_expiry", "expiry", "expires_at"):
-                        if _eg4q_date_active(lic.get(date_key)):
-                            if status in ("active", "used", "approved") or used is True or lic_user == username:
-                                return True
-
-            return False
+            return bool(
+                entitlement.get("premium")
+            )
 
         except Exception as _eg4q_premium_err:
-            print("ERATGUARD STAGE4Q PREMIUM CHECK ERROR:", _eg4q_premium_err)
+            print(
+                "ERATGUARD STAGE4Q PREMIUM CHECK ERROR:",
+                _eg4q_premium_err
+            )
             return False
 
     def _eg4q_load_filtered_notifications():
@@ -18058,16 +18038,25 @@ def _eg_vites2e_force_report_center():
 @app.after_request
 def _eg_vites2e_force_reports_after_response(response):
     try:
-        if request.path == "/u/reports":
-            html = _eg_vites2e_report_center_html()
-            response.set_data(html)
-            response.status_code = 200
-            response.headers["Content-Type"] = "text/html; charset=utf-8"
-            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-            response.headers["Pragma"] = "no-cache"
-            response.headers["Expires"] = "0"
+        if request.path != "/u/reports":
+            return response
+
+        # SECURITY BOUNDARY:
+        # Auth / entitlement / redirect cevaplarini ASLA ezme.
+        if response.status_code != 200:
+            return response
+
+        html = _eg_vites2e_report_center_html()
+        response.set_data(html)
+        response.status_code = 200
+        response.headers["Content-Type"] = "text/html; charset=utf-8"
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+
     except Exception:
         pass
+
     return response
 # ===== ERATGUARD VITES-2E FORCE AFTER RESPONSE END =====
 
@@ -19154,6 +19143,12 @@ html,body{{
   </div>
 
   <a class="eg-back" href="/u/eg-panel">← Ana Ekrana Dön</a>
+
+  <div class="eg-actions" style="margin-top:18px;">
+    <a class="eg-btn" href="/logout">
+      Oturumu Kapat <span>→</span>
+    </a>
+  </div>
 
   <section class="eg-delete-account">
     <h3>⚠️ Hesap ve Veriler</h3>
@@ -22725,6 +22720,29 @@ def _eg_canonical_apply_plan_to_user_v1(user, raw_plan, now=None):
     user["license_type"] = info["license_type"]
     user["expires_at"] = expiry
     user["license_expiry"] = expiry
+
+    # Paid entitlement permanently consumes any old trial.
+    # A paid plan must never fall back to a previous trial
+    # after the paid entitlement expires.
+    if info["license_type"] in ("pro", "lifetime"):
+        trial_started_at = str(
+            user.get("trial_started_at") or ""
+        ).strip()
+
+        trial_expires_at = str(
+            user.get("trial_expires_at") or ""
+        ).strip()
+
+        if trial_started_at or trial_expires_at:
+            from datetime import datetime as _eg_trial_datetime_v2
+
+            user["trial_consumed_at"] = (
+                _eg_trial_datetime_v2.now()
+                .isoformat(timespec="seconds")
+            )
+
+        user.pop("trial_started_at", None)
+        user.pop("trial_expires_at", None)
 
     return user
 
@@ -28393,17 +28411,8 @@ def eratguard_mobile_login():
                 "message": "Bu kullanıcı pasif durumda."
             }), 403
 
-        expires_at = user.get(
-            "expires_at",
-            user.get("license_expiry", "2099-12-31")
-        )
-
-        if is_date_expired(expires_at):
-            return jsonify({
-                "ok": False,
-                "error": "license_expired",
-                "message": "Kullanıcı lisans süresi dolmuş."
-            }), 403
+        entitlement = _eg_user_entitlement_v1(user)
+        expires_at = entitlement.get("expires_at", "")
 
         stored_password = str(
             user.get("password")
@@ -28519,19 +28528,24 @@ def eratguard_mobile_login():
                 "email": user.get("email", ""),
                 "role": user.get("role", "user"),
                 "premium": bool(
-                    user.get("premium")
-                    or user.get("is_premium")
+                    entitlement.get("premium")
                 ),
-                "plan": user.get(
-                    "plan",
-                    user.get("license_type", "")
+                "plan": entitlement.get(
+                    "tier",
+                    "FREE"
                 ),
-                "license_status": user.get(
-                    "license_status",
-                    user.get("license_mode", "")
+                "license_status": entitlement.get(
+                    "tier",
+                    "FREE"
+                ).lower(),
+                "license_expiry": entitlement.get(
+                    "expires_at",
+                    ""
                 ),
-                "license_expiry": expires_at,
-                "license_label": user.get("license_label", "")
+                "license_label": entitlement.get(
+                    "tier",
+                    "FREE"
+                )
             }
         }), 200
 
@@ -29426,6 +29440,446 @@ except Exception as e:
 # =============================================================================
 
 
+# =====================================================================
+# ERATGUARD USER ENTITLEMENT V1
+# Trial -> Free -> Paid PRO
+#
+# Rules:
+# - New users receive 14 days of full PRO trial.
+# - Trial expiry NEVER disables the account.
+# - Expired paid licenses fall back to FREE.
+# - Lifetime remains permanently premium.
+# - Admin remains premium.
+# - Commercial plan/payment model remains untouched.
+# =====================================================================
+
+ERATGUARD_TRIAL_DAYS_V1 = 14
+
+
+def _eg_entitlement_date_v1(value):
+    from datetime import datetime
+
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+
+    try:
+        return datetime.strptime(raw[:10], "%Y-%m-%d").date()
+    except Exception:
+        return None
+
+
+def _eg_entitlement_date_active_v1(value, today=None):
+    from datetime import datetime
+
+    expiry = _eg_entitlement_date_v1(value)
+    if expiry is None:
+        return False
+
+    current = today or datetime.now().date()
+    return expiry >= current
+
+
+def _eg_trial_expiry_v1(start=None):
+    from datetime import datetime, timedelta
+
+    base = start or datetime.now()
+
+    if hasattr(base, "date"):
+        base = base.date()
+
+    return (base + timedelta(
+        days=ERATGUARD_TRIAL_DAYS_V1
+    )).isoformat()
+
+
+def _eg_user_entitlement_v1(user, today=None):
+    """
+    Read-only entitlement resolver.
+
+    Returns:
+      tier: ADMIN / PRO / TRIAL / FREE
+      premium: full premium access
+      trial_active: trial currently valid
+      paid: paid commercial entitlement
+      expires_at: effective entitlement expiry
+    """
+    from datetime import datetime
+
+    if not isinstance(user, dict):
+        user = {}
+
+    current = today or datetime.now().date()
+
+    role = str(
+        user.get("role") or ""
+    ).strip().lower()
+
+    username = str(
+        user.get("username") or ""
+    ).strip().lower()
+
+    if role == "admin" or username == "admin":
+        return {
+            "tier": "ADMIN",
+            "premium": True,
+            "trial_active": False,
+            "paid": False,
+            "expires_at": "2099-12-31",
+        }
+
+    if user.get("active") is False:
+        return {
+            "tier": "FREE",
+            "premium": False,
+            "trial_active": False,
+            "paid": False,
+            "expires_at": "",
+        }
+
+    license_type = str(
+        user.get("license_type")
+        or user.get("license_mode")
+        or ""
+    ).strip().lower()
+
+    plan = str(
+        user.get("plan") or ""
+    ).strip().lower()
+
+    license_key = str(
+        user.get("license_key") or ""
+    ).strip().upper()
+
+    paid_types = {
+        "pro",
+        "premium",
+        "paid",
+        "pro_monthly",
+        "pro_yearly",
+        "lifetime",
+    }
+
+    paid_plans = {
+        "starter_monthly",
+        "pro_monthly",
+        "pro_yearly",
+        "yearly",
+        "lifetime",
+    }
+
+    if license_type == "lifetime" or plan == "lifetime":
+        return {
+            "tier": "PRO",
+            "premium": True,
+            "trial_active": False,
+            "paid": True,
+            "expires_at": "2099-12-31",
+        }
+
+    paid_candidate = (
+        license_type in paid_types
+        or plan in paid_plans
+        or (license_key not in ("", "NONE"))
+    )
+
+    paid_expiry = (
+        user.get("license_expiry")
+        or user.get("expires_at")
+        or ""
+    )
+
+    if (
+        paid_candidate
+        and _eg_entitlement_date_active_v1(
+            paid_expiry,
+            today=current
+        )
+    ):
+        return {
+            "tier": "PRO",
+            "premium": True,
+            "trial_active": False,
+            "paid": True,
+            "expires_at": str(paid_expiry),
+        }
+
+    trial_consumed = bool(
+        str(
+            user.get("trial_consumed_at")
+            or ""
+        ).strip()
+    )
+
+    trial_expiry = (
+        user.get("trial_expires_at")
+        or ""
+    )
+
+    if (
+        not trial_consumed
+        and _eg_entitlement_date_active_v1(
+            trial_expiry,
+            today=current
+        )
+    ):
+        return {
+            "tier": "TRIAL",
+            "premium": True,
+            "trial_active": True,
+            "paid": False,
+            "expires_at": str(trial_expiry),
+        }
+
+    return {
+        "tier": "FREE",
+        "premium": False,
+        "trial_active": False,
+        "paid": False,
+        "expires_at": "",
+    }
+
+
+def _eg_user_has_premium_v1(user):
+    return bool(
+        _eg_user_entitlement_v1(user).get("premium")
+    )
+
+
+print(
+    "ERATGUARD USER ENTITLEMENT V1 ACTIVE: "
+    "TRIAL -> FREE -> PAID PRO"
+)
+
+
+# =====================================================================
+# ERATGUARD PRO ACCESS GUARD V1
+# TRIAL / PRO / ADMIN -> allowed
+# FREE -> AI Analysis + Reports locked
+# =====================================================================
+
+_EG_PRO_PATHS_V1 = {
+    "/analysis",
+    "/u/analysis",
+    "/u/analysis/check",
+    "/report",
+    "/reports",
+    "/u/reports",
+}
+
+
+def _eg_current_user_entitlement_v1():
+    username = str(
+        session.get("username") or ""
+    ).strip()
+
+    role = str(
+        session.get("role") or ""
+    ).strip().lower()
+
+    if role == "admin" or username.lower() == "admin":
+        return {
+            "tier": "ADMIN",
+            "premium": True,
+            "trial_active": False,
+            "paid": False,
+            "expires_at": "2099-12-31",
+        }
+
+    if not username:
+        return {
+            "tier": "FREE",
+            "premium": False,
+            "trial_active": False,
+            "paid": False,
+            "expires_at": "",
+        }
+
+    users = load_users()
+    user = users.get(username)
+
+    if not isinstance(user, dict):
+        return {
+            "tier": "FREE",
+            "premium": False,
+            "trial_active": False,
+            "paid": False,
+            "expires_at": "",
+        }
+
+    return _eg_user_entitlement_v1(user)
+
+
+def _eg_pro_locked_page_v1(entitlement):
+    tier = str(
+        entitlement.get("tier") or "FREE"
+    ).upper()
+
+    return """
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1">
+<title>EratGuard PRO</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ min-height:100vh;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ padding:24px;
+ background:#01070c;
+ color:#d9f8ff;
+ font-family:Arial,sans-serif
+}
+.card{
+ width:100%;
+ max-width:520px;
+ padding:28px 22px;
+ border:1px solid rgba(0,231,255,.42);
+ border-radius:16px;
+ background:#020a10;
+ text-align:center
+}
+.lock{
+ font-size:46px;
+ margin-bottom:10px
+}
+h1{
+ margin:0 0 12px;
+ font-size:24px
+}
+p{
+ color:#8fb8c8;
+ line-height:1.55
+}
+.badge{
+ display:inline-block;
+ margin:6px 0 18px;
+ padding:7px 12px;
+ border:1px solid rgba(0,231,255,.35);
+ border-radius:999px;
+ color:#00e7ff
+}
+a{
+ display:block;
+ margin-top:12px;
+ padding:13px 16px;
+ border-radius:10px;
+ text-decoration:none;
+ font-weight:700
+}
+.pro{
+ background:#00e7ff;
+ color:#01070c
+}
+.back{
+ border:1px solid rgba(143,184,200,.35);
+ color:#d9f8ff
+}
+</style>
+</head>
+<body>
+<div class="card">
+ <div class="lock">🔒</div>
+ <h1>PRO Özelliği</h1>
+ <div class="badge">Mevcut Plan: """ + tier + """</div>
+ <p>
+  Bu bölüm EratGuard TRIAL veya PRO üyeliğinde kullanılabilir.
+  Temel güvenlik ve SMS korumasını FREE planında kullanmaya
+  devam edebilirsiniz.
+ </p>
+ <a class="pro" href="/pricing">PRO'ya Geç</a>
+ <a class="back" href="/dashboard">Panele Dön</a>
+</div>
+</body>
+</html>
+""", 403
+
+
+@app.before_request
+def _eg_pro_access_guard_v1():
+    path = request.path.rstrip("/") or "/"
+
+    if path not in _EG_PRO_PATHS_V1:
+        return None
+
+    # Önce normal auth katmanı çalışsın:
+    # giriş yapılmamış kullanıcı burada premium ekranı görmemeli.
+    if not (
+        session.get("logged_in")
+        and session.get("username")
+    ):
+        return None
+
+    entitlement = _eg_current_user_entitlement_v1()
+
+    if entitlement.get("premium"):
+        return None
+
+    return _eg_pro_locked_page_v1(
+        entitlement
+    )
+
+
+print(
+    "ERATGUARD PRO ACCESS GUARD V1 ACTIVE: "
+    "AI ANALYSIS + REPORTS"
+)
+
+
+# =====================================================================
+# ERATGUARD PRO ACCESS GUARD PRIORITY V2
+#
+# Auth guard first, entitlement guard immediately after it.
+# Legacy UI before_request bridges must not bypass PRO access control.
+# =====================================================================
+
+try:
+    _eg_pro_before_v2 = app.before_request_funcs.get(None, [])
+
+    if _eg_pro_access_guard_v1 in _eg_pro_before_v2:
+        _eg_pro_before_v2.remove(
+            _eg_pro_access_guard_v1
+        )
+
+    _eg_auth_guard_index_v2 = next(
+        (
+            i for i, fn in enumerate(_eg_pro_before_v2)
+            if getattr(fn, "__name__", "") ==
+            "_eg_strict_user_auth_guard_final"
+        ),
+        None,
+    )
+
+    if _eg_auth_guard_index_v2 is None:
+        raise RuntimeError(
+            "strict user auth guard bulunamadi"
+        )
+
+    _eg_pro_before_v2.insert(
+        _eg_auth_guard_index_v2 + 1,
+        _eg_pro_access_guard_v1,
+    )
+
+    print(
+        "ERATGUARD PRO ACCESS GUARD PRIORITY V2 ACTIVE: "
+        "AUTH -> PRO -> LEGACY UI"
+    )
+
+except Exception as _eg_pro_priority_error_v2:
+    print(
+        "ERATGUARD PRO ACCESS GUARD PRIORITY V2 ERROR:",
+        _eg_pro_priority_error_v2,
+    )
+    raise
+
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
@@ -29433,3 +29887,844 @@ if __name__ == "__main__":
 # =============================================================================
 # ERATGUARD PHASE 7D.18A END
 # =============================================================================
+
+# =====================================================================
+# ERATGUARD LICENSE ENTITLEMENT UI V3
+# Canonical display model:
+# TRIAL -> full PRO during trial
+# FREE  -> core protection remains available, premium AI/reports limited
+# PRO   -> paid commercial entitlement
+# LIFE  -> display "Ömür Boyu", never expose 2099 sentinel
+#
+# POST /u/license is intentionally untouched.
+# Canonical before_request activation lock remains authoritative.
+# =====================================================================
+
+def _eg_license_ui_info_v3(username):
+    from datetime import datetime
+
+    users = load_users()
+
+    if not isinstance(users, dict):
+        users = {}
+
+    user = users.get(username, {})
+
+    if not isinstance(user, dict):
+        user = {}
+
+    entitlement = _eg_user_entitlement_v1(user)
+
+    tier = str(
+        entitlement.get("tier") or "FREE"
+    ).strip().upper()
+
+    expiry = str(
+        entitlement.get("expires_at") or ""
+    ).strip()
+
+    license_key = str(
+        user.get("license_key")
+        or user.get("license")
+        or user.get("license_code")
+        or ""
+    ).strip()
+
+    plan_key = str(
+        user.get("plan")
+        or user.get("license_type")
+        or ""
+    ).strip().lower()
+
+    # -------------------------------------------------------------
+    # Canonical plan / tier labels
+    # -------------------------------------------------------------
+
+    if tier == "ADMIN":
+        plan_label = "EratGuard Admin"
+        status_label = "AKTİF"
+        expiry_label = "Sınırsız"
+        days_label = "∞"
+
+    elif tier == "TRIAL":
+        plan_label = "PRO Deneme"
+        status_label = "DENEME"
+
+        expiry_label = expiry or "—"
+
+        try:
+            exp = datetime.fromisoformat(expiry[:10]).date()
+            today = datetime.now().date()
+            days_label = str(max(0, (exp - today).days))
+        except Exception:
+            days_label = "—"
+
+    elif tier == "PRO":
+        status_label = "AKTİF"
+
+        if plan_key == "lifetime":
+            plan_label = "Lifetime Shield"
+            expiry_label = "Ömür Boyu"
+            days_label = "∞"
+
+        else:
+            try:
+                info = _eg_canonical_plan_v1(plan_key)
+                plan_label = str(
+                    info.get("label") or "EratGuard PRO"
+                )
+            except Exception:
+                plan_label = "EratGuard PRO"
+
+            expiry_label = expiry or "—"
+
+            try:
+                exp = datetime.fromisoformat(expiry[:10]).date()
+                today = datetime.now().date()
+                days_label = str(max(0, (exp - today).days))
+            except Exception:
+                days_label = "—"
+
+    else:
+        plan_label = "EratGuard FREE"
+        status_label = "FREE"
+        expiry_label = "—"
+        days_label = "—"
+
+    # 2099 is an internal lifetime sentinel only.
+    if expiry_label.startswith("2099-"):
+        expiry_label = "Ömür Boyu"
+        days_label = "∞"
+
+    # Trial has full PRO access while active.
+    premium_open = bool(
+        entitlement.get("premium")
+    )
+
+    # Core protection remains available on FREE.
+    core_access = "Açık"
+
+    # Premium areas follow entitlement.
+    premium_access = (
+        "Açık"
+        if premium_open
+        else "PRO"
+    )
+
+    return {
+        "username": username,
+        "tier": tier,
+        "plan": plan_label,
+        "status": status_label,
+        "expiry": expiry_label,
+        "days_left": days_label,
+        "license_key": (
+            license_key
+            if license_key not in ("", "NONE")
+            else "—"
+        ),
+        "core_access": core_access,
+        "premium_access": premium_access,
+        "premium": premium_open,
+    }
+
+
+# Patch only the active ULD2 GET display data source.
+# POST continues through the canonical activation before_request lock.
+_eg_uld2_find_user_license = _eg_license_ui_info_v3
+
+
+# Patch ULD2 renderer so core and premium permissions are displayed
+# independently without replacing the existing visual design.
+
+_eg_license_ui_v3_original_route = _eg_uld2_license_route
+
+
+def _eg_license_ui_route_v3():
+    # POST is deliberately delegated unchanged.
+    if str(request.method).upper() == "POST":
+        return _eg_license_ui_v3_original_route()
+
+    if not (
+        session.get("logged_in")
+        and session.get("username")
+    ):
+        return redirect("/login")
+
+    username = str(
+        session.get("username") or "user"
+    )
+
+    info = _eg_license_ui_info_v3(username)
+
+    response = _eg_license_ui_v3_original_route()
+
+    try:
+        response = _eg_uld2_make_response(response)
+
+        body = response.get_data(as_text=True)
+
+        # The original ULD2 renderer has already inserted
+        # info["premium"] into all permission chips.
+        #
+        # Replace the resulting permission section with the
+        # canonical FREE/TRIAL/PRO split.
+
+        marker_start = '<div class="section-title">YETKİLER</div>'
+        marker_end = '</section>'
+
+        pos = body.find(marker_start)
+
+        if pos >= 0:
+            section_end = body.find(
+                marker_end,
+                pos
+            )
+
+            if section_end >= 0:
+                section_end += len(marker_end)
+
+                permission_html = f'''
+<div class="section-title">YETKİLER</div>
+<section class="perms">
+  <div class="chip"><span>Koruma</span><b>{_eg_uld2_safe(info["core_access"])}</b></div>
+  <div class="chip"><span>AI Analiz</span><b>{_eg_uld2_safe(info["premium_access"])}</b></div>
+  <div class="chip"><span>Rapor</span><b>{_eg_uld2_safe(info["premium_access"])}</b></div>
+  <div class="chip"><span>Güvenli Liste</span><b>{_eg_uld2_safe(info["core_access"])}</b></div>
+  <div class="chip"><span>Blok Liste</span><b>{_eg_uld2_safe(info["core_access"])}</b></div>
+  <div class="chip"><span>Bildirim</span><b>{_eg_uld2_safe(info["core_access"])}</b></div>
+</section>'''
+
+                body = (
+                    body[:pos]
+                    + permission_html
+                    + body[section_end:]
+                )
+
+        # Add effective expiry under the remaining-days card.
+        old = (
+            '<div class="card"><b>'
+            + _eg_uld2_safe(info["days_left"])
+            + '</b><span>Kalan gün</span></div>'
+        )
+
+        new = (
+            '<div class="card"><b>'
+            + _eg_uld2_safe(info["days_left"])
+            + '</b><span>'
+            + (
+                "Süre: "
+                + _eg_uld2_safe(info["expiry"])
+                if info["tier"] in ("TRIAL", "PRO")
+                else "Kalan gün"
+            )
+            + '</span></div>'
+        )
+
+        body = body.replace(
+            old,
+            new,
+            1
+        )
+
+        response.set_data(body)
+
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, max-age=0"
+        )
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+
+    except Exception as e:
+        print(
+            "ERATGUARD LICENSE ENTITLEMENT UI V3 WARN:",
+            repr(e),
+            flush=True
+        )
+
+    return response
+
+
+try:
+    for _rule in list(app.url_map.iter_rules()):
+        if str(_rule) in (
+            "/u/license",
+            "/u/license/"
+        ):
+            app.view_functions[
+                _rule.endpoint
+            ] = _eg_license_ui_route_v3
+
+    print(
+        "ERATGUARD LICENSE ENTITLEMENT UI V3 ACTIVE: "
+        "TRIAL / FREE / PRO / LIFETIME"
+    )
+
+except Exception as _eg_license_ui_v3_error:
+    print(
+        "ERATGUARD LICENSE ENTITLEMENT UI V3 ERROR:",
+        repr(_eg_license_ui_v3_error),
+        flush=True
+    )
+
+
+# =====================================================================
+# ERATGUARD LICENSE UI FINAL V4
+# Direct canonical GET renderer.
+# POST remains owned by canonical activation before_request lock.
+# =====================================================================
+
+def _eg_license_ui_final_v4():
+    if not (
+        session.get("logged_in")
+        and session.get("username")
+    ):
+        return redirect("/login")
+
+    # Never interfere with canonical POST activation.
+    if str(request.method).upper() == "POST":
+        return _eg_license_ui_v3_original_route()
+
+    username = str(
+        session.get("username") or "user"
+    )
+
+    info = _eg_license_ui_info_v3(username)
+
+    esc = _eg_uld2_safe
+
+    tier = str(info.get("tier") or "FREE")
+    plan = str(info.get("plan") or "EratGuard FREE")
+    status = str(info.get("status") or "FREE")
+    days = str(info.get("days_left") or "—")
+    expiry = str(info.get("expiry") or "—")
+    key = str(info.get("license_key") or "—")
+
+    core = str(info.get("core_access") or "Açık")
+    premium = str(info.get("premium_access") or "PRO")
+
+    if tier == "TRIAL":
+        note = (
+            "14 günlük PRO deneme erişimin aktif. "
+            "Deneme boyunca premium özelliklerin tamamı açık."
+        )
+        time_label = "Kalan gün"
+
+    elif tier == "PRO":
+        note = (
+            "PRO erişimin aktif. Premium özelliklerin "
+            "tamamını kullanabilirsin."
+        )
+
+        if expiry == "Ömür Boyu":
+            time_label = "Lisans süresi"
+            days = "∞"
+        else:
+            time_label = "Kalan gün"
+
+    elif tier == "ADMIN":
+        note = "Yönetici erişimi aktif."
+        time_label = "Erişim"
+        days = "∞"
+
+    else:
+        note = (
+            "Temel koruma özellikleri açık. "
+            "AI Analiz ve Rapor için PRO lisansı gerekir."
+        )
+        time_label = "Plan"
+        days = "FREE"
+
+    # 2099 is internal only.
+    if expiry.startswith("2099-"):
+        expiry = "Ömür Boyu"
+        days = "∞"
+
+    html = f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<title>EratGuard PRO - Lisans</title>
+
+<style>
+:root{{
+  --bg:#020806;
+  --panel:#071a10;
+  --line:rgba(35,255,137,.22);
+  --green:#20ff88;
+  --yellow:#ffdd35;
+  --text:#f5fff8;
+  --muted:rgba(245,255,248,.62);
+}}
+
+*{{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}}
+
+html,body{{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(
+      circle at 80% 0%,
+      rgba(35,255,137,.14),
+      transparent 32%
+    ),
+    var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}}
+
+body{{
+  padding:16px 14px 24px;
+}}
+
+.top{{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+}}
+
+.brand{{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}}
+
+.logo{{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  background:rgba(35,255,137,.12);
+  border:1px solid var(--line);
+  display:grid;
+  place-items:center;
+  font-size:27px;
+}}
+
+.brand h1{{
+  margin:0;
+  font-size:26px;
+  line-height:1;
+  font-weight:950;
+  letter-spacing:-1.2px;
+}}
+
+.brand h1 span{{
+  color:var(--green);
+}}
+
+.brand p{{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-weight:850;
+  font-size:12px;
+}}
+
+.badge{{
+  border:1px solid rgba(255,221,53,.35);
+  color:var(--yellow);
+  background:rgba(255,221,53,.10);
+  padding:9px 12px;
+  border-radius:999px;
+  font-weight:950;
+  font-size:12px;
+  white-space:nowrap;
+}}
+
+.hero,.form,.perms{{
+  border:1px solid var(--line);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(10,36,23,.94),
+      rgba(4,14,9,.94)
+    );
+  border-radius:23px;
+  padding:16px;
+  box-shadow:0 18px 48px rgba(0,0,0,.34);
+}}
+
+.hero-top{{
+  display:flex;
+  align-items:flex-start;
+  gap:13px;
+}}
+
+.ico{{
+  width:54px;
+  height:54px;
+  flex:0 0 54px;
+  border-radius:19px;
+  border:1px solid var(--line);
+  background:rgba(35,255,137,.10);
+  display:grid;
+  place-items:center;
+  font-size:29px;
+}}
+
+.hero h2{{
+  font-size:31px;
+  line-height:1;
+  margin:4px 0 7px;
+  font-weight:950;
+  letter-spacing:-1.4px;
+}}
+
+.hero p{{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.35;
+  font-weight:800;
+}}
+
+.grid{{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:14px;
+}}
+
+.card{{
+  border:1px solid rgba(35,255,137,.17);
+  background:rgba(0,0,0,.23);
+  border-radius:17px;
+  padding:12px;
+  min-height:68px;
+}}
+
+.card b{{
+  display:block;
+  color:var(--yellow);
+  font-size:19px;
+  line-height:1.1;
+  word-break:break-word;
+}}
+
+.card span{{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  font-weight:900;
+  margin-top:6px;
+}}
+
+.wide{{
+  grid-column:1/-1;
+}}
+
+.wide b{{
+  font-size:15px;
+  color:#9fffc4;
+}}
+
+.mini-back{{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:12px;
+  min-height:44px;
+  width:100%;
+  border-radius:16px;
+  color:var(--text);
+  text-decoration:none;
+  font-weight:950;
+  background:rgba(255,255,255,.075);
+  border:1px solid rgba(255,255,255,.09);
+}}
+
+.section-title{{
+  font-size:18px;
+  letter-spacing:6px;
+  font-weight:950;
+  margin:22px 0 10px;
+}}
+
+.form{{
+  padding:14px;
+}}
+
+.form label{{
+  display:block;
+  font-size:15px;
+  font-weight:950;
+  margin-bottom:8px;
+}}
+
+.form input{{
+  width:100%;
+  height:52px;
+  border-radius:16px;
+  border:1px solid rgba(35,255,137,.22);
+  background:rgba(0,0,0,.22);
+  color:var(--text);
+  font-size:15px;
+  font-weight:850;
+  padding:0 13px;
+  outline:none;
+}}
+
+.form input::placeholder{{
+  color:rgba(245,255,248,.34);
+}}
+
+.form button{{
+  width:100%;
+  height:52px;
+  border:0;
+  border-radius:16px;
+  margin-top:10px;
+  background:
+    linear-gradient(
+      135deg,
+      var(--yellow),
+      var(--green)
+    );
+  font-size:16px;
+  font-weight:950;
+  color:#00180c;
+}}
+
+.perms{{
+  padding:14px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}}
+
+.chip{{
+  min-height:48px;
+  border-radius:15px;
+  border:1px solid rgba(35,255,137,.18);
+  background:rgba(0,0,0,.20);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:10px 11px;
+}}
+
+.chip span{{
+  font-size:13px;
+  font-weight:900;
+  color:var(--muted);
+}}
+
+.chip b{{
+  font-size:13px;
+  font-weight:950;
+  color:#9fffc4;
+}}
+
+.foot{{
+  text-align:center;
+  margin:20px 0 0;
+  color:rgba(245,255,248,.42);
+  font-weight:800;
+  font-size:13px;
+}}
+
+@media(max-width:380px){{
+  .hero h2{{font-size:28px}}
+  .perms{{grid-template-columns:1fr}}
+}}
+</style>
+</head>
+
+<body>
+
+<header class="top">
+  <div class="brand">
+    <div class="logo">🔑</div>
+    <div>
+      <h1>Erat<span>Guard</span></h1>
+      <p>Lisans Merkezi</p>
+    </div>
+  </div>
+
+  <div class="badge">👑 {esc(status)}</div>
+</header>
+
+<section class="hero">
+
+  <div class="hero-top">
+    <div class="ico">🔑</div>
+
+    <div>
+      <h2>{esc(plan)}</h2>
+      <p>{esc(note)}</p>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <b>{esc(status)}</b>
+      <span>Durum</span>
+    </div>
+
+    <div class="card">
+      <b>{esc(days)}</b>
+      <span>{esc(time_label)}</span>
+    </div>
+
+    <div class="card wide">
+      <b>{esc(expiry)}</b>
+      <span>Bitiş / lisans süresi</span>
+    </div>
+
+    <div class="card wide">
+      <b>{esc(key)}</b>
+      <span>Lisans anahtarı</span>
+    </div>
+
+  </div>
+
+  <a class="mini-back" href="/u/eg-panel">
+    ← Ana ekrana dön
+  </a>
+
+</section>
+
+<div class="section-title">AKTİVASYON</div>
+
+<form class="form"
+      method="post"
+      action="/u/license">
+
+  <label>Lisans kodu gir</label>
+
+  <input
+    name="license_key"
+    placeholder="Örn: ERATGUARD-PRO-XXXX-XXXX"
+    autocomplete="off">
+
+  <button type="submit">
+    Lisansı Aktifleştir
+  </button>
+
+</form>
+
+<div class="section-title">YETKİLER</div>
+
+<section class="perms">
+
+  <div class="chip">
+    <span>Koruma</span>
+    <b>{esc(core)}</b>
+  </div>
+
+  <div class="chip">
+    <span>AI Analiz</span>
+    <b>{esc(premium)}</b>
+  </div>
+
+  <div class="chip">
+    <span>Rapor</span>
+    <b>{esc(premium)}</b>
+  </div>
+
+  <div class="chip">
+    <span>Güvenli Liste</span>
+    <b>{esc(core)}</b>
+  </div>
+
+  <div class="chip">
+    <span>Blok Liste</span>
+    <b>{esc(core)}</b>
+  </div>
+
+  <div class="chip">
+    <span>Bildirim</span>
+    <b>{esc(core)}</b>
+  </div>
+
+</section>
+
+<div class="foot">
+  EratGuard PRO - © 2026
+</div>
+
+</body>
+</html>"""
+
+    response = _eg_uld2_make_response(html)
+
+    response.headers["Cache-Control"] = (
+        "no-store, no-cache, must-revalidate, max-age=0"
+    )
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
+
+
+try:
+    for _rule in list(app.url_map.iter_rules()):
+        if str(_rule) in (
+            "/u/license",
+            "/u/license/"
+        ):
+            app.view_functions[
+                _rule.endpoint
+            ] = _eg_license_ui_final_v4
+
+    print(
+        "ERATGUARD LICENSE UI FINAL V4 ACTIVE: "
+        "DIRECT CANONICAL RENDERER"
+    )
+
+except Exception as e:
+    print(
+        "ERATGUARD LICENSE UI FINAL V4 ERROR:",
+        repr(e),
+        flush=True
+    )
+
+
+# =====================================================================
+# ERATGUARD LICENSE AFTER_REQUEST QUARANTINE V5
+#
+# Canonical /u/license is owned by:
+#   _eg_license_ui_final_v4
+#
+# Disable only the obsolete Vites-2F response replacer.
+# Do not touch canonical POST activation.
+# =====================================================================
+
+try:
+    _eg_license_after_v5 = app.after_request_funcs.get(None, [])
+
+    _eg_license_removed_v5 = []
+
+    for _fn in list(_eg_license_after_v5):
+        if getattr(_fn, "__name__", "") == (
+            "_eg_vites2f_force_license_center_after_response"
+        ):
+            _eg_license_after_v5.remove(_fn)
+            _eg_license_removed_v5.append(
+                getattr(_fn, "__name__", "")
+            )
+
+    print(
+        "ERATGUARD LICENSE AFTER_REQUEST QUARANTINE V5 ACTIVE:",
+        ", ".join(_eg_license_removed_v5)
+        if _eg_license_removed_v5
+        else "nothing-to-remove"
+    )
+
+except Exception as _eg_license_after_v5_error:
+    print(
+        "ERATGUARD LICENSE AFTER_REQUEST QUARANTINE V5 ERROR:",
+        repr(_eg_license_after_v5_error),
+        flush=True
+    )
+

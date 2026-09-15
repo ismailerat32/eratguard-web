@@ -275,7 +275,29 @@ fun EratGuardApp() {
                                             "render.com"
                                         )
 
-                                    val eratGuardReady =
+                                    val currentUrl =
+                                        url.orEmpty()
+
+                                    val trustedEratGuardPage =
+                                        try {
+                                            val parsed =
+                                                android.net.Uri.parse(
+                                                    currentUrl
+                                                )
+
+                                            parsed.scheme.equals(
+                                                "https",
+                                                ignoreCase = true
+                                            ) &&
+                                            parsed.host.equals(
+                                                "app.eratguard.com",
+                                                ignoreCase = true
+                                            )
+                                        } catch (_: Exception) {
+                                            false
+                                        }
+
+                                    val eratGuardContentReady =
                                         text.contains(
                                             "eratguard"
                                         ) &&
@@ -290,6 +312,32 @@ fun EratGuardApp() {
                                                 "sistem aktif"
                                             )
                                         )
+
+                                    val authPageReady =
+                                        trustedEratGuardPage &&
+                                        (
+                                            currentUrl.contains(
+                                                "/login",
+                                                ignoreCase = true
+                                            ) ||
+                                            currentUrl.contains(
+                                                "/register",
+                                                ignoreCase = true
+                                            ) ||
+                                            currentUrl.contains(
+                                                "/forgot-password",
+                                                ignoreCase = true
+                                            ) ||
+                                            currentUrl.contains(
+                                                "/reset-password",
+                                                ignoreCase = true
+                                            )
+                                        ) &&
+                                        text.contains("eratguard")
+
+                                    val eratGuardReady =
+                                        eratGuardContentReady ||
+                                        authPageReady
 
                                     if (eratGuardReady) {
 
