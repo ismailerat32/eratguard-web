@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.eratguard.pro.R
+import com.eratguard.pro.domain.shell.EratGuardShellPolicy
 import com.eratguard.pro.screens.SmsCenterScreen
 import kotlinx.coroutines.delay
 
@@ -57,7 +58,10 @@ private const val ERATGUARD_PANEL =
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun EratGuardApp() {
+fun EratGuardApp(
+    openSmsCenter: Boolean = false,
+    onSmsCenterRequestConsumed: () -> Unit = {}
+) {
 
     var webView: WebView? by remember { mutableStateOf(null) }
 
@@ -76,6 +80,14 @@ fun EratGuardApp() {
     var webReady by remember { mutableStateOf(false) }
 
     var showNativeSms by remember { mutableStateOf(false) }
+
+    LaunchedEffect(openSmsCenter) {
+
+        if (openSmsCenter) {
+            showNativeSms = true
+            onSmsCenterRequestConsumed()
+        }
+    }
 
     val handler = remember {
         Handler(Looper.getMainLooper())
@@ -205,18 +217,8 @@ fun EratGuardApp() {
                                     request?.url?.path.orEmpty()
 
                                 if (
-                                    path.equals(
-                                        "/sms",
-                                        ignoreCase = true
-                                    ) ||
-                                    path.contains(
-                                        "sms-center",
-                                        ignoreCase = true
-                                    ) ||
-                                    path.contains(
-                                        "sms-actions-center",
-                                        ignoreCase = true
-                                    )
+                                    EratGuardShellPolicy
+                                        .shouldOpenNativeSms(path)
                                 ) {
                                     showNativeSms = true
                                     return true
@@ -268,76 +270,18 @@ fun EratGuardApp() {
                                             .lowercase()
 
                                     val renderLoading =
-                                        text.contains(
-                                            "application loading"
-                                        ) ||
-                                        text.contains(
-                                            "render.com"
-                                        )
+                                        EratGuardShellPolicy
+                                            .isRenderLoading(text)
 
                                     val currentUrl =
                                         url.orEmpty()
 
-                                    val trustedEratGuardPage =
-                                        try {
-                                            val parsed =
-                                                android.net.Uri.parse(
-                                                    currentUrl
-                                                )
-
-                                            parsed.scheme.equals(
-                                                "https",
-                                                ignoreCase = true
-                                            ) &&
-                                            parsed.host.equals(
-                                                "app.eratguard.com",
-                                                ignoreCase = true
-                                            )
-                                        } catch (_: Exception) {
-                                            false
-                                        }
-
-                                    val eratGuardContentReady =
-                                        text.contains(
-                                            "eratguard"
-                                        ) &&
-                                        (
-                                            text.contains(
-                                                "ana koruma"
-                                            ) ||
-                                            text.contains(
-                                                "pro notification control"
-                                            ) ||
-                                            text.contains(
-                                                "sistem aktif"
-                                            )
-                                        )
-
-                                    val authPageReady =
-                                        trustedEratGuardPage &&
-                                        (
-                                            currentUrl.contains(
-                                                "/login",
-                                                ignoreCase = true
-                                            ) ||
-                                            currentUrl.contains(
-                                                "/register",
-                                                ignoreCase = true
-                                            ) ||
-                                            currentUrl.contains(
-                                                "/forgot-password",
-                                                ignoreCase = true
-                                            ) ||
-                                            currentUrl.contains(
-                                                "/reset-password",
-                                                ignoreCase = true
-                                            )
-                                        ) &&
-                                        text.contains("eratguard")
-
                                     val eratGuardReady =
-                                        eratGuardContentReady ||
-                                        authPageReady
+                                        EratGuardShellPolicy
+                                            .isContentReady(
+                                                url = currentUrl,
+                                                bodyText = text
+                                            )
 
                                     if (eratGuardReady) {
 
@@ -363,8 +307,12 @@ fun EratGuardApp() {
 
                                         handler.postDelayed({
 
-                                            if (showSplash) {
-                                                view?.loadUrl(
+                                            if (
+                                                showSplash &&
+                                                view != null &&
+                                                webView === view
+                                            ) {
+                                                view.loadUrl(
                                                     ERATGUARD_PANEL
                                                 )
                                             }
@@ -382,6 +330,12 @@ fun EratGuardApp() {
                 }
             }
         )
+
+        DisposableEffect(webView) {
+            onDispose {
+                handler.removeCallbacksAndMessages(null)
+            }
+        }
 
         // Yeni PNG'siz Compose/Canvas EratGuard Splash.
         // WebView arka planda yüklenmeye devam eder.

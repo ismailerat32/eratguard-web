@@ -2,782 +2,2339 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EratGuard — Ana Koruma Çekirdeği</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EratGuard – Dashboard</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Orbitron:wght@600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+<!-- ERATGUARD MASTER PANEL M02K FINAL START -->
 <style>
-  :root{
-    --bg-0:#03060a;
-    --bg-1:#060c14;
-    --cyan:#37e6ff;
-    --cyan-dim:#1c8fa6;
-    --ink:#d9f4fb;
-    --ink-dim:#7fa3ad;
-    --line:rgba(55,230,255,0.14);
-    --glass:rgba(12,26,34,0.55);
-    --glass-b:rgba(90,220,255,0.16);
+:root{
+  --bg:#050d16;
+  --panel:#0a1a28;
+  --line:#15384d;
 
-    --n-bell:#ffb454;
-    --n-spam:#3dffb0;
-    --n-brain:#b58bff;
-    --n-report:#37e6ff;
-    --n-radar:#ff8a5c;
-    --n-medal:#ffd166;
-    --n-chat:#4fc3ff;
-    --n-block:#ff6b81;
-  }
+  --cyan:#22d3ee;
+  --green:#22e07a;
+  --orange:#fb923c;
+  --purple:#a855f7;
+  --red:#f43f5e;
+  --yellow:#facc15;
 
-  *{margin:0;padding:0;box-sizing:border-box;}
+  --text:#e6f6ff;
+  --muted:#8fb3c7;
 
-  html,body{
-    background:var(--bg-0);
-    color:var(--ink);
-    font-family:'Rajdhani',sans-serif;
-    overflow-x:hidden;
-    min-height:100%;
-  }
+  box-sizing:border-box;
+}
 
-  body{
-    position:relative;
-    min-height:100vh;
-    padding-bottom:48px;
-  }
+*,*::before,*::after{
+  box-sizing:inherit;
+  margin:0;
+}
 
-  /* ---------- ambient backdrop ---------- */
-  #dust{
-    position:fixed; inset:0;
-    z-index:0;
-    pointer-events:none;
-  }
+html{
+  background:var(--bg);
+}
 
-  .vignette{
-    position:fixed; inset:0;
-    z-index:1;
-    pointer-events:none;
-    background:
-      radial-gradient(ellipse 70% 50% at 50% 38%, rgba(24,70,88,0.35), transparent 60%),
-      radial-gradient(ellipse 120% 80% at 50% 100%, rgba(0,0,0,0.75), transparent 55%),
-      linear-gradient(180deg, #03060a 0%, #050b12 55%, #03070d 100%);
-  }
+body{
+  min-height:100vh;
 
-  .scanlines{
-    position:fixed; inset:0;
-    z-index:2;
-    pointer-events:none;
-    opacity:.05;
-    background:repeating-linear-gradient(180deg, #fff 0px, #fff 1px, transparent 1px, transparent 3px);
-    mix-blend-mode:overlay;
-  }
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));
 
-  main{
-    position:relative;
-    z-index:3;
-    max-width:560px;
-    margin:0 auto;
-    padding:22px 16px 0;
-  }
+  overflow-x:hidden;
 
-  .frame{
-    position:relative;
-    border:1px solid rgba(55,230,255,.14);
-    border-radius:18px;
-    padding:20px 14px 26px;
-  }
-  .frame .corner{
-    position:absolute;
-    width:16px;height:16px;
-    border:1.6px solid var(--cyan);
-    opacity:.75;
-    filter:drop-shadow(0 0 4px rgba(55,230,255,.6));
-  }
-  .frame .corner.tl{top:-1px;left:-1px;border-right:none;border-bottom:none;border-radius:6px 0 0 0;}
-  .frame .corner.tr{top:-1px;right:-1px;border-left:none;border-bottom:none;border-radius:0 6px 0 0;}
-  .frame .corner.bl{bottom:-1px;left:-1px;border-right:none;border-top:none;border-radius:0 0 0 6px;}
-  .frame .corner.br{bottom:-1px;right:-1px;border-left:none;border-top:none;border-radius:0 0 6px 0;}
-  .frame .tag{
-    position:absolute;
-    font-family:'JetBrains Mono',monospace;
-    font-size:8px;letter-spacing:1.5px;
-    color:var(--cyan-dim);
-    opacity:.8;
-  }
-  .frame .tag.tl-tag{top:6px;left:20px;}
-  .frame .tag.tr-tag{top:6px;right:20px;}
+  background:
+    radial-gradient(
+      circle at 50% 38%,
+      rgba(34,211,238,.18),
+      transparent 45%
+    ),
+    linear-gradient(
+      rgba(34,211,238,.05) 1px,
+      transparent 1px
+    ) 0 0/28px 28px,
+    linear-gradient(
+      90deg,
+      rgba(34,211,238,.05) 1px,
+      transparent 1px
+    ) 0 0/28px 28px,
+    var(--bg);
 
-  /* ---------- header ---------- */
-  .brandbar{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    margin-bottom:20px;
-  }
-  .brandmark{
-    width:38px;height:38px;border-radius:11px;
-    background:linear-gradient(145deg,#1a5f73,#0a2530);
-    border:1px solid var(--glass-b);
-    display:flex;align-items:center;justify-content:center;
-    font-family:'JetBrains Mono',monospace;
-    font-weight:700;color:var(--cyan);
-    box-shadow:0 0 18px rgba(55,230,255,0.25), inset 0 0 12px rgba(55,230,255,0.15);
-    flex-shrink:0;
-  }
-  .brandtext .name{
-    font-weight:700;font-size:20px;letter-spacing:.5px;
-    color:#eafcff;
-  }
-  .brandtext .name span{color:var(--cyan);}
-  .brandtext .sub{
-    font-family:'JetBrains Mono',monospace;
-    font-size:9.5px;letter-spacing:2.5px;color:var(--ink-dim);
-    text-transform:uppercase;
-  }
+  color:var(--text);
 
-  /* ---------- top stat cards ---------- */
-  .stat-row{
-    display:grid;
-    grid-template-columns:1fr 1.15fr 1fr;
-    gap:9px;
-    margin-bottom:26px;
-  }
-  .stat-card{
-    background:var(--glass);
-    border:1px solid var(--glass-b);
-    border-radius:14px;
-    padding:12px 10px;
-    text-align:center;
-    backdrop-filter:blur(6px);
-    position:relative;
-    overflow:hidden;
-  }
-  .stat-card::before{
-    content:"";
-    position:absolute; top:0; left:0; right:0; height:1px;
-    background:linear-gradient(90deg,transparent,var(--cyan),transparent);
-    opacity:.6;
-  }
-  .stat-label{
-    font-family:'JetBrains Mono',monospace;
-    font-size:8.5px;letter-spacing:1.8px;
-    color:var(--ink-dim);text-transform:uppercase;
-    margin-bottom:8px;
-  }
-  .spark{
-    display:flex;align-items:flex-end;justify-content:center;
-    gap:2.5px;height:26px;margin-bottom:2px;
-  }
-  .spark i{
-    width:4px;border-radius:1px;
-    background:linear-gradient(180deg,var(--cyan),var(--cyan-dim));
-    box-shadow:0 0 6px rgba(55,230,255,.5);
-    opacity:.85;
-  }
-  .ring-wrap{position:relative;width:58px;height:58px;margin:0 auto 6px;}
-  .ring-wrap svg{transform:rotate(-90deg);filter:drop-shadow(0 0 6px rgba(55,230,255,.55));}
-  .ring-pct{
-    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    font-family:'JetBrains Mono',monospace;font-weight:600;font-size:13px;color:var(--cyan);
-  }
-  .stat-value{
-    font-weight:700;font-size:15px;color:#eafcff;letter-spacing:.3px;
-  }
-  .threat-tag{
-    display:inline-block;margin-top:4px;
-    font-family:'JetBrains Mono',monospace;
-    font-size:12px;font-weight:600;letter-spacing:1px;
-    color:var(--n-spam);
-    text-shadow:0 0 10px rgba(61,255,176,.6);
-  }
+  font-family:"Rajdhani",system-ui,sans-serif;
+}
 
-  /* ---------- core hub ---------- */
-  .hub{
-    position:relative;
-    width:100%;
-    max-width:480px;
-    aspect-ratio:1/1;
-    margin:0 auto;
-  }
+a{
+  -webkit-tap-highlight-color:transparent;
+}
 
-  .beam{
-    position:absolute;
-    left:50%;top:-38px;
-    width:2px;height:64px;
-    transform:translateX(-50%);
-    background:linear-gradient(180deg, transparent, var(--cyan) 70%, var(--cyan));
-    opacity:.55;
-    filter:blur(.3px);
-    z-index:0;
-  }
-  .beam::before{
-    content:"";
-    position:absolute; left:50%; top:0;
-    width:40px;height:40px;
-    transform:translate(-50%,-60%);
-    background:radial-gradient(circle, rgba(55,230,255,.5), transparent 70%);
-  }
+.wrap{
+  width:100%;
+  max-width:460px;
 
-  .ground{
-    position:absolute;
-    left:50%; bottom:-6%;
-    width:92%; height:16%;
-    transform:translateX(-50%);
-    z-index:0;
-    pointer-events:none;
-  }
-  .ground i{
-    position:absolute; inset:0;
-    border-radius:50%;
-    border:1px solid rgba(55,230,255,.22);
-  }
-  .ground i:nth-child(2){inset:14% 8%;border-color:rgba(55,230,255,.32);}
-  .ground i:nth-child(3){inset:28% 18%;border-color:rgba(55,230,255,.16);}
-  .ground::before{
-    content:"";
-    position:absolute; left:50%; top:50%;
-    width:100%; height:220%;
-    transform:translate(-50%,-50%);
-    background:radial-gradient(ellipse 50% 45% at 50% 50%, rgba(55,230,255,.16), transparent 70%);
-  }
-  .hub svg.links{
-    position:absolute;inset:0;width:100%;height:100%;
-    overflow:visible;
-  }
-  .link-path{
-    fill:none;
-    stroke:var(--cyan);
-    stroke-width:1;
-    opacity:.22;
-  }
-  .pulse{
-    fill:var(--cyan);
-    filter:drop-shadow(0 0 4px var(--cyan));
-  }
+  margin:0 auto;
 
+  padding:10px;
+}
+
+.panel{
+  background:
+    linear-gradient(
+      180deg,
+      rgba(14,40,58,.85),
+      rgba(6,20,32,.85)
+    );
+
+  border:1px solid var(--line);
+  border-radius:14px;
+
+  box-shadow:
+    inset 0 0 18px rgba(34,211,238,.06);
+}
+
+.mono{
+  font-family:"Share Tech Mono",monospace;
+  letter-spacing:.12em;
+}
+
+.dot{
+  display:inline-block;
+
+  width:9px;
+  height:9px;
+
+  border-radius:50%;
+
+  background:currentColor;
+
+  box-shadow:
+    0 0 8px currentColor;
+
+  margin-right:6px;
+
+  vertical-align:middle;
+}
+
+
+/* =================================================
+   HEADER
+================================================= */
+
+.header{
+  display:grid;
+
+  grid-template-columns:
+    minmax(0,1fr)
+    auto;
+
+  gap:8px;
+
+  margin-bottom:8px;
+}
+
+.brand{
+  min-width:0;
+
+  display:flex;
+  align-items:center;
+
+  gap:9px;
+
+  padding:9px;
+}
+
+.logo{
+  width:50px;
+  height:50px;
+
+  flex:0 0 50px;
+
+  border-radius:12px;
+  border:2px solid var(--cyan);
+
+  display:grid;
+  place-items:center;
+
+  font:
+    800 27px
+    "Orbitron",
+    sans-serif;
+
+  color:var(--cyan);
+
+  box-shadow:
+    0 0 14px rgba(34,211,238,.5),
+    inset 0 0 10px rgba(34,211,238,.3);
+}
+
+.brand-copy{
+  min-width:0;
+}
+
+.brand h1{
+  font:
+    700 23px
+    "Rajdhani",
+    sans-serif;
+
+  line-height:1;
+}
+
+.brand h1 span{
+  color:var(--cyan);
+}
+
+.brand small{
+  display:block;
+
+  margin-top:3px;
+
+  color:var(--muted);
+
+  font-size:8px;
+
+  white-space:nowrap;
+}
+
+.status{
+  min-width:96px;
+
+  margin-left:auto;
+
+  padding:6px 7px;
+
+  border:1px solid var(--line);
+  border-radius:10px;
+
+  color:var(--muted);
+
+  font-size:8px;
+  line-height:1.2;
+}
+
+.status b{
+  display:block;
+
+  margin-bottom:2px;
+
+  color:var(--green);
+
+  font-size:9px;
+
+  white-space:nowrap;
+}
+
+.clock{
+  width:88px;
+
+  padding:8px 8px;
+
+  text-align:center;
+}
+
+.clock .date{
+  color:var(--muted);
+
+  font-size:8px;
+
+  white-space:nowrap;
+}
+
+.clock .time{
+  font:
+    700 23px
+    "Rajdhani";
+
+  line-height:1.1;
+}
+
+.clock .on{
+  color:var(--green);
+
+  font-size:9px;
+}
+
+
+/* =================================================
+   TOP STATS
+================================================= */
+
+.stats{
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,minmax(0,1fr));
+
+  gap:8px;
+}
+
+.stat{
+  position:relative;
+
+  min-width:0;
+  min-height:90px;
+
+  padding:9px;
+}
+
+.stat .lbl{
+  color:var(--muted);
+
+  font-size:10px;
+}
+
+.stat .big{
+  margin-top:2px;
+
+  font:
+    700 27px
+    "Rajdhani";
+
+  line-height:1;
+}
+
+.stat-note{
+  margin-top:4px;
+
+  color:var(--muted);
+
+  font-size:9px;
+}
+
+.ring{
+  --p:{{ metrics.score }};
+
+  width:56px;
+  height:56px;
+
+  margin-top:4px;
+
+  border-radius:50%;
+
+  display:grid;
+  place-items:center;
+
+  background:
+    conic-gradient(
+      var(--cyan) calc(var(--p)*1%),
+      #12304a 0
+    );
+}
+
+.ring span{
+  width:44px;
+  height:44px;
+
+  border-radius:50%;
+
+  display:grid;
+  place-items:center;
+
+  background:var(--panel);
+
+  font-weight:700;
+}
+
+.security-state{
+  margin-top:3px;
+
+  color:var(--green);
+
+  font-size:9px;
+}
+
+.threat{
+  margin-top:8px;
+
+  color:var(--yellow);
+
+  font:
+    800 19px
+    "Rajdhani";
+
+  line-height:1;
+
+  text-shadow:
+    0 0 10px rgba(250,204,21,.5);
+}
+
+.spark{
+  position:absolute;
+
+  left:8px;
+  right:8px;
+  bottom:8px;
+
+  height:28px;
+
+  display:flex;
+  align-items:flex-end;
+
+  gap:3px;
+}
+
+.spark i{
+  display:block;
+
+  flex:1;
+
+  min-height:2px;
+
+  border-radius:2px;
+
+  background:var(--cyan);
+
+  box-shadow:
+    0 0 5px rgba(34,211,238,.5);
+}
+
+
+/* =================================================
+   MASTER ORBIT
+   CLAUDE REFERENCE GEOMETRY
+================================================= */
+
+.orbit{
+  position:relative;
+
+  width:100%;
+
+  aspect-ratio:1 / 1.08;
+
+  margin:6px 0;
+}
+
+.orbit-lines{
+  position:absolute;
+
+  inset:0;
+
+  width:100%;
+  height:100%;
+
+  pointer-events:none;
+}
+
+.core{
+  position:absolute;
+
+  left:50%;
+  top:50%;
+
+  width:46%;
+
+  aspect-ratio:1;
+
+  transform:
+    translate(-50%,-50%);
+
+  border-radius:50%;
+  border:3px solid var(--cyan);
+
+  display:grid;
+  place-items:center;
+
+  text-align:center;
+
+  background:
+    radial-gradient(
+      circle,
+      #0b2a3c 0%,
+      #06131f 70%
+    );
+
+  box-shadow:
+    0 0 30px rgba(34,211,238,.6),
+    inset 0 0 30px rgba(34,211,238,.35),
+    0 0 0 10px rgba(34,211,238,.08),
+    0 0 0 22px rgba(34,211,238,.04);
+
+  z-index:2;
+}
+
+.core .E{
+  color:#9ef3ff;
+
+  font:
+    800 clamp(40px,12vw,58px)
+    "Orbitron";
+
+  line-height:1;
+
+  text-shadow:
+    0 0 16px var(--cyan);
+}
+
+.core .t{
+  color:var(--cyan);
+
+  font:
+    800 clamp(16px,5vw,22px)
+    "Orbitron";
+}
+
+.core small{
+  display:block;
+
+  color:var(--muted);
+
+  font-size:8px;
+}
+
+.core .on{
+  margin-top:3px;
+
+  color:var(--green);
+
+  font-size:9px;
+}
+
+@media (prefers-reduced-motion:no-preference){
   .core{
-    position:absolute;left:50%;top:50%;
-    width:29%;aspect-ratio:1/1;
-    transform:translate(-50%,-50%);
-    border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(circle at 50% 42%, rgba(55,230,255,.16), rgba(4,10,14,.9) 70%);
-    border:1px solid rgba(55,230,255,.55);
+    animation:
+      egCorePulse
+      3s ease-in-out
+      infinite;
+  }
+}
+
+@keyframes egCorePulse{
+  50%{
     box-shadow:
-      0 0 30px rgba(55,230,255,.35),
-      inset 0 0 24px rgba(55,230,255,.18);
-    z-index:5;
+      0 0 44px rgba(34,211,238,.85),
+      inset 0 0 36px rgba(34,211,238,.45),
+      0 0 0 12px rgba(34,211,238,.1),
+      0 0 0 26px rgba(34,211,238,.05);
   }
-  .core::before,.core::after{
-    content:"";position:absolute;border-radius:50%;
-    border:1px solid rgba(55,230,255,.28);
-  }
-  .core::before{inset:-14%;animation:spin 14s linear infinite;border-style:dashed;}
-  .core::after{inset:-26%;animation:spin 22s linear infinite reverse;opacity:.5;}
-  .core-label{
-    font-family:'JetBrains Mono',monospace;
-    font-weight:700;font-size:clamp(13px,3.6vw,19px);
-    color:var(--cyan);letter-spacing:2px;
-    text-shadow:0 0 14px rgba(55,230,255,.8);
-  }
-  @keyframes spin{to{transform:rotate(360deg);}}
+}
 
-  .node{
-    position:absolute;
-    width:23%;aspect-ratio:1/1;
-    transform:translate(-50%,-50%);
-    display:flex;align-items:center;justify-content:center;
-    border-radius:50%;
-    z-index:6;
-    cursor:pointer;
-  }
-  .node .ring{
-    position:absolute;inset:0;border-radius:50%;
-    border:1.4px solid var(--c);
-    box-shadow:0 0 16px -2px var(--c), inset 0 0 12px -4px var(--c);
-    background:radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--c) 16%, transparent), rgba(5,10,13,.86) 72%);
-    transition:box-shadow .25s ease, transform .25s ease;
-  }
-  .node:active .ring{transform:scale(.94);box-shadow:0 0 26px 0 var(--c), inset 0 0 16px -2px var(--c);}
-  .node svg{width:38%;height:38%;position:relative;z-index:2;stroke:var(--c);filter:drop-shadow(0 0 5px var(--c));}
-  .node-label{
-    position:absolute;
-    top:104%;left:50%;transform:translateX(-50%);
-    white-space:nowrap;
-    font-family:'JetBrains Mono',monospace;
-    font-size:clamp(8.5px,2.1vw,10.5px);
-    letter-spacing:.5px;
-    color:var(--ink);
-    text-shadow:0 0 8px rgba(0,0,0,.9);
+.node{
+  position:absolute;
+
+  width:26%;
+
+  transform:
+    translate(-50%,-50%);
+
+  text-align:center;
+  text-decoration:none;
+
+  color:var(--c);
+
+  z-index:3;
+}
+
+.node .ic{
+  width:clamp(56px,17vw,76px);
+
+  aspect-ratio:1;
+
+  margin:
+    0 auto
+    4px;
+
+  border-radius:50%;
+  border:3px solid var(--c);
+
+  display:grid;
+  place-items:center;
+
+  background:
+    radial-gradient(
+      circle,
+      #0d2233,
+      #07121c
+    );
+
+  box-shadow:
+    0 0 16px var(--c),
+    inset 0 0 12px rgba(255,255,255,.05);
+}
+
+.node svg{
+  width:45%;
+  height:45%;
+}
+
+.node b{
+  display:block;
+
+  color:var(--text);
+
+  font-size:13px;
+  line-height:1.05;
+
+  white-space:nowrap;
+}
+
+.node i{
+  display:block;
+
+  color:var(--muted);
+
+  font-size:10px;
+  line-height:1.05;
+
+  font-style:normal;
+
+  white-space:nowrap;
+}
+
+.node i .dot{
+  width:7px;
+  height:7px;
+
+  color:var(--c);
+}
+
+.node:focus-visible{
+  outline:
+    2px solid var(--c);
+
+  outline-offset:4px;
+
+  border-radius:12px;
+}
+
+
+/* =================================================
+   CORE BANNER
+================================================= */
+
+.banner{
+  margin:
+    8px 6px
+    10px;
+
+  padding:11px;
+
+  border-radius:40px;
+
+  text-align:center;
+}
+
+.banner h2{
+  color:var(--cyan);
+
+  font:
+    800 19px
+    "Orbitron";
+
+  letter-spacing:.15em;
+
+  text-shadow:
+    0 0 12px rgba(34,211,238,.6);
+}
+
+.banner p{
+  margin-top:3px;
+
+  color:var(--green);
+
+  font-size:10px;
+  font-weight:700;
+
+  letter-spacing:.20em;
+}
+
+
+/* =================================================
+   COUNTERS
+================================================= */
+
+.counters{
+  display:grid;
+
+  grid-template-columns:
+    repeat(4,minmax(0,1fr));
+
+  margin-bottom:10px;
+
+  padding:
+    12px 4px;
+}
+
+.counter{
+  min-width:0;
+
+  text-align:center;
+
+  border-right:
+    1px solid var(--line);
+}
+
+.counter:last-child{
+  border:0;
+}
+
+.counter .ci{
+  width:36px;
+  height:36px;
+
+  margin:
+    0 auto
+    4px;
+
+  border-radius:50%;
+  border:2px solid var(--c);
+
+  display:grid;
+  place-items:center;
+
+  color:var(--c);
+
+  box-shadow:
+    0 0 10px var(--c);
+}
+
+.counter .ci svg{
+  width:18px;
+  height:18px;
+}
+
+.counter b{
+  display:block;
+
+  font:
+    700 23px
+    "Rajdhani";
+
+  line-height:1.1;
+}
+
+.counter span{
+  display:block;
+
+  padding:
+    0 2px;
+
+  color:var(--muted);
+
+  font-size:8px;
+  line-height:1.05;
+
+  letter-spacing:.04em;
+}
+
+
+/* =================================================
+   SMS SUMMARY
+================================================= */
+
+.sms{
+  padding:12px;
+
+  margin-bottom:8px;
+}
+
+.sms h3{
+  font-size:18px;
+}
+
+.sms > p{
+  margin-bottom:10px;
+
+  color:var(--muted);
+
+  font-size:11px;
+  line-height:1.25;
+}
+
+.boxes{
+  display:grid;
+
+  grid-template-columns:
+    1.2fr 1fr 1fr 1fr;
+
+  gap:6px;
+
+  margin-bottom:10px;
+}
+
+.box{
+  min-width:0;
+
+  padding:
+    8px 3px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:10px;
+
+  background:
+    rgba(0,0,0,.2);
+
+  text-align:center;
+}
+
+.box b{
+  display:block;
+
+  color:var(--green);
+
+  font-size:18px;
+  line-height:1.05;
+
+  white-space:nowrap;
+}
+
+.box:first-child b{
+  font-size:12px;
+}
+
+.box span{
+  display:block;
+
+  margin-top:3px;
+
+  color:var(--muted);
+
+  font-size:8px;
+  line-height:1.05;
+}
+
+.actions{
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:8px;
+}
+
+.btn{
+  min-width:0;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  gap:7px;
+
+  padding:11px 5px;
+
+  border-radius:12px;
+
+  font:
+    700 15px
+    "Rajdhani";
+
+  text-decoration:none;
+
+  white-space:nowrap;
+}
+
+.btn svg{
+  width:19px;
+  height:19px;
+}
+
+.btn.primary{
+  border:0;
+
+  background:var(--green);
+
+  color:#03220f;
+
+  box-shadow:
+    0 0 18px rgba(34,224,122,.5);
+}
+
+.btn.ghost{
+  border:
+    1.5px solid var(--green);
+
+  background:transparent;
+
+  color:var(--cyan);
+}
+
+
+/* =================================================
+   BOTTOM NAV
+================================================= */
+
+.nav{
+  position:fixed;
+
+  left:0;
+  right:0;
+  bottom:0;
+
+  z-index:100;
+
+  padding:
+    0 10px
+    env(safe-area-inset-bottom,0px);
+
+  pointer-events:none;
+}
+
+.nav .inner{
+  width:100%;
+  max-width:460px;
+
+  margin:
+    0 auto
+    8px;
+
+  padding:6px;
+
+  display:grid;
+
+  grid-template-columns:
+    repeat(5,minmax(0,1fr));
+
+  background:
+    rgba(6,18,28,.95);
+
+  backdrop-filter:
+    blur(8px);
+
+  pointer-events:auto;
+}
+
+.nav a{
+  position:relative;
+
+  min-width:0;
+
+  padding:
+    6px 0;
+
+  border-radius:10px;
+
+  color:var(--muted);
+
+  text-align:center;
+  text-decoration:none;
+
+  font-size:11px;
+  font-weight:600;
+}
+
+.nav a svg{
+  width:23px;
+  height:23px;
+
+  display:block;
+
+  margin:
+    0 auto
+    2px;
+}
+
+.nav a.active{
+  border:
+    1px solid var(--green);
+
+  background:
+    rgba(34,224,122,.08);
+
+  color:var(--green);
+
+  box-shadow:
+    0 0 12px rgba(34,224,122,.3);
+}
+
+
+
+
+/* =================================================
+   NARROW PHONE
+================================================= */
+
+@media (max-width:390px){
+
+  .wrap{
+    padding:
+      8px;
   }
 
-  .n1{top:6%;left:50%;}
-  .n2{top:19%;left:84%;}
-  .n3{top:50%;left:96%;}
-  .n4{top:81%;left:84%;}
-  .n5{top:92%;left:50%;}
-  .n6{top:81%;left:16%;}
-  .n7{top:50%;left:4%;}
-  .n8{top:19%;left:16%;}
-
-  /* bottom-center node has no room below it — flip its label above */
-  .n5 .node-label{
-    top:auto;
-    bottom:108%;
+  .header{
+    gap:5px;
   }
 
-  .caption{
-    text-align:center;
-    margin-top:34px;
-    position:relative;
-    z-index:4;
-  }
-  .caption h2{
-    font-weight:700;font-size:19px;letter-spacing:.5px;color:#eafcff;
-  }
-  .caption p{
-    font-family:'JetBrains Mono',monospace;
-    font-size:10.5px;letter-spacing:1.5px;color:var(--n-spam);
-    margin-top:4px;text-transform:uppercase;
-    opacity:.85;
-  }
-  .caption p::before{content:"● ";}
+  .brand{
+    gap:6px;
 
-  /* ---------- bottom stats ---------- */
-  .bottom-stats{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:8px;
-    margin-top:26px;
-    background:var(--glass);
-    border:1px solid var(--glass-b);
-    border-radius:16px;
-    padding:16px 8px;
-    backdrop-filter:blur(6px);
-  }
-  .b-item{text-align:center;}
-  .b-icon{
-    width:38px;height:38px;margin:0 auto 8px;
-    border-radius:50%;
-    border:1px solid rgba(61,255,176,.5);
-    box-shadow:0 0 12px rgba(61,255,176,.35), inset 0 0 8px rgba(61,255,176,.2);
-    display:flex;align-items:center;justify-content:center;
-  }
-  .b-icon svg{width:17px;height:17px;stroke:var(--n-spam);filter:drop-shadow(0 0 4px var(--n-spam));}
-  .b-num{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:17px;color:#eafcff;}
-  .b-label{
-    font-family:'JetBrains Mono',monospace;
-    font-size:8px;letter-spacing:1px;color:var(--ink-dim);
-    text-transform:uppercase;margin-top:3px;
+    padding:7px;
   }
 
-  @media (max-width:380px){
-    .node-label{display:none;}
+  .logo{
+    width:44px;
+    height:44px;
+
+    flex-basis:44px;
+
+    font-size:23px;
   }
+
+  .brand h1{
+    font-size:20px;
+  }
+
+  .brand small{
+    font-size:7px;
+  }
+
+  .status{
+    min-width:80px;
+
+    padding:
+      5px;
+
+    font-size:7px;
+  }
+
+  .status b{
+    font-size:8px;
+  }
+
+  .clock{
+    width:74px;
+
+    padding:
+      7px 4px;
+  }
+
+  .clock .time{
+    font-size:20px;
+  }
+
+  .stats{
+    gap:5px;
+  }
+
+  .stat{
+    padding:7px;
+
+    min-height:84px;
+  }
+
+  .node b{
+    font-size:11px;
+  }
+
+  .node i{
+    font-size:8px;
+  }
+
+  .counter b{
+    font-size:20px;
+  }
+
+  .counter span{
+    font-size:7px;
+  }
+
+  .box:first-child b{
+    font-size:10px;
+  }
+
+  .box b{
+    font-size:16px;
+  }
+
+  .box span{
+    font-size:7px;
+  }
+
+  .btn{
+    font-size:13px;
+  }
+
+}
+
+
+/* =================================================
+   DESKTOP
+================================================= */
+
+@media (min-width:800px){
+
+  .wrap{
+    max-width:520px;
+  }
+
+  .nav .inner{
+    max-width:520px;
+  }
+
+}
+
+
+/* ERATGUARD CLAUDE UI POLISH V1 */
+
+/*
+   1. Header:
+   prevent brand subtitle and system status from colliding
+*/
+.header .brand{
+  min-width:0;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  grid-template-areas:
+    "logo identity"
+    "logo status";
+  align-items:center;
+  column-gap:12px;
+  row-gap:5px;
+}
+
+.header .brand .logo{
+  grid-area:logo;
+}
+
+.header .brand > div:nth-child(2){
+  grid-area:identity;
+  min-width:0;
+}
+
+.header .brand h1{
+  white-space:nowrap;
+}
+
+.header .brand small{
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:100%;
+}
+
+.header .brand .status{
+  grid-area:status;
+  margin-left:0;
+  width:100%;
+  min-width:0;
+  padding:4px 0 0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  line-height:1.15;
+}
+
+.header .brand .status b{
+  display:inline-block;
+  margin-right:6px;
+}
+
+/*
+   2. Orbit node labels:
+   dynamic values must stay inside their node.
+*/
+.orbit .node{
+  min-width:0;
+}
+
+.orbit .node b,
+.orbit .node i{
+  max-width:100%;
+}
+
+.orbit .node i{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  padding:0 3px;
+}
+
+/*
+   License node gets slightly more usable label width without
+   changing the orbit geometry.
+*/
+.orbit a[href="/u/license"]{
+  width:30%;
+}
+
+/*
+   3. Fixed bottom navigation:
+   content must be able to scroll completely above it.
+*/
+body{
+  padding-bottom:calc(132px + env(safe-area-inset-bottom,0px));
+}
+
+.wrap{
+  padding-bottom:34px;
+}
+
+.nav{
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+
+.nav .inner{
+  margin-bottom:8px;
+}
+
+/*
+   Small-phone refinement.
+*/
+@media (max-width:390px){
+  .header .brand{
+    column-gap:8px;
+  }
+
+  .header .brand .logo{
+    width:46px;
+    height:46px;
+    font-size:24px;
+  }
+
+  .header .brand h1{
+    font-size:21px;
+  }
+
+  .header .brand small{
+    font-size:8px;
+    letter-spacing:.08em;
+  }
+
+  .header .brand .status{
+    font-size:9px;
+  }
+
+  .header .brand .status b{
+    font-size:9px;
+  }
+}
+
 </style>
 </head>
+
 <body>
 
-<canvas id="dust"></canvas>
-<div class="vignette"></div>
-<div class="scanlines"></div>
+<div class="wrap">
 
-<main>
-<div class="frame">
-  <span class="corner tl"></span><span class="corner tr"></span>
-  <span class="corner bl"></span><span class="corner br"></span>
-  <span class="tag tl-tag">SYS/01</span>
-  <span class="tag tr-tag">SEC·OK</span>
+  <!-- HEADER -->
+  <div class="header">
 
-  <div class="brandbar">
-    <div class="brandmark">E</div>
-    <div class="brandtext">
-      <div class="name">Erat<span>Guard</span></div>
-      <div class="sub">Pro Notification Control</div>
+    <div class="panel brand">
+
+      <div class="logo">E</div>
+
+      <div class="brand-copy">
+        <h1>Erat<span>Guard</span></h1>
+        <small class="mono">PRO NOTIFICATION CONTROL</small>
+      </div>
+
+      <div class="status">
+        <b>
+          <span class="dot"></span>
+          SİSTEM AKTİF
+        </b>
+        Koruma çekirdeği çalışıyor
+      </div>
+
     </div>
-  </div>
 
-  <div class="stat-row">
-    <div class="stat-card">
-      <div class="stat-label">7 Günlük</div>
-      <div class="spark" id="spark"></div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Güvenlik</div>
-      <div class="ring-wrap">
-        <svg width="58" height="58" viewBox="0 0 58 58">
-          <circle cx="29" cy="29" r="25" fill="none" stroke="rgba(55,230,255,.15)" stroke-width="4"/>
-          <circle cx="29" cy="29" r="25" fill="none" stroke="#37e6ff" stroke-width="4" stroke-linecap="round"
-            stroke-dasharray="157" stroke-dashoffset="0"/>
-        </svg>
-        <div class="ring-pct">100%</div>
+    <div class="panel clock mono">
+      <div class="date" id="eg-live-date">--</div>
+      <div class="time" id="eg-live-clock">--:--</div>
+
+      <div class="on">
+        <span class="dot"></span>
+        ONLINE
       </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Tehdit</div>
-      <div class="stat-value">&nbsp;</div>
-      <div class="threat-tag">DÜŞÜK</div>
-    </div>
+
   </div>
 
-  <div class="hub" id="hub">
-    <div class="ground"><i></i><i></i><i></i></div>
-    <div class="beam"></div>
-    <svg class="links" id="links"></svg>
 
-    <div class="core" id="eg-core-trigger" onclick="egOpenEva()" style="cursor:pointer;">
-      <div class="core-label">AI</div>
+  <!-- TOP STATS -->
+  <div class="stats">
+
+    <div class="panel stat">
+
+      <div class="lbl">
+        TOPLAM
+      </div>
+
+      <div
+        class="big"
+        id="eg-total-top"
+      >{{ metrics.total }}</div>
+
+      <div class="stat-note">
+        Toplam tarama
+      </div>
+
+      <div
+        class="spark"
+        id="spark"
+        aria-label="7 günlük aktivite"
+      ></div>
+
     </div>
 
-    <div id="eg-eva-overlay" class="eg-eva-overlay">
-      <div class="eg-eva-modal">
-        <div class="eg-eva-modal-head">
-          <span>EVA ile Konus</span>
-          <button onclick="egCloseEva()">&times;</button>
+
+    <div class="panel stat">
+
+      <div class="lbl">
+        GÜVENLİK
+      </div>
+
+      <div
+        class="ring"
+        id="eg-security-ring"
+        style="--p:{{ metrics.score }}"
+      >
+
+        <span id="eg-security-value">
+          {{ metrics.score }}%
+        </span>
+
+      </div>
+
+      <div class="security-state">
+        <span class="dot"></span>
+        SİSTEM DURUMU
+      </div>
+
+    </div>
+
+
+    <div class="panel stat">
+
+      <div class="lbl">
+        TEHDİT
+      </div>
+
+      <div
+        class="threat"
+        id="eg-threat"
+      >{{ metrics.threat_label }}</div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ORBIT -->
+  <div class="orbit">
+
+    <svg
+      class="orbit-lines"
+      viewBox="0 0 100 108"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <g
+        stroke-width=".5"
+        fill="none"
+      >
+
+        <circle
+          cx="50"
+          cy="54"
+          r="27"
+          stroke="rgba(34,211,238,.25)"
+        />
+
+        <circle
+          cx="50"
+          cy="54"
+          r="31"
+          stroke="rgba(34,211,238,.12)"
+        />
+
+        <line x1="50" y1="54" x2="50" y2="12" stroke="#22e07a"/>
+        <line x1="50" y1="54" x2="78" y2="24" stroke="#a855f7"/>
+        <line x1="50" y1="54" x2="88" y2="54" stroke="#f43f5e"/>
+        <line x1="50" y1="54" x2="78" y2="84" stroke="#f43f5e"/>
+        <line x1="50" y1="54" x2="50" y2="96" stroke="#22d3ee"/>
+        <line x1="50" y1="54" x2="22" y2="84" stroke="#facc15"/>
+        <line x1="50" y1="54" x2="12" y2="54" stroke="#22d3ee"/>
+        <line x1="50" y1="54" x2="22" y2="24" stroke="#fb923c"/>
+
+      </g>
+    </svg>
+
+
+    <div
+      class="core"
+    >
+
+      <div>
+
+        <div class="E">
+          E
         </div>
-        <div id="eg-eva-log" class="eg-eva-log"></div>
-        <form id="eg-eva-form" class="eg-eva-form">
-          <input type="text" id="eg-eva-input" placeholder="EVA ya bir sey sor..." autocomplete="off" />
-          <button type="submit">Gonder</button>
-        </form>
+
+        <div class="t">
+          CORE
+        </div>
+
+        <small class="mono">
+          KORUMA ÇEKİRDEĞİ
+        </small>
+
+        <div class="on mono">
+          <span class="dot"></span>
+          ONLINE
+        </div>
+
       </div>
+
     </div>
 
-    <style>
-      .eg-eva-overlay{
-        display:none;
-        position:fixed; inset:0;
-        background:rgba(2,6,10,.82);
-        backdrop-filter:blur(4px);
-        z-index:999;
-        align-items:center;
-        justify-content:center;
-        padding:20px;
-      }
-      .eg-eva-overlay.open{ display:flex; }
-      .eg-eva-modal{
-        width:100%; max-width:420px;
-        max-height:80vh;
-        background:rgba(6,14,20,.96);
-        border:1px solid rgba(55,230,255,.35);
-        border-radius:18px;
-        box-shadow:0 0 40px rgba(55,230,255,.2);
-        display:flex; flex-direction:column;
-        overflow:hidden;
-      }
-      .eg-eva-modal-head{
-        display:flex; justify-content:space-between; align-items:center;
-        padding:14px 16px;
-        border-bottom:1px solid rgba(55,230,255,.2);
-        color:#eafcff; font-weight:700; font-size:14px;
-      }
-      .eg-eva-modal-head button{
-        background:none; border:none; color:#9fe8f2;
-        font-size:22px; line-height:1; cursor:pointer;
-      }
-      .eg-eva-log{
-        flex:1; overflow-y:auto;
-        display:flex; flex-direction:column; gap:10px;
-        padding:14px 16px;
-      }
-      .eg-eva-msg{
-        max-width:85%; padding:9px 13px; border-radius:12px;
-        font-size:13px; line-height:1.45; white-space:pre-wrap;
-      }
-      .eg-eva-msg.user{ align-self:flex-end; background:rgba(0,255,255,.14); border:1px solid rgba(0,255,255,.3); color:#eafcff; }
-      .eg-eva-msg.model{ align-self:flex-start; background:rgba(8,22,40,.85); border:1px solid rgba(0,255,255,.18); color:#d9f4fb; }
-      .eg-eva-msg.error{ align-self:flex-start; background:rgba(255,60,60,.1); border:1px solid rgba(255,60,60,.35); color:#ffb4b4; }
-      .eg-eva-form{ display:flex; gap:8px; padding:12px 16px; border-top:1px solid rgba(55,230,255,.15); }
-      .eg-eva-form input{ flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(0,255,255,.25); background:rgba(4,10,16,.8); color:#eafcff; font-size:13px; }
-      .eg-eva-form button{ padding:10px 16px; border-radius:10px; border:1px solid rgba(0,255,255,.4); background:rgba(0,255,255,.15); color:#eafcff; font-size:13px; font-weight:600; cursor:pointer; }
-    </style>
 
-    <script>
-      var egEvaHistory = [];
+    <!-- 1 -->
+    <a
+      class="node"
+      href="/u/protection"
+      style="
+        --c:#22e07a;
+        left:50%;
+        top:11%;
+      "
+    >
 
-      function egOpenEva(){
-        document.getElementById("eg-eva-overlay").classList.add("open");
-        document.getElementById("eg-eva-input").focus();
-      }
-      function egCloseEva(){
-        document.getElementById("eg-eva-overlay").classList.remove("open");
-      }
+      <div class="ic">
 
-      (function(){
-        var log = document.getElementById("eg-eva-log");
-        var form = document.getElementById("eg-eva-form");
-        var input = document.getElementById("eg-eva-input");
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path d="M12 2 4 5v6c0 5 3.4 9.5 8 11 4.6-1.5 8-6 8-11V5l-8-3zm-1.2 14.2-3.5-3.5 1.4-1.4 2.1 2.1 5-5 1.4 1.4-6.4 6.4z"/>
+        </svg>
 
-        function addMsg(role, text){
-          var div = document.createElement("div");
-          div.className = "eg-eva-msg " + role;
-          div.textContent = text;
-          log.appendChild(div);
-          log.scrollTop = log.scrollHeight;
-        }
+      </div>
 
-        form.addEventListener("submit", function(e){
-          e.preventDefault();
-          var msg = input.value.trim();
-          if (msg.length === 0){ return; }
+      <b>Spam Koruması</b>
 
-          addMsg("user", msg);
-          egEvaHistory.push({role:"user", text: msg});
-          input.value = "";
-          input.disabled = true;
+      <i>
+        <span class="dot"></span>
+        Aktif
+      </i>
 
-          fetch("/u/eva-chat", {
-            method: "POST",
-            headers: {"Content-Type":"application/json"},
-            body: JSON.stringify({message: msg, history: egEvaHistory})
-          })
-          .then(function(r){ return r.json(); })
-          .then(function(data){
-            if(data.ok){
-              addMsg("model", data.answer);
-              egEvaHistory.push({role:"model", text: data.answer});
-            } else {
-              addMsg("error", data.answer || data.error || "Bilinmeyen hata");
-            }
-          })
-          .catch(function(){
-            addMsg("error", "Baglanti hatasi.");
-          })
-          .finally(function(){
-            input.disabled = false;
-            input.focus();
-          });
-        });
-      })();
-    </script>
+    </a>
 
-    <div class="node n1" onclick="location.href='/protection'" style="--c:var(--n-spam)">
-      <div class="ring"></div>
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2 L4 6 V12 C4 17 7.5 20.5 12 22 C16.5 20.5 20 17 20 12 V6 Z"/>
-        <path d="M9 12 L11 14 L15.5 9"/>
-      </svg>
-      <div class="node-label">Spam Koruması</div>
+
+    <!-- 2 -->
+    <a
+      class="node"
+      href="/u/analysis"
+      style="
+        --c:#a855f7;
+        left:78%;
+        top:22%;
+      "
+    >
+
+      <div class="ic">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        >
+          <path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V5a2 2 0 0 0-3-1zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/>
+        </svg>
+
+      </div>
+
+      <b>AI Analiz</b>
+
+      <i>
+        <span class="dot"></span>
+        Aktif
+      </i>
+
+    </a>
+
+
+    <!-- 3 -->
+    <a
+      class="node"
+      href="/u/analysis"
+      style="
+        --c:#f43f5e;
+        left:86%;
+        top:50%;
+      "
+    >
+
+      <div class="ic">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.6"
+        >
+          <circle
+            cx="10"
+            cy="10"
+            r="6"
+          />
+
+          <path d="m15 15 5 5"/>
+        </svg>
+
+      </div>
+
+      <b>Risk Tarama</b>
+
+      <i>
+        <span class="dot"></span>
+        Hazır
+      </i>
+
+    </a>
+
+
+    <!-- 4 -->
+    <a
+      class="node"
+      href="/u/blocked"
+      style="
+        --c:#f43f5e;
+        left:76%;
+        top:82%;
+      "
+    >
+
+      <div class="ic">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.9 6.5-8.4 8.4-1.4-1.4 8.4-8.4 1.4 1.4z"/>
+        </svg>
+
+      </div>
+
+      <b>Engellenenler</b>
+
+      <i>
+        <span class="dot"></span>
+        <span id="eg-node-blocked">
+          {{ metrics.blocked }}
+        </span>
+        kayıt
+      </i>
+
+    </a>
+
+
+    <!-- 5 -->
+    <a
+      class="node"
+      href="/sms"
+      style="
+        --c:#22d3ee;
+        left:50%;
+        top:90%;
+      "
+    >
+
+      <div class="ic">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path d="M4 3h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm3 5v2h10V8H7zm0 4v2h7v-2H7z"/>
+        </svg>
+
+      </div>
+
+      <b>SMS Merkezi</b>
+
+      <i>
+        <span class="dot"></span>
+        <span id="eg-node-sms">
+          {{ metrics.blocked }}
+        </span>
+        engellenen
+      </i>
+
+    </a>
+
+
+    <!-- 6 -->
+    <a
+      class="node"
+      href="/u/license"
+      style="
+        --c:#facc15;
+        left:24%;
+        top:82%;
+      "
+    >
+
+      <div class="ic">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <circle
+            cx="12"
+            cy="9"
+            r="6"
+          />
+
+          <path d="m8 14-2 8 6-3 6 3-2-8z"/>
+        </svg>
+
+      </div>
+
+      <b>Lisans</b>
+
+      <i>
+        <span class="dot"></span>
+        {{ license_info.plan }}
+      </i>
+
+    </a>
+
+
+    <!-- 7 -->
+    <a
+      class="node"
+      href="/u/reports"
+      style="
+        --c:#22d3ee;
+        left:14%;
+        top:50%;
+      "
+    >
+
+      <div class="ic">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <rect
+            x="4"
+            y="10"
+            width="4"
+            height="10"
+            rx="1"
+          />
+
+          <rect
+            x="10"
+            y="4"
+            width="4"
+            height="16"
+            rx="1"
+          />
+
+          <rect
+            x="16"
+            y="12"
+            width="4"
+            height="8"
+            rx="1"
+          />
+        </svg>
+
+      </div>
+
+      <b>Raporlar</b>
+
+      <i>
+        <span class="dot"></span>
+        Canlı veri
+      </i>
+
+    </a>
+
+
+    <!-- 8 -->
+    <a
+      class="node"
+      href="/u/notifications"
+      style="
+        --c:#fb923c;
+        left:22%;
+        top:22%;
+      "
+    >
+
+      <div class="ic">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path d="M12 22a2.5 2.5 0 0 0 2.5-2.5h-5A2.5 2.5 0 0 0 12 22zm7-6V11a7 7 0 0 0-5.5-6.8V3h-3v1.2A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2z"/>
+        </svg>
+
+      </div>
+
+      <b>Bildirimler</b>
+
+      <i>
+        <span class="dot"></span>
+        Aktif
+      </i>
+
+    </a>
+
+  </div>
+
+
+  <!-- CORE BANNER -->
+  <div class="panel banner">
+
+    <h2>
+      ERATGUARD CORE
+    </h2>
+
+    <p>
+      • KORUMA ÇEKİRDEĞİ HAZIR •
+    </p>
+
+  </div>
+
+
+  <!-- LIVE COUNTERS -->
+  <div class="panel counters">
+
+    <div
+      class="counter"
+      style="--c:#f43f5e"
+    >
+
+      <div class="ci">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.4"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="8"
+          />
+
+          <path d="m7 17 10-10"/>
+        </svg>
+
+      </div>
+
+      <b id="eg-count-blocked">
+        {{ metrics.blocked }}
+      </b>
+
+      <span>
+        ENGELLENEN
+      </span>
+
     </div>
 
-    <div class="node n2" onclick="location.href='/analysis'" style="--c:var(--n-brain)">
-      <div class="ring"></div>
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3.3"/>
-        <path d="M12 3v2.7M12 18.3V21M21 12h-2.7M5.7 12H3M18.4 5.6l-1.9 1.9M7.5 16.5l-1.9 1.9M18.4 18.4l-1.9-1.9M7.5 7.5 5.6 5.6"/>
-      </svg>
-      <div class="node-label">AI Analiz</div>
+
+    <div
+      class="counter"
+      style="--c:#22d3ee"
+    >
+
+      <div class="ci">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.4"
+        >
+          <circle
+            cx="12"
+            cy="13"
+            r="8"
+          />
+
+          <path d="M12 9v4l2 2M10 2h4"/>
+        </svg>
+
+      </div>
+
+      <b id="eg-count-total">
+        {{ metrics.total }}
+      </b>
+
+      <span>
+        TOPLAM TARAMA
+      </span>
+
     </div>
 
-    <div class="node n3" onclick="location.href='/analysis'" style="--c:var(--n-radar)">
-      <div class="ring"></div>
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2v6"/>
-        <path d="M8 5a6 6 0 1 0 8 0"/>
-        <circle cx="12" cy="14" r="1.4" fill="currentColor" stroke="none"/>
-        <path d="M12 15.4V22"/>
-      </svg>
-      <div class="node-label">Risk Tarama</div>
+
+    <div
+      class="counter"
+      style="--c:#22e07a"
+    >
+
+      <div class="ci">
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.6"
+        >
+          <path d="m5 12 5 5 9-10"/>
+        </svg>
+
+      </div>
+
+      <b id="eg-count-safe">
+        {{ metrics.safe }}
+      </b>
+
+      <span>
+        GÜVENLİ
+      </span>
+
     </div>
 
-    <div class="node n4" onclick="location.href='/blocked'" style="--c:var(--n-block)">
-      <div class="ring"></div>
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="8.5"/>
-        <path d="M6.2 17.8 17.8 6.2"/>
-      </svg>
-      <div class="node-label">Engellenenler</div>
-    </div>
 
-    <div class="node n5" onclick="location.href='/notifications'" style="--c:var(--n-chat)">
-      <div class="ring"></div>
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 5.5h11a3 3 0 0 1 3 3v3.5a3 3 0 0 1-3 3H10l-4 3v-3H6a3 3 0 0 1-3-3V8a2.5 2.5 0 0 1 1-2.5Z"/>
-        <path d="M14.5 12.5h4a2.5 2.5 0 0 1 2.5 2.5v2a2.5 2.5 0 0 1-2 2.45V21l-3-1.5"/>
-      </svg>
-      <div class="node-label">SMS Merkezi</div>
-    </div>
+    <div
+      class="counter"
+      style="--c:#facc15"
+    >
 
-    <div class="node n6" onclick="location.href='/license'" style="--c:var(--n-medal)">
-      <div class="ring"></div>
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="8.5" r="5.5"/>
-        <path d="M8.3 13.2 6.5 21l5.5-3 5.5 3-1.8-7.8"/>
-      </svg>
-      <div class="node-label">Lisans</div>
-    </div>
+      <div class="ci">
 
-    <div class="node n7" onclick="location.href='/reports'" style="--c:var(--n-report)">
-      <div class="ring"></div>
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 20V10M10 20V4M16 20v-7M4 20h16"/>
-      </svg>
-      <div class="node-label">Raporlar</div>
-    </div>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.4"
+        >
+          <path d="M6 21V4h11l-2 4 2 4H6"/>
+        </svg>
 
-    <div class="node n8" onclick="location.href='/community'" style="--c:var(--n-bell)">
-      <div class="ring"></div>
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 9a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6.5H4c.5-1 2-2.5 2-6.5Z"/>
-        <path d="M10 19.5a2 2 0 0 0 4 0"/>
-      </svg>
-      <div class="node-label">Bildirimler</div>
+      </div>
+
+      <b id="eg-count-reported">
+        {{ metrics.reported }}
+      </b>
+
+      <span>
+        ŞİKAYET EDİLEN
+      </span>
+
     </div>
 
   </div>
 
-  <div class="caption">
-    <h2>Ana Koruma Çekirdeği</h2>
-    <p>Sistem aktif ve senkronize</p>
-  </div>
 
-  <div class="bottom-stats">
-    <div class="b-item">
-      <div class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M6.2 17.8 17.8 6.2"/></svg></div>
-      <div class="b-num">0</div>
-      <div class="b-label">Engellenen</div>
+  <!-- SMS SUMMARY -->
+  <div
+    class="panel sms"
+    id="eg-master-sms-summary"
+  >
+
+    <h3>
+      SMS Koruma Özeti
+    </h3>
+
+    <p>
+      SMS risk motoru aktif, analiz ve aksiyon kayıtları takip ediliyor.
+    </p>
+
+
+    <div class="boxes">
+
+      <div class="box">
+
+        <b>
+          AKTİF İZLEME
+        </b>
+
+        <span>
+          Durum
+        </span>
+
+      </div>
+
+
+      <div class="box">
+
+        <b id="eg-sms-actions">
+          {{ metrics.total }}
+        </b>
+
+        <span>
+          Toplam Aksiyon
+        </span>
+
+      </div>
+
+
+      <div class="box">
+
+        <b id="eg-sms-blocked">
+          {{ metrics.blocked }}
+        </b>
+
+        <span>
+          Engellenen
+        </span>
+
+      </div>
+
+
+      <div class="box">
+
+        <b id="eg-sms-reported">
+          {{ metrics.reported }}
+        </b>
+
+        <span>
+          Şikayet
+        </span>
+
+      </div>
+
     </div>
-    <div class="b-item">
-      <div class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v6l4 2"/><circle cx="12" cy="12" r="9"/></svg></div>
-      <div class="b-num">0</div>
-      <div class="b-label">Toplam Tarama</div>
+
+
+    <div class="actions">
+
+      <a
+        class="btn primary"
+        href="/u/analysis"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V5a2 2 0 0 0-3-1zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/>
+        </svg>
+
+        AI Analiz Aç
+
+      </a>
+
+
+      <a
+        class="btn ghost"
+        href="/sms"
+      >
+
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M4 4h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H9l-4 3v-3a2 2 0 0 1-1-2V6a2 2 0 0 1 0-2z"/>
+        </svg>
+
+        SMS Merkezi
+
+      </a>
+
     </div>
-    <div class="b-item">
-      <div class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></div>
-      <div class="b-num">0</div>
-      <div class="b-label">Güvenli</div>
-    </div>
-    <div class="b-item">
-      <div class="b-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18M5 4h11l-2.5 3.5L16 11H5"/></svg></div>
-      <div class="b-num">0</div>
-      <div class="b-label">Şikayet Edilen</div>
-    </div>
+
   </div>
 
 </div>
-</main>
+
+
+<!-- MOBILE NAV -->
+<nav
+  class="nav"
+  id="eg-mobile-nav"
+>
+
+  <div class="inner panel">
+
+    <a
+      href="/dashboard"
+      class="active"
+    >
+
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/>
+      </svg>
+
+      Ana Sayfa
+
+    </a>
+
+
+    <a href="/u/protection">
+
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M12 2 4 5v6c0 5 3.4 9.5 8 11 4.6-1.5 8-6 8-11V5z"/>
+      </svg>
+
+      Koruma
+
+    </a>
+
+
+    <a href="/sms">
+
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M12 3C6.5 3 2 6.6 2 11c0 2.4 1.3 4.5 3.4 6L4 21l4.5-2.3c1.1.3 2.3.5 3.5.5 5.5 0 10-3.6 10-8s-4.5-8-10-8z"/>
+      </svg>
+
+      SMS
+
+    </a>
+
+
+    <a href="/u/notifications">
+
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M12 22a2.5 2.5 0 0 0 2.5-2.5h-5A2.5 2.5 0 0 0 12 22zm7-6V11a7 7 0 0 0-5.5-6.8V3h-3v1.2A7 7 0 0 0 5 11v5l-2 2v1h18v-1l-2-2z"/>
+      </svg>
+
+      Bildirim
+
+    </a>
+
+
+    <a href="/u/settings">
+
+      <svg
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7 7 0 0 0-1.7-1L15 3h-4l-.4 2.9a7 7 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7 7 0 0 0 1.7 1L11 21h4l.4-2.9a7 7 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/>
+      </svg>
+
+      Ayarlar
+
+    </a>
+
+  </div>
+
+</nav>
+
+
+
 
 <script>
-  // sparkline bars
-  const spark = document.getElementById('spark');
-  const vals = [30,45,28,60,38,72,50];
-  vals.forEach(v=>{
-    const bar = document.createElement('i');
-    bar.style.height = v*0.34+'px';
+
+/* =================================================
+   CLOCK
+================================================= */
+
+(function(){
+
+  const months=[
+    "OCA","ŞUB","MAR","NİS","MAY","HAZ",
+    "TEM","AĞU","EYL","EKİ","KAS","ARA"
+  ];
+
+  function tick(){
+
+    const n=new Date();
+
+    const d=
+      String(n.getDate()).padStart(2,"0")
+      +" "
+      +months[n.getMonth()]
+      +" "
+      +n.getFullYear();
+
+    const t=
+      String(n.getHours()).padStart(2,"0")
+      +":"
+      +String(n.getMinutes()).padStart(2,"0");
+
+    const de=
+      document.getElementById(
+        "eg-live-date"
+      );
+
+    const te=
+      document.getElementById(
+        "eg-live-clock"
+      );
+
+    if(de){
+      de.textContent=d;
+    }
+
+    if(te){
+      te.textContent=t;
+    }
+
+  }
+
+  tick();
+
+  setInterval(
+    tick,
+    1000
+  );
+
+})();
+
+
+/* =================================================
+   REAL 7-DAY SPARK
+================================================= */
+
+(function(){
+
+  const spark=
+    document.getElementById(
+      "spark"
+    );
+
+  if(!spark){
+    return;
+  }
+
+  const sparkPoints=
+    "{{ metrics.spark_points }}";
+
+  const vals=
+    sparkPoints
+      .split(" ")
+      .filter(Boolean)
+      .map(function(point){
+
+        const parts=
+          point.split(",");
+
+        const y=
+          Number(parts[1]);
+
+        return Number.isFinite(y)
+          ? Math.max(2,26-y)
+          : 2;
+
+      });
+
+  vals.forEach(function(v){
+
+    const bar=
+      document.createElement("i");
+
+    bar.style.height=
+      Math.max(2,v)+"px";
+
     spark.appendChild(bar);
+
   });
 
-  // connection lines + traveling pulses between each node and the core
-  const hub = document.getElementById('hub');
-  const svg = document.getElementById('links');
-  const core = hub.querySelector('.core');
-  const nodes = [...hub.querySelectorAll('.node')];
+})();
 
-  function layout(){
-    svg.innerHTML = '';
-    const rect = hub.getBoundingClientRect();
-    const cx = rect.width/2, cy = rect.height/2;
-    svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
 
-    nodes.forEach((node,i)=>{
-      const nr = node.getBoundingClientRect();
-      const hr = hub.getBoundingClientRect();
-      const nx = nr.left - hr.left + nr.width/2;
-      const ny = nr.top - hr.top + nr.height/2;
+/* =================================================
+   LIVE ERATGUARD API
+================================================= */
 
-      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-      const d = `M ${nx} ${ny} L ${cx} ${cy}`;
-      path.setAttribute('d', d);
-      path.setAttribute('class','link-path');
-      svg.appendChild(path);
+async function egLoadStats(){
 
-      const pulse = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      pulse.setAttribute('r','2.6');
-      pulse.setAttribute('class','pulse');
-      const len = Math.hypot(nx-cx, ny-cy);
-      const dur = 2.6 + (i%4)*0.5;
-      const delay = i*0.35;
-      const anim = document.createElementNS('http://www.w3.org/2000/svg','animateMotion');
-      anim.setAttribute('dur', dur+'s');
-      anim.setAttribute('repeatCount','indefinite');
-      anim.setAttribute('path', d);
-      anim.setAttribute('begin', delay+'s');
-      pulse.appendChild(anim);
-      const anim2 = document.createElementNS('http://www.w3.org/2000/svg','animate');
-      anim2.setAttribute('attributeName','opacity');
-      anim2.setAttribute('values','0;1;1;0');
-      anim2.setAttribute('keyTimes','0;0.08;0.85;1');
-      anim2.setAttribute('dur', dur+'s');
-      anim2.setAttribute('repeatCount','indefinite');
-      anim2.setAttribute('begin', delay+'s');
-      pulse.appendChild(anim2);
-      svg.appendChild(pulse);
-    });
+  try{
+
+    const res=
+      await fetch(
+        "/api/stats",
+        {
+          cache:"no-store"
+        }
+      );
+
+    if(!res.ok){
+      return;
+    }
+
+    const data=
+      await res.json();
+
+
+    function setText(id,value){
+
+      const el=
+        document.getElementById(id);
+
+      if(
+        el &&
+        value !== null &&
+        value !== undefined
+      ){
+        el.textContent=value;
+      }
+
+    }
+
+
+    const blocked=
+      data.blocked_count ?? 0;
+
+    const total=
+      data.total ?? 0;
+
+    const safe=
+      data.safe_count ?? 0;
+
+    const reported=
+      data.reported_count ?? 0;
+
+
+    setText(
+      "eg-total-top",
+      total
+    );
+
+    setText(
+      "eg-count-blocked",
+      blocked
+    );
+
+    setText(
+      "eg-count-total",
+      total
+    );
+
+    setText(
+      "eg-count-safe",
+      safe
+    );
+
+    setText(
+      "eg-count-reported",
+      reported
+    );
+
+    setText(
+      "eg-node-blocked",
+      blocked
+    );
+
+    setText(
+      "eg-node-sms",
+      blocked
+    );
+
+    /*
+      Current verified API does not expose a
+      separate action-total field.
+      Preserve truthful data by using the
+      current total value.
+    */
+    setText(
+      "eg-sms-actions",
+      total
+    );
+
+    setText(
+      "eg-sms-blocked",
+      blocked
+    );
+
+    setText(
+      "eg-sms-reported",
+      reported
+    );
+
+
+    if(
+      data.security_percent !== null &&
+      data.security_percent !== undefined
+    ){
+
+      const sec=
+        Number(
+          data.security_percent
+        );
+
+      if(Number.isFinite(sec)){
+
+        setText(
+          "eg-security-value",
+          sec+"%"
+        );
+
+        const ring=
+          document.getElementById(
+            "eg-security-ring"
+          );
+
+        if(ring){
+
+          ring.style.setProperty(
+            "--p",
+            Math.max(
+              0,
+              Math.min(
+                100,
+                sec
+              )
+            )
+          );
+
+        }
+
+      }
+
+    }
+
+
+    if(data.protection_status){
+
+      setText(
+        "eg-threat",
+        String(
+          data.protection_status
+        ).toUpperCase()
+      );
+
+    }
+
   }
-  window.addEventListener('resize', layout);
-  setTimeout(layout, 60);
+  catch(err){
 
-  // ambient dust particles
-  const canvas = document.getElementById('dust');
-  const ctx = canvas.getContext('2d');
-  let W,H,particles=[];
-  function resize(){
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+    console.log(
+      "EratGuard stats:",
+      err
+    );
+
   }
-  function initParticles(){
-    particles = Array.from({length:70},()=>({
-      x:Math.random()*W, y:Math.random()*H,
-      r:Math.random()*1.4+0.3,
-      vy:-(Math.random()*0.18+0.04),
-      vx:(Math.random()-0.5)*0.08,
-      a:Math.random()*0.5+0.15
-    }));
-  }
-  function tick(){
-    ctx.clearRect(0,0,W,H);
-    particles.forEach(p=>{
-      p.x+=p.vx; p.y+=p.vy;
-      if(p.y<-5) p.y = H+5;
-      if(p.x<-5) p.x = W+5;
-      if(p.x>W+5) p.x = -5;
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle = `rgba(80,220,255,${p.a})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(tick);
-  }
-  resize(); initParticles(); tick();
-  window.addEventListener('resize', ()=>{resize(); initParticles();});
-async function loadStats(){
-try{
-const res=await fetch("/api/stats");
-const data=await res.json();
-document.querySelectorAll(".b-num")[0].textContent=data.blocked_count??0;
-document.querySelectorAll(".b-num")[1].textContent=data.total??0;
-document.querySelectorAll(".b-num")[2].textContent=data.safe_count??0;
-document.querySelectorAll(".b-num")[3].textContent=data.reported_count??0;
-if(data.protection_status)document.querySelector(".threat-tag").textContent=data.protection_status.toUpperCase();
-if(data.security_percent)document.querySelector(".ring-pct").textContent=data.security_percent+"%";
-}catch(e){console.log(e);}
+
 }
-loadStats();
-setInterval(loadStats,3000);
 
-async function loadLogs(){
-try{
-const res=await fetch("/api/logs");
-const data=await res.json();
-const box=document.getElementById("liveLogs");
-if(box&&data.logs){
-box.innerHTML=data.logs.slice(0,5).map(l=>`<div style="margin:6px 0"><b>${l.event||"-"}</b><br><span style="color:#7fa3ad">${l.message||""}</span></div>`).join("");
-}
-}catch(e){console.log(e);}
-}
-loadLogs();
-setInterval(loadLogs,5000);
+egLoadStats();
+
+setInterval(
+  egLoadStats,
+  3000
+);
+
 
 
 </script>
+
+<!-- ERATGUARD MASTER PANEL M02K FINAL END -->
 
 </body>
 </html>

@@ -70,16 +70,9 @@ object SpamDecisionCore {
          * karantinaya gönderilir.
          */
         val verdict =
-            when {
-                finalScore >= 55 ->
-                    SpamVerdict.SPAM
-
-                finalScore >= 30 ->
-                    SpamVerdict.SUSPICIOUS
-
-                else ->
-                    SpamVerdict.SAFE
-            }
+            SpamRiskPolicy.verdictFor(
+                finalScore
+            )
 
         val reasons =
             base.reasons.toMutableList()
@@ -99,10 +92,21 @@ object SpamDecisionCore {
                 "Agresif koruma: güvenli geçmişin risk düşürme etkisi sınırlandı"
         }
 
+        /*
+         * RiskEngine tarafından verilen yüksek güvenli spam
+         * bilgisini öğrenme katmanında kaybetme.
+         *
+         * Bu bayrak yalnızca nihai karar hâlâ SPAM ise korunur.
+         */
+        val highConfidenceSpam =
+            base.highConfidenceSpam &&
+                verdict == SpamVerdict.SPAM
+
         return SpamResult(
             score = finalScore,
             verdict = verdict,
-            reasons = reasons
+            reasons = reasons,
+            highConfidenceSpam = highConfidenceSpam
         )
     }
 }

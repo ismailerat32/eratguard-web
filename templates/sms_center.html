@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EratGuard · SMS Merkezi</title>
+
+<style>
+:root{
+  --bg:#07111d;
+  --panel:#0c1826;
+  --panel2:#101e2e;
+  --line:rgba(255,255,255,.09);
+  --text:#f4f7fb;
+  --muted:#8da0b5;
+  --accent:#18d7b0;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+.wrap{
+  width:min(1050px,calc(100% - 28px));
+  margin:0 auto;
+  padding:30px 0 100px;
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:18px;
+  margin-bottom:28px;
+}
+
+.eyebrow{
+  color:var(--accent);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.16em;
+}
+
+h1{
+  margin:5px 0 7px;
+  font-size:30px;
+}
+
+.subtitle{
+  margin:0;
+  color:var(--muted);
+  line-height:1.5;
+}
+
+.back{
+  color:var(--text);
+  text-decoration:none;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:10px 14px;
+  white-space:nowrap;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+
+.card{
+  display:block;
+  min-height:150px;
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:var(--panel);
+  color:var(--text);
+  text-decoration:none;
+  transition:
+    transform .16s ease,
+    border-color .16s ease,
+    background .16s ease;
+}
+
+.card:hover{
+  transform:translateY(-2px);
+  border-color:rgba(24,215,176,.35);
+  background:var(--panel2);
+}
+
+.card.primary{
+  border-color:rgba(24,215,176,.28);
+}
+
+.mark{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--line);
+  border-radius:12px;
+  margin-bottom:17px;
+  color:var(--accent);
+  font-size:20px;
+}
+
+.card strong{
+  display:block;
+  font-size:18px;
+  margin-bottom:7px;
+}
+
+.card span{
+  display:block;
+  color:var(--muted);
+  line-height:1.45;
+  font-size:14px;
+}
+
+.note{
+  margin-top:18px;
+  padding:15px 17px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+
+@media(max-width:650px){
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .top{
+    align-items:flex-start;
+  }
+
+  h1{
+    font-size:25px;
+  }
+}
+</style>
+</head>
+
+<body>
+<main class="wrap">
+
+<header class="top">
+  <div>
+    <div class="eyebrow">ERATGUARD CORE</div>
+    <h1>SMS Merkezi</h1>
+    <p class="subtitle">
+      SMS koruması, analiz ve mesaj yönetimi.
+    </p>
+  </div>
+
+  <a class="back" href="/dashboard">
+    Ana Sayfa
+  </a>
+</header>
+
+<section class="grid">
+
+  <a class="card primary"
+     href="/u/protection-history">
+    <div class="mark">☷</div>
+    <strong>SMS Geçmişi</strong>
+    <span>
+      Engellenen, güvenli ve şikâyet edilen
+      SMS kayıtlarını görüntüle.
+    </span>
+  </a>
+
+  <a class="card"
+     href="/u/blocked">
+    <div class="mark">⊘</div>
+    <strong>Engellenenler</strong>
+    <span>
+      Engellenen göndericileri ve koruma
+      kayıtlarını görüntüle.
+    </span>
+  </a>
+
+  <a class="card"
+     href="/u/analysis">
+    <div class="mark">AI</div>
+    <strong>AI Analiz</strong>
+    <span>
+      Şüpheli içerikleri EratGuard analiz
+      motoruyla incele.
+    </span>
+  </a>
+
+  <a class="card"
+     href="/u/sms-default">
+    <div class="mark">◆</div>
+    <strong>Varsayılan SMS</strong>
+    <span>
+      Android varsayılan SMS uygulaması
+      durumunu ve gerekli izinleri yönet.
+    </span>
+  </a>
+
+</section>
+
+<div class="note">
+  Android uygulaması /sms hedefini native SMS
+  deneyimine yönlendirebilir. Bu sayfa tarayıcı
+  ve WebView için canonical companion ekranıdır.
+</div>
+
+</main>
+</body>
+</html>

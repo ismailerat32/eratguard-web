@@ -1,31 +1,49 @@
 package com.eratguard.pro.theme
 
-import androidx.compose.ui.graphics.Color
+import com.eratguard.pro.designsystem.EratGuardColors
 
+/**
+ * Compatibility bridge for existing UI.
+ *
+ * New UI should consume EratGuardColors directly.
+ * This object remains temporarily so existing screens can migrate
+ * without a large-bang rewrite.
+ */
 object DashboardColors {
 
-    val Background = Color(0xFF07121B)
+    val Background
+        get() = EratGuardColors.Background
 
-    val Surface = Color(0xFF102430)
+    val Surface
+        get() = EratGuardColors.Surface
 
-    val SurfaceLight = Color(0xFF173648)
+    val SurfaceLight
+        get() = EratGuardColors.SurfaceElevated
 
-    val Primary = Color(0xFF00E5FF)
+    val Primary
+        get() = EratGuardColors.Primary
 
-    val PrimaryGlow = Color(0x8800E5FF)
+    val PrimaryGlow
+        get() = EratGuardColors.PrimaryGlow
 
-    val Accent = Color(0xFF00FF99)
+    val Accent
+        get() = EratGuardColors.Accent
 
-    val Warning = Color(0xFFFFC107)
+    val Warning
+        get() = EratGuardColors.Warning
 
-    val Danger = Color(0xFFFF5252)
+    val Danger
+        get() = EratGuardColors.Danger
 
-    val Text = Color(0xFFFFFFFF)
+    val Text
+        get() = EratGuardColors.TextPrimary
 
-    val SubText = Color(0xFF8CBBC9)
+    val SubText
+        get() = EratGuardColors.TextSecondary
 
-    val Border = Color(0xFF00E5FF)
+    val Border
+        get() = EratGuardColors.Border
 
-    val Divider = Color(0x3320E5FF)
-
+    val Divider
+        get() = EratGuardColors.Divider
 }

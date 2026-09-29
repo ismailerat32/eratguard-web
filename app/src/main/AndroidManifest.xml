@@ -17,6 +17,8 @@
         </intent>
     </queries>
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
         android:usesCleartextTraffic="true"
         android:allowBackup="true"
@@ -90,6 +92,20 @@
             </intent-filter>
 
         </service>
+
+    
+        <!-- EratGuard outgoing SMS sent/delivery callbacks -->
+        <receiver
+            android:name="com.eratguard.pro.spam.sms.SmsSendResultReceiver"
+            android:enabled="true"
+            android:exported="false">
+
+            <intent-filter>
+                <action android:name="com.eratguard.pro.SMS_SENT" />
+                <action android:name="com.eratguard.pro.SMS_DELIVERED" />
+            </intent-filter>
+
+        </receiver>
 
     </application>
 

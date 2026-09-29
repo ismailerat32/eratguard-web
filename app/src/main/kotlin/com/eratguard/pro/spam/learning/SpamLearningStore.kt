@@ -7,6 +7,9 @@ object SpamLearningStore {
     private const val PREFS =
         "eratguard_spam_learning"
 
+    private val writeLock =
+        Any()
+
     internal fun normalizeSender(
         sender: String
     ): String =
@@ -35,71 +38,77 @@ object SpamLearningStore {
         context: Context,
         sender: String
     ) {
-
         if (normalizeSender(sender).isBlank()) {
             return
         }
 
-        val prefs =
-            context.getSharedPreferences(
-                PREFS,
-                Context.MODE_PRIVATE
-            )
-
-        val key =
-            spamKey(sender)
-
-        val current =
-            prefs.getInt(
-                key,
-                0
-            )
-
-        prefs.edit()
-            .putInt(
-                key,
-                current + 1
-            )
-            .apply()
+        increment(
+            context = context,
+            key = spamKey(sender)
+        )
     }
 
     fun markSafe(
         context: Context,
         sender: String
     ) {
-
         if (normalizeSender(sender).isBlank()) {
             return
         }
 
-        val prefs =
-            context.getSharedPreferences(
-                PREFS,
-                Context.MODE_PRIVATE
-            )
+        increment(
+            context = context,
+            key = safeKey(sender)
+        )
+    }
 
-        val key =
-            safeKey(sender)
+    private fun increment(
+        context: Context,
+        key: String
+    ) {
+        synchronized(writeLock) {
+            val prefs =
+                context.getSharedPreferences(
+                    PREFS,
+                    Context.MODE_PRIVATE
+                )
 
-        val current =
-            prefs.getInt(
-                key,
-                0
-            )
+            val current =
+                prefs.getInt(
+                    key,
+                    0
+                )
 
-        prefs.edit()
-            .putInt(
-                key,
-                current + 1
-            )
-            .apply()
+            /*
+             * Learning feedback is durable state.
+             *
+             * commit() is intentional here:
+             * once markSpam()/markSafe() returns, the updated
+             * counter has been synchronously persisted.
+             *
+             * Saturation prevents Int overflow from corrupting
+             * long-lived learning state.
+             */
+            val next =
+                if (current == Int.MAX_VALUE) {
+                    Int.MAX_VALUE
+                } else {
+                    current + 1
+                }
+
+            prefs.edit()
+                .putInt(
+                    key,
+                    next
+                )
+                .commit()
+        }
     }
 
     fun senderAdjustment(
         context: Context,
         sender: String
     ): Int {
-
         if (normalizeSender(sender).isBlank()) {
             return 0
         }

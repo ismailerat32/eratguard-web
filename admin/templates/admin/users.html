@@ -736,7 +736,7 @@
 
                 <a
                     class="eg-identity-action"
-                    href="{{ url_for('eg_premium_admin_user_detail_page', target_username=udata.username) }}"
+                    href="{{ url_for('admin.user_detail', target_username=udata.username) }}"
                 >
                     <span>IDENTITY CONTROL</span>
                     <span>→</span>
@@ -746,7 +746,7 @@
 
                     <form
                         method="post"
-                        action="{{ url_for('eg_premium_admin_reset_devices_action', target_username=udata.username) }}"
+                        action="{{ url_for('admin.reset_user_devices', target_username=udata.username) }}"
                         onsubmit="return confirm('{{ udata.username }} kullanıcısının bağlı cihazları sıfırlansın mı?');"
                     >
                         <button class="eg-reset" type="submit">
@@ -766,7 +766,7 @@
 
             <a
                 class="eg-identity-action"
-                href="{{ url_for('eg_premium_admin_user_detail_page', target_username=udata.username) }}"
+                href="{{ url_for('admin.user_detail', target_username=udata.username) }}"
             >
                 <span>IDENTITY CONTROL</span>
                 <span>→</span>

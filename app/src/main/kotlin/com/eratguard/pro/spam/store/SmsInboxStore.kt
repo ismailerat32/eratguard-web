@@ -7,6 +7,13 @@ import android.provider.Telephony
 object SmsInboxStore {
 
     /*
+     * query -> insert dizisini aynı process içinde atomik tutar.
+     *
+     * Store güvenliği caller'ın threading davranışına bağlı değildir.
+     */
+    private val insertLock = Any()
+
+    /*
      * Karantinadan Inbox'a geri yükleme için idempotent yazma.
      *
      * Aynı sender + body + timestamp zaten Inbox'ta bulunuyorsa
@@ -19,10 +26,10 @@ object SmsInboxStore {
         sender: String,
         body: String,
         timestamp: Long
-    ): Boolean {
+    ): Boolean = synchronized(insertLock) {
 
         if (body.isBlank()) {
-            return false
+            return@synchronized false
         }
 
         val projection =
@@ -42,7 +49,7 @@ object SmsInboxStore {
                 timestamp.toString()
             )
 
-        return try {
+        try {
 
             val exists =
                 context.contentResolver.query(
@@ -65,6 +72,42 @@ object SmsInboxStore {
                     timestamp = timestamp
                 )
             }
+
+        } catch (_: SecurityException) {
+
+            false
+
+        } catch (_: Exception) {
+
+            false
+        }
+    }
+
+    /*
+     * Gelen Kutusu'ndaki tek bir gerçek SMS kaydını _ID ile siler.
+     *
+     * Yalnızca EratGuard varsayılan SMS uygulaması olduğunda
+     * çağrılması beklenir. UI ayrıca kullanıcı onayı istemelidir.
+     */
+    fun deleteById(
+        context: Context,
+        messageId: Long
+    ): Boolean {
+
+        if (messageId <= 0L) {
+            return false
+        }
+
+        return try {
+
+            val deletedRows =
+                context.contentResolver.delete(
+                    Telephony.Sms.CONTENT_URI,
+                    "${Telephony.Sms._ID} = ?",
+                    arrayOf(messageId.toString())
+                )
+
+            deletedRows == 1
 
         } catch (_: SecurityException) {
 

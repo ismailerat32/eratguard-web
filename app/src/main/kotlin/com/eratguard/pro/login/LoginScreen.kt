@@ -23,9 +23,11 @@ import com.eratguard.pro.network.InstallationIdManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-private val BackgroundColor = Color(0xFF07121B)
-private val NeonColor = Color(0xFF00E5FF)
+import com.eratguard.pro.designsystem.EratGuardColors
+import com.eratguard.pro.designsystem.EratGuardSpacing
+import com.eratguard.pro.designsystem.components.EratGuardButton
+import com.eratguard.pro.designsystem.components.EratGuardField
+import com.eratguard.pro.designsystem.components.EratGuardTextButton
 
 @Composable
 fun LoginScreen(
@@ -43,31 +45,31 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundColor)
+            .background(EratGuardColors.Background)
     ) {
         Column(
             modifier = Modifier
                 .align(Alignment.Center)
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(EratGuardSpacing.Xxl),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "ERATGUARD PRO",
-                color = NeonColor,
+                color = EratGuardColors.Primary,
                 fontSize = 30.sp
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(EratGuardSpacing.Sm))
 
             Text(
                 text = "AI Powered Mobile Security",
-                color = Color.LightGray
+                color = EratGuardColors.TextSecondary
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(EratGuardSpacing.Xxxl))
 
-            OutlinedTextField(
+            EratGuardField(
                 value = username,
                 onValueChange = {
                     username = it
@@ -85,9 +87,9 @@ fun LoginScreen(
                 )
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(EratGuardSpacing.Lg))
 
-            OutlinedTextField(
+            EratGuardField(
                 value = password,
                 onValueChange = {
                     password = it
@@ -101,7 +103,7 @@ fun LoginScreen(
                     Icon(Icons.Default.Lock, contentDescription = null)
                 },
                 trailingIcon = {
-                    TextButton(
+                    EratGuardTextButton(
                         enabled = !loading,
                         onClick = {
                             showPassword = !showPassword
@@ -131,16 +133,13 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+            EratGuardButton(
+                modifier = Modifier.fillMaxWidth(),
                 enabled = !loading,
-                shape = RoundedCornerShape(18.dp),
                 onClick = {
                     if (username.isBlank() || password.isBlank()) {
                         errorMessage = "Kullanıcı adı ve şifre gerekli."
-                        return@Button
+                        return@EratGuardButton
                     }
 
                     loading = true
@@ -176,27 +175,27 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(EratGuardSpacing.Lg))
 
-            TextButton(
+            EratGuardTextButton(
                 enabled = !loading,
                 onClick = { }
             ) {
                 Text("Şifremi Unuttum")
             }
 
-            TextButton(
+            EratGuardTextButton(
                 enabled = !loading,
                 onClick = { }
             ) {
                 Text("Hesap Oluştur")
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(EratGuardSpacing.Xxxl))
 
             Text(
                 text = "Protected by ERAT AI Engine",
-                color = NeonColor
+                color = EratGuardColors.Primary
             )
         }
     }

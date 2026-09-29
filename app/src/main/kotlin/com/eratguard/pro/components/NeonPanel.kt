@@ -4,13 +4,14 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.eratguard.pro.theme.DashboardColors
+import com.eratguard.pro.designsystem.EratGuardColors
+import com.eratguard.pro.designsystem.EratGuardShapeTokens
+import com.eratguard.pro.designsystem.EratGuardSizes
+import com.eratguard.pro.designsystem.EratGuardSpacing
 
 @Composable
 fun NeonPanel(
@@ -20,18 +21,18 @@ fun NeonPanel(
 
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
+        shape = EratGuardShapeTokens.Large,
         border = BorderStroke(
-            1.dp,
-            DashboardColors.Border
+            EratGuardSizes.BorderThin,
+            EratGuardColors.Border
         ),
         colors = CardDefaults.cardColors(
-            containerColor = DashboardColors.Surface
+            containerColor = EratGuardColors.Surface
         )
     ) {
 
         Box(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(EratGuardSpacing.Lg),
             content = content
         )
 

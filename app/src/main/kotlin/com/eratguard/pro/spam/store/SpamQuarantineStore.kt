@@ -1,9 +1,9 @@
 package com.eratguard.pro.spam.store
 
 import android.content.Context
+import com.eratguard.pro.domain.messaging.SmsIncomingIdentity
 import org.json.JSONArray
 import org.json.JSONObject
-import java.security.MessageDigest
 
 object SpamQuarantineStore {
 
@@ -14,40 +14,6 @@ object SpamQuarantineStore {
         "messages"
 
     private const val MAX_MESSAGES = 200
-
-    private fun fingerprint(
-        sender: String,
-        body: String,
-        timestamp: Long
-    ): String {
-
-        /*
-         * Multipart / duplicate broadcast koruması.
-         *
-         * Timestamp saniyeye yuvarlanır. Aynı gönderici,
-         * aynı içerik ve aynı saniyedeki teslimat aynı
-         * mesaj kabul edilir.
-         */
-
-        val second =
-            timestamp / 1000L
-
-        val raw =
-            "$sender\u0000$body\u0000$second"
-
-        val digest =
-            MessageDigest
-                .getInstance("SHA-256")
-                .digest(
-                    raw.toByteArray(
-                        Charsets.UTF_8
-                    )
-                )
-
-        return digest.joinToString("") {
-            "%02x".format(it)
-        }
-    }
 
     @Synchronized
     fun add(
@@ -88,11 +54,11 @@ object SpamQuarantineStore {
                 }
 
             val id =
-                fingerprint(
+                SmsIncomingIdentity.fingerprint(
                     sender = sender,
                     body = body,
                     timestamp = timestamp
-                )
+                ) ?: return false
 
             /*
              * Aynı mesaj zaten varsa yeniden ekleme.

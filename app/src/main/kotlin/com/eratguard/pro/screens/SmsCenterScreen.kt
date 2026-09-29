@@ -1,8 +1,24 @@
 package com.eratguard.pro.screens
 
+import com.eratguard.pro.designsystem.EratGuardColors
+import com.eratguard.pro.designsystem.EratGuardShapeTokens
+import com.eratguard.pro.designsystem.EratGuardSpacing
+import com.eratguard.pro.designsystem.components.EratGuardButton
+import com.eratguard.pro.designsystem.components.EratGuardField
+import com.eratguard.pro.designsystem.components.EratGuardPanel
+
+import com.eratguard.pro.domain.messaging.SmsAddressValidator
+
 import android.app.Activity
+import android.content.Context
 import android.Manifest
 import android.content.pm.PackageManager
+import android.database.ContentObserver
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.provider.ContactsContract
+import android.provider.Telephony
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -19,12 +35,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -39,9 +55,12 @@ import androidx.compose.ui.unit.dp
 import com.eratguard.pro.contacts.ContactNameResolver
 import com.eratguard.pro.spam.feedback.SpamFeedbackService
 import com.eratguard.pro.spam.sms.SmsRoleManager
+import com.eratguard.pro.spam.sms.SmsSendResultReceiver
+import com.eratguard.pro.spam.sms.SmsSender
 import com.eratguard.pro.spam.store.SpamQuarantineStore
+import com.eratguard.pro.spam.store.SpamProtectionSettings
 import com.eratguard.pro.spam.store.SmsInboxReader
-import com.eratguard.pro.theme.DashboardColors
+import com.eratguard.pro.spam.store.SmsInboxStore
 
 @Composable
 fun SmsCenterScreen(
@@ -54,7 +73,8 @@ fun SmsCenterScreen(
     val requiredSmsPermissions =
         arrayOf(
             Manifest.permission.RECEIVE_SMS,
-            Manifest.permission.READ_SMS
+            Manifest.permission.READ_SMS,
+            Manifest.permission.SEND_SMS
         )
 
     val optionalContactsPermission =
@@ -81,6 +101,22 @@ fun SmsCenterScreen(
             permissionRefreshKey++
         }
 
+    val notificationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract =
+                ActivityResultContracts.RequestPermission()
+        ) {
+            permissionRefreshKey++
+        }
+
+    val notificationPermissionGranted =
+        Build.VERSION.SDK_INT <
+            Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+
     val smsPermissionsGranted =
         remember(permissionRefreshKey) {
             requiredSmsPermissions.all { permission ->
@@ -96,9 +132,148 @@ fun SmsCenterScreen(
             mutableIntStateOf(0)
         }
 
+    DisposableEffect(context) {
+
+        val observer =
+            object : ContentObserver(
+                Handler(Looper.getMainLooper())
+            ) {
+                override fun onChange(
+                    selfChange: Boolean
+                ) {
+                    super.onChange(selfChange)
+                    refreshKey++
+                }
+            }
+
+        context.contentResolver
+            .registerContentObserver(
+                Telephony.Sms.CONTENT_URI,
+                true,
+                observer
+            )
+
+        onDispose {
+            context.contentResolver
+                .unregisterContentObserver(
+                    observer
+                )
+        }
+    }
+
+    /*
+     * Karantina SharedPreferences üzerinde tutuluyor.
+     * Yeni spam eklenince veya karantinadan mesaj silinince
+     * ekran açıkken listeyi anında yenile.
+     */
+    DisposableEffect(context) {
+
+        val quarantinePrefs =
+            context.getSharedPreferences(
+                "eratguard_spam_quarantine",
+                Context.MODE_PRIVATE
+            )
+
+        val listener =
+            android.content.SharedPreferences
+                .OnSharedPreferenceChangeListener {
+                    _, key ->
+
+                    if (key == "messages") {
+                        refreshKey++
+                    }
+                }
+
+        quarantinePrefs
+            .registerOnSharedPreferenceChangeListener(
+                listener
+            )
+
+        onDispose {
+            quarantinePrefs
+                .unregisterOnSharedPreferenceChangeListener(
+                    listener
+                )
+        }
+    }
+
     var statusMessage by
         remember {
             mutableStateOf<String?>(null)
+        }
+
+    var sendStatusRefreshKey by
+        remember {
+            mutableIntStateOf(0)
+        }
+
+    DisposableEffect(context) {
+
+        val sendStatusPrefs =
+            context.getSharedPreferences(
+                SmsSendResultReceiver.PREFS_NAME,
+                Context.MODE_PRIVATE
+            )
+
+        val listener =
+            android.content.SharedPreferences
+                .OnSharedPreferenceChangeListener {
+                    _, _ ->
+                    sendStatusRefreshKey++
+                }
+
+        sendStatusPrefs
+            .registerOnSharedPreferenceChangeListener(
+                listener
+            )
+
+        onDispose {
+            sendStatusPrefs
+                .unregisterOnSharedPreferenceChangeListener(
+                    listener
+                )
+        }
+    }
+
+    /*
+     * SMS silme sonucu kalıcı durum yazısı olarak
+     * ekranda kalmasın. Diğer durum mesajlarına dokunma.
+     */
+    LaunchedEffect(statusMessage) {
+
+        if (
+            statusMessage == "SMS silindi." ||
+            statusMessage == "SMS silinemedi."
+        ) {
+            kotlinx.coroutines.delay(3000L)
+
+            if (
+                statusMessage == "SMS silindi." ||
+                statusMessage == "SMS silinemedi."
+            ) {
+                statusMessage = null
+            }
+        }
+    }
+
+    var autoDeleteHighConfidence by
+        remember {
+            mutableStateOf(
+                SpamProtectionSettings
+                    .isAutoDeleteHighConfidenceEnabled(
+                        context
+                    )
+            )
+        }
+
+    var showAutoDeleteWarning by
+        remember {
+            mutableStateOf(false)
+        }
+
+    var pendingDeleteMessageId by
+        remember {
+            mutableStateOf<Long?>(null)
         }
 
     var roleRefreshKey by
@@ -143,6 +318,95 @@ fun SmsCenterScreen(
             mutableStateOf(true)
         }
 
+    var showComposer by
+        remember {
+            mutableStateOf(false)
+        }
+
+    var composeRecipient by
+        remember {
+            mutableStateOf("")
+        }
+
+    var composeBody by
+        remember {
+            mutableStateOf("")
+        }
+
+    val contactPickerLauncher =
+        rememberLauncherForActivityResult(
+            contract =
+                ActivityResultContracts.PickContact()
+        ) { contactUri ->
+
+            if (contactUri != null) {
+
+                try {
+
+                    context.contentResolver.query(
+                        contactUri,
+                        arrayOf(
+                            ContactsContract.Contacts._ID
+                        ),
+                        null,
+                        null,
+                        null
+                    )?.use { cursor ->
+
+                        if (cursor.moveToFirst()) {
+
+                            val idIndex =
+                                cursor.getColumnIndex(
+                                    ContactsContract.Contacts._ID
+                                )
+
+                            if (idIndex >= 0) {
+
+                                val contactId =
+                                    cursor.getLong(idIndex)
+
+                                context.contentResolver.query(
+                                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                    arrayOf(
+                                        ContactsContract.CommonDataKinds.Phone.NUMBER
+                                    ),
+                                    "${ContactsContract.CommonDataKinds.Phone.CONTACT_ID} = ?",
+                                    arrayOf(contactId.toString()),
+                                    null
+                                )?.use { phoneCursor ->
+
+                                    if (phoneCursor.moveToFirst()) {
+
+                                        val numberIndex =
+                                            phoneCursor.getColumnIndex(
+                                                ContactsContract.CommonDataKinds.Phone.NUMBER
+                                            )
+
+                                        if (numberIndex >= 0) {
+                                            composeRecipient =
+                                                phoneCursor
+                                                    .getString(numberIndex)
+                                                    .orEmpty()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                } catch (_: SecurityException) {
+
+                    statusMessage =
+                        "Rehber izni gerekli."
+
+                } catch (_: Exception) {
+
+                    statusMessage =
+                        "Kişi seçilemedi."
+                }
+            }
+        }
+
     val inboxMessages =
         remember(
             refreshKey,
@@ -165,10 +429,182 @@ fun SmsCenterScreen(
             )
         }
 
+    val outgoingSmsStatus =
+        remember(sendStatusRefreshKey) {
+
+            val prefs =
+                context.getSharedPreferences(
+                    SmsSendResultReceiver.PREFS_NAME,
+                    Context.MODE_PRIVATE
+                )
+
+            val sentStatus =
+                prefs.getString(
+                    SmsSendResultReceiver.KEY_LAST_SENT_STATUS,
+                    null
+                )
+
+            val deliveryStatus =
+                prefs.getString(
+                    SmsSendResultReceiver.KEY_LAST_DELIVERY_STATUS,
+                    null
+                )
+
+            when {
+
+                deliveryStatus == "delivered" ->
+                    "Son SMS: Teslim edildi."
+
+                deliveryStatus == "delivering" ->
+                    "Son SMS: Teslim ediliyor."
+
+                deliveryStatus == "delivery_failed" ->
+                    "Son SMS gönderildi ancak teslim raporu başarısız."
+
+                sentStatus == "sent" ->
+                    "Son SMS: Gönderildi."
+
+                sentStatus == "sending" ->
+                    "Son SMS: Gönderiliyor."
+
+                sentStatus == "no_service" ->
+                    "SMS gönderilemedi: Şebeke hizmeti yok."
+
+                sentStatus == "radio_off" ->
+                    "SMS gönderilemedi: Mobil bağlantı kapalı."
+
+                sentStatus == "null_pdu" ->
+                    "SMS gönderilemedi: Geçersiz SMS verisi."
+
+                sentStatus == "generic_failure" ->
+                    "SMS gönderilemedi: Operatör/modem hatası."
+
+                sentStatus == "send_failed" ->
+                    "SMS gönderilemedi."
+
+                else ->
+                    null
+            }
+        }
+
+    if (showAutoDeleteWarning) {
+
+        AlertDialog(
+            containerColor = EratGuardColors.SurfaceElevated,
+            titleContentColor = EratGuardColors.TextPrimary,
+            textContentColor = EratGuardColors.TextSecondary,
+            shape = EratGuardShapeTokens.ExtraLarge,
+            onDismissRequest = {
+                showAutoDeleteWarning = false
+            },
+            title = {
+                Text(
+                    "Otomatik silme açılsın mı?"
+                )
+            },
+            text = {
+                Text(
+                    "Yüksek güvenle spam/phishing olarak belirlenen mesajlar Gelen Kutusu'na veya Karantina'ya kaydedilmeden engellenir. Bu mesajlar sonradan geri getirilemez."
+                )
+            },
+            dismissButton = {
+                EratGuardButton(
+                    onClick = {
+                        showAutoDeleteWarning = false
+                    }
+                ) {
+                    Text("Vazgeç")
+                }
+            },
+            confirmButton = {
+                EratGuardButton(
+                    onClick = {
+
+                        SpamProtectionSettings
+                            .setAutoDeleteHighConfidenceEnabled(
+                                context = context,
+                                enabled = true
+                            )
+
+                        autoDeleteHighConfidence = true
+                        showAutoDeleteWarning = false
+
+                        statusMessage =
+                            "Kesin spam otomatik silme açıldı."
+                    }
+                ) {
+                    Text("Aç")
+                }
+            }
+        )
+    }
+
+    pendingDeleteMessageId?.let { messageId ->
+
+        AlertDialog(
+            containerColor = EratGuardColors.SurfaceElevated,
+            titleContentColor = EratGuardColors.TextPrimary,
+            textContentColor = EratGuardColors.TextSecondary,
+            shape = EratGuardShapeTokens.ExtraLarge,
+            onDismissRequest = {
+                pendingDeleteMessageId = null
+            },
+            title = {
+                Text("SMS silinsin mi?")
+            },
+            text = {
+                Text(
+                    "Bu SMS cihazdan kalıcı olarak silinecek."
+                )
+            },
+            dismissButton = {
+                EratGuardButton(
+                    onClick = {
+                        pendingDeleteMessageId = null
+                    }
+                ) {
+                    Text("İptal")
+                }
+            },
+            confirmButton = {
+                EratGuardButton(
+                    onClick = {
+
+                        val deleted =
+                            if (
+                                SmsRoleManager
+                                    .isDefaultSmsApp(context)
+                            ) {
+                                SmsInboxStore.deleteById(
+                                    context = context,
+                                    messageId = messageId
+                                )
+                            } else {
+                                false
+                            }
+
+                        pendingDeleteMessageId = null
+
+                        if (deleted) {
+                            statusMessage =
+                                "SMS silindi."
+                            refreshKey++
+                        } else {
+                            statusMessage =
+                                "SMS silinemedi."
+                        }
+                    }
+                ) {
+                    Text("Sil")
+                }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(EratGuardSpacing.Lg)
     ) {
 
         Row(
@@ -181,7 +617,7 @@ fun SmsCenterScreen(
                 text = "SMS Merkezi"
             )
 
-            Button(
+            EratGuardButton(
                 onClick = onBack
             ) {
                 Text("Geri")
@@ -189,7 +625,7 @@ fun SmsCenterScreen(
         }
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(EratGuardSpacing.Md)
         )
 
         Text(
@@ -203,7 +639,7 @@ fun SmsCenterScreen(
         if (isDefaultSmsApp && !smsPermissionsGranted) {
 
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(EratGuardSpacing.Sm)
             )
 
             Text(
@@ -211,10 +647,10 @@ fun SmsCenterScreen(
             )
 
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(EratGuardSpacing.Sm)
             )
 
-            Button(
+            EratGuardButton(
                 onClick = {
                     permissionLauncher.launch(
                         requiredSmsPermissions
@@ -235,7 +671,7 @@ fun SmsCenterScreen(
         ) {
 
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(EratGuardSpacing.Sm)
             )
 
             Text(
@@ -244,10 +680,10 @@ fun SmsCenterScreen(
             )
 
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(EratGuardSpacing.Sm)
             )
 
-            Button(
+            EratGuardButton(
                 onClick = {
                     contactsPermissionLauncher.launch(
                         optionalContactsPermission
@@ -261,10 +697,10 @@ fun SmsCenterScreen(
         if (!isDefaultSmsApp) {
 
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(EratGuardSpacing.Sm)
             )
 
-            Button(
+            EratGuardButton(
                 onClick = {
 
                     val activity =
@@ -300,7 +736,7 @@ fun SmsCenterScreen(
         statusMessage?.let { status ->
 
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(EratGuardSpacing.Sm)
             )
 
             Text(
@@ -308,16 +744,337 @@ fun SmsCenterScreen(
             )
         }
 
+        outgoingSmsStatus?.let { status ->
+
+            Spacer(
+                modifier = Modifier.height(EratGuardSpacing.Sm)
+            )
+
+            Text(
+                text = status,
+                color = EratGuardColors.TextSecondary
+            )
+        }
+
         Spacer(
-            modifier = Modifier.height(16.dp)
+            modifier = Modifier.height(EratGuardSpacing.Lg)
+        )
+
+        if (!notificationPermissionGranted) {
+
+            EratGuardPanel(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp)
+                ) {
+                    Text(
+                        text = "SMS bildirimleri",
+                        color = EratGuardColors.TextPrimary
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(EratGuardSpacing.Xxs)
+                    )
+
+                    Text(
+                        text =
+                            "Yeni SMS ve engellenen spam mesajları için bildirim alın.",
+                        color = EratGuardColors.TextSecondary
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(10.dp)
+                    )
+
+                    EratGuardButton(
+                        onClick = {
+                            if (
+                                Build.VERSION.SDK_INT >=
+                                Build.VERSION_CODES.TIRAMISU
+                            ) {
+                                notificationPermissionLauncher
+                                    .launch(
+                                        Manifest.permission
+                                            .POST_NOTIFICATIONS
+                                    )
+                            }
+                        }
+                    ) {
+                        Text("Bildirimleri etkinleştir")
+                    }
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.height(EratGuardSpacing.Lg)
+            )
+        }
+
+        if (isDefaultSmsApp && smsPermissionsGranted) {
+
+            EratGuardButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    showComposer = !showComposer
+
+                    if (!showComposer) {
+                        composeRecipient = ""
+                        composeBody = ""
+                    }
+                }
+            ) {
+                Text(
+                    if (showComposer)
+                        "Yeni Mesajı Kapat"
+                    else
+                        "Yeni Mesaj"
+                )
+            }
+
+            if (showComposer) {
+
+                Spacer(
+                    modifier = Modifier.height(EratGuardSpacing.Md)
+                )
+
+                EratGuardPanel(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp)
+                    ) {
+
+                        Text(
+                            text = "Yeni SMS",
+                            color = EratGuardColors.TextPrimary
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(10.dp)
+                        )
+
+                        EratGuardField(
+                            modifier =
+                                Modifier.fillMaxWidth(),
+                            value = composeRecipient,
+                            onValueChange = {
+                                composeRecipient = it
+                            },
+                            label = {
+                                Text("Telefon numarası")
+                            },
+                            singleLine = true
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(EratGuardSpacing.Sm)
+                        )
+
+                        EratGuardButton(
+                            modifier =
+                                Modifier.fillMaxWidth(),
+                            onClick = {
+
+                                if (
+                                    ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.READ_CONTACTS
+                                    ) ==
+                                    PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    contactPickerLauncher.launch(null)
+                                } else {
+                                    contactsPermissionLauncher.launch(
+                                        Manifest.permission.READ_CONTACTS
+                                    )
+                                    statusMessage =
+                                        "Önce rehber iznini ver, sonra tekrar Rehberden Seç'e dokun."
+                                }
+                            }
+                        ) {
+                            Text("Rehberden Seç")
+                        }
+
+                        Spacer(
+                            modifier = Modifier.height(10.dp)
+                        )
+
+                        EratGuardField(
+                            modifier =
+                                Modifier.fillMaxWidth(),
+                            value = composeBody,
+                            onValueChange = {
+                                composeBody = it
+                            },
+                            label = {
+                                Text("Mesaj")
+                            },
+                            minLines = 4
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(EratGuardSpacing.Sm)
+                        )
+
+                        val actualParts =
+                            SmsSender.partCount(
+                                context = context,
+                                message = composeBody
+                            )
+
+                        Text(
+                            text =
+                                "${composeBody.length} karakter • " +
+                                    "$actualParts SMS",
+                            color =
+                                EratGuardColors.TextSecondary
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(EratGuardSpacing.Md)
+                        )
+
+                        Row(
+                            modifier =
+                                Modifier.fillMaxWidth(),
+                            horizontalArrangement =
+                                Arrangement.spacedBy(EratGuardSpacing.Sm)
+                        ) {
+
+                            EratGuardButton(
+                                modifier =
+                                    Modifier.weight(1f),
+                                onClick = {
+                                    composeRecipient = ""
+                                    composeBody = ""
+                                    showComposer = false
+                                }
+                            ) {
+                                Text("Vazgeç")
+                            }
+
+                            EratGuardButton(
+                                modifier =
+                                    Modifier.weight(1f),
+                                enabled =
+                                    SmsAddressValidator.isReplyable(
+                                        composeRecipient
+                                    ) &&
+                                    composeBody
+                                        .isNotBlank(),
+                                onClick = {
+
+                                    val result =
+                                        SmsSender.send(
+                                            context =
+                                                context,
+                                            destination =
+                                                composeRecipient,
+                                            message =
+                                                composeBody
+                                        )
+
+                                    if (result.accepted) {
+
+                                        statusMessage = null
+                                        composeBody = ""
+
+                                    } else {
+
+                                        statusMessage =
+                                            result.error
+                                                ?: "SMS gönderilemedi."
+                                    }
+                                }
+                            ) {
+                                Text("Gönder")
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.height(EratGuardSpacing.Lg)
+            )
+        }
+
+        EratGuardPanel(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(14.dp),
+                horizontalArrangement =
+                    Arrangement.spacedBy(EratGuardSpacing.Md)
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text =
+                            "Kesin spam'i otomatik sil",
+                        color = EratGuardColors.TextPrimary
+                    )
+
+                    Spacer(
+                        modifier = Modifier.height(EratGuardSpacing.Xxs)
+                    )
+
+                    Text(
+                        text =
+                            "Yalnızca çok güçlü spam/phishing sinyalleri taşıyan mesajlar Gelen Kutusu'na veya Karantina'ya kaydedilmeden engellenir.",
+                        color = EratGuardColors.TextSecondary
+                    )
+                }
+
+                Switch(
+                    checked =
+                        autoDeleteHighConfidence,
+                    onCheckedChange = { enabled ->
+
+                        if (enabled) {
+
+                            showAutoDeleteWarning = true
+
+                        } else {
+
+                            SpamProtectionSettings
+                                .setAutoDeleteHighConfidenceEnabled(
+                                    context = context,
+                                    enabled = false
+                                )
+
+                            autoDeleteHighConfidence = false
+
+                            statusMessage =
+                                "Kesin spam otomatik silme kapatıldı."
+                        }
+                    }
+                )
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.height(EratGuardSpacing.Lg)
         )
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement =
-                Arrangement.spacedBy(8.dp)
+                Arrangement.spacedBy(EratGuardSpacing.Sm)
         ) {
-            Button(
+            EratGuardButton(
                 modifier = Modifier.weight(1f),
                 onClick = {
                     showInbox = true
@@ -331,7 +1088,7 @@ fun SmsCenterScreen(
                 )
             }
 
-            Button(
+            EratGuardButton(
                 modifier = Modifier.weight(1f),
                 onClick = {
                     showInbox = false
@@ -347,7 +1104,7 @@ fun SmsCenterScreen(
         }
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(EratGuardSpacing.Md)
         )
 
         if (showInbox) {
@@ -369,46 +1126,43 @@ fun SmsCenterScreen(
 
                 LazyColumn(
                     verticalArrangement =
-                        Arrangement.spacedBy(12.dp)
+                        Arrangement.spacedBy(EratGuardSpacing.Md)
                 ) {
                     items(
                         items = inboxMessages,
                         key = { "inbox_${it.id}" }
                     ) { message ->
 
-                        Card(
+                        EratGuardPanel(
                             modifier =
-                                Modifier.fillMaxWidth(),
-                            colors =
-                                CardDefaults.cardColors(
-                                    containerColor =
-                                        DashboardColors.SurfaceLight
-                                )
+                                Modifier.fillMaxWidth()
                         ) {
                             Column(
                                 modifier =
-                                    Modifier.padding(16.dp)
+                                    Modifier.padding(EratGuardSpacing.Lg)
                             ) {
                                 Text(
                                     text =
                                         ContactNameResolver.displayName(
                                             context = context,
                                             phoneNumber = message.sender
-                                        )
+                                        ),
+                                    color = EratGuardColors.TextPrimary
                                 )
 
                                 Spacer(
                                     modifier =
-                                        Modifier.height(8.dp)
+                                        Modifier.height(EratGuardSpacing.Sm)
                                 )
 
                                 Text(
-                                    text = message.body
+                                    text = message.body,
+                                    color = EratGuardColors.TextPrimary
                                 )
 
                                 Spacer(
                                     modifier =
-                                        Modifier.height(8.dp)
+                                        Modifier.height(EratGuardSpacing.Sm)
                                 )
 
                                 Text(
@@ -418,12 +1172,13 @@ fun SmsCenterScreen(
                                             Locale.getDefault()
                                         ).format(
                                             Date(message.timestamp)
-                                        )
+                                        ),
+                                    color = EratGuardColors.TextSecondary
                                 )
 
                                 Spacer(
                                     modifier =
-                                        Modifier.height(4.dp)
+                                        Modifier.height(EratGuardSpacing.Xxs)
                                 )
 
                                 Text(
@@ -431,8 +1186,63 @@ fun SmsCenterScreen(
                                         if (message.read)
                                             "Okundu"
                                         else
-                                            "Okunmadı"
+                                            "Okunmadı",
+                                    color = EratGuardColors.TextSecondary
                                 )
+
+                                Spacer(
+                                    modifier =
+                                        Modifier.height(EratGuardSpacing.Md)
+                                )
+
+                                Row(
+                                    modifier =
+                                        Modifier.fillMaxWidth(),
+                                    horizontalArrangement =
+                                        Arrangement.spacedBy(EratGuardSpacing.Sm)
+                                ) {
+
+                                    val replyableSender =
+                                        SmsAddressValidator.isReplyable(
+                                            message.sender
+                                        )
+
+                                    EratGuardButton(
+                                        modifier =
+                                            Modifier.weight(1f),
+                                        enabled =
+                                            isDefaultSmsApp &&
+                                            smsPermissionsGranted &&
+                                            replyableSender,
+                                        onClick = {
+                                            composeRecipient =
+                                                message.sender
+                                            composeBody = ""
+                                            showComposer = true
+                                        }
+                                    ) {
+                                        Text(
+                                            if (replyableSender) {
+                                                "Yanıtla"
+                                            } else {
+                                                "Yanıt Yok"
+                                            }
+                                        )
+                                    }
+
+                                    EratGuardButton(
+                                        modifier =
+                                            Modifier.weight(1f),
+                                        enabled =
+                                            isDefaultSmsApp,
+                                        onClick = {
+                                            pendingDeleteMessageId =
+                                                message.id
+                                        }
+                                    ) {
+                                        Text("Sil")
+                                    }
+                                }
                             }
                         }
                     }
@@ -451,59 +1261,57 @@ fun SmsCenterScreen(
 
                 LazyColumn(
                     verticalArrangement =
-                        Arrangement.spacedBy(12.dp)
+                        Arrangement.spacedBy(EratGuardSpacing.Md)
                 ) {
                     items(
                         items = quarantineMessages,
                         key = { "quarantine_${it.id}" }
                     ) { message ->
 
-                        Card(
+                        EratGuardPanel(
                             modifier =
-                                Modifier.fillMaxWidth(),
-                            colors =
-                                CardDefaults.cardColors(
-                                    containerColor =
-                                        DashboardColors.SurfaceLight
-                                )
+                                Modifier.fillMaxWidth()
                         ) {
                             Column(
                                 modifier =
-                                    Modifier.padding(16.dp)
+                                    Modifier.padding(EratGuardSpacing.Lg)
                             ) {
                                 Text(
                                     text =
                                         ContactNameResolver.displayName(
                                             context = context,
                                             phoneNumber = message.sender
-                                        )
+                                        ),
+                                    color = EratGuardColors.TextPrimary
                                 )
 
                                 Spacer(
                                     modifier =
-                                        Modifier.height(8.dp)
+                                        Modifier.height(EratGuardSpacing.Sm)
                                 )
 
                                 Text(
-                                    text = message.body
+                                    text = message.body,
+                                    color = EratGuardColors.TextPrimary
                                 )
 
                                 Spacer(
                                     modifier =
-                                        Modifier.height(8.dp)
+                                        Modifier.height(EratGuardSpacing.Sm)
                                 )
 
                                 Text(
                                     text =
-                                        "Risk: ${message.score} / ${message.verdict}"
+                                        "Risk: ${message.score} / ${message.verdict}",
+                                    color = EratGuardColors.Warning
                                 )
 
                                 Spacer(
                                     modifier =
-                                        Modifier.height(12.dp)
+                                        Modifier.height(EratGuardSpacing.Md)
                                 )
 
-                                Button(
+                                EratGuardButton(
                                     enabled =
                                         isDefaultSmsApp,
                                     onClick = {

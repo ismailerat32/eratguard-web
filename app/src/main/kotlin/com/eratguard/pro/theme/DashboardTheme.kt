@@ -1,25 +1,19 @@
 package com.eratguard.pro.theme
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import com.eratguard.pro.designsystem.EratGuardTheme
 
-private val EratGuardColors = darkColorScheme(
-    primary = DashboardColors.Primary,
-    secondary = DashboardColors.Accent,
-    background = DashboardColors.Background,
-    surface = DashboardColors.Surface,
-    onPrimary = DashboardColors.Text,
-    onBackground = DashboardColors.Text,
-    onSurface = DashboardColors.Text
-)
-
+/**
+ * Compatibility entry point.
+ *
+ * Existing callers can keep DashboardTheme while the application
+ * migrates to the unified EratGuard design system.
+ */
 @Composable
 fun DashboardTheme(
     content: @Composable () -> Unit
 ) {
-    MaterialTheme(
-        colorScheme = EratGuardColors,
+    EratGuardTheme(
         content = content
     )
 }

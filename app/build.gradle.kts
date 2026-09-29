@@ -11,8 +11,8 @@ android {
         applicationId = "com.eratguard.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 34
-        versionName = "1.0.34-compose-production"
+        versionCode = 37
+        versionName = "1.0.37-compose-production"
 
         vectorDrawables {
             useSupportLibrary = true

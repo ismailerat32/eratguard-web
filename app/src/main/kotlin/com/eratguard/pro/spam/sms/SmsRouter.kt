@@ -1,9 +1,11 @@
 package com.eratguard.pro.spam.sms
 
 import android.content.Context
+import com.eratguard.pro.domain.messaging.SmsRoutingPolicy
 import com.eratguard.pro.spam.SpamDecisionEngine
 import com.eratguard.pro.spam.model.SpamVerdict
 import com.eratguard.pro.spam.store.SmsInboxStore
+import com.eratguard.pro.spam.store.SpamProtectionSettings
 import com.eratguard.pro.spam.store.SpamQuarantineStore
 
 object SmsRouter {
@@ -13,7 +15,9 @@ object SmsRouter {
         val score: Int,
         val inboxInserted: Boolean,
         val quarantined: Boolean,
-        val failSafeActivated: Boolean = false
+        val failSafeActivated: Boolean = false,
+        val highConfidenceSpam: Boolean = false,
+        val autoDeleted: Boolean = false
     )
 
     fun route(
@@ -30,14 +34,43 @@ object SmsRouter {
                 message = body
             )
 
-        return when (
-            result.verdict
-        ) {
+        val autoDeleteEnabled =
+            SpamProtectionSettings
+                .isAutoDeleteHighConfidenceEnabled(
+                    context
+                )
 
-            SpamVerdict.SAFE -> {
+        val routingDecision =
+            SmsRoutingPolicy.decide(
+                verdict = result.verdict,
+                highConfidenceSpam =
+                    result.highConfidenceSpam,
+                autoDeleteHighConfidenceEnabled =
+                    autoDeleteEnabled
+            )
+
+        if (
+            routingDecision.destination ==
+            SmsRoutingPolicy.Destination.DROP
+        ) {
+            return RouteResult(
+                verdict = result.verdict,
+                score = result.score,
+                inboxInserted = false,
+                quarantined = false,
+                failSafeActivated = false,
+                highConfidenceSpam =
+                    result.highConfidenceSpam,
+                autoDeleted = true
+            )
+        }
+
+        return when (routingDecision.destination) {
+
+            SmsRoutingPolicy.Destination.INBOX -> {
 
                 val inserted =
-                    SmsInboxStore.insert(
+                    SmsInboxStore.insertIfMissing(
                         context = context,
                         sender = sender,
                         body = body,
@@ -49,12 +82,13 @@ object SmsRouter {
                     score = result.score,
                     inboxInserted = inserted,
                     quarantined = false,
-                    failSafeActivated = false
+                    failSafeActivated = false,
+                    highConfidenceSpam = result.highConfidenceSpam,
+                    autoDeleted = false
                 )
             }
 
-            SpamVerdict.SUSPICIOUS,
-            SpamVerdict.SPAM -> {
+            SmsRoutingPolicy.Destination.QUARANTINE -> {
 
                 val quarantined =
                     SpamQuarantineStore.add(
@@ -70,16 +104,17 @@ object SmsRouter {
                 /*
                  * KRİTİK FAIL-SAFE:
                  *
-                 * EratGuard spam olduğuna karar verdi fakat
-                 * kendi karantinasına kalıcı olarak yazamadıysa
-                 * mesajı yok etmiyoruz.
+                 * Karantinaya kalıcı yazma başarısızsa mesajı
+                 * kaybetmemek için Inbox'a bırakmayı dene.
                  *
-                 * Sistem inbox'una bırakmayı deniyoruz.
+                 * Bu fail-safe otomatik silme dalında çalışmaz;
+                 * çünkü kullanıcı KESİN SPAM otomatik silmeyi
+                 * açıkça etkinleştirmiştir.
                  */
                 if (!quarantined) {
 
                     val fallbackInserted =
-                        SmsInboxStore.insert(
+                        SmsInboxStore.insertIfMissing(
                             context = context,
                             sender = sender,
                             body = body,
@@ -91,7 +126,9 @@ object SmsRouter {
                         score = result.score,
                         inboxInserted = fallbackInserted,
                         quarantined = false,
-                        failSafeActivated = true
+                        failSafeActivated = true,
+                        highConfidenceSpam = result.highConfidenceSpam,
+                        autoDeleted = false
                     )
 
                 } else {
@@ -101,9 +138,17 @@ object SmsRouter {
                         score = result.score,
                         inboxInserted = false,
                         quarantined = true,
-                        failSafeActivated = false
+                        failSafeActivated = false,
+                        highConfidenceSpam = result.highConfidenceSpam,
+                        autoDeleted = false
                     )
                 }
+            }
+
+            SmsRoutingPolicy.Destination.DROP -> {
+                error(
+                    "AUTO_DELETE must be handled before persistence routing."
+                )
             }
         }
     }
