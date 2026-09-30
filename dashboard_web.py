@@ -655,11 +655,6 @@ def _eg_json_data_path(name):
     p.parent.mkdir(parents=True, exist_ok=True)
     return p
 
-def _eg_client_ip():
-    try:
-        return (request.headers.get("X-Forwarded-For") or request.remote_addr or "").split(",")[0].strip() or "-"
-    except Exception:
-        return "-"
 
 def _eg_user_agent():
     try:
@@ -859,7 +854,11 @@ def api_push_log():
     api_key = request.headers.get("X-API-KEY", "").strip()
     expected_key = os.getenv("API_PUSH_KEY", "").strip()
 
-    if not expected_key or api_key != expected_key:
+    if (
+        not expected_key
+        or not api_key
+        or not __import__("hmac").compare_digest(expected_key, api_key)
+    ):
         return jsonify({"ok": False, "error": "unauthorized"}), 401
 
     data = request.get_json(silent=True) or {}
@@ -3989,13 +3988,38 @@ import time as _eg_time
 _eg_rate_buckets = _eg_defaultdict(list)
 
 def _eg_client_ip():
+    """Return client IP; proxy headers are trusted only when explicitly enabled."""
     try:
-        xff = request.headers.get("X-Forwarded-For", "")
+        remote_ip = str(request.remote_addr or "").strip() or "unknown"
+
+        trust_proxy = (
+            str(os.getenv("ERATGUARD_TRUST_PROXY_IP", ""))
+            .strip()
+            .lower()
+            in {"1", "true", "yes", "on"}
+        )
+
+        if not trust_proxy:
+            return remote_ip
+
+        cf_ip = str(
+            request.headers.get("CF-Connecting-IP", "")
+        ).strip()
+        if cf_ip:
+            return cf_ip
+
+        xff = str(
+            request.headers.get("X-Forwarded-For", "")
+        ).strip()
         if xff:
-            return xff.split(",")[0].strip()
-        return request.headers.get("CF-Connecting-IP") or request.remote_addr or "unknown"
+            candidate = xff.split(",", 1)[0].strip()
+            if candidate:
+                return candidate
+
+        return remote_ip
     except Exception:
         return "unknown"
+
 
 def _eg_rate_limit_check(bucket_name, limit, window_seconds):
     now = _eg_time.time()
@@ -4024,6 +4048,7 @@ def eratguard_beta_rate_limit_guard():
             "/login": ("user-login", 12, 15 * 60),
             "/forgot-password": ("forgot-password", 5, 15 * 60),
             "/forgot": ("forgot-password-alias", 5, 15 * 60),
+            "/api/mobile/login": ("mobile-login", 20, 15 * 60),
         }
 
         if path not in rules:
@@ -4035,11 +4060,19 @@ def eratguard_beta_rate_limit_guard():
         if ok:
             return None
 
-        resp = app.response_class(
-            "<h2>EratGuard PRO</h2><p>Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.</p>",
-            status=429,
-            mimetype="text/html",
-        )
+        if path == "/api/mobile/login":
+            resp = jsonify({
+                "ok": False,
+                "error": "rate_limited",
+                "message": "Çok fazla giriş denemesi. Lütfen biraz sonra tekrar deneyin.",
+            })
+            resp.status_code = 429
+        else:
+            resp = app.response_class(
+                "<h2>EratGuard PRO</h2><p>Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar deneyin.</p>",
+                status=429,
+                mimetype="text/html",
+            )
         resp.headers["Retry-After"] = str(max(retry_after, 60))
         return resp
 
@@ -6156,7 +6189,14 @@ try:
     @app.before_request
     def _eg_satg1_guard_sms_action_api():
         try:
-            if _eg_satg1_request.path == "/sms/action" and _eg_satg1_request.method == "POST":
+            if (
+                _eg_satg1_request.path in {
+                    "/sms/action",
+                    "/api/v5/sms-action",
+                    "/api/v5/sms-risk",
+                }
+                and _eg_satg1_request.method == "POST"
+            ):
                 expected = _eg_satg1_get_token()
                 provided = _eg_satg1_request_token()
 
