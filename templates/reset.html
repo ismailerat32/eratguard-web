@@ -164,6 +164,7 @@ button {
         {% endif %}
 
         <form method="POST" {% if success %}style="display:none;"{% endif %}>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <label>Kullanıcı Adı</label>
             <input
                 type="text"

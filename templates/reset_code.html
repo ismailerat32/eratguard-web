@@ -82,6 +82,7 @@
         {% endif %}
 
         <form method="POST" action="/reset-code">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <label for="code">6 haneli kod</label>
             <input type="text" id="code" name="code" maxlength="6" required>
 

@@ -306,6 +306,7 @@ button{
         <p>Spam filtresinden muaf tutulacak numara veya gönderen adını ekle.</p>
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <label>Gönderen / Numara</label>
           <input type="text" name="number" placeholder="ör: 0850..., BANKA, KARGO" required>
           <button type="submit">✅ Listeye Ekle</button>

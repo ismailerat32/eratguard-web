@@ -99,6 +99,7 @@
     {% endif %}
 
     <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input name="license_key" placeholder="Lisans kodunu gir" required>
       <button type="submit">Lisansı Aktif Et</button>
     </form>

@@ -163,6 +163,7 @@
 
     <section class="card">
       <form method="post" action="/u/analysis/check">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label>SMS metni</label>
         <textarea name="message" placeholder="Örn: Tebrikler! Ödül kazandınız. Hemen linke tıklayın..." required>{{ message or "" }}</textarea>
 

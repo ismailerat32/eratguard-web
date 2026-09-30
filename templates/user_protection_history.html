@@ -262,7 +262,12 @@ async function clearHistory(){
   try{
     const res = await fetch(
       "/api/v6/history-clear",
-      {method:"POST"}
+      {
+        method:"POST",
+        headers:{
+          "X-CSRF-Token": {{ csrf_token()|tojson }}
+        }
+      }
     );
 
     const data = await res.json();
@@ -289,7 +294,12 @@ async function restoreHistory(){
   try{
     const res = await fetch(
       "/api/v6/history-restore-latest",
-      {method:"POST"}
+      {
+        method:"POST",
+        headers:{
+          "X-CSRF-Token": {{ csrf_token()|tojson }}
+        }
+      }
     );
 
     const data = await res.json();

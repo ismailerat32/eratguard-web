@@ -290,6 +290,7 @@
       {% endif %}
 
       <form method="POST" action="/forgot-password">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label for="identity">Kullanıcı adı veya e-posta</label>
         <input type="text" id="identity" name="identity" required autocomplete="username" placeholder="Kullanıcı adın veya e-posta adresin">
 

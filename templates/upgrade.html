@@ -62,6 +62,7 @@ li{background:#1d2a42;border-radius:14px;padding:12px 14px;margin-bottom:10px;fo
         <li>✔ Lisans aktivasyonu</li>
       </ul>
       <form method="POST" action="/request-upgrade">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn btn-purple" type="submit">Yükseltme Talebi Oluştur</button>
       </form>
       <a class="btn btn-blue" href="/activate-license">Lisans Kodum Var</a>

@@ -103,9 +103,216 @@ if not app.secret_key:
     )
 
 app.config["SECRET_KEY"] = app.secret_key
+# Canonical EratGuard browser-session policy.
+#
+# Production/default:
+#     Secure cookie required.
+#
+# Local HTTP development may explicitly opt out with:
+#     ERATGUARD_DEV_INSECURE_COOKIE=1
+#
+# Never infer an insecure cookie merely from request headers.
+_eg_dev_insecure_cookie = (
+    str(_eg_secret_os.environ.get(
+        "ERATGUARD_DEV_INSECURE_COOKIE",
+        ""
+    )).strip().lower()
+    in {"1", "true", "yes", "on"}
+)
+
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = not _eg_dev_insecure_cookie
+app.config["SESSION_COOKIE_NAME"] = "eratguard_session"
+app.config["SESSION_REFRESH_EACH_REQUEST"] = False
+
 # ===== ERATGUARD SECURE SESSION SECRET END =====
+
+# ===== ERATGUARD SECURITY SHIELD CSRF CORE V1 =====
+#
+# SECURITY-SHIELD-04A:
+#   AUDIT MODE ONLY.
+#
+# This stage creates the canonical CSRF primitive without rejecting
+# requests yet. Enforcement is enabled only after browser forms/fetch
+# callers have been token-bound and verified.
+#
+# Browser token sources:
+#   form field : csrf_token
+#   HTTP header: X-CSRF-Token
+#
+# Exemptions here are authentication-boundary exemptions, not
+# "trusted because of path" shortcuts.
+#
+import hmac as _eg_csrf_hmac
+import secrets as _eg_csrf_secrets
+
+_EG_CSRF_SESSION_KEY = "_eg_csrf_token"
+_EG_CSRF_HEADER = "X-CSRF-Token"
+_EG_CSRF_FORM_FIELD = "csrf_token"
+
+# Native/token-authenticated SMS boundary. These are NOT protected by
+# browser-session CSRF; their own API authentication remains mandatory.
+_EG_CSRF_NATIVE_API_EXEMPT = frozenset({
+    "/api/v5/sms-action",
+    "/api/v5/sms-risk",
+})
+
+# API_PUSH_KEY authenticated machine endpoint.
+_EG_CSRF_MACHINE_API_EXEMPT = frozenset({
+    "/api/push-log",
+    "/api/mobile/login",
+})
+
+
+def _eg_csrf_token():
+    token = session.get(_EG_CSRF_SESSION_KEY)
+
+    if not isinstance(token, str) or len(token) < 32:
+        token = _eg_csrf_secrets.token_urlsafe(32)
+        session[_EG_CSRF_SESSION_KEY] = token
+
+    return token
+
+
+def _eg_csrf_supplied_token():
+    token = request.headers.get(_EG_CSRF_HEADER, "")
+
+    if token:
+        return str(token).strip()
+
+    return str(
+        request.form.get(
+            _EG_CSRF_FORM_FIELD,
+            ""
+        )
+    ).strip()
+
+
+def _eg_csrf_valid():
+    expected = session.get(_EG_CSRF_SESSION_KEY)
+    supplied = _eg_csrf_supplied_token()
+
+    if not isinstance(expected, str):
+        return False
+
+    if not expected or not supplied:
+        return False
+
+    return _eg_csrf_hmac.compare_digest(
+        expected,
+        supplied,
+    )
+
+
+def _eg_csrf_exempt_request():
+    path = (request.path or "").rstrip("/") or "/"
+
+    if path in _EG_CSRF_NATIVE_API_EXEMPT:
+        return True
+
+    if path in _EG_CSRF_MACHINE_API_EXEMPT:
+        return True
+
+    return False
+
+
+def _eg_csrf_audit_state():
+    """
+    SECURITY-SHIELD-04A diagnostic helper.
+
+    No request is rejected here.
+    """
+    method = request.method.upper()
+
+    if method not in {
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+    }:
+        return "SAFE_METHOD"
+
+    if _eg_csrf_exempt_request():
+        return "EXEMPT_API"
+
+    if _eg_csrf_valid():
+        return "VALID"
+
+    return "MISSING_OR_INVALID"
+
+
+def _eg_csrf_failure_response():
+    """
+    Fail closed without exposing token/session details.
+
+    JSON/API-style callers receive JSON.
+    Browser form callers receive a small 403 response.
+    """
+    path = request.path or ""
+
+    wants_json = (
+        request.is_json
+        or path.startswith("/api/")
+        or path.startswith("/u/sms/")
+        or request.headers.get(
+            "Accept",
+            ""
+        ).lower().find("application/json") >= 0
+    )
+
+    if wants_json:
+        return jsonify({
+            "ok": False,
+            "error": "CSRF validation failed",
+        }), 403
+
+    return (
+        "İstek güvenlik doğrulamasından geçemedi.",
+        403,
+    )
+
+
+@app.before_request
+def _eg_csrf_enforce():
+    """
+    Canonical browser-session CSRF boundary.
+
+    Safe methods are untouched.
+
+    Explicit native/machine API boundaries retain their own
+    authentication and are exempt from browser-session CSRF.
+
+    Every other POST/PUT/PATCH/DELETE fails closed unless its
+    synchronizer token matches the session token.
+    """
+    method = request.method.upper()
+
+    if method not in {
+        "POST",
+        "PUT",
+        "PATCH",
+        "DELETE",
+    }:
+        return None
+
+    if _eg_csrf_exempt_request():
+        return None
+
+    if _eg_csrf_valid():
+        return None
+
+    return _eg_csrf_failure_response()
+
+
+@app.context_processor
+def _eg_csrf_template_context():
+    return {
+        "csrf_token": _eg_csrf_token,
+    }
+
+# ===== /ERATGUARD SECURITY SHIELD CSRF CORE V1 =====
+
 
 # app.secret_key already configured above with stable EratGuard/Render secret.
 
@@ -3877,9 +4084,6 @@ def eratguard_beta_security_headers(resp):
 
 # ===== ERATGUARD SESSION COOKIE HARDENING START =====
 # Ensure Flask session cookies are protected in production.
-app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SECURE"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 # ===== ERATGUARD SESSION COOKIE HARDENING END =====
 
 # ===== ERATGUARD MANUAL LICENSE ADMIN FLOW START =====
@@ -4625,7 +4829,7 @@ def user_history_export():
 
 
 # ===== ERATGUARD USER HISTORY CLEAR START =====
-@app.route("/api/v6/history-clear", methods=["POST", "GET"])
+@app.route("/api/v6/history-clear", methods=["POST"])
 def user_history_clear():
     from flask import jsonify
     from pathlib import Path

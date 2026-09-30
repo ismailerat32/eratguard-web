@@ -171,6 +171,7 @@
     </section>
 
     <form method="post" action="/u/settings/manage">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="section-title">KORUMA</div>
 
       <section class="card">

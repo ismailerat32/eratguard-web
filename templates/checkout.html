@@ -172,6 +172,7 @@
     </div>
 
     <form method="POST" action="/u/checkout">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="plan" value="{{ plan }}">
 
       <label>İletişim e-postası</label>

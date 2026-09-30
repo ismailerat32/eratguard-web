@@ -490,6 +490,7 @@
 
           {% if row.control == "protection_toggle" %}
           <form class="toggle-form" method="post" action="/u/protection/toggle">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="protection_enabled" value="{% if row.enabled %}off{% else %}on{% endif %}">
             <button class="toggle-btn {% if row.enabled %}on{% else %}off{% endif %}" type="submit">
               {% if row.enabled %}

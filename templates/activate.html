@@ -62,6 +62,7 @@ button{
         <h1>Lisans Aktifleştir</h1>
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input name="username" placeholder="Kullanıcı adı" required>
             <input name="license_key" placeholder="Lisans kodu" required>
             <button type="submit">Aktifleştir</button>

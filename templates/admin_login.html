@@ -349,6 +349,7 @@ body{
     <!-- FORM -->
     <div class="form">
       <form method="POST" action="/admin/login" id="admin-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <!-- {{ form.hidden_tag() if form else '' }} -->
 
         <div class="field">

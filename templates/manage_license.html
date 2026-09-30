@@ -81,6 +81,7 @@ button{padding:12px;border:none;border-radius:12px;color:#fff;font-weight:bold;c
         {% if error %}<div class="err">{{ error }}</div>{% endif %}
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <label>Kaç gün eklensin?</label>
             <input type="number" name="extra_days" placeholder="30">
             <div class="actions">

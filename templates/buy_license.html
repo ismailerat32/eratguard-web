@@ -24,6 +24,7 @@ button{background:#1db446;border:0;font-weight:bold}
         {% if success %}<div class="msg-ok">{{ success }}</div>{% endif %}
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <select name="plan" required>
                 <option value="">Paket seç</option>
                 <option value="trial">Trial</option>

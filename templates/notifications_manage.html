@@ -192,6 +192,7 @@ a{text-decoration:none;color:inherit}
     <p>Değişiklikler kaydedildikten sonra bildirim akışı bu tercihlere göre çalışır.</p>
 
     <form class="form" method="post" action="/u/notifications/manage">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <label class="setting">
         <span>
           <b>Bildirimler aktif</b>

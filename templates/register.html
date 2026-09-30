@@ -431,6 +431,7 @@ form[action="/register"] .eg-pass-hint-final {
     <div class="success-box show"><span>✅</span><span>{{ success }}</span></div>
     {% endif %}
     <form method="POST" action="/register">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div style="display:flex;flex-direction:column;gap:14px">
         <div class="field">
           <label>Kullanıcı Adı</label>

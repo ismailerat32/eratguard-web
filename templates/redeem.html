@@ -144,6 +144,7 @@
       <p class="muted">Test modunda geçerli format: ERATGUARD-PRO-XXXXXX</p>
 
       <form method="post" action="/u/redeem">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input name="license_code" placeholder="ERATGUARD-PRO-XXXXXX" autocomplete="off">
         <button class="btn" type="submit">Kodu Aktifleştir</button>
       </form>

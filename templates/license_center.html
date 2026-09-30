@@ -275,6 +275,7 @@
 
     <section class="card">
       <form method="post" action="/u/license">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label>Lisans kodu gir</label>
         <input name="license_key" placeholder="Örn: SPAM-PRO-XXXX-XXXX" autocomplete="off">
 

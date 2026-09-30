@@ -106,6 +106,7 @@ button{
     <div class="kv">Mevcut Lisans: <strong>{{ user.get("license_type", "trial") }}</strong></div>
 
     <form method="POST" action="/activate-license">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <label for="license_key">Lisans kodu</label>
       <input id="license_key" name="license_key" placeholder="Örn: ABCD-EFGH-IJKL-MNOP" required>
       <button type="submit">Lisansı Aktive Et</button>

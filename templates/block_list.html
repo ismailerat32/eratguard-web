@@ -143,6 +143,7 @@
 
     <section class="card">
       <form method="post" action="/u/block-list">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label>Ad / Açıklama</label>
         <input name="name" placeholder="Örn: Sahte kampanya, bilinmeyen numara" required>
 
@@ -167,6 +168,7 @@
             <span>{{ item.phone }}</span>
           </div>
           <form method="post" action="/u/block-list/delete">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="idx" value="{{ loop.index0 }}">
             <button class="delete" type="submit">Sil</button>
           </form>

@@ -63,6 +63,7 @@ button{margin-top:16px;width:100%;padding:12px;border:none;border-radius:12px;ba
         <h2>Ayarlar</h2>
         {% if message %}<div class="ok">{{ message }}</div>{% endif %}
         <form method="POST" action="/setting">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <label>Uygulama Adı</label>
             <input type="text" name="app_name" value="{{ config.app_name }}">
 

@@ -347,6 +347,7 @@ th{color:#dbeafe;font-size:16px}
 
                             {% if user_name != 'admin' %}
                             <form method="POST" action="/delete-user/{{ user_name }}" onsubmit="return confirm('Bu kullanıcı silinsin mi?');" style="margin:0;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button class="btn btn-delete" type="submit">Sil</button>
                             </form>
                             {% else %}

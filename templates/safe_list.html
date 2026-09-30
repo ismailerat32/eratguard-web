@@ -176,6 +176,7 @@
 
     <section class="card">
       <form method="post" action="/u/safe-list">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <label>Ad / Açıklama</label>
         <input name="name" placeholder="Örn: Annem, Banka, Kargo servisi" required>
 
@@ -200,6 +201,7 @@
             <span>{{ item.phone }}</span>
           </div>
           <form method="post" action="/u/safe-list/delete">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="hidden" name="idx" value="{{ loop.index0 }}">
             <button class="delete" type="submit">Sil</button>
           </form>
