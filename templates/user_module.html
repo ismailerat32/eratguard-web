@@ -456,7 +456,15 @@
         <div class="accordion-body">
           {% if card.features %}
             {% for feature in card.features %}
-            {% if feature.href %}
+            {% if feature.href and feature.method|default("get")|lower == "post" %}
+            <form method="POST" action="{{ feature.href }}" style="margin:0">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="feature-row feature-link" style="width:100%;border:0;text-align:left;font:inherit;cursor:pointer;">
+                <span>{{ feature.name }}</span>
+                <b>{{ feature.value }} ›</b>
+              </button>
+            </form>
+            {% elif feature.href %}
             <a class="feature-row feature-link" href="{{ feature.href }}">
               <span>{{ feature.name }}</span>
               <b>{{ feature.value }} ›</b>

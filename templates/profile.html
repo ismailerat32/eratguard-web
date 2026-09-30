@@ -131,7 +131,10 @@ html,body{width:100%;min-height:100%;background:#020e07;font-family:'DM Sans',sa
   <div class="section-title">İşlemler</div>
   <div class="actions">
     <button class="btn-change-pass" onclick="location.href='/change-password'">🔑 Şifre Değiştir</button>
-    <button class="btn-logout" onclick="location.href='/logout'">🚪 Çıkış Yap</button>
+    <form method="POST" action="/logout" style="margin:0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn-logout">🚪 Çıkış Yap</button>
+    </form>
   </div>
   <div class="foot">Erat<span>Guard</span> PRO · 2026</div>
 </div>

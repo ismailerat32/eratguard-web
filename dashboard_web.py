@@ -1065,7 +1065,7 @@ def login():
 
 
 
-@app.route("/logout")
+@app.route("/logout", methods=["POST"])
 def logout():
     session.clear()
     return redirect(url_for("login"))
@@ -2013,7 +2013,7 @@ USER_MODULES = {
                 "text": "Şifre değişimi ve oturum kontrolü için yönlendirme alanıdır.",
                 "features": [
                     {"name": "Şifre değiştir", "value": "Aç", "href": "/change-password"},
-                    {"name": "Oturumu kapat", "value": "Çık", "href": "/logout"},
+                    {"name": "Oturumu kapat", "value": "Çık", "href": "/logout", "method": "post"},
                     {"name": "Hesap durumu", "value": "Aktif"},
                     {"name": "Güvenli oturum", "value": "Açık"}
                 ]
