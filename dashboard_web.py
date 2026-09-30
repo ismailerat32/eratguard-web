@@ -5239,23 +5239,192 @@ def eg_sms_actions_backup():
 @app.route("/u/sms/actions/restore", methods=["POST"])
 def eg_sms_actions_restore():
     # multipart file alanı: backup
+    #
+    # SECURITY-SHIELD-05B:
+    # Restore input is fully validated before any backup or live-data
+    # write is allowed to occur.
     f = _eg_request.files.get("backup")
+
     if not f:
-        return _eg_jsonify({"ok": False, "error": "backup dosyası yok"}), 400
+        return _eg_jsonify({
+            "ok": False,
+            "error": "backup dosyası yok",
+        }), 400
+
+    max_upload_bytes = 1024 * 1024
+    max_records = 5000
+    max_depth = 12
+    max_string_length = 65536
+    max_key_length = 256
+    max_container_items = 10000
+
+    def _restore_validate_json_value(value, depth=0):
+        if depth > max_depth:
+            raise ValueError(
+                "Yedek JSON yapısı çok derin."
+            )
+
+        if value is None or isinstance(
+            value,
+            (bool, int, float),
+        ):
+            return
+
+        if isinstance(value, str):
+            if len(value) > max_string_length:
+                raise ValueError(
+                    "Yedekte izin verilenden uzun metin var."
+                )
+            return
+
+        if isinstance(value, list):
+            if len(value) > max_container_items:
+                raise ValueError(
+                    "Yedek JSON listesi çok büyük."
+                )
+
+            for item in value:
+                _restore_validate_json_value(
+                    item,
+                    depth + 1,
+                )
+            return
+
+        if isinstance(value, dict):
+            if len(value) > max_container_items:
+                raise ValueError(
+                    "Yedek JSON nesnesi çok büyük."
+                )
+
+            for key, item in value.items():
+                if not isinstance(key, str):
+                    raise ValueError(
+                        "Yedek JSON anahtarı geçersiz."
+                    )
+
+                if len(key) > max_key_length:
+                    raise ValueError(
+                        "Yedek JSON anahtarı çok uzun."
+                    )
+
+                _restore_validate_json_value(
+                    item,
+                    depth + 1,
+                )
+            return
+
+        raise ValueError(
+            "Yedekte desteklenmeyen veri tipi var."
+        )
+
     try:
-        data = _eg_json.loads(f.read().decode("utf-8"))
-        if isinstance(data, dict) and isinstance(data.get("actions"), list):
-            data = data["actions"]
+        # Read at most limit + 1. This prevents an unbounded f.read()
+        # from consuming arbitrary memory before validation.
+        raw = f.read(max_upload_bytes + 1)
+
+        if len(raw) > max_upload_bytes:
+            raise ValueError(
+                "Yedek dosyası en fazla 1 MiB olabilir."
+            )
+
+        if not raw:
+            raise ValueError(
+                "Yedek dosyası boş."
+            )
+
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            raise ValueError(
+                "Yedek dosyası geçerli UTF-8 değil."
+            )
+
+        try:
+            data = _eg_json.loads(text)
+        except Exception:
+            raise ValueError(
+                "Yedek dosyası geçerli JSON değil."
+            )
+
+        # Canonical export is a list. Historical wrapper
+        # {"actions": [...]} remains accepted for compatibility.
+        if isinstance(data, dict):
+            if set(data.keys()) != {"actions"}:
+                raise ValueError(
+                    "Yedek nesnesi yalnız actions alanını içerebilir."
+                )
+
+            data = data.get("actions")
+
         if not isinstance(data, list):
-            raise ValueError("Yedek formatı liste değil.")
+            raise ValueError(
+                "Yedek formatı liste değil."
+            )
+
+        if len(data) > max_records:
+            raise ValueError(
+                "Yedek en fazla 5000 SMS kaydı içerebilir."
+            )
+
+        for index, item in enumerate(data):
+            if not isinstance(item, dict):
+                raise ValueError(
+                    f"Yedek kaydı geçersiz: {index + 1}"
+                )
+
+            _restore_validate_json_value(
+                item,
+                1,
+            )
+
+            # If an action field exists, it must use the engine's
+            # already-defined canonical action vocabulary.
+            if "action" in item:
+                action = str(
+                    item.get("action", "")
+                ).strip()
+
+                if action not in _EG_ALLOWED_SMS_ACTIONS:
+                    raise ValueError(
+                        f"Geçersiz SMS aksiyonu: kayıt {index + 1}"
+                    )
+
+        # IMPORTANT:
+        # No live-data or safety-backup write occurs before this point.
         old = _eg_load_sms_actions()
+
         if old:
-            stamp = _eg_datetime.now().strftime("%Y%m%d_%H%M%S")
-            _eg_atomic_write_json(_EG_SMS_ACTIONS_BACKUP_DIR / f"before_restore_{stamp}.json", old)
+            stamp = _eg_datetime.now().strftime(
+                "%Y%m%d_%H%M%S"
+            )
+
+            _eg_atomic_write_json(
+                _EG_SMS_ACTIONS_BACKUP_DIR
+                / f"before_restore_{stamp}.json",
+                old,
+            )
+
         _eg_save_sms_actions(data)
-        return _eg_jsonify({"ok": True, "restored": len(data), "counts": _eg_counts(data)})
-    except Exception as e:
-        return _eg_jsonify({"ok": False, "error": str(e)}), 400
+
+        return _eg_jsonify({
+            "ok": True,
+            "restored": len(data),
+            "counts": _eg_counts(data),
+        })
+
+    except ValueError as e:
+        return _eg_jsonify({
+            "ok": False,
+            "error": str(e),
+        }), 400
+
+    except Exception:
+        # Do not expose filesystem/parser/internal exception details.
+        return _eg_jsonify({
+            "ok": False,
+            "error": "Yedek geri yüklenemedi.",
+        }), 400
+
 
 @app.route("/u/sms/actions/counts")
 def eg_sms_actions_counts():
