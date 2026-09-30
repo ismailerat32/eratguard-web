@@ -1029,6 +1029,12 @@ def login():
         elif check_password_hash(user["password"], password):
             _eg_login_clear_failures(username)
 
+            # Authentication boundary:
+            # discard all pre-auth session state before establishing
+            # the authenticated user session. This prevents attacker-
+            # controlled/pre-login session data from surviving login.
+            session.clear()
+
             session["logged_in"] = True
             session["onboarding_done"] = True
             session["username"] = username
