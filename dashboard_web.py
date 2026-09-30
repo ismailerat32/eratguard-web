@@ -8254,34 +8254,6 @@ except Exception as _eg_pro_priority_error_v2:
 # Preview-only. Canonical /u/protection ownership is unchanged.
 # ============================================================
 
-@app.route("/__eg_reference/shield")
-def eratguard_reference_shield_preview():
-    try:
-        if not session.get("username"):
-            return redirect(url_for("login"))
-    except Exception:
-        return redirect("/login")
-
-    try:
-        metrics = _eg_panel_metrics()
-    except Exception:
-        metrics = {
-            "total": 0,
-            "blocked": 0,
-            "safe": 0,
-            "reported": 0,
-            "score": 0,
-            "threat_label": "VERİ YOK",
-            "spark_points": [],
-        }
-
-    plan = session.get("plan") or session.get("license_type") or "ERATGUARD"
-
-    return render_template(
-        "eratguard_reference/shield.html",
-        metrics=metrics,
-        plan=plan,
-    )
 
 # ============================================================
 # ERATGUARD CANONICAL RUNTIME ENTRYPOINT
