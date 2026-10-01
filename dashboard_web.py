@@ -1206,8 +1206,7 @@ from flask import request as _eg_final_request
 
 @app.after_request
 def _eg_final_security_headers(response):
-    # Render HTTPS arkasında çalıştığı için HSTS güvenli.
-    response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    """Apply the single canonical EratGuard browser security-header policy."""
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
@@ -1216,19 +1215,43 @@ def _eg_final_security_headers(response):
         "geolocation=(), microphone=(), camera=(), payment=(), usb=(), bluetooth=()"
     )
 
-    # Uygulamada inline CSS/JS bulunduğu için CSP güvenli ama kırmayacak seviyede tutuldu.
+    # Active templates still contain inline script/style usage.
+    # unsafe-eval is intentionally not permitted.
     response.headers.setdefault(
         "Content-Security-Policy",
         "default-src 'self' https: data: blob:; "
-        "script-src 'self' https: 'unsafe-inline' 'unsafe-eval'; "
-        "style-src 'self' https: 'unsafe-inline'; "
-        "img-src 'self' https: data: blob:; "
-        "font-src 'self' https: data:; "
+        "script-src 'self' 'unsafe-inline' https:; "
+        "style-src 'self' 'unsafe-inline' https:; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' data: https:; "
         "connect-src 'self' https:; "
         "frame-ancestors 'none'; "
         "base-uri 'self'; "
-        "form-action 'self' https:;"
+        "form-action 'self'"
     )
+
+    # Trust forwarded HTTPS state only when proxy trust is explicitly enabled.
+    trust_proxy = (
+        str(os.getenv("ERATGUARD_TRUST_PROXY_IP", ""))
+        .strip()
+        .lower()
+        in {"1", "true", "yes", "on"}
+    )
+    forwarded_https = (
+        trust_proxy
+        and str(request.headers.get("X-Forwarded-Proto", ""))
+        .split(",", 1)[0]
+        .strip()
+        .lower()
+        == "https"
+    )
+
+    if request.is_secure or forwarded_https:
+        response.headers.setdefault(
+            "Strict-Transport-Security",
+            "max-age=31536000; includeSubDomains"
+        )
+
     return response
 
 
@@ -4085,40 +4108,6 @@ def eratguard_beta_rate_limit_guard():
     except Exception:
         return None
 
-@app.after_request
-def eratguard_beta_security_headers(resp):
-    try:
-        resp.headers.setdefault("X-Content-Type-Options", "nosniff")
-        resp.headers.setdefault("X-Frame-Options", "DENY")
-        resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
-        resp.headers.setdefault(
-            "Permissions-Policy",
-            "geolocation=(), microphone=(), camera=(), payment=()"
-        )
-
-        resp.headers.setdefault(
-            "Content-Security-Policy",
-            "default-src 'self' https: data: blob:; "
-            "script-src 'self' 'unsafe-inline' https:; "
-            "style-src 'self' 'unsafe-inline' https:; "
-            "img-src 'self' data: https:; "
-            "font-src 'self' data: https:; "
-            "connect-src 'self' https:; "
-            "frame-ancestors 'none'; "
-            "base-uri 'self'; "
-            "form-action 'self'"
-        )
-
-        if request.scheme == "https" or request.headers.get("X-Forwarded-Proto") == "https":
-            resp.headers.setdefault(
-                "Strict-Transport-Security",
-                "max-age=31536000; includeSubDomains"
-            )
-
-    except Exception:
-        pass
-
-    return resp
 # ===== ERATGUARD BETA SECURITY HARDENING END =====
 
 # ===== ERATGUARD SESSION COOKIE HARDENING START =====
