@@ -1,241 +1,205 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+        content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#020812">
 
-  <title>EratGuard – Yeni Şifre Oluştur</title>
-
-  <link rel="preconnect"
-        href="https://fonts.googleapis.com">
-
-  <link rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin>
-
-  <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+  <title>EratGuard · Yeni Şifre Oluştur</title>
 
   <link rel="stylesheet"
         href="{{ url_for('static', filename='css/auth-premium.css') }}">
 </head>
 
-<body class="eg-auth-page">
+<body class="eg-auth">
 
 <main class="eg-auth-shell">
 
-  <section class="eg-auth-hero">
+  <div class="eg-auth-hex" aria-hidden="true"></div>
 
-    <div class="eg-auth-hex"
-         aria-hidden="true"></div>
+  <header class="eg-brand">
 
-    <img class="eg-auth-logo"
-         src="{{ url_for('static', filename='img/eg-shield-premium.svg') }}"
-         alt="EratGuard">
+    <img
+      class="eg-brand-shield"
+      src="{{ url_for('static', filename='img/eg-shield-premium.svg') }}"
+      alt="EratGuard">
 
-    <div class="eg-auth-brand">
+    <div class="eg-brand-name">
       ERAT<span>GUARD</span>
     </div>
 
-    <div class="eg-auth-tagline">
-      DİJİTAL DÜNYADA GÜVENDE OLUN
+    <div class="eg-brand-tag">
+      Dijital Dünyada Güvende Olun
     </div>
 
-    <svg class="eg-auth-wave"
-         viewBox="0 0 420 90"
-         preserveAspectRatio="none"
-         aria-hidden="true">
+  </header>
 
-      <defs>
-        <linearGradient id="resetWave"
-                        x1="0"
-                        x2="1">
-
-          <stop offset="0"
-                stop-color="#1e8bff"/>
-
-          <stop offset=".55"
-                stop-color="#66d7ff"/>
-
-          <stop offset="1"
-                stop-color="#d9f6ff"/>
-        </linearGradient>
-      </defs>
-
-      <path class="eg-wave-fill"
-            d="M0 24 C105 3 170 70 280 64 C345 60 385 39 420 21 V90 H0 Z"/>
-
-      <path class="eg-wave-glow"
-            d="M0 24 C105 3 170 70 280 64 C345 60 385 39 420 21"/>
-
-      <path class="eg-wave-line"
-            d="M0 24 C105 3 170 70 280 64 C345 60 385 39 420 21"
-            stroke="url(#resetWave)"/>
-    </svg>
-
-  </section>
+  <div class="eg-wave" aria-hidden="true"></div>
 
 
-  <section class="eg-auth-body">
+  <section class="eg-auth-content">
 
-    <header class="eg-auth-heading">
+    <h1 class="eg-auth-title">
+      Yeni Şifre <span>Oluştur</span>
+    </h1>
 
-      <h1>
-        Yeni Şifre <span>Oluştur</span>
-      </h1>
-
-      <p>
-        EratGuard hesabın için yeni ve güçlü bir şifre belirle.
-      </p>
-
-    </header>
+    <p class="eg-auth-subtitle">
+      EratGuard hesabın için yeni ve güçlü bir şifre belirle.
+    </p>
 
 
     {% if error %}
-      <div class="eg-auth-alert eg-auth-alert-error"
-           role="alert">
+      <div class="eg-alert eg-alert-error" role="alert">
         {{ error }}
       </div>
     {% endif %}
 
     {% if message %}
-      <div class="eg-auth-alert eg-auth-alert-success"
-           role="status">
+      <div class="eg-alert eg-alert-success" role="status">
         {{ message }}
       </div>
     {% endif %}
 
 
-    <form method="POST"
-          action="{{ action }}"
-          class="eg-auth-form">
+    <form
+      class="eg-auth-form"
+      method="POST"
+      action="{{ action }}">
 
-      <input type="hidden"
-             name="csrf_token"
-             value="{{ csrf_token() }}">
+      <input
+        type="hidden"
+        name="csrf_token"
+        value="{{ csrf_token() }}">
 
 
       {% if code_mode %}
 
-      <label class="eg-auth-label"
-             for="resetCode">
-        SIFIRLAMA KODU
-      </label>
+      <div class="eg-field">
 
-      <div class="eg-auth-field">
+        <label for="resetCode">
+          SIFIRLAMA KODU
+        </label>
 
-        <svg viewBox="0 0 24 24"
-             aria-hidden="true">
-          <rect x="4"
-                y="4"
-                width="16"
-                height="16"
-                rx="4"/>
-          <path d="M8 9h8M8 13h5M8 17h3"/>
-        </svg>
+        <div class="eg-input">
 
-        <input id="resetCode"
-               name="code"
-               type="text"
-               inputmode="numeric"
-               autocomplete="one-time-code"
-               maxlength="6"
-               placeholder="6 haneli kod"
-               required>
+          <span class="eg-input-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <rect x="4"
+                    y="4"
+                    width="16"
+                    height="16"
+                    rx="4"/>
+              <path d="M8 9h8M8 13h5M8 17h3"/>
+            </svg>
+          </span>
+
+          <input
+            id="resetCode"
+            name="code"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            placeholder="6 haneli kod"
+            required>
+
+        </div>
 
       </div>
 
       {% endif %}
 
 
-      <label class="eg-auth-label"
-             for="newPassword">
-        YENİ ŞİFRE
-      </label>
+      <div class="eg-field">
 
-      <div class="eg-auth-field">
+        <label for="newPassword">
+          YENİ ŞİFRE
+        </label>
 
-        <svg viewBox="0 0 24 24"
-             aria-hidden="true">
-          <rect x="5"
-                y="10"
-                width="14"
-                height="10"
-                rx="2"/>
-          <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
-        </svg>
+        <div class="eg-input">
 
-        <input id="newPassword"
-               name="new_password"
-               type="password"
-               minlength="8"
-               autocomplete="new-password"
-               placeholder="Yeni güçlü şifren"
-               required>
+          <span class="eg-input-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <rect x="5"
+                    y="10"
+                    width="14"
+                    height="10"
+                    rx="2"/>
+              <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+            </svg>
+          </span>
 
-      </div>
+          <input
+            id="newPassword"
+            name="new_password"
+            type="password"
+            minlength="8"
+            autocomplete="new-password"
+            placeholder="Yeni güçlü şifren"
+            required>
 
-
-      <label class="eg-auth-label"
-             for="confirmPassword">
-        YENİ ŞİFRE TEKRAR
-      </label>
-
-      <div class="eg-auth-field">
-
-        <svg viewBox="0 0 24 24"
-             aria-hidden="true">
-          <rect x="5"
-                y="10"
-                width="14"
-                height="10"
-                rx="2"/>
-          <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
-        </svg>
-
-        <input id="confirmPassword"
-               name="confirm_password"
-               type="password"
-               minlength="8"
-               autocomplete="new-password"
-               placeholder="Yeni şifreni tekrar gir"
-               required>
+        </div>
 
       </div>
 
 
-      <div class="eg-auth-policy">
-        <strong>Güçlü şifre:</strong>
+      <div class="eg-field">
+
+        <label for="confirmPassword">
+          YENİ ŞİFRE TEKRAR
+        </label>
+
+        <div class="eg-input">
+
+          <span class="eg-input-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <rect x="5"
+                    y="10"
+                    width="14"
+                    height="10"
+                    rx="2"/>
+              <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+            </svg>
+          </span>
+
+          <input
+            id="confirmPassword"
+            name="confirm_password"
+            type="password"
+            minlength="8"
+            autocomplete="new-password"
+            placeholder="Yeni şifreni tekrar gir"
+            required>
+
+        </div>
+
+      </div>
+
+
+      <div class="eg-policy">
+        <b>Güçlü şifre:</b>
         En az 8 karakter, 1 büyük harf, 1 küçük harf,
         1 rakam ve 1 özel karakter kullan.
       </div>
 
 
-      <button class="eg-auth-primary"
-              type="submit">
-
-        <span>Şifreyi Güncelle</span>
-
-        <span class="eg-auth-arrow"
-              aria-hidden="true">
-          →
-        </span>
-
+      <button class="eg-btn" type="submit">
+        Şifreyi Güncelle
       </button>
 
     </form>
 
 
-    <div class="eg-auth-switch">
+    <div class="eg-secondary-action">
       Şifreni hatırladın mı?
       <a href="/login">Giriş Yap</a>
     </div>
 
 
-    <footer class="eg-auth-footer">
+    <div class="eg-auth-foot">
       ERATGUARD · GÜVENLİ ŞİFRE SIFIRLAMA
-    </footer>
+    </div>
 
   </section>
 
