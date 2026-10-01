@@ -3465,6 +3465,13 @@ def _eg_strict_user_auth_guard_final():
         if path.startswith("/api/system-resources"):
             return None
 
+        # Browser-session history APIs contain user protection data and
+        # mutations; keep them behind the canonical user auth boundary.
+        if path.startswith("/api/v6/history-"):
+            if not session.get("logged_in") or not session.get("username"):
+                session.clear()
+                return redirect("/login?auth_required=1")
+
         # Admin giriş sistemi kendi guard'ını kullansın.
         if path.startswith("/admin") or path.startswith("/ss-admin"):
             return None
