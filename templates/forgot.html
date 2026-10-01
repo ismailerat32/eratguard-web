@@ -1,310 +1,147 @@
-<!DOCTYPE html>
-<html lang="tr">
+<!doctype html>
+<html lang="{{ lang or 'tr' }}">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Şifre Yenileme - EratGuard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport"
+        content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#020812">
 
-  <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  <title>EratGuard · Şifremi Unuttum</title>
 
-    :root {
-      --bg: #020b06;
-      --card: rgba(3, 22, 12, .76);
-      --line: rgba(82, 255, 154, .18);
-      --line-soft: rgba(255, 255, 255, .08);
-      --green: #19f58a;
-      --cyan: #16d1d8;
-      --text: #f4fff8;
-      --muted: rgba(244, 255, 248, .56);
-      --muted2: rgba(244, 255, 248, .40);
-      --blue: #bfdbfe;
-      --danger: #fecaca;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: 'Space Grotesk', Arial, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at 50% -8%, rgba(25,245,138,.20), transparent 34%),
-        radial-gradient(circle at 95% 80%, rgba(22,209,216,.10), transparent 30%),
-        linear-gradient(180deg, #010302 0%, var(--bg) 58%, #010503 100%);
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      padding: 52px 18px 22px;
-    }
-
-    .shell {
-      width: 100%;
-      max-width: 410px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 11px;
-      margin: 0 0 18px;
-      color: rgba(244,255,248,.76);
-      font-size: 13px;
-      font-weight: 900;
-      letter-spacing: 3.6px;
-      text-transform: uppercase;
-    }
-
-    .brand-shield {
-      width: 34px;
-      height: 34px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      background:
-        radial-gradient(circle at 50% 20%, rgba(25,245,138,.34), transparent 58%),
-        linear-gradient(135deg, rgba(25,245,138,.18), rgba(22,209,216,.10));
-      border: 1px solid rgba(25,245,138,.22);
-      box-shadow: 0 0 34px rgba(25,245,138,.14);
-      font-size: 17px;
-    }
-
-    .card {
-      position: relative;
-      overflow: hidden;
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 26px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)),
-        var(--card);
-      box-shadow:
-        0 28px 90px rgba(0,0,0,.48),
-        inset 0 1px 0 rgba(255,255,255,.05);
-      padding: 24px 22px;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    .card::before {
-      content: "";
-      position: absolute;
-      left: 24px;
-      right: 24px;
-      top: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(25,245,138,.56), transparent);
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin: 0 0 14px;
-      padding: 8px 11px;
-      border: 1px solid rgba(25,245,138,.16);
-      border-radius: 999px;
-      background: rgba(25,245,138,.055);
-      color: rgba(187,247,208,.92);
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .pulse {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 14px rgba(25,245,138,.72);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(26px, 7vw, 34px);
-      line-height: 1.08;
-      letter-spacing: -1px;
-      color: #fff;
-    }
-
-    .lead {
-      margin: 12px 0 20px;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.56;
-      font-weight: 600;
-    }
-
-    .alert {
-      border-radius: 17px;
-      padding: 14px 15px;
-      margin: 0 0 14px;
-      font-size: 14px;
-      line-height: 1.45;
-      font-weight: 750;
-    }
-
-    .error {
-      background: rgba(239, 68, 68, .10);
-      border: 1px solid rgba(239, 68, 68, .22);
-      color: var(--danger);
-    }
-
-    .success {
-      background: rgba(34, 197, 94, .10);
-      border: 1px solid rgba(34, 197, 94, .22);
-      color: #bbf7d0;
-    }
-
-    .btn-link {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 50px;
-      width: 100%;
-      margin: 0 0 18px;
-      padding: 13px 16px;
-      border-radius: 16px;
-      border: 1px solid rgba(147,197,253,.30);
-      background: linear-gradient(180deg, rgba(147,197,253,.09), rgba(147,197,253,.045));
-      color: var(--blue);
-      font-weight: 900;
-      text-align: center;
-      text-decoration: none;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
-    }
-
-    label {
-      display: block;
-      margin: 0 0 9px;
-      font-size: 13px;
-      font-weight: 900;
-      color: rgba(244,255,248,.75);
-      letter-spacing: .2px;
-    }
-
-    input {
-      width: 100%;
-      min-height: 50px;
-      padding: 14px 15px;
-      border-radius: 16px;
-      border: 1px solid var(--line-soft);
-      background: rgba(0,0,0,.20);
-      color: #fff;
-      outline: none;
-      font-size: 15px;
-      font-weight: 700;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.035);
-    }
-
-    input::placeholder {
-      color: rgba(244,255,248,.28);
-      font-weight: 650;
-    }
-
-    input:focus {
-      border-color: rgba(25,245,138,.48);
-      box-shadow: 0 0 0 4px rgba(25,245,138,.08);
-    }
-
-    .btn {
-      width: 100%;
-      min-height: 52px;
-      margin-top: 15px;
-      padding: 14px 16px;
-      border: 0;
-      border-radius: 17px;
-      background: linear-gradient(135deg, var(--green), var(--cyan));
-      color: #02120b;
-      font-weight: 1000;
-      font-size: 15px;
-      letter-spacing: -.2px;
-      box-shadow: 0 18px 42px rgba(25,245,138,.18);
-    }
-
-    .hint {
-      margin: 14px 0 0;
-      color: var(--muted2);
-      font-size: 12px;
-      line-height: 1.55;
-      font-weight: 700;
-      text-align: center;
-    }
-
-    .back {
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .back a {
-      color: rgba(191,219,254,.90);
-      text-decoration: none;
-      font-weight: 850;
-      font-size: 15px;
-    }
-
-    @media (max-width: 420px) {
-      body {
-        padding: 42px 16px 18px;
-      }
-
-      .card {
-        padding: 23px 20px;
-        border-radius: 25px;
-      }
-
-      .lead {
-        font-size: 13.5px;
-      }
-    }
-  </style>
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/auth-premium.css') }}">
 </head>
 
-<body>
-  <main class="shell">
-    <div class="brand">
-      <span class="brand-shield">🛡</span>
-      <span>EratGuard</span>
+<body class="eg-auth">
+<main class="eg-auth-shell">
+
+  <div class="eg-auth-hex" aria-hidden="true"></div>
+
+  <header class="eg-brand">
+    <img
+      class="eg-brand-shield"
+      src="{{ url_for('static', filename='img/eg-shield-premium.svg') }}"
+      alt="EratGuard">
+
+    <div class="eg-brand-name">
+      ERAT<span>GUARD</span>
     </div>
 
-    <section class="card">
-      <div class="badge">
-        <span class="pulse"></span>
-        Güvenli hesap kurtarma
+    <div class="eg-brand-tag">
+      Dijital Dünyada Güvende Olun
+    </div>
+  </header>
+
+  <div class="eg-wave" aria-hidden="true"></div>
+
+  <section class="eg-auth-content">
+
+    <h1 class="eg-auth-title">
+      Şifremi <span>Unuttum</span>
+    </h1>
+
+    <p class="eg-auth-subtitle">
+      Kullanıcı adını veya e-posta adresini yaz.
+      Hesabın bulunursa sıfırlama kodunu güvenli şekilde göndeririz.
+    </p>
+
+    {% if error %}
+      <div class="eg-alert eg-alert-error">
+        ⚠ {{ error }}
+      </div>
+    {% endif %}
+
+    {% if success %}
+      <div class="eg-alert eg-alert-success">
+        {{ message }}
       </div>
 
-      <h1>Hesabına tekrar eriş</h1>
+      <div class="eg-policy">
+        Bilgiler bir hesapla eşleşiyorsa sıfırlama bilgileri
+        kayıtlı e-posta adresine gönderilir.
+      </div>
 
-      <p class="lead">
-        Kullanıcı adını veya e-posta adresini yaz. Hesabın bulunursa sıfırlama kodunu güvenli şekilde göndeririz.
-      </p>
+      <div class="eg-secondary-action">
+        Kodun hazır mı?
+        <a href="/reset-password-code">
+          Şifreyi Yenile
+        </a>
+      </div>
 
-      {% if error %}
-        <div class="alert error">{{ error }}</div>
-      {% endif %}
+    {% else %}
 
-      {% if success %}
-        <div class="alert success">{{ message }}</div>
-        <a class="btn-link" href="/reset-password-code">Kodum var, şifreyi yenile →</a>
-      {% endif %}
+      <form
+        class="eg-auth-form"
+        method="POST"
+        action="/forgot-password">
 
-      <form method="POST" action="/forgot-password">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <label for="identity">Kullanıcı adı veya e-posta</label>
-        <input type="text" id="identity" name="identity" required autocomplete="username" placeholder="Kullanıcı adın veya e-posta adresin">
+        <input
+          type="hidden"
+          name="csrf_token"
+          value="{{ csrf_token() }}">
 
-        <button class="btn" type="submit">Kodu gönder</button>
+        <div class="eg-field">
+          <label for="identity">
+            Kullanıcı Adı veya E-posta
+          </label>
 
-        <div class="hint">
-          Bilgilerin gizli tutulur; hesap durumu ekranda açık edilmez.
+          <div class="eg-input">
+
+            <span class="eg-input-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect
+                  x="3.5"
+                  y="5.5"
+                  width="17"
+                  height="13"
+                  rx="2.5"
+                  stroke="currentColor"
+                  stroke-width="1.8"/>
+
+                <path
+                  d="m5 7 7 5 7-5"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"/>
+              </svg>
+            </span>
+
+            <input
+              id="identity"
+              type="text"
+              name="identity"
+              placeholder="Kullanıcı adı veya e-posta"
+              autocomplete="username"
+              required>
+
+          </div>
         </div>
+
+        <button class="eg-btn" type="submit">
+          Kodu Gönder
+        </button>
+
       </form>
 
-      <div class="back">
-        <a href="/login">← Girişe dön</a>
+      <div class="eg-policy">
+        Bilgilerin gizli tutulur; hesap durumu ekranda açık edilmez.
       </div>
-    </section>
-  </main>
+
+    {% endif %}
+
+    <div class="eg-secondary-action">
+      Şifreni hatırladın mı?
+      <a href="/login">
+        Giriş Yap
+      </a>
+    </div>
+
+    <div class="eg-auth-foot">
+      EratGuard · Güvenli Hesap Kurtarma
+    </div>
+
+  </section>
+</main>
 </body>
 </html>
