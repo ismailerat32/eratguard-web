@@ -1337,69 +1337,15 @@ from werkzeug.security import generate_password_hash as _eg_reset_generate_passw
 def _eg_reset_page(error=None, message=None, token="", code_mode=False):
     action = "/reset-password-code" if code_mode else ("/reset-password/" + token)
 
-    if code_mode:
-        code_input = """
-        <label>Sıfırlama kodu</label>
-        <input name="code" inputmode="numeric" maxlength="6" placeholder="6 haneli kod">
-        """
-    else:
-        code_input = ""
+    return render_template(
+        "reset_premium.html",
+        error=error,
+        message=message,
+        token=token,
+        code_mode=code_mode,
+        action=action,
+    )
 
-    html = f"""
-<!doctype html>
-<html lang="tr">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>EratGuard PRO • Şifre Sıfırla</title>
-  <style>
-    body {{
-      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
-      background:radial-gradient(circle at top,#07351f 0,#010805 48%,#000 100%);
-      color:#eefaf2; font-family:Arial,sans-serif;
-    }}
-    .card {{
-      width:min(88vw,480px); padding:34px 28px; border:1px solid rgba(120,255,150,.18);
-      border-radius:28px; background:rgba(0,20,12,.72); box-shadow:0 24px 80px rgba(0,0,0,.45);
-    }}
-    h1 {{ margin:0 0 14px; font-size:30px; }}
-    p {{ color:rgba(238,250,242,.72); line-height:1.55; }}
-    label {{ display:block; margin:18px 0 8px; font-weight:700; }}
-    input {{
-      width:100%; box-sizing:border-box; padding:15px 16px; border-radius:16px;
-      border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.28);
-      color:white; font-size:16px; outline:none;
-    }}
-    button {{
-      width:100%; margin-top:22px; padding:16px; border:0; border-radius:18px;
-      color:white; font-weight:800; font-size:16px;
-      background:linear-gradient(90deg,#00d66f,#18c6e8);
-    }}
-    .msg {{ margin-top:14px; color:#8dffb0; }}
-    .err {{ margin-top:14px; color:#ff7b7b; }}
-    a {{ color:#a9c8ff; text-decoration:none; display:block; margin-top:18px; text-align:center; }}
-  </style>
-</head>
-<body>
-  <form class="card" method="post" action="{action}">
-    <h1>Yeni Şifre Oluştur</h1>
-    <p>EratGuard hesabın için yeni ve güçlü bir şifre belirle.</p>
-    {code_input}
-    <label>Yeni şifre</label>
-    <input name="new_password" type="password" minlength="8" required placeholder="En az 8 karakter, büyük/küçük harf, rakam ve özel karakter">
-    <label>Yeni şifre tekrar</label>
-    <input name="confirm_password" type="password" minlength="8" required placeholder="Güçlü şifreyi tekrar gir">
-    <button type="submit">Şifreyi Güncelle</button>
-    {f'<div class="msg">{message}</div>' if message else ''}
-    {f'<div class="err">{error}</div>' if error else ''}
-    <a href="/login">← Giriş sayfasına dön</a>
-  </form>
-
-
-</body>
-</html>
-"""
-    return _eg_reset_render_template_string(html)
 
 def _eg_reset_update_password(username, new_password):
     users = load_users()
