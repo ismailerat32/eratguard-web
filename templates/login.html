@@ -1,319 +1,202 @@
 <!doctype html>
-<html lang="tr">
+<html lang="{{ lang or 'tr' }}">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#020914">
-<title>EratGuard — Güvenli Giriş</title>
+  <meta charset="utf-8">
+  <meta name="viewport"
+        content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#020812">
 
-<style>
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;background:#020914;color:#fff}
-body{min-height:100vh;overflow-x:hidden}
+  <title>EratGuard · Giriş Yap</title>
 
-.eg-bg{
-  position:fixed;inset:0;pointer-events:none;
-  background:
-    radial-gradient(circle at 50% -10%,rgba(0,153,255,.20),transparent 36%),
-    radial-gradient(circle at 100% 70%,rgba(0,102,255,.10),transparent 32%),
-    linear-gradient(180deg,#03101d 0%,#020914 52%,#01050b 100%);
-}
-
-.eg-grid{
-  position:fixed;inset:0;opacity:.12;pointer-events:none;
-  background-image:
-    linear-gradient(rgba(40,169,255,.16) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(40,169,255,.16) 1px,transparent 1px);
-  background-size:42px 42px;
-  mask-image:linear-gradient(to bottom,black,transparent 70%);
-}
-
-.shell{
-  position:relative;z-index:2;
-  width:min(100%,480px);
-  min-height:100vh;
-  margin:auto;
-  padding:28px 22px 22px;
-  display:flex;
-  flex-direction:column;
-}
-
-.brand{text-align:center}
-.shield{
-  width:68px;height:77px;margin:0 auto 9px;
-  filter:drop-shadow(0 0 22px rgba(0,174,255,.38));
-}
-.brand-name{
-  font-size:25px;font-weight:900;letter-spacing:2px;
-}
-.brand-name span{color:#19baff}
-.tag{
-  margin-top:4px;font-size:9px;letter-spacing:2px;
-  color:#8ba5b9;text-transform:uppercase;
-}
-
-.wave{
-  position:relative;height:72px;margin:5px -22px 0;overflow:hidden;
-}
-.wave:before{
-  content:"";position:absolute;
-  width:140%;height:105px;left:-20%;top:18px;
-  border-radius:50% 50% 0 0;
-  border-top:5px solid #38caff;
-  background:linear-gradient(180deg,rgba(31,190,255,.24),rgba(0,132,255,.07) 48%,transparent);
-  transform:rotate(6deg);
-  box-shadow:
-    0 -2px 0 rgba(225,248,255,.95),
-    0 -7px 22px rgba(0,174,255,.28);
-}
-.wave:after{
-  content:"";position:absolute;
-  width:136%;height:82px;left:-18%;top:35px;
-  border-radius:50%;
-  border-top:2px solid rgba(199,241,255,.72);
-  transform:rotate(6deg);
-  filter:drop-shadow(0 -2px 5px rgba(35,188,255,.25));
-}
-
-.title{font-size:32px;font-weight:900;letter-spacing:-1px;margin:0}
-.subtitle{color:#91a4b5;font-size:14px;margin:6px 0 20px}
-
-.error{
-  margin-bottom:14px;padding:12px 14px;border-radius:13px;
-  background:rgba(255,55,76,.10);
-  border:1px solid rgba(255,79,96,.28);
-  color:#ffb5bd;font-size:13px;
-}
-
-.form-stack{display:flex;flex-direction:column;gap:12px}
-.field{position:relative}
-.field input{
-  width:100%;height:58px;border-radius:16px;
-  border:1px solid rgba(111,181,225,.25);
-  background:rgba(7,20,33,.82);
-  color:#fff;font-size:15px;
-  padding:0 50px 0 49px;outline:none;
-  transition:.2s ease;
-}
-.field input::placeholder{color:#71879a}
-.field input:focus{
-  border-color:#1cbcff;
-  background:rgba(6,26,43,.96);
-  box-shadow:0 0 0 3px rgba(0,174,255,.10),0 0 22px rgba(0,174,255,.08);
-}
-.icon{
-  position:absolute;left:17px;top:50%;transform:translateY(-50%);
-  width:20px;height:20px;color:#b8d2e4;pointer-events:none;
-}
-.toggle{
-  position:absolute;right:13px;top:50%;transform:translateY(-50%);
-  width:38px;height:38px;border:0;background:transparent;color:#9ec7df;
-  font-size:18px;cursor:pointer;border-radius:10px;
-}
-
-.options{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:14px;margin:1px 1px 3px;
-}
-.remember{display:flex;align-items:center;gap:9px;color:#a9bac8;font-size:13px;cursor:pointer}
-.remember input{position:absolute;opacity:0}
-.check{
-  width:20px;height:20px;border-radius:6px;
-  border:1px solid #45657b;background:#071522;
-  display:grid;place-items:center;
-}
-.remember input:checked+.check{
-  border-color:#16baff;background:linear-gradient(145deg,#14c7ff,#0877ff);
-  box-shadow:0 0 14px rgba(0,174,255,.25);
-}
-.remember input:checked+.check:after{
-  content:"✓";font-weight:900;color:white;font-size:13px;
-}
-.forgot{color:#1ebdff;text-decoration:none;font-size:13px;font-weight:700}
-
-.submit{
-  height:56px;border:0;border-radius:18px;
-  background:linear-gradient(135deg,#10c9ff,#0875ee);
-  color:#fff;font-size:17px;font-weight:900;cursor:pointer;
-  box-shadow:0 13px 32px rgba(0,119,255,.26);
-}
-.submit:active,.register:active{transform:scale(.985)}
-
-.divider{
-  display:flex;align-items:center;gap:13px;color:#61788b;
-  font-size:11px;text-transform:uppercase;letter-spacing:1px;
-  margin:3px 0;
-}
-.divider:before,.divider:after{
-  content:"";height:1px;flex:1;background:rgba(137,183,214,.15);
-}
-
-.register{
-  height:53px;border-radius:17px;
-  border:1px solid rgba(71,167,225,.24);
-  background:rgba(7,21,34,.55);
-  color:#dcebf5;font-size:15px;font-weight:800;cursor:pointer;
-}
-
-.security{
-  display:flex;align-items:center;justify-content:center;
-  gap:7px;margin-top:16px;color:#567083;font-size:11px;
-}
-.security span{color:#20baff}
-
-.foot{
-  margin-top:auto;padding-top:18px;text-align:center;
-  color:#415769;font-size:10px;letter-spacing:1px;
-}
-.foot a{color:#66879d;text-decoration:none}
-
-@media(min-width:700px){
-  body{padding:30px}
-  .shell{
-    min-height:calc(100vh - 60px);
-    border:1px solid rgba(40,169,255,.20);
-    border-radius:32px;
-    background:rgba(2,10,18,.58);
-    box-shadow:0 30px 90px rgba(0,0,0,.45);
-    overflow:hidden;
-  }
-}
-</style>
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/auth-premium.css') }}">
 </head>
 
-<body>
-<div class="eg-bg"></div>
-<div class="eg-grid"></div>
+<body class="eg-auth">
+<main class="eg-auth-shell">
 
-<main class="shell">
+  <div class="eg-auth-hex" aria-hidden="true"></div>
 
-  <header class="brand">
-    <svg class="shield" viewBox="0 0 80 92" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="shieldBlue" x1="10" y1="5" x2="68" y2="83">
-          <stop stop-color="#4BE0FF"/>
-          <stop offset=".48" stop-color="#0EA5FF"/>
-          <stop offset="1" stop-color="#0756D8"/>
-        </linearGradient>
-      </defs>
-      <path d="M40 4L8 16V43C8 62 22 79 40 86C58 79 72 62 72 43V16L40 4Z"
-            fill="#061523" stroke="url(#shieldBlue)" stroke-width="4"/>
-      <path d="M22 29H57L53 38H32V44H51L47 53H32V65H22V29Z"
-            fill="url(#shieldBlue)"/>
-      <path d="M42 44H58C57 58 50 69 40 75L35 65C42 61 46 56 47 53H42V44Z"
-            fill="#B8EEFF" opacity=".9"/>
-    </svg>
+  <header class="eg-brand">
+    <img
+      class="eg-brand-shield"
+      src="{{ url_for('static', filename='img/eg-shield-premium.svg') }}"
+      alt="EratGuard">
 
-    <div class="brand-name">ERAT<span>GUARD</span></div>
-    <div class="tag">Dijital Dünyada Güvende Olun</div>
+    <div class="eg-brand-name">
+      ERAT<span>GUARD</span>
+    </div>
+
+    <div class="eg-brand-tag">
+      Dijital Dünyada Güvende Olun
+    </div>
   </header>
 
-  <div class="wave"></div>
+  <div class="eg-wave" aria-hidden="true"></div>
 
-  <section>
-    <h1 class="title">Giriş Yap</h1>
-    <p class="subtitle">Hesabına giriş yap ve güvende kal.</p>
+  <section class="eg-auth-content">
+
+    <h1 class="eg-auth-title">
+      Tekrar <span>Hoş Geldin</span>
+    </h1>
+
+    <p class="eg-auth-subtitle">
+      Hesabına giriş yap ve korumaya devam et.
+    </p>
 
     {% if error %}
-    <div class="error">⚠ {{ error }}</div>
+      <div class="eg-alert eg-alert-error">
+        ⚠ {{ error }}
+      </div>
     {% endif %}
 
-    <form method="POST" action="/login">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <form
+      class="eg-auth-form"
+      method="POST"
+      action="/login">
 
-      <div class="form-stack">
+      <input
+        type="hidden"
+        name="csrf_token"
+        value="{{ csrf_token() }}">
 
-        <div class="field">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
-            <path d="M4 6.5h16v11H4zM4.5 7l7.5 6 7.5-6"
-                  stroke="currentColor" stroke-width="1.7"
-                  stroke-linejoin="round"/>
-          </svg>
+      <div class="eg-field">
+        <label for="username">
+          Kullanıcı Adı
+        </label>
+
+        <div class="eg-input">
+          <span class="eg-input-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle
+                cx="12"
+                cy="8"
+                r="4"
+                stroke="currentColor"
+                stroke-width="1.8"/>
+
+              <path
+                d="M4.5 20c.8-4 3.3-6 7.5-6s6.7 2 7.5 6"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"/>
+            </svg>
+          </span>
+
           <input
+            id="username"
             type="text"
             name="username"
-            placeholder="Kullanıcı adı veya e-posta"
+            placeholder="Kullanıcı adın"
             autocomplete="username"
             required>
         </div>
+      </div>
 
-        <div class="field">
-          <svg class="icon" viewBox="0 0 24 24" fill="none">
-            <rect x="5" y="10" width="14" height="10" rx="2"
-                  stroke="currentColor" stroke-width="1.7"/>
-            <path d="M8 10V7a4 4 0 018 0v3"
-                  stroke="currentColor" stroke-width="1.7"/>
-          </svg>
+      <div class="eg-field">
+        <label for="password">
+          Şifre
+        </label>
+
+        <div class="eg-input">
+          <span class="eg-input-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <rect
+                x="5"
+                y="10"
+                width="14"
+                height="10"
+                rx="3"
+                stroke="currentColor"
+                stroke-width="1.8"/>
+
+              <path
+                d="M8 10V7.5a4 4 0 018 0V10"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"/>
+            </svg>
+          </span>
 
           <input
-            type="password"
             id="password"
+            type="password"
             name="password"
-            placeholder="Şifre"
+            placeholder="Şifren"
             autocomplete="current-password"
             required>
 
           <button
-            class="toggle"
+            class="eg-eye"
             type="button"
-            id="passToggle"
-            aria-label="Şifreyi göster"
-            onclick="togglePass()">◉</button>
+            onclick="togglePassword()"
+            aria-label="Şifreyi göster veya gizle">
+
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"/>
+
+              <circle
+                cx="12"
+                cy="12"
+                r="2.5"
+                stroke="currentColor"
+                stroke-width="1.7"/>
+            </svg>
+          </button>
         </div>
-
-        <div class="options">
-          <label class="remember">
-            <input type="checkbox" name="remember" id="rememberMe">
-            <span class="check"></span>
-            <span>Beni Hatırla</span>
-          </label>
-
-          <a class="forgot" href="/forgot-password">
-            Şifremi Unuttum?
-          </a>
-        </div>
-
-        <button class="submit" type="submit">
-          Giriş Yap →
-        </button>
-
-        <div class="divider">veya</div>
-
-        <button
-          class="register"
-          type="button"
-          onclick="location.href='/register'">
-          Hesabın yok mu? &nbsp; Kayıt Ol
-        </button>
-
       </div>
+
+      <div class="eg-auth-row">
+
+        <label class="eg-check" for="rememberMe">
+          <input
+            type="checkbox"
+            name="remember"
+            id="rememberMe">
+
+          <span>Beni Hatırla</span>
+        </label>
+
+        <a
+          class="eg-auth-link"
+          href="/forgot-password">
+          Şifremi Unuttum
+        </a>
+      </div>
+
+      <button
+        class="eg-btn"
+        type="submit">
+        Giriş Yap
+      </button>
+
     </form>
 
-    <div class="security">
-      ◇ Güvenli bağlantı <span>•</span> EratGuard koruması
+    <div class="eg-secondary-action">
+      Hesabın yok mu?
+      <a href="/register">
+        Kayıt Ol
+      </a>
     </div>
+
+    <div class="eg-auth-foot">
+      EratGuard · Güvenli Giriş
+    </div>
+
   </section>
-
-  <footer class="foot">
-    ERATGUARD · 2026 ·
-    <a href="/legal">Gizlilik ve Koşullar</a>
-  </footer>
-
 </main>
 
 <script>
-function togglePass(){
-  const input=document.getElementById("password");
-  const button=document.getElementById("passToggle");
-
-  const hidden=input.type==="password";
-  input.type=hidden ? "text" : "password";
-
-  button.textContent=hidden ? "◎" : "◉";
-  button.setAttribute(
-    "aria-label",
-    hidden ? "Şifreyi gizle" : "Şifreyi göster"
-  );
+function togglePassword(){
+  const input = document.getElementById("password");
+  input.type =
+    input.type === "password"
+      ? "text"
+      : "password";
 }
 </script>
 
