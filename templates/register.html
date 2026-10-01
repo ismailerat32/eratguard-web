@@ -1,760 +1,211 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="{{ lang or 'tr' }}">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>EratGuard · Kayıt Ol</title>
+  <meta charset="utf-8">
+  <meta name="viewport"
+        content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#020812">
 
-<style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
+  <title>EratGuard · Kayıt Ol</title>
 
-html,body{
-  min-height:100%;
-}
-
-body{
-  font-family:Arial,Helvetica,sans-serif;
-  color:#fff;
-  background:
-    radial-gradient(circle at 50% -10%,rgba(18,103,255,.24),transparent 36%),
-    linear-gradient(180deg,#061226 0%,#030914 52%,#02060d 100%);
-  overflow-x:hidden;
-}
-
-body:before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  opacity:.22;
-  background-image:
-    linear-gradient(rgba(39,123,255,.09) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(39,123,255,.09) 1px,transparent 1px);
-  background-size:34px 34px;
-  mask-image:linear-gradient(to bottom,#000,transparent 60%);
-}
-
-.page{
-  width:min(100%,480px);
-  min-height:100vh;
-  margin:0 auto;
-  position:relative;
-  padding:25px 22px 24px;
-}
-
-.hero{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  text-align:center;
-}
-
-.shield{
-  width:66px;
-  height:75px;
-  filter:drop-shadow(0 0 18px rgba(37,125,255,.38));
-}
-
-.brand{
-  margin-top:5px;
-  font-size:25px;
-  font-weight:900;
-  letter-spacing:4px;
-  line-height:1;
-}
-
-.brand span{
-  color:#2381ff;
-}
-
-.tagline{
-  margin-top:8px;
-  color:#8fa3c3;
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:1.6px;
-  text-transform:uppercase;
-}
-
-.wave{
-  position:relative;
-  height:64px;
-  margin:7px -22px 0;
-  overflow:hidden;
-}
-
-.wave:before,
-.wave:after{
-  content:"";
-  position:absolute;
-  width:145%;
-  height:72px;
-  left:-23%;
-  border-radius:50%;
-  transform:rotate(-4deg);
-}
-
-.wave:before{
-  top:28px;
-  border-top:5px solid #2381ff;
-  filter:
-    drop-shadow(0 -1px 6px rgba(35,129,255,.85))
-    drop-shadow(0 2px 7px rgba(255,255,255,.30));
-}
-
-.wave:after{
-  top:34px;
-  border-top:2px solid rgba(255,255,255,.90);
-}
-
-.content{
-  position:relative;
-  z-index:2;
-  margin-top:-4px;
-}
-
-.heading{
-  text-align:center;
-}
-
-.heading h1{
-  font-size:31px;
-  line-height:1.05;
-  font-weight:900;
-  letter-spacing:-1px;
-}
-
-.heading h1 span{
-  color:#2785ff;
-}
-
-.heading p{
-  margin-top:7px;
-  color:#8192ad;
-  font-size:13px;
-  line-height:1.45;
-}
-
-.message{
-  display:flex;
-  align-items:flex-start;
-  gap:9px;
-  margin:14px 0 0;
-  padding:11px 13px;
-  border-radius:12px;
-  font-size:12px;
-  line-height:1.45;
-}
-
-.error-box{
-  color:#ffc2c8;
-  border:1px solid rgba(255,73,93,.27);
-  background:rgba(255,73,93,.08);
-}
-
-.success-box{
-  color:#bfffd8;
-  border:1px solid rgba(52,211,153,.27);
-  background:rgba(52,211,153,.08);
-}
-
-form{
-  margin-top:17px;
-}
-
-.fields{
-  display:flex;
-  flex-direction:column;
-  gap:11px;
-}
-
-.field label{
-  display:block;
-  margin:0 0 6px 3px;
-  color:#aab7cc;
-  font-size:10px;
-  font-weight:800;
-  letter-spacing:1.1px;
-  text-transform:uppercase;
-}
-
-.input-wrap,
-.pass-wrap{
-  position:relative;
-}
-
-.icon{
-  position:absolute;
-  left:16px;
-  top:50%;
-  transform:translateY(-50%);
-  width:20px;
-  height:20px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#55739d;
-  pointer-events:none;
-}
-
-.icon svg{
-  width:19px;
-  height:19px;
-}
-
-input{
-  width:100%;
-  height:55px;
-  border:1px solid rgba(79,137,221,.18);
-  border-radius:15px;
-  outline:none;
-  background:rgba(6,20,40,.82);
-  color:#f4f8ff;
-  padding:0 48px;
-  font-size:14px;
-  transition:
-    border-color .2s,
-    box-shadow .2s,
-    background .2s;
-  -webkit-appearance:none;
-}
-
-input::placeholder{
-  color:#52637d;
-}
-
-input:focus{
-  border-color:rgba(43,133,255,.72);
-  background:rgba(7,24,49,.96);
-  box-shadow:
-    0 0 0 3px rgba(35,129,255,.08),
-    0 0 20px rgba(35,129,255,.08);
-}
-
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus{
-  -webkit-box-shadow:0 0 0 1000px #071831 inset;
-  -webkit-text-fill-color:#f4f8ff;
-  caret-color:#fff;
-}
-
-.pass-wrap input{
-  padding-right:55px;
-}
-
-.pass-toggle{
-  position:absolute;
-  right:13px;
-  top:50%;
-  transform:translateY(-50%);
-  width:36px;
-  height:36px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:0;
-  background:transparent;
-  color:#7187a8;
-  cursor:pointer;
-}
-
-.pass-toggle svg{
-  width:20px;
-  height:20px;
-}
-
-.password-policy{
-  margin-top:7px;
-  padding:9px 11px;
-  border:1px solid rgba(43,133,255,.12);
-  border-radius:11px;
-  background:rgba(20,61,116,.12);
-  color:#687c9b;
-  font-size:10.5px;
-  line-height:1.45;
-}
-
-.password-policy b{
-  color:#579bff;
-}
-
-.terms{
-  margin:12px 7px 0;
-  color:#64758e;
-  text-align:center;
-  font-size:10.5px;
-  line-height:1.5;
-}
-
-.terms a{
-  color:#4d98ff;
-  text-decoration:none;
-}
-
-.btn-submit,
-.btn-login{
-  width:100%;
-  height:54px;
-  border-radius:15px;
-  font-size:14px;
-  font-weight:800;
-  cursor:pointer;
-}
-
-.btn-submit{
-  margin-top:13px;
-  border:0;
-  color:#fff;
-  background:linear-gradient(135deg,#1268e8,#278dff);
-  box-shadow:
-    0 10px 28px rgba(18,104,232,.23),
-    inset 0 1px 0 rgba(255,255,255,.16);
-}
-
-.btn-submit:active,
-.btn-login:active{
-  transform:scale(.985);
-}
-
-.divider{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin:13px 3px;
-}
-
-.divider span{
-  flex:1;
-  height:1px;
-  background:rgba(255,255,255,.07);
-}
-
-.divider small{
-  color:#4e6079;
-  font-size:10px;
-  text-transform:uppercase;
-}
-
-.btn-login{
-  border:1px solid rgba(82,130,196,.18);
-  color:#9db0ca;
-  background:rgba(255,255,255,.018);
-}
-
-.security{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:6px;
-  margin-top:16px;
-  color:#42536c;
-  font-size:9.5px;
-  letter-spacing:.5px;
-  text-transform:uppercase;
-}
-
-.security svg{
-  width:12px;
-  height:12px;
-}
-
-@media(max-width:370px){
-  .page{
-    padding-left:17px;
-    padding-right:17px;
-  }
-
-  .wave{
-    margin-left:-17px;
-    margin-right:-17px;
-  }
-
-  .shield{
-    width:58px;
-    height:66px;
-  }
-
-  .brand{
-    font-size:22px;
-  }
-
-  .heading h1{
-    font-size:28px;
-  }
-
-  input{
-    height:52px;
-  }
-}
-</style>
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/auth-premium.css') }}">
 </head>
 
-<body>
-<main class="page">
+<body class="eg-auth">
+<main class="eg-auth-shell">
 
-  <header class="hero">
-    <svg class="shield" viewBox="0 0 80 92" fill="none" aria-hidden="true">
-      <path
-        d="M40 4L8 16V44C8 62.4 22.4 79.6 40 84C57.6 79.6 72 62.4 72 44V16L40 4Z"
-        fill="rgba(35,129,255,.10)"
-        stroke="#2785ff"
-        stroke-width="3"
-        stroke-linejoin="round"/>
-      <path
-        d="M27 46L37 56L55 34"
-        stroke="#72b2ff"
-        stroke-width="4.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"/>
-    </svg>
+  <div class="eg-auth-hex" aria-hidden="true"></div>
 
-    <div class="brand">ERAT<span>GUARD</span></div>
-    <div class="tagline">Dijital Dünyada Güvende Olun</div>
+  <header class="eg-brand">
+    <img
+      class="eg-brand-shield"
+      src="{{ url_for('static', filename='img/eg-shield-premium.svg') }}"
+      alt="EratGuard">
+
+    <div class="eg-brand-name">
+      ERAT<span>GUARD</span>
+    </div>
+
+    <div class="eg-brand-tag">
+      Dijital Dünyada Güvende Olun
+    </div>
   </header>
 
-  <div class="wave" aria-hidden="true"></div>
+  <div class="eg-wave" aria-hidden="true"></div>
 
-  <section class="content">
-    <div class="heading">
-      <h1>Hesap <span>Oluştur</span></h1>
-      <p>Korumanı başlatmak için birkaç bilgi yeterli.</p>
-    </div>
+  <section class="eg-auth-content">
+
+    <h1 class="eg-auth-title">
+      Hesap <span>Oluştur</span>
+    </h1>
+
+    <p class="eg-auth-subtitle">
+      EratGuard ailesine katıl ve korumanı başlat.
+    </p>
 
     {% if error %}
-    <div class="message error-box">
-      <span>⚠</span>
-      <span>{{ error }}</span>
-    </div>
+      <div class="eg-alert eg-alert-error">
+        ⚠ {{ error }}
+      </div>
     {% endif %}
 
     {% if success %}
-    <div class="message success-box">
-      <span>✓</span>
-      <span>{{ success }}</span>
-    </div>
+      <div class="eg-alert eg-alert-success">
+        {{ success }}
+      </div>
     {% endif %}
 
-    <form method="POST" action="/register">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <form
+      class="eg-auth-form"
+      method="POST"
+      action="/register">
 
-      <div class="fields">
+      <input
+        type="hidden"
+        name="csrf_token"
+        value="{{ csrf_token() }}">
 
-        <div class="field">
-          <label for="username">Kullanıcı Adı</label>
-          <div class="input-wrap">
-            <span class="icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="8" r="4"
-                        stroke="currentColor" stroke-width="1.8"/>
-                <path d="M4.5 20c.8-4 3.3-6 7.5-6s6.7 2 7.5 6"
-                      stroke="currentColor" stroke-width="1.8"
-                      stroke-linecap="round"/>
-              </svg>
-            </span>
+      <div class="eg-field">
+        <label for="username">Kullanıcı Adı</label>
 
-            <input
-              type="text"
-              id="username"
-              name="username"
-              placeholder="Kullanıcı adını belirle"
-              autocomplete="username"
-              required>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="email">E-posta</label>
-          <div class="input-wrap">
-            <span class="icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="5" width="18" height="14" rx="3"
+        <div class="eg-input">
+          <span class="eg-input-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="8" r="4"
                       stroke="currentColor" stroke-width="1.8"/>
-                <path d="M4.5 7l7.5 6 7.5-6"
-                      stroke="currentColor" stroke-width="1.8"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"/>
-              </svg>
-            </span>
+              <path d="M4.5 20c.8-4 3.3-6 7.5-6s6.7 2 7.5 6"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"/>
+            </svg>
+          </span>
 
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="E-posta adresin"
-              autocomplete="email"
-              required>
-          </div>
+          <input
+            id="username"
+            type="text"
+            name="username"
+            placeholder="Kullanıcı adını belirle"
+            autocomplete="username"
+            required>
         </div>
-
-        <div class="field">
-          <label for="password">Şifre</label>
-
-          <div class="pass-wrap">
-            <span class="icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <rect x="5" y="10" width="14" height="10" rx="3"
-                      stroke="currentColor" stroke-width="1.8"/>
-                <path d="M8 10V7.5a4 4 0 018 0V10"
-                      stroke="currentColor" stroke-width="1.8"
-                      stroke-linecap="round"/>
-              </svg>
-            </span>
-
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Güçlü şifreni belirle"
-              minlength="8"
-              pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}"
-              title="Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir."
-              autocomplete="new-password"
-              required>
-
-            <button
-              class="pass-toggle"
-              type="button"
-              onclick="togglePass()"
-              aria-label="Şifreyi göster veya gizle">
-
-              <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path
-                  d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
-                  stroke="currentColor"
-                  stroke-width="1.7"
-                  stroke-linejoin="round"/>
-                <circle cx="12" cy="12" r="2.5"
-                        stroke="currentColor" stroke-width="1.7"/>
-              </svg>
-            </button>
-          </div>
-
-          <div class="password-policy">
-            <b>Güçlü şifre:</b>
-            En az 8 karakter, 1 büyük harf, 1 küçük harf,
-            1 rakam ve 1 özel karakter kullan.
-          </div>
-        </div>
-
       </div>
 
-      <div class="terms">
+      <div class="eg-field">
+        <label for="email">E-posta</label>
+
+        <div class="eg-input">
+          <span class="eg-input-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <rect x="3.5" y="5.5" width="17" height="13"
+                    rx="2.5"
+                    stroke="currentColor"
+                    stroke-width="1.8"/>
+              <path d="m5 7 7 5 7-5"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"/>
+            </svg>
+          </span>
+
+          <input
+            id="email"
+            type="email"
+            name="email"
+            placeholder="E-posta adresin"
+            autocomplete="email"
+            required>
+        </div>
+      </div>
+
+      <div class="eg-field">
+        <label for="password">Şifre</label>
+
+        <div class="eg-input">
+          <span class="eg-input-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <rect x="5" y="10" width="14" height="10"
+                    rx="3"
+                    stroke="currentColor"
+                    stroke-width="1.8"/>
+              <path d="M8 10V7.5a4 4 0 018 0V10"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"/>
+            </svg>
+          </span>
+
+          <input
+            id="password"
+            type="password"
+            name="password"
+            placeholder="Güçlü şifreni belirle"
+            autocomplete="new-password"
+            minlength="8"
+            pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}"
+            title="Şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir."
+            required>
+
+          <button
+            class="eg-eye"
+            type="button"
+            onclick="togglePassword()"
+            aria-label="Şifreyi göster veya gizle">
+
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
+                    stroke="currentColor"
+                    stroke-width="1.7"/>
+              <circle cx="12" cy="12" r="2.5"
+                      stroke="currentColor"
+                      stroke-width="1.7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="eg-policy">
+        <b>Güçlü şifre:</b>
+        En az 8 karakter, 1 büyük harf, 1 küçük harf,
+        1 rakam ve 1 özel karakter kullan.
+      </div>
+
+      <div class="eg-legal">
         Kayıt olarak
-        <a href="/u/legal">Kullanım Koşulları</a> ve
+        <a href="/u/legal">Kullanım Koşulları</a>
+        ve
         <a href="/privacy">Gizlilik Politikası</a>'nı
         kabul etmiş olursunuz.
       </div>
 
-      <button type="submit" class="btn-submit">
-        Kayıt Ol →
+      <button class="eg-btn" type="submit">
+        Kayıt Ol
       </button>
 
-      <div class="divider">
-        <span></span>
-        <small>veya</small>
-        <span></span>
-      </div>
-
-      <button
-        type="button"
-        class="btn-login"
-        onclick="location.href='/login'">
-        Zaten hesabım var
-      </button>
     </form>
 
-    <div class="security">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 3L5 6v5c0 4.6 2.9 8.1 7 10 4.1-1.9 7-5.4 7-10V6l-7-3Z"
-              stroke="currentColor" stroke-width="1.6"/>
-      </svg>
+    <div class="eg-secondary-action">
+      Zaten hesabın var mı?
+      <a href="/login">Giriş Yap</a>
+    </div>
+
+    <div class="eg-auth-foot">
       EratGuard · Güvenli Kayıt
     </div>
+
   </section>
 </main>
 
 <script>
-function togglePass(){
-  const input = document.getElementById('password');
-  input.type = input.type === 'password' ? 'text' : 'password';
+function togglePassword(){
+  const input = document.getElementById("password");
+  input.type =
+    input.type === "password"
+      ? "text"
+      : "password";
 }
 </script>
+
 </body>
 </html>
-
-<style>
-/* ================================================================
-   ERATGUARD REGISTER UI 02
-   MOBILE PROPORTION / PREMIUM COMPOSITION TUNE
-   ================================================================ */
-
-@media (max-width: 600px){
-
-  /* More compact top composition */
-  .page{
-    padding-top:18px;
-    padding-bottom:18px;
-  }
-
-  .shield{
-    width:56px;
-    height:64px;
-  }
-
-  .brand{
-    margin-top:3px;
-    font-size:23px;
-    letter-spacing:3.5px;
-  }
-
-  .tagline{
-    margin-top:6px;
-    font-size:9.5px;
-    letter-spacing:1.45px;
-  }
-
-  /* Bring the wave closer to the identity block */
-  .wave{
-    height:52px;
-    margin-top:2px;
-    margin-bottom:0;
-  }
-
-  .wave:before,
-  .wave:after{
-    height:60px;
-  }
-
-  .wave:before{
-    top:22px;
-  }
-
-  .wave:after{
-    top:28px;
-  }
-
-  /* Reference composition: content leads from the left */
-  .content{
-    margin-top:-3px;
-  }
-
-  .heading{
-    text-align:left;
-    padding:0 5px;
-  }
-
-  .heading h1{
-    font-size:29px;
-    line-height:1.02;
-    letter-spacing:-.8px;
-  }
-
-  .heading p{
-    margin-top:5px;
-    font-size:12px;
-  }
-
-  form{
-    margin-top:14px;
-  }
-
-  .fields{
-    gap:9px;
-  }
-
-  .field label{
-    margin-bottom:5px;
-    font-size:9.5px;
-  }
-
-  input{
-    height:51px;
-    border-radius:14px;
-    font-size:13.5px;
-  }
-
-  .password-policy{
-    margin-top:6px;
-    padding:8px 10px;
-    font-size:10px;
-  }
-
-  .terms{
-    margin-top:9px;
-    font-size:10px;
-    line-height:1.4;
-  }
-
-  .btn-submit,
-  .btn-login{
-    height:50px;
-    border-radius:14px;
-  }
-
-  .btn-submit{
-    margin-top:10px;
-  }
-
-  .divider{
-    margin:10px 3px;
-  }
-
-  .security{
-    margin-top:11px;
-  }
-}
-
-/* Very short phones */
-@media (max-width: 600px) and (max-height: 760px){
-
-  .page{
-    padding-top:13px;
-  }
-
-  .shield{
-    width:50px;
-    height:57px;
-  }
-
-  .brand{
-    font-size:21px;
-  }
-
-  .tagline{
-    margin-top:4px;
-  }
-
-  .wave{
-    height:45px;
-  }
-
-  .wave:before{
-    top:18px;
-  }
-
-  .wave:after{
-    top:24px;
-  }
-
-  .heading h1{
-    font-size:27px;
-  }
-
-  form{
-    margin-top:11px;
-  }
-
-  .fields{
-    gap:7px;
-  }
-
-  input{
-    height:48px;
-  }
-}
-</style>
