@@ -2,132 +2,317 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EratGuard — Giriş</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#020914">
+<title>EratGuard — Güvenli Giriş</title>
+
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;min-height:100%;background:#020e07;font-family:'DM Sans',sans-serif;color:#fff}
-.bg{position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(0,255,100,.1) 0%,transparent 55%),radial-gradient(ellipse 40% 30% at 90% 80%,rgba(0,180,80,.06) 0%,transparent 45%),#020e07}
-.corner{position:fixed;width:18px;height:18px;z-index:3}
-.corner.tl{top:14px;left:14px;border-top:1.5px solid rgba(0,255,136,.3);border-left:1.5px solid rgba(0,255,136,.3)}
-.corner.tr{top:14px;right:14px;border-top:1.5px solid rgba(0,255,136,.3);border-right:1.5px solid rgba(0,255,136,.3)}
-.corner.bl{bottom:14px;left:14px;border-bottom:1.5px solid rgba(0,255,136,.3);border-left:1.5px solid rgba(0,255,136,.3)}
-.corner.br{bottom:14px;right:14px;border-bottom:1.5px solid rgba(0,255,136,.3);border-right:1.5px solid rgba(0,255,136,.3)}
-.page{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:52px 26px 40px}
-.header{display:flex;align-items:center;gap:12px;margin-bottom:40px;animation:fadeD .7s cubic-bezier(.16,1,.3,1) both}
-.logo-box{width:44px;height:44px;border-radius:13px;background:linear-gradient(145deg,rgba(0,40,20,.9),rgba(0,20,10,.95));border:1.5px solid rgba(0,255,136,.25);display:grid;place-items:center;box-shadow:0 0 20px rgba(0,255,136,.1)}
-.brand-name{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:900;letter-spacing:-.5px}
-.brand-name span{color:#00ff88}
-.brand-tag{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:1px}
-.welcome{width:100%;margin-bottom:32px;animation:fadeU .7s cubic-bezier(.16,1,.3,1) .1s both}
-.welcome-title{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:900;letter-spacing:-.5px;line-height:1.1;margin-bottom:8px}
-.welcome-title span{color:#00ff88}
-.welcome-sub{font-size:14px;color:rgba(255,255,255,.4);line-height:1.5;font-weight:300}
-.form{width:100%;display:flex;flex-direction:column;gap:14px;animation:fadeU .7s cubic-bezier(.16,1,.3,1) .2s both}
-.field{display:flex;flex-direction:column;gap:7px}
-.field label{font-size:12px;font-weight:500;color:rgba(255,255,255,.5);letter-spacing:.5px;text-transform:uppercase}
-.input-wrap{position:relative}
-.input-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:16px;opacity:.4;pointer-events:none}
-input[type=text],input[type=password]{width:100%;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:16px;padding:16px 16px 16px 46px;font-family:'DM Sans',sans-serif;font-size:15px;color:#fff;outline:none;transition:border-color .2s,box-shadow .2s,background .2s;-webkit-appearance:none}
-input[type=text]::placeholder,input[type=password]::placeholder{color:rgba(255,255,255,.2)}
-input[type=text]:focus,input[type=password]:focus{border-color:rgba(0,255,136,.4);background:rgba(0,255,136,.04);box-shadow:0 0 0 3px rgba(0,255,136,.08)}
-.pass-toggle{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;opacity:.35;transition:opacity .2s;padding:4px}
-.pass-toggle:hover{opacity:.7}
-.options{display:flex;justify-content:space-between;align-items:center;margin-top:2px}
-.remember{display:flex;align-items:center;gap:8px;cursor:pointer}
-.remember input[type=checkbox]{display:none}
-.check-box{width:18px;height:18px;border-radius:6px;border:1.5px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);display:grid;place-items:center;transition:all .2s;flex-shrink:0}
-.remember input:checked+.check-box{background:#00ff88;border-color:#00ff88}
-.remember input:checked+.check-box::after{content:'✓';font-size:11px;color:#000;font-weight:800}
-.remember-label{font-size:13px;color:rgba(255,255,255,.4)}
-.forgot{font-size:13px;color:rgba(0,255,136,.7);text-decoration:none;font-weight:500;transition:color .2s}
-.forgot:hover{color:#00ff88}
-.btn-submit{width:100%;margin-top:4px;background:linear-gradient(135deg,#00d966,#00ff88);color:#000;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:900;border:none;border-radius:16px;padding:17px;cursor:pointer;letter-spacing:.3px;box-shadow:0 8px 30px rgba(0,255,136,.25);transition:transform .15s;position:relative;overflow:hidden}
-.btn-submit::before{content:'';position:absolute;top:-50%;left:-60%;width:35%;height:200%;background:rgba(255,255,255,.2);transform:skewX(-20deg);animation:shine 3s ease-in-out infinite 1.5s}
-@keyframes shine{0%,100%{left:-60%}40%{left:120%}}
-.btn-submit:active{transform:scale(.98)}
-.divider{display:flex;align-items:center;gap:12px;margin:4px 0}
-.div-line{flex:1;height:1px;background:rgba(255,255,255,.06)}
-.div-text{font-size:11px;color:rgba(255,255,255,.2);letter-spacing:1px;text-transform:uppercase}
-.btn-register{width:100%;background:transparent;color:rgba(255,255,255,.6);font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;border:1.5px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;cursor:pointer;transition:all .2s}
-.btn-register:hover{border-color:rgba(0,255,136,.2);color:#00ff88}
-.btn-register:active{transform:scale(.98)}
-.error-box{display:none;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.25);border-radius:12px;padding:12px 14px;font-size:13px;color:#fca5a5;align-items:center;gap:8px;margin-bottom:4px}
-.error-box.show{display:flex}
-.foot{margin-top:32px;text-align:center;font-size:10px;color:rgba(255,255,255,.15);letter-spacing:1.5px;text-transform:uppercase;animation:fadeU .7s cubic-bezier(.16,1,.3,1) .4s both}
-@keyframes fadeD{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeU{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;background:#020914;color:#fff}
+body{min-height:100vh;overflow-x:hidden}
+
+.eg-bg{
+  position:fixed;inset:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 50% -10%,rgba(0,153,255,.20),transparent 36%),
+    radial-gradient(circle at 100% 70%,rgba(0,102,255,.10),transparent 32%),
+    linear-gradient(180deg,#03101d 0%,#020914 52%,#01050b 100%);
+}
+
+.eg-grid{
+  position:fixed;inset:0;opacity:.12;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(40,169,255,.16) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(40,169,255,.16) 1px,transparent 1px);
+  background-size:42px 42px;
+  mask-image:linear-gradient(to bottom,black,transparent 70%);
+}
+
+.shell{
+  position:relative;z-index:2;
+  width:min(100%,480px);
+  min-height:100vh;
+  margin:auto;
+  padding:42px 22px 28px;
+  display:flex;
+  flex-direction:column;
+}
+
+.brand{text-align:center}
+.shield{
+  width:78px;height:88px;margin:0 auto 13px;
+  filter:drop-shadow(0 0 22px rgba(0,174,255,.38));
+}
+.brand-name{
+  font-size:27px;font-weight:900;letter-spacing:2px;
+}
+.brand-name span{color:#19baff}
+.tag{
+  margin-top:5px;font-size:10px;letter-spacing:2.2px;
+  color:#8ba5b9;text-transform:uppercase;
+}
+
+.wave{
+  position:relative;height:92px;margin:8px -22px 4px;overflow:hidden;
+}
+.wave:before{
+  content:"";position:absolute;
+  width:135%;height:120px;left:-18%;top:23px;
+  border-radius:50% 50% 0 0;
+  border-top:3px solid #35c5ff;
+  background:linear-gradient(180deg,rgba(0,174,255,.16),rgba(0,174,255,.025) 44%,transparent);
+  transform:rotate(6deg);
+  box-shadow:0 -4px 18px rgba(0,174,255,.18);
+}
+.wave:after{
+  content:"";position:absolute;
+  width:130%;height:90px;left:-15%;top:40px;
+  border-radius:50%;
+  border-top:1px solid rgba(181,234,255,.75);
+  transform:rotate(6deg);
+}
+
+.title{font-size:34px;font-weight:900;letter-spacing:-1px;margin:0}
+.subtitle{color:#91a4b5;font-size:15px;margin:7px 0 25px}
+
+.error{
+  margin-bottom:14px;padding:12px 14px;border-radius:13px;
+  background:rgba(255,55,76,.10);
+  border:1px solid rgba(255,79,96,.28);
+  color:#ffb5bd;font-size:13px;
+}
+
+.form-stack{display:flex;flex-direction:column;gap:14px}
+.field{position:relative}
+.field input{
+  width:100%;height:61px;border-radius:16px;
+  border:1px solid rgba(111,181,225,.25);
+  background:rgba(7,20,33,.82);
+  color:#fff;font-size:15px;
+  padding:0 50px 0 49px;outline:none;
+  transition:.2s ease;
+}
+.field input::placeholder{color:#71879a}
+.field input:focus{
+  border-color:#1cbcff;
+  background:rgba(6,26,43,.96);
+  box-shadow:0 0 0 3px rgba(0,174,255,.10),0 0 22px rgba(0,174,255,.08);
+}
+.icon{
+  position:absolute;left:17px;top:50%;transform:translateY(-50%);
+  width:20px;height:20px;color:#b8d2e4;pointer-events:none;
+}
+.toggle{
+  position:absolute;right:13px;top:50%;transform:translateY(-50%);
+  width:38px;height:38px;border:0;background:transparent;color:#9ec7df;
+  font-size:18px;cursor:pointer;border-radius:10px;
+}
+
+.options{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:14px;margin:2px 1px 5px;
+}
+.remember{display:flex;align-items:center;gap:9px;color:#a9bac8;font-size:13px;cursor:pointer}
+.remember input{position:absolute;opacity:0}
+.check{
+  width:20px;height:20px;border-radius:6px;
+  border:1px solid #45657b;background:#071522;
+  display:grid;place-items:center;
+}
+.remember input:checked+.check{
+  border-color:#16baff;background:linear-gradient(145deg,#14c7ff,#0877ff);
+  box-shadow:0 0 14px rgba(0,174,255,.25);
+}
+.remember input:checked+.check:after{
+  content:"✓";font-weight:900;color:white;font-size:13px;
+}
+.forgot{color:#1ebdff;text-decoration:none;font-size:13px;font-weight:700}
+
+.submit{
+  height:59px;border:0;border-radius:18px;
+  background:linear-gradient(135deg,#10c9ff,#0875ee);
+  color:#fff;font-size:17px;font-weight:900;cursor:pointer;
+  box-shadow:0 13px 32px rgba(0,119,255,.26);
+}
+.submit:active,.register:active{transform:scale(.985)}
+
+.divider{
+  display:flex;align-items:center;gap:13px;color:#61788b;
+  font-size:11px;text-transform:uppercase;letter-spacing:1px;
+  margin:3px 0;
+}
+.divider:before,.divider:after{
+  content:"";height:1px;flex:1;background:rgba(137,183,214,.15);
+}
+
+.register{
+  height:56px;border-radius:17px;
+  border:1px solid rgba(71,167,225,.24);
+  background:rgba(7,21,34,.55);
+  color:#dcebf5;font-size:15px;font-weight:800;cursor:pointer;
+}
+
+.security{
+  display:flex;align-items:center;justify-content:center;
+  gap:7px;margin-top:22px;color:#567083;font-size:11px;
+}
+.security span{color:#20baff}
+
+.foot{
+  margin-top:auto;padding-top:25px;text-align:center;
+  color:#415769;font-size:10px;letter-spacing:1px;
+}
+.foot a{color:#66879d;text-decoration:none}
+
+@media(min-width:700px){
+  body{padding:30px}
+  .shell{
+    min-height:calc(100vh - 60px);
+    border:1px solid rgba(40,169,255,.20);
+    border-radius:32px;
+    background:rgba(2,10,18,.58);
+    box-shadow:0 30px 90px rgba(0,0,0,.45);
+    overflow:hidden;
+  }
+}
 </style>
 </head>
+
 <body>
-<div class="bg"></div>
-<div class="corner tl"></div>
-<div class="corner tr"></div>
-<div class="corner bl"></div>
-<div class="corner br"></div>
-<div class="page">
-  <div class="header">
-    <div class="logo-box">
-      <svg width="24" height="27" viewBox="0 0 80 92" fill="none">
-        <path d="M40 4L8 16V44C8 62.4 22.4 79.6 40 84C57.6 79.6 72 62.4 72 44V16L40 4Z" fill="rgba(0,255,136,0.12)" stroke="#00ff88" stroke-width="3" stroke-linejoin="round"/>
-        <path d="M27 46L37 56L55 34" stroke="#00ff88" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <div>
-      <div class="brand-name">Erat<span>Guard</span></div>
-      <div class="brand-tag">AI Spam Koruma</div>
-    </div>
-  </div>
-  <div class="welcome">
-    <div class="welcome-title">Hoş geldin,<br><span>tekrar merhaba.</span></div>
-    <div class="welcome-sub">Hesabına giriş yap, korumanı aktif tut.</div>
-  </div>
-  <div class="form">
+<div class="eg-bg"></div>
+<div class="eg-grid"></div>
+
+<main class="shell">
+
+  <header class="brand">
+    <svg class="shield" viewBox="0 0 80 92" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="shieldBlue" x1="10" y1="5" x2="68" y2="83">
+          <stop stop-color="#4BE0FF"/>
+          <stop offset=".48" stop-color="#0EA5FF"/>
+          <stop offset="1" stop-color="#0756D8"/>
+        </linearGradient>
+      </defs>
+      <path d="M40 4L8 16V43C8 62 22 79 40 86C58 79 72 62 72 43V16L40 4Z"
+            fill="#061523" stroke="url(#shieldBlue)" stroke-width="4"/>
+      <path d="M22 29H57L53 38H32V44H51L47 53H32V65H22V29Z"
+            fill="url(#shieldBlue)"/>
+      <path d="M42 44H58C57 58 50 69 40 75L35 65C42 61 46 56 47 53H42V44Z"
+            fill="#B8EEFF" opacity=".9"/>
+    </svg>
+
+    <div class="brand-name">ERAT<span>GUARD</span></div>
+    <div class="tag">Dijital Dünyada Güvende Olun</div>
+  </header>
+
+  <div class="wave"></div>
+
+  <section>
+    <h1 class="title">Giriş Yap</h1>
+    <p class="subtitle">Hesabına giriş yap ve güvende kal.</p>
+
     {% if error %}
-    <div class="error-box show"><span>⚠️</span><span>{{ error }}</span></div>
+    <div class="error">⚠ {{ error }}</div>
     {% endif %}
+
     <form method="POST" action="/login">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <div style="display:flex;flex-direction:column;gap:14px">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-stack">
+
         <div class="field">
-          <label>Kullanıcı Adı</label>
-          <div class="input-wrap">
-            <span class="input-icon">👤</span>
-            <input type="text" name="username" placeholder="Kullanıcı adını gir" autocomplete="username" required>
-          </div>
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <path d="M4 6.5h16v11H4zM4.5 7l7.5 6 7.5-6"
+                  stroke="currentColor" stroke-width="1.7"
+                  stroke-linejoin="round"/>
+          </svg>
+          <input
+            type="text"
+            name="username"
+            placeholder="Kullanıcı adı veya e-posta"
+            autocomplete="username"
+            required>
         </div>
+
         <div class="field">
-          <label>Şifre</label>
-          <div class="input-wrap">
-            <span class="input-icon">🔒</span>
-            <input type="password" id="password" name="password" placeholder="Şifreni gir" autocomplete="current-password" required>
-            <button class="pass-toggle" type="button" onclick="togglePass()" id="passToggle">👁️</button>
-          </div>
+          <svg class="icon" viewBox="0 0 24 24" fill="none">
+            <rect x="5" y="10" width="14" height="10" rx="2"
+                  stroke="currentColor" stroke-width="1.7"/>
+            <path d="M8 10V7a4 4 0 018 0v3"
+                  stroke="currentColor" stroke-width="1.7"/>
+          </svg>
+
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Şifre"
+            autocomplete="current-password"
+            required>
+
+          <button
+            class="toggle"
+            type="button"
+            id="passToggle"
+            aria-label="Şifreyi göster"
+            onclick="togglePass()">◉</button>
         </div>
+
         <div class="options">
           <label class="remember">
             <input type="checkbox" name="remember" id="rememberMe">
-            <div class="check-box"></div>
-            <span class="remember-label">Beni hatırla</span>
+            <span class="check"></span>
+            <span>Beni Hatırla</span>
           </label>
-          <a href="/forgot-password" class="forgot">Şifremi unuttum</a>
+
+          <a class="forgot" href="/forgot-password">
+            Şifremi Unuttum?
+          </a>
         </div>
-        <button type="submit" class="btn-submit">Giriş Yap</button>
-        <div class="divider"><div class="div-line"></div><div class="div-text">veya</div><div class="div-line"></div></div>
-        <button type="button" class="btn-register" onclick="location.href='/register'">Hesap Oluştur</button>
+
+        <button class="submit" type="submit">
+          Giriş Yap →
+        </button>
+
+        <div class="divider">veya</div>
+
+        <button
+          class="register"
+          type="button"
+          onclick="location.href='/register'">
+          Hesabın yok mu? &nbsp; Kayıt Ol
+        </button>
+
       </div>
     </form>
-  </div>
-  <div class="foot">EratGuard PRO · 2026 · Güvenli Giriş · <a href="/legal">Gizlilik ve Koşullar</a></div>
-</div>
+
+    <div class="security">
+      ◇ Güvenli bağlantı <span>•</span> EratGuard koruması
+    </div>
+  </section>
+
+  <footer class="foot">
+    ERATGUARD · 2026 ·
+    <a href="/legal">Gizlilik ve Koşullar</a>
+  </footer>
+
+</main>
+
 <script>
 function togglePass(){
-  var inp=document.getElementById('password');
-  var btn=document.getElementById('passToggle');
-  if(inp.type==='password'){inp.type='text';btn.textContent='🙈'}
-  else{inp.type='password';btn.textContent='👁️'}
+  const input=document.getElementById("password");
+  const button=document.getElementById("passToggle");
+
+  const hidden=input.type==="password";
+  input.type=hidden ? "text" : "password";
+
+  button.textContent=hidden ? "◎" : "◉";
+  button.setAttribute(
+    "aria-label",
+    hidden ? "Şifreyi gizle" : "Şifreyi göster"
+  );
 }
 </script>
+
 </body>
 </html>
