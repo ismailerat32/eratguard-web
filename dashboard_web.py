@@ -126,6 +126,12 @@ app.config["SESSION_COOKIE_SECURE"] = not _eg_dev_insecure_cookie
 app.config["SESSION_COOKIE_NAME"] = "eratguard_session"
 app.config["SESSION_REFRESH_EACH_REQUEST"] = False
 
+# Remember-me policy:
+# persistent authenticated sessions expire after 30 days.
+# Non-remembered sessions remain browser-session cookies.
+from datetime import timedelta as _eg_session_timedelta
+app.config["PERMANENT_SESSION_LIFETIME"] = _eg_session_timedelta(days=30)
+
 # ===== ERATGUARD SECURE SESSION SECRET END =====
 
 # ===== ERATGUARD SECURITY SHIELD CSRF CORE V1 =====
@@ -1010,6 +1016,7 @@ def login():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
+        remember = request.form.get("remember") == "on"
         users = load_users()
         user = users.get(username)
 
@@ -1034,6 +1041,9 @@ def login():
             # the authenticated user session. This prevents attacker-
             # controlled/pre-login session data from surviving login.
             session.clear()
+
+            # Apply remember-me only after successful authentication.
+            session.permanent = remember
 
             session["logged_in"] = True
             session["onboarding_done"] = True
