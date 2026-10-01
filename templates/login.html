@@ -33,47 +33,50 @@ body{min-height:100vh;overflow-x:hidden}
   width:min(100%,480px);
   min-height:100vh;
   margin:auto;
-  padding:42px 22px 28px;
+  padding:28px 22px 22px;
   display:flex;
   flex-direction:column;
 }
 
 .brand{text-align:center}
 .shield{
-  width:78px;height:88px;margin:0 auto 13px;
+  width:68px;height:77px;margin:0 auto 9px;
   filter:drop-shadow(0 0 22px rgba(0,174,255,.38));
 }
 .brand-name{
-  font-size:27px;font-weight:900;letter-spacing:2px;
+  font-size:25px;font-weight:900;letter-spacing:2px;
 }
 .brand-name span{color:#19baff}
 .tag{
-  margin-top:5px;font-size:10px;letter-spacing:2.2px;
+  margin-top:4px;font-size:9px;letter-spacing:2px;
   color:#8ba5b9;text-transform:uppercase;
 }
 
 .wave{
-  position:relative;height:92px;margin:8px -22px 4px;overflow:hidden;
+  position:relative;height:72px;margin:5px -22px 0;overflow:hidden;
 }
 .wave:before{
   content:"";position:absolute;
-  width:135%;height:120px;left:-18%;top:23px;
+  width:140%;height:105px;left:-20%;top:18px;
   border-radius:50% 50% 0 0;
-  border-top:3px solid #35c5ff;
-  background:linear-gradient(180deg,rgba(0,174,255,.16),rgba(0,174,255,.025) 44%,transparent);
+  border-top:5px solid #38caff;
+  background:linear-gradient(180deg,rgba(31,190,255,.24),rgba(0,132,255,.07) 48%,transparent);
   transform:rotate(6deg);
-  box-shadow:0 -4px 18px rgba(0,174,255,.18);
+  box-shadow:
+    0 -2px 0 rgba(225,248,255,.95),
+    0 -7px 22px rgba(0,174,255,.28);
 }
 .wave:after{
   content:"";position:absolute;
-  width:130%;height:90px;left:-15%;top:40px;
+  width:136%;height:82px;left:-18%;top:35px;
   border-radius:50%;
-  border-top:1px solid rgba(181,234,255,.75);
+  border-top:2px solid rgba(199,241,255,.72);
   transform:rotate(6deg);
+  filter:drop-shadow(0 -2px 5px rgba(35,188,255,.25));
 }
 
-.title{font-size:34px;font-weight:900;letter-spacing:-1px;margin:0}
-.subtitle{color:#91a4b5;font-size:15px;margin:7px 0 25px}
+.title{font-size:32px;font-weight:900;letter-spacing:-1px;margin:0}
+.subtitle{color:#91a4b5;font-size:14px;margin:6px 0 20px}
 
 .error{
   margin-bottom:14px;padding:12px 14px;border-radius:13px;
@@ -82,10 +85,10 @@ body{min-height:100vh;overflow-x:hidden}
   color:#ffb5bd;font-size:13px;
 }
 
-.form-stack{display:flex;flex-direction:column;gap:14px}
+.form-stack{display:flex;flex-direction:column;gap:12px}
 .field{position:relative}
 .field input{
-  width:100%;height:61px;border-radius:16px;
+  width:100%;height:58px;border-radius:16px;
   border:1px solid rgba(111,181,225,.25);
   background:rgba(7,20,33,.82);
   color:#fff;font-size:15px;
@@ -110,7 +113,7 @@ body{min-height:100vh;overflow-x:hidden}
 
 .options{
   display:flex;align-items:center;justify-content:space-between;
-  gap:14px;margin:2px 1px 5px;
+  gap:14px;margin:1px 1px 3px;
 }
 .remember{display:flex;align-items:center;gap:9px;color:#a9bac8;font-size:13px;cursor:pointer}
 .remember input{position:absolute;opacity:0}
@@ -129,7 +132,7 @@ body{min-height:100vh;overflow-x:hidden}
 .forgot{color:#1ebdff;text-decoration:none;font-size:13px;font-weight:700}
 
 .submit{
-  height:59px;border:0;border-radius:18px;
+  height:56px;border:0;border-radius:18px;
   background:linear-gradient(135deg,#10c9ff,#0875ee);
   color:#fff;font-size:17px;font-weight:900;cursor:pointer;
   box-shadow:0 13px 32px rgba(0,119,255,.26);
@@ -146,7 +149,7 @@ body{min-height:100vh;overflow-x:hidden}
 }
 
 .register{
-  height:56px;border-radius:17px;
+  height:53px;border-radius:17px;
   border:1px solid rgba(71,167,225,.24);
   background:rgba(7,21,34,.55);
   color:#dcebf5;font-size:15px;font-weight:800;cursor:pointer;
@@ -154,12 +157,12 @@ body{min-height:100vh;overflow-x:hidden}
 
 .security{
   display:flex;align-items:center;justify-content:center;
-  gap:7px;margin-top:22px;color:#567083;font-size:11px;
+  gap:7px;margin-top:16px;color:#567083;font-size:11px;
 }
 .security span{color:#20baff}
 
 .foot{
-  margin-top:auto;padding-top:25px;text-align:center;
+  margin-top:auto;padding-top:18px;text-align:center;
   color:#415769;font-size:10px;letter-spacing:1px;
 }
 .foot a{color:#66879d;text-decoration:none}
