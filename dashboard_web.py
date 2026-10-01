@@ -4356,6 +4356,20 @@ except Exception as _eg_license_override_error:
 # ===== ERATGUARD ADMIN SYSTEM RESOURCES API START =====
 @app.route("/api/system-resources")
 def _eg_admin_system_resources_api_final():
+    # Host telemetry is administrative data; use the canonical
+    # admin authentication source rather than a parallel session flag.
+    try:
+        from admin.auth import is_real_admin
+        _eg_system_resources_admin = bool(is_real_admin(load_users))
+    except Exception:
+        _eg_system_resources_admin = False
+
+    if not _eg_system_resources_admin:
+        return jsonify({
+            "ok": False,
+            "error": "unauthorized",
+        }), 401
+
     try:
         import os
         import time
