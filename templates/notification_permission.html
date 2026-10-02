@@ -10,6 +10,46 @@
   <link
     rel="stylesheet"
     href="{{ url_for('static', filename='css/auth-premium.css') }}">
+
+  <style>
+    .eg-notification-skip{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      min-height:46px;
+      margin-top:4px;
+      padding:0 18px;
+      border:1px solid rgba(132,168,220,.18);
+      border-radius:999px;
+      background:rgba(255,255,255,.025);
+      color:#8fa8c7;
+      font:inherit;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      transition:
+        border-color .2s ease,
+        background .2s ease,
+        color .2s ease,
+        transform .2s ease;
+      -webkit-appearance:none;
+      appearance:none;
+    }
+
+    .eg-notification-skip:hover,
+    .eg-notification-skip:focus-visible{
+      border-color:rgba(76,153,255,.40);
+      background:rgba(30,112,255,.08);
+      color:#dcecff;
+      outline:none;
+    }
+
+    .eg-notification-skip:active{
+      transform:scale(.99);
+    }
+  </style>
+
 </head>
 
 <body class="eg-auth">
@@ -71,11 +111,10 @@
           id="enableNotificationButton"
           type="button">
           <span>Bildirimlere İzin Ver</span>
-          <span aria-hidden="true">→</span>
         </button>
 
         <button
-          class="eg-secondary-action"
+          class="eg-notification-skip"
           id="skipNotificationButton"
           type="submit">
           Şimdilik Geç
