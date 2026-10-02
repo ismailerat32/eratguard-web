@@ -3238,19 +3238,29 @@ def user_pay():
 # ===== ERATGUARD LIVE ADMIN APK ROUTES START =====
 
 
-@app.route("/notification-permission")
+@app.route("/notification-permission", methods=["GET", "POST"])
 def notification_permission():
     if not login_required():
         return redirect("/login")
-    session["notif_asked"] = True
-    username = session.get("username", "")
-    if username:
-        users = load_users()
-        if username in users:
-            users[username]["notif_asked"] = True
-            import json as _j
-            with open(USERS_FILE, "w", encoding="utf-8") as _f:
-                _j.dump(users, _f, ensure_ascii=False, indent=2)
+
+    if request.method == "POST":
+        username = str(session.get("username") or "").strip()
+        permission = str(request.form.get("permission") or "skipped").strip().lower()
+
+        if permission not in {"granted", "denied", "default", "skipped"}:
+            permission = "skipped"
+
+        session["notif_asked"] = True
+
+        if username:
+            users = load_users()
+            if username in users:
+                users[username]["notif_asked"] = True
+                users[username]["notification_permission"] = permission
+                save_users(users)
+
+        return redirect("/u/notifications")
+
     return render_template("notification_permission.html")
 
 @app.route("/onboarding")
