@@ -2091,6 +2091,7 @@ def render_user_module_page(module_key):
     return render_template(
         "user_module.html",
         page=page,
+        module_key=module_key,
         user_settings=user_settings,
         protection_enabled=protection_enabled
     )
